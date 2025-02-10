@@ -1,0 +1,288 @@
+"DOTAAbilities"
+{
+    // Gem
+	//=================================================================================================================
+	"item_gem"
+	{
+		// General
+		//-------------------------------------------------------------------------------------------------------------
+		"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_POINT | DOTA_ABILITY_BEHAVIOR_AOE"
+		"AbilityCastRange"				"9999"
+		"Model"							"models/props_gameplay/gem01.vmdl"
+		"Effect"						"particles/generic_gameplay/dropped_gem.vpcf"
+		
+		"AbilityCooldown"				"0"
+
+		// Item Info
+		//-------------------------------------------------------------------------------------------------------------
+		"ItemCost"						"900"
+		"ItemShopTags"					"see_invis"
+		"ItemQuality"					"component"
+		"ItemAliases"					"gem of true sight"
+		"ItemSellable"					"0"
+		"ItemInitiallySellable"					"1"
+		"ItemShareability"				"ITEM_FULLY_SHAREABLE"
+		"ItemDeclarations"				"DECLARE_PURCHASES_TO_TEAMMATES | DECLARE_PURCHASES_TO_SPECTATORS"
+		"ItemStockMax"					"1"
+		"ItemStockTime"					"600.0"
+		"ItemSupport"					"1"
+		"ItemKillable"					"0"
+		"ItemContributesToNetWorthWhenDropped"	"0"
+		"AllowedInBackpack"				"0"
+		"IsTempestDoubleClonable"		"0"
+		
+		// Sound
+		//-------------------------------------------------------------------------------------------------------------			
+		"UIPickupSound"					"Item.PickUpGemShop"
+		"UIDropSound"					"Item.DropGemShop"
+		"WorldDropSound"				"Item.DropGemWorld"
+		
+		// Special	
+		//-------------------------------------------------------------------------------------------------------------
+		"AbilityValues"
+		{
+			"radius"				"9999"
+			"active_radius"
+			{
+				"value"						"99999"
+				"affected_by_aoe_increase"	"1"
+			}
+			"duration"			"99999"
+		}
+	}
+
+	"item_abyssal_blade"
+	{
+		"AbilityCastRange"				"500"
+	}
+
+	"item_belt_of_strength"
+	{
+
+		"AbilityValues"	
+		{
+				"bonus_strength"		"-14"
+		}
+	}
+
+	"item_iron_branch_custom"
+	{
+		"ID"                            "1000"  // 确保这个ID是唯一的
+		"BaseClass"                     "item_lua"
+		"AbilityBehavior"               "DOTA_ABILITY_BEHAVIOR_PASSIVE"
+		"AbilityTextureName"            "item_branches"
+		"ItemCost"                      "50"
+		"ItemShopTags"                  "agi;int;str"
+		"ItemQuality"                   "consumable"
+		"ItemStackable"                 "1"
+		"ItemShareability"              "ITEM_FULLY_SHAREABLE"
+		"ItemPermanent"                 "0"
+		"ItemInitialCharges"            "1"
+		"ItemDisplayCharges"            "1"
+		"ItemStockMax"                  "10"
+		"ItemStockTime"                 "60.0"
+		"ItemDeclarations"              "DECLARE_PURCHASES_TO_TEAMMATES | DECLARE_PURCHASES_IN_SPEECH | DECLARE_PURCHASES_TO_SPECTATORS"
+
+		"AbilitySpecial"
+		{
+			"01"
+			{
+				"var_type"              "FIELD_INTEGER"
+				"bonus_all_stats"       "1"
+			}
+		}
+	}
+	"item_attribute_amplifier_5x"
+	{
+		"ID"                            "1001" // 自定义ID
+		"BaseClass"                     "item_lua"
+		"ScriptFile"                    "items/item_attribute_amplifier_5x"
+		"AbilityBehavior"              "DOTA_ABILITY_BEHAVIOR_PASSIVE"
+		"AbilityTextureName"           "item_branches" // 可以更换图标
+		
+		"ItemCost"                     "0"
+		"ItemShopTags"                 "attributes"
+		"ItemQuality"                  "epic"
+		"ItemAliases"                  "5x;attribute amplifier"
+		"ItemPermanent"                "1"
+		"ItemInitialCharges"           "0"
+		"ItemRequiresCharges"          "0"
+		"ItemDisplayCharges"           "0"
+		
+		"MaxUpgradeLevel"              "1"
+		"ItemBaseLevel"                "1"
+		
+		"AbilitySpecial"
+		{
+			"01"
+			{
+				"var_type"              "FIELD_INTEGER"
+				"bonus_all_stats"       "0"
+			}
+		}
+	}
+		"item_attribute_amplifier_3x"
+	{
+		"ID"                            "1000002" // 自定义ID
+		"BaseClass"                     "item_lua"
+		"ScriptFile"                    "items/item_attribute_amplifier_3x"
+		"AbilityBehavior"              "DOTA_ABILITY_BEHAVIOR_PASSIVE"
+		"AbilityTextureName"           "item_branches" // 可以更换图标
+		
+		"ItemCost"                     "0"
+		"ItemShopTags"                 "attributes"
+		"ItemQuality"                  "epic"
+		"ItemAliases"                  "5x;attribute amplifier"
+		"ItemPermanent"                "1"
+		"ItemInitialCharges"           "0"
+		"ItemRequiresCharges"          "0"
+		"ItemDisplayCharges"           "0"
+		
+		"MaxUpgradeLevel"              "1"
+		"ItemBaseLevel"                "1"
+		
+		"AbilitySpecial"
+		{
+			"01"
+			{
+				"var_type"              "FIELD_INTEGER"
+				"bonus_all_stats"       "0"
+			}
+		}
+	}
+			"item_attribute_amplifier_2x"
+	{
+		"ID"                            "1000003" // 自定义ID
+		"BaseClass"                     "item_lua"
+		"ScriptFile"                    "items/item_attribute_amplifier_2x"
+		"AbilityBehavior"              "DOTA_ABILITY_BEHAVIOR_PASSIVE"
+		"AbilityTextureName"           "item_branches" // 可以更换图标
+		"ItemCost"                     "0"
+		"ItemShopTags"                 "attributes"
+		"ItemQuality"                  "epic"
+		"ItemAliases"                  "5x;attribute amplifier"
+		"ItemPermanent"                "1"
+		"ItemInitialCharges"           "0"
+		"ItemRequiresCharges"          "0"
+		"ItemDisplayCharges"           "0"
+		
+		"MaxUpgradeLevel"              "1"
+		"ItemBaseLevel"                "1"
+		
+		"AbilitySpecial"
+		{
+			"01"
+			{
+				"var_type"              "FIELD_INTEGER"
+				"bonus_all_stats"       "0"
+			}
+		}
+	}
+
+
+
+
+
+	// "item_sphere"
+	// {
+	// 	// General
+	// 	//-------------------------------------------------------------------------------------------------------------
+	// 	"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_UNIT_TARGET"
+	// 	"AbilityUnitTargetTeam"			"DOTA_UNIT_TARGET_TEAM_FRIENDLY"
+	// 	"AbilityUnitTargetType"			"DOTA_UNIT_TARGET_HERO"
+	// 	"FightRecapLevel"				"1"
+
+		
+	// 	"AbilityCastRange"				"700"
+	// 	"AbilityCooldown"				"0.0"
+
+
+	// 	// Item Info
+	// 	//-------------------------------------------------------------------------------------------------------------
+	// 	"ItemCost"						"4800"
+	// 	"ItemShopTags"					"regen_health;regen_mana;str;agi;int;hard_to_tag"
+	// 	"ItemQuality"					"epic"
+	// 	"ItemAliases"					"ls;linken's sphere"
+	// 	"ItemDeclarations"				"DECLARE_PURCHASES_TO_TEAMMATES | DECLARE_PURCHASES_IN_SPEECH | DECLARE_PURCHASES_TO_SPECTATORS"
+	// 	"ActiveDescriptionLine"			"2"
+	// 	"ShouldBeSuggested"				"1"
+
+	// 	// Special	
+	// 	//-------------------------------------------------------------------------------------------------------------
+	// 	"AbilityValues"
+	// 	{
+	// 			"bonus_all_stats"		"2000"
+	// 			"bonus_health_regen"	"6"
+	// 			"bonus_mana_regen"		"4.25"
+	// 			"block_cooldown"		"0.0"
+	// 			"upgrade_absorb_duration"		"10.0"
+	// 			"damage_absorb"		"300"
+	// 	}
+	// }
+
+	// 	"item_vitality_booster"
+	// {
+	// 	// General
+	// 	//-------------------------------------------------------------------------------------------------------------
+	// 	"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_PASSIVE"
+		
+	// 	// Item Info
+	// 	//-------------------------------------------------------------------------------------------------------------
+	// 	"ItemCost"						"1000"
+	// 	"ItemShopTags"					"health_pool"
+	// 	"ItemQuality"					"secret_shop"
+	// 	"ItemAliases"					"vitality booster"
+	// 	"SecretShop"					"1"
+	// 	//"SideShop"						"1"
+
+	// 	// Special	
+	// 	//-------------------------------------------------------------------------------------------------------------
+	// 	"AbilityValues"
+	// 	{
+	// 			"bonus_health"			"-2275"
+	// 	}
+	// }
+
+
+		"item_roshans_banner"
+	{
+		// General
+		//-------------------------------------------------------------------------------------------------------------
+		"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_POINT | DOTA_ABILITY_BEHAVIOR_AOE "
+
+		"Model"							"models/props_gameplay/neutral_box.vmdl"
+		
+		
+		// Stats
+		//-------------------------------------------------------------------------------------------------------------
+		"AbilityCastRange"				"99999"
+		"AbilityCastPoint"				"0.0"
+		"AbilityCooldown"				"1.0"
+		
+		// Item Info
+		//-------------------------------------------------------------------------------------------------------------
+		"ItemCost"						"0"
+		"ItemSellable"					"0"
+		"ItemPurchasable"				"0"
+		"ItemQuality"					"artifact"
+		"ItemDroppable"					"1"
+		"ItemKillable"					"1"
+		"ItemContributesToNetWorthWhenDropped"	"0"
+		"AllowedInBackpack"				"1"
+		"IsTempestDoubleClonable"		"0"
+		"ItemShareability"				"ITEM_FULLY_SHAREABLE"
+
+		// Special	
+		//-------------------------------------------------------------------------------------------------------------
+		"AbilityValues"
+		{
+			"duration"				"999999"
+			"radius"				"999999"
+			"health"				"6"
+			"hp_bonus"				"75"
+			"damage_bonus"			"50"
+			"model_scale"			"25"
+			"buff_linger_duration"		"999999"
+		}
+	}
+}

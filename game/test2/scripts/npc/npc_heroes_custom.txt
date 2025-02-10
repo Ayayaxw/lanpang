@@ -1,0 +1,82 @@
+// // Dota Heroes File
+// // NOTE: This is not for creating new heroes, this is for taking a currently existing hero as a template and overriding
+// // the specified key-value combinations.  Use override_hero <hero_to_override> for this.
+"DOTAHeroes"
+{
+    // "npc_dota_hero_shadow_shaman"
+    // {
+    // "override_hero"				"npc_dota_hero_shadow_shaman"			// Hero to override
+    // "Ability4"		"creep_piercing"
+    // }
+
+	"npc_dota_hero_witch_doctor"
+	{
+
+		"Ability5"		""
+
+}
+}
+
+// {
+// 	//=================================================================================================================
+// 	// HERO: Templar Assassin
+// 	//=================================================================================================================
+// 	"npc_dota_hero_alchemist"
+// 	{
+// 		"override_hero"				"npc_dota_hero_alchemist"			// Hero to override
+// 		//"Ability1"					"custom_blink"		// Ability 1
+// 		//"Ability2"					"cool_beans"		// Ability 1
+// 		"Ability5"					""
+// 		//"VisionNighttimeRange"		"1800"										// Range of vision at night time.
+// 	}
+// 		"npc_dota_hero_templar_assassin"
+// 	{
+// 		"override_hero"				"npc_dota_hero_templar_assassin"			// Hero to override
+// 		//"Ability1"					"custom_blink"		// Ability 1
+// 		//"Ability2"					"cool_beans"		// Ability 1
+// 		//"Ability1"					""
+// 		//"VisionNighttimeRange"		"1800"										// Range of vision at night time.
+// 	}
+// 			"npc_dota_hero_shadow_shaman"
+// 	{
+// 		//"Ability6"					""
+// 		"SoundSet"					"ShadowShaman_Ward"		
+//         "AttackRange"				"650"		// Range within a target can be attacked.
+//         "ProjectileModel"			"particles/units/heroes/hero_shadowshaman/shadow_shaman_ward_base_attack.vpcf" // Particle system model for projectile.
+// 		"ProjectileSpeed"			"900"		// Speed of projectile.
+// 	}
+	
+// 	"npc_dota_hero_juggernaut"
+// 	{
+//         //"Ability2"					""			// Ability 3
+// 	}
+//     	"npc_dota_hero_witch_doctor"
+// 	{
+// 		//"Ability6"					""
+//         "AttackRate"				"0.22"		// Speed of attack.
+//         "ProjectileModel"			"particles/units/heroes/hero_witchdoctor/witchdoctor_ward_attack.vpcf" // Particle system model for projectile.
+//         "ProjectileSpeed"			"1000"		// Speed of projectile.
+// 		"SoundSet"					"Hero_WitchDoctor_Ward"					// Name of sound set.
+// 		"AttackDamageType"			"DAMAGE_TYPE_Pure"
+// 		"AttackDamageMin"		"71"
+// 		"AttackDamageMax"		"81"
+// 		"AttackRange"		"625"
+//     }
+//     "npc_dota_hero_venomancer"
+//     {
+// 		//"Ability3"					""			// Ability 3
+//         "ProjectileModel"			"particles/units/heroes/hero_venomancer/venomancer_plague_ward_projectile.vpcf" // Particle system model for projectile.
+// 		"ProjectileSpeed"			"1900"		// Speed of projectile.
+//         "SoundSet"					"Hero_VenomancerWard"	
+//     }
+// 	"npc_dota_hero_pugna"
+// 	{
+// 		"SoundSet"					"Pugna_NetherWard"	
+// 		//"Ability3"					""			// Ability 3
+// 	}
+// 	"npc_dota_hero_lich"
+// 	{
+// 		//"Ability4"		""
+// 	}
+// }
+

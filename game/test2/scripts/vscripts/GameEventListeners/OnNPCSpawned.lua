@@ -1,0 +1,203 @@
+
+function PrintAllModifiers(unit)
+    print("正在打印单位 " .. unit:GetUnitName() .. " 的所有 modifier：")
+    for i = 0, unit:GetModifierCount() - 1 do
+        local modifier = unit:GetModifierNameByIndex(i)
+        print(i + 1 .. ": " .. modifier)
+    end
+    print("Modifier 列表结束")
+end
+
+-- 在文件顶部或适当的位置定义这个变量
+local DEBUG_PRINT = true
+
+-- 定义一个debug打印函数
+local function DebugPrint(message)
+    if DEBUG_PRINT then
+        print(message)
+    end
+end
+
+function Main:isExcludedUnit(unit)
+    local unitName = unit:GetUnitName()
+
+    local excludedUnits = {
+        "npc_dota_thinker",
+        "npc_dota_observer_wards",
+        "npc_dota_sentry_wards",
+        "npc_dota_rattletrap_cog",
+        "npc_dota_clinkz_skeleton_archer",
+        "npc_dota_zeus_cloud",
+        "npc_dota_troll_warlord_axe",
+        "npc_dota_base_additive",
+        "npc_dota_unit_undying_zombie",
+        "npc_dota_unit_undying_tombstone",
+        "npc_dota_beastmaster_hawk",
+        "double_on_death_mega",
+        "npc_dota_looping_sound",
+        "npc_dota_unit_undying_zombie_torso",
+        "npc_dota_wisp_spirit",
+        "npc_dota_muerta_revenant"
+    }
+    -- 检查单位名称是否在排除列表中
+    for _, excludedName in ipairs(excludedUnits) do
+        if unitName == excludedName then
+            return true
+        end
+    end
+
+    -- 检查是否有幻象禁锢modifier或者猴子大的士兵modifier
+    if unit:HasModifier("modifier_bane_fiends_grip_illusion") or 
+    unit:HasModifier("modifier_hoodwink_decoy_illusion") or 
+    unit:HasModifier("modifier_monkey_king_fur_army_soldier") then
+        return true
+    end
+
+    return false
+end
+
+function Main:OnNPCSpawned(event)
+    local spawnedUnit = EntIndexToHScript(event.entindex)
+    if not spawnedUnit then
+        DebugPrint("警告：生成的单位为空")
+        return
+    end
+
+    local unitName = spawnedUnit:GetUnitName() or "未知单位"
+    if unitName and unitName ~= "" then
+        DebugPrint("单位生成：" .. unitName)
+    end
+
+    if Main.currentChallenge == Main.Challenges.CreepChallenge_100Creeps then 
+        if unitName == "npc_dota_warlock_minor_imp" then
+            DebugPrint("在100小兵挑战中检测到魔童")
+            Timers:CreateTimer(0.8, function()
+                if spawnedUnit and not spawnedUnit:IsNull() then
+                    spawnedUnit:RemoveSelf()
+                    DebugPrint("术士魔童已移除")
+                end
+                return nil
+            end)
+        end
+    else
+
+        if unitName and unitName ~= "" then
+            --DebugPrint("检查单位1：" .. unitName)
+        end
+
+
+
+
+        local aiUnitKeywords = {
+            "npc_dota_lone_druid_bear"
+        }
+
+
+
+        if unitName and unitName ~= "" then
+            --DebugPrint("检查单位2：" .. unitName)
+        end
+
+        Timers:CreateTimer(0.03, function()
+            if not spawnedUnit or spawnedUnit:IsNull() then
+                DebugPrint("警告：单位已经不存在")
+                return
+            end
+        
+            local unitName = spawnedUnit:GetUnitName()
+            print(unitName)
+            if not unitName then
+                DebugPrint("警告：无法获取单位名称")
+                return
+            end
+        
+            if self:isExcludedUnit(spawnedUnit) then
+                return
+            end
+
+            local isIllusion = spawnedUnit:IsIllusion()
+            if spawnedUnit:IsIllusion() then
+                spawnedUnit:AddNewModifier(spawnedUnit, nil, "modifier_kv_editor", {})
+            end
+            if not isIllusion and spawnedUnit:IsInvulnerable() then
+                if unitName and unitName ~= "" then
+                    DebugPrint("忽略非幻象的无敌单位: " .. unitName)
+                end
+                return
+            end
+
+            -- 检查是否需要添加AI
+            local shouldAddAI = not spawnedUnit:IsRealHero() or spawnedUnit:IsIllusion() or spawnedUnit:HasModifier("modifier_arc_warden_tempest_double")
+            
+            -- 检查单位名称是否包含关键词
+            for _, keyword in ipairs(aiUnitKeywords) do
+                if string.find(unitName, keyword) then
+                    shouldAddAI = true
+                    break
+                end
+            end
+
+            if shouldAddAI then
+                local teamNumber = spawnedUnit:GetTeamNumber()
+                local foundAI = false
+                for unit, aiInfo in pairs(AIs) do
+                    if unit and IsValidEntity(unit) and not unit:IsNull() then
+                        if unit:GetTeamNumber() == teamNumber then
+                            if unitName and unitName ~= "" then
+                                DebugPrint("找到同阵营的 AI，正在为 " .. unitName .. " 创建 AI")
+                            end
+                            if CreateAIForHero then
+                                local originalAI = aiInfo.ai
+                                local overallStrategy = originalAI.global_strategy
+                                local heroStrategy = originalAI.hero_strategy
+                                CreateAIForHero(spawnedUnit, overallStrategy, heroStrategy)
+                                if unitName and unitName ~= "" then
+                                    DebugPrint("已成功为 " .. unitName .. " 创建 AI 并继承策略")
+                                end
+                            else
+                                DebugPrint("警告：CreateAIForHero 函数未定义")
+                            end
+                            foundAI = true
+                            break
+                        end
+                    else
+                        --DebugPrint("警告：AI中的单位无效，已跳过")
+                    end
+                end
+                
+                if not foundAI then
+                    if unitName and unitName ~= "" then
+                        DebugPrint("没有找到同阵营的 AI，无法为 " .. unitName .. " 创建 AI")
+                    end
+                end
+            else
+                if unitName and unitName ~= "" then
+                    DebugPrint(unitName .. " 是真实英雄")
+                end
+            end
+            
+            return nil
+        end)
+    end
+
+    local challengeId = self.currentChallenge
+
+    local challengeName
+    for name, id in pairs(Main.Challenges) do
+        if id == challengeId then
+            challengeName = name
+            break
+        end
+    end
+
+    if challengeName then
+        local challengeFunctionName = "OnNPCSpawned_" .. challengeName
+        if self[challengeFunctionName] then
+            self[challengeFunctionName](self, spawnedUnit, event)
+        else
+            --DebugPrint("没有找到对应挑战模式的处理函数: " .. challengeName)
+        end
+    else
+        DebugPrint("未知的挑战模式ID: " .. tostring(challengeId))
+    end
+end

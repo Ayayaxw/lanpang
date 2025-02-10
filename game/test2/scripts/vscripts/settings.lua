@@ -1,0 +1,13 @@
+
+RADIANT_PLAYER_COUNT = 12    -- 天辉玩家数
+DIRE_PLAYER_COUNT = 12       -- 夜魇玩家数
+
+RADIANT_MAX_PLAYER_COUNT = 12    -- 天辉最大玩家数
+DIRE_MAX_PLAYER_COUNT = 12       -- 夜魇最大玩家数
+USE_AUTOMATIC_PLAYERS_PER_TEAM = true   -- Should we set the number of players to 10 / MAX_NUMBER_OF_TEAMS?
+
+CUSTOM_TEAM_PLAYER_COUNT = {}           -- If we're not automatically setting the number of players per team, use this table
+CUSTOM_TEAM_PLAYER_COUNT[DOTA_TEAM_GOODGUYS] = 12
+CUSTOM_TEAM_PLAYER_COUNT[DOTA_TEAM_BADGUYS]  = 12
+CUSTOM_TEAM_PLAYER_COUNT[DOTA_TEAM_CUSTOM_1] = 12
+CUSTOM_TEAM_PLAYER_COUNT[DOTA_TEAM_CUSTOM_2] = 12

@@ -1,0 +1,471 @@
+// Dota Heroes File
+"DOTAAbilities"
+{
+	"Version"		"1"
+
+	//=================================================================================================================
+	// Templar Assassin: Refraction Holdout
+	//=================================================================================================================
+	
+
+	
+	"custom_blink"
+	{
+
+
+		"BaseClass"						"ability_lua"
+		"ScriptFile"					"custom_blink"
+
+		// General
+		//-------------------------------------------------------------------------------------------------------------
+		"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_UNIT_TARGET | DOTA_ABILITY_BEHAVIOR_POINT"
+		"AbilityUnitDamageType"			"DAMAGE_TYPE_PHYSICAL"	
+
+		// Casting
+		//-------------------------------------------------------------------------------------------------------------
+		"AbilityCastPoint"				"0.0 0.0 0.0 0.0"
+
+		// Time		
+		//-------------------------------------------------------------------------------------------------------------
+		"AbilityCooldown"				"17.0 15.0 12.0 2.0"
+
+		// Cost
+		//-------------------------------------------------------------------------------------------------------------
+		"AbilityManaCost"				"100"
+		
+		// Special
+		//-------------------------------------------------------------------------------------------------------------
+		"AbilityValues"
+		{
+			"01"
+			{
+				"var_type"					"FIELD_INTEGER"
+				"damage_absorb"				"200 300 400 500"
+			}
+			"02"
+			{
+				"var_type"					"FIELD_INTEGER"
+				"bonus_damage"				"20 40 60 80"
+			}
+			"04"
+			{
+				"var_type"					"FIELD_FLOAT"
+				"duration"					"17.0 17.0 17.0 17.0"
+			}
+		}
+		}
+	
+	"divide_on_death"
+	{
+		"BaseClass"                     "ability_lua"
+		"ScriptFile"                   "abilities/divide_on_death.lua"
+		"AbilityTextureName"           "skeleton_king_reincarnation"  // 直接使用冥魂大帝的复活技能图标
+		"MaxLevel"                     "1"
+		"AbilityBehavior"             "DOTA_ABILITY_BEHAVIOR_PASSIVE"
+	}
+
+
+	"cool_beans"
+	{
+		// General  
+	// ----------------------------------------------------------------------------------------
+	"BaseClass"           "ability_lua"
+	"ScriptFile"			"cool_beans"
+
+	"AbilityBehavior"        "DOTA_ABILITY_BEHAVIOR_UNIT_TARGET | DOTA_ABILITY_BEHAVIOR_NO_TARGET" 
+	"AbilityTextureName"     "dragon_knight_dragon_tail"
+	"AbilityUnitTargetTeam"  "DOTA_UNIT_TARGET_TEAM_ENEMY"
+	"AbilityUnitTargetType"  "DOTA_UNIT_TARGET_HERO | DOTA_UNIT_TARGET_BASIC"
+	"AbilityUnitTargetFlags" "DOTA_UNIT_TARGET_FLAG_MAGIC_IMMUNE_ENEMIES"
+	"AbilityUnitDamageType"  "DAMAGE_TYPE_PHYSICAL"
+
+	"AbilityType"            "DOTA_ABILITY_TYPE_BASIC"
+	"MaxLevel"               "3"
+	"RequiredLevel"          "1"
+	"LevelsBetweenUpgrades"  "2"
+
+	"AbilityCastPoint"       "0.0"
+	"AbilityCastAnimation"   "ACT_DOTA_DIE"
+	"AnimationPlaybackRate"  "1"
+	"AnimationIgnoresModelScale" "1"
+
+	// Stats
+	//----------------------------------------------------------------------------------------
+		"AbilityDamage" 					"20 50 100"
+	"AbilityManaCost"         "10 10 20"
+	"AbilityCooldown"         "2.0 1.0 0.5"
+	"AbilityCastRange"        "500"
+	//"AbilityCastRangeBuffer"  "250"
+	//"AbilityChannelTime"      "0.0 0.0 0.0"
+	//"AbilityChannelledManaCostPerSecond" "30 35 40"
+	//"AbilityDuration"         "0.0 0.0 0.0"
+	//"AoERadius"               "250"
+
+		"AbilityValues"
+		{
+			"01"
+			{
+				"var_type" 	"FIELD_FLOAT"
+				"stun_duration" 		"0.5 1.0 3.0"
+			}
+			"02"
+			{
+				"var_type" 	"FIELD_INTEGER"
+				"vision_radius" 		"500"
+			}
+		}
+	}
+"attribute_amplifier_passive"
+{
+    "BaseClass"             "ability_lua"
+    "ScriptFile"           "abilities/attribute_amplifier_passive"
+    "AbilityBehavior"       "DOTA_ABILITY_BEHAVIOR_PASSIVE | DOTA_ABILITY_BEHAVIOR_HIDDEN"
+    "AbilityType"           "DOTA_ABILITY_TYPE_BASIC"
+    "MaxLevel"              "1"
+    "AbilityTextureName"    "custom/attribute_amplifier_passive"
+    "AbilityHidden"         "1"
+    "IsHidden"              "1"
+}
+
+
+	"my_arrow"
+	{
+		"BaseClass"           "ability_lua"
+		"ScriptFile"			"my_arrow"
+
+		"AbilityBehavior"     "DOTA_ABILITY_BEHAVIOR_POINT"
+		"AbilityTextureName"     "mirana_arrow"
+
+		"AbilityValues"
+		{
+			"01"
+			{
+				"var_type" 	"FIELD_INTEGER"
+				"speed" 		"999999"
+			}
+		}
+	}
+
+
+	// "phantom_assassin_blur"
+	// 	{
+
+	// 		// Special
+	// 		//-------------------------------------------------------------------------------------------------------------
+	// 		"AbilityValues"
+	// 		{
+	// 		"radius"				"99999"
+	// 		"duration"			"0.5"
+
+	// 		}
+
+	// 	}
+
+
+
+
+"custom_inner_fire"
+{
+    // General
+    //-------------------------------------------------------------------------------------------------------------
+    "BaseClass"                     "ability_datadriven"
+    "AbilityBehavior"               "DOTA_ABILITY_BEHAVIOR_NO_TARGET"
+    "AbilityUnitTargetTeam"         "DOTA_UNIT_TARGET_TEAM_ENEMY"
+    "AbilityUnitTargetType"         "DOTA_UNIT_TARGET_HERO | DOTA_UNIT_TARGET_BASIC"
+    "AbilityUnitTargetFlags"        "DOTA_UNIT_TARGET_FLAG_MAGIC_IMMUNE_ENEMIES"
+    "AbilityUnitDamageType"         "DAMAGE_TYPE_PURE"
+    "SpellDispellableType"          "SPELL_DISPELLABLE_YES"                    
+    "SpellImmunityType"             "SPELL_IMMUNITY_ENEMIES_NO"   
+    "AbilityTextureName"            "huskar_inner_fire"
+	"AbilitySound"					"Hero_Huskar.Inner_Fire"
+
+
+    // Casting
+    //-------------------------------------------------------------------------------------------------------------
+    "AbilityCastRange"              "0"
+    "AbilityCastPoint"              "0.2"
+    
+    // Time        
+    //-------------------------------------------------------------------------------------------------------------
+    "AbilityCooldown"               "1"
+
+    // Cost
+    //-------------------------------------------------------------------------------------------------------------
+    "AbilityManaCost"               "0"
+    
+    // Special
+    //-------------------------------------------------------------------------------------------------------------
+    "AbilityValues"
+    {
+        "01"
+        {
+            "var_type"              "FIELD_INTEGER"
+            "radius"                "999999"
+        }
+        "02"
+        {
+            "var_type"              "FIELD_INTEGER"
+            "damage"                "0" // 无限大伤害
+        }
+        "03"
+        {
+            "var_type"              "FIELD_FLOAT"
+            "knockback_duration"    "0"
+        }
+        "04"
+        {
+            "var_type"              "FIELD_INTEGER"
+            "knockback_distance"    "0"
+        }
+    }
+    
+    "OnSpellStart"
+    {
+        "RunScript"
+        {
+            "ScriptFile"            "abilities/custom_inner_fire.lua"
+            "Function"              "CustomInnerFire"
+        }
+    }
+}
+// "centaur_khan_war_stomp"
+// {
+// 	"AbilityCooldown"				"0"
+// }
+
+// 	"hoodwink_acorn_shot"
+// 	{
+// 		"AbilityCooldown"				"0.01"
+// 	}
+
+
+
+	// "sniper_shrapnel"
+	// {
+	// 			"AbilityValues"
+	// 	{
+	// 			"AbilityChargeRestoreTime"		
+	// 			{
+	// 				"value"				"0.01"
+	// 				"special_bonus_unique_sniper_2" "-25"
+	// 			}
+	// 	}
+	// }
+	// 	//=================================================================================================================
+	// "silencer_curse_of_the_silent"
+	// {
+	// 	"AbilityValues"
+	// 	{
+	// 		"AbilityCooldown"					
+	// 		{
+	// 			"value"						"22 20 18 16"
+	// 		}
+	// 		}
+	// // }
+	// "shadow_demon_disruption"
+	// {
+	// 			"AbilityValues"
+	// 	{
+	// 			"AbilityCooldown"				
+	// 	{
+	// 		"value"			"0.01"
+
+	// 	}
+	// 	"AbilityChargeRestoreTime"		"0.01"
+	// 	}
+		
+	// }
+	// "enraged_wildkin_hurricane"
+	// {
+	// 	"AbilityCastRange"				"750"
+	// 	"AbilityCooldown"				"0"
+	// 	"AbilityManaCost"				"0"
+	// }
+	// "muerta_dead_shot"
+	// {
+	// 	"AbilityCooldown"				"0.01"
+	// }
+
+	// "keeper_of_the_light_illuminate"
+	// {
+	// 	"AbilityManaCost"				"0"
+	// 	"AbilityValues"
+	// 	{
+			
+	// 				"AbilityCooldown"				
+	// 			{
+	// 				"value"					"0.01"
+	// 			}}
+	// }
+	// "spirit_breaker_charge_of_darkness"
+	// {
+	// 	"AbilityValues"{
+	// 		"AbilityCooldown"{
+	// 			"value"			"0.01"
+	// 		}
+	// 	}
+	// }
+
+
+
+	// "ursa_earthshock"
+	// {
+	// 	"AbilityValues"
+	// 	{
+	// 		"AbilityChargeRestoreTime"
+	// 		{
+	// 			"value"	"0.01"
+	// 		}
+	// 	}
+	// }
+// "shadow_shaman_shackles"
+// {
+// 	"AbilityValues"
+// 		{			"heal_percentage"
+// 			{
+// 				"value"						"0"
+// 			}
+// 		}
+// }
+// "pugna_nether_ward"
+// 	{
+// 		// General
+// 		//-------------------------------------------------------------------------------------------------------------
+// 		"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_POINT "		
+// 		"AbilityUnitDamageType"			"DAMAGE_TYPE_MAGICAL"	
+// 		"SpellImmunityType"				"SPELL_IMMUNITY_ENEMIES_NO"
+// 		"AbilitySound"					"Hero_Pugna.NetherWard"		
+
+// 		"HasShardUpgrade"			"1"
+// 		// Casting
+// 		//-------------------------------------------------------------------------------------------------------------
+// 		"AbilityCastPoint"				"0.2 0.2 0.2 0.2"
+
+// 		// Time		
+// 		//-------------------------------------------------------------------------------------------------------------
+// 		"AbilityCooldown"				"0"
+// 		"AbilityDuration"				"99999 99999 99999 99999"
+
+// 		// Cost
+// 		//-------------------------------------------------------------------------------------------------------------
+// 		"AbilityManaCost"				"0"		
+
+// 		// Special
+// 		//-------------------------------------------------------------------------------------------------------------
+// 		"AbilityValues"
+// 		{
+// 			"radius"
+// 			{
+// 				"value"		"1400"
+// 				"affected_by_aoe_increase"	"1"
+// 			}
+// 			"base_damage"				"50 70 90 110"
+// 			"mana_multiplier"
+// 			{
+// 				"value"			"1 1.2 1.4 1.6"
+// 				"special_bonus_unique_pugna_3"		"+1.75"
+// 				"DamageTypeTooltip"			"DAMAGE_TYPE_MAGICAL"
+// 			}
+// 			"mana_regen"				"0"
+
+// 			"health_restore_pct"
+// 			{
+// 				"value"					"0"
+// 				"special_bonus_facet_pugna_siphoning_ward" "+25"				
+// 			}
+
+// 			"mana_restore_pct"
+// 			{
+// 				"value"					"0"
+// 				"special_bonus_facet_pugna_siphoning_ward" "+25"				
+// 			}
+
+// 			"attacks_to_destroy"
+// 			{
+// 				"value"				"4 4 4 4"
+// 				"special_bonus_unique_pugna_6"		"+3"
+// 			}
+// 			"spell_damage_reduction"
+// 			{
+// 				"value"						"0"
+// 				"DamageTypeTooltip"			"DAMAGE_TYPE_NONE"
+// 			}
+// 			"AbilityCastRange"
+// 			{
+// 				"value"									"9999"
+// 				"special_bonus_shard"					"=9999"
+// 			}			
+// 			"nether_ward_gold_bounty"					"20 40 60 80"
+// 			"self_restoration_range"					
+// 			{
+// 				"value"			"1200"
+// 				"affected_by_aoe_increase"	"1"
+// 			}
+// 		}
+// 		"AbilityCastAnimation"		"ACT_DOTA_CAST_ABILITY_3"
+// 	}
+	
+// "lich_ice_spire"
+// 	{
+// 		// General
+// 		//-------------------------------------------------------------------------------------------------------------
+// 		"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_POINT | DOTA_ABILITY_BEHAVIOR_AOE | DOTA_ABILITY_BEHAVIOR_HIDDEN | DOTA_ABILITY_BEHAVIOR_IGNORE_BACKSWING | DOTA_ABILITY_BEHAVIOR_SHOW_IN_GUIDES"
+// 		"SpellImmunityType"				"SPELL_IMMUNITY_ENEMIES_NO"
+// 		"SpellDispellableType"			"SPELL_DISPELLABLE_NO"
+// 		"AbilitySound"					"Ability.FrostNova"
+// 		"MaxLevel"						"1"
+		
+// 		"IsShardUpgrade"				"1"
+// 		"IsGrantedByShard"				"1"
+
+// 		// Casting
+// 		//-------------------------------------------------------------------------------------------------------------
+// 		"AbilityCastRange"				"9999"
+// 		"AbilityCastPoint"				"0.3"
+// 		"AbilityCastAnimation"			"ACT_DOTA_CAST_ABILITY_5"
+// 		"AbilityCastGestureSlot"		"DEFAULT"
+		
+// 		// Time		
+// 		//-------------------------------------------------------------------------------------------------------------
+// 		"AbilityCooldown"				"0"
+	
+// 		// Cost
+// 		//-------------------------------------------------------------------------------------------------------------
+// 		"AbilityManaCost"				"0"
+
+// 		// Special
+// 		//-------------------------------------------------------------------------------------------------------------
+// 		"AbilityValues"
+// 		{
+// 			"bonus_movespeed"			"-25"
+// 			"aura_radius"				
+// 			{
+// 				"value"		"750"
+// 				"affected_by_aoe_increase"	"1"
+// 			}
+// 			"max_hero_attacks"			"5"
+// 			"max_creep_attacks"			"10"
+// 			"duration"					"99999.0"
+// 			"slow_duration"				"0.5"				
+// 		}
+
+// 	}
+
+
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

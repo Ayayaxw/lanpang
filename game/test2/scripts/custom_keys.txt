@@ -1,0 +1,9 @@
+"CustomKeys"
+{
+  "custom_slowmo_key" "-"
+  "custom_normalmo_key" "+"
+  "custom_print_mouse_pos_key" "KP_0"
+  "custom_printUnitInfoCmdName" "KP_1"
+  "custom_printNearbyUnitsInfoCmdName" "KP_2"
+  "custom_test_key" "'"
+}

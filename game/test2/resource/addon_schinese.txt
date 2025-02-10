@@ -1,0 +1,34 @@
+"lang" {
+	"Language" "SChinese"
+	"Tokens" {
+		"caipan" "裁判"
+		"luosi" "螺丝"
+		"double_on_death_mega" "超级僵尸"
+		"attribute_stack_modifier" "工件计数"
+		"DOTA_Tooltip_ability_item_iron_branch_custom"        "升级树枝"
+		"DOTA_Tooltip_ability_item_iron_branch_custom_Description" "提供额外的一级全属性加成"
+		"DOTA_Tooltip_ability_item_iron_branch_custom_Lore"   "蕴含着神奇力量的树枝"
+
+		"DOTA_Tooltip_ability_item_attribute_amplifier_5x"        "五倍属性树枝"
+		"DOTA_Tooltip_ability_item_attribute_amplifier_5x_Description" "提供英雄五倍的基础属性加成"
+		"DOTA_Tooltip_ability_item_attribute_amplifier_5x_Lore"   "倍化之力"
+
+		"DOTA_Tooltip_ability_item_attribute_amplifier_3x"        "三倍属性树枝"
+		"DOTA_Tooltip_ability_item_attribute_amplifier_3x_Description" "提供英雄三倍的基础属性加成"
+		"DOTA_Tooltip_ability_item_attribute_amplifier_3x_Lore"   "倍化之力"
+
+		"DOTA_Tooltip_ability_item_attribute_amplifier_2x"        "双倍属性树枝"
+		"DOTA_Tooltip_ability_item_attribute_amplifier_2x_Description" "提供英雄双倍的基础属性加成"
+		"DOTA_Tooltip_ability_item_attribute_amplifier_2x_Lore"   "倍化之力"
+		"DOTA_Tooltip_modifier_truesight_vision"             "真实视野"
+		"DOTA_Tooltip_modifier_truesight_vision_Description" "提供真实视野和高空视野"
+		"DOTA_Tooltip_modifier_sniper_kill_bonus"             "狙击猎杀"
+		"DOTA_Tooltip_modifier_sniper_kill_bonus_Description" "击杀狙击手可以降低技能1秒冷却，同时恢复2%最大生命值和魔法"
+		"DOTA_Tooltip_ability_divide_on_death"                  "分裂重生"
+		"DOTA_Tooltip_ability_divide_on_death_Description"      "每次死亡后立即重生，并分裂出多个分身。每死亡一次，分身数量呈指数增长(2^n - 1)。\n\n第一次死亡：1个分身\n第二次死亡：3个分身\n第三次死亡：7个分身\n第四次死亡：15个分身"
+		"DOTA_Tooltip_ability_divide_on_death_Lore"            "即便是死亡，也只会让我变得更强大。"
+		"DOTA_Tooltip_modifier_reduced_ability_cost"              "奥术增幅"
+		"DOTA_Tooltip_modifier_reduced_ability_cost_Description"  "技能冷却时间减少90%%\n技能魔法消耗减少90%%"
+	}
+
+}

@@ -1,0 +1,29 @@
+"AddonInfo"
+{
+    "TeamCount"     "5"                  // 总队伍数量
+    "maps"          "untitled_1"
+    "IsPlayable"    "1"
+    "untitled_1"
+    {
+        "MaxPlayers"        "100"          // 最大玩家数量，应该等于队伍数量（如果是每队1人）
+//        "PlayerPerTeam"     "1"           // 每个队伍的玩家数量
+    }
+    "RADIANT_MAX_PLAYER_COUNT" "12"
+    "DIRE_MAX_PLAYER_COUNT"  "12"
+    "USE_AUTOMATIC_PLAYERS_PER_TEAM"  "1"
+    "Default_Keys"
+    {
+        "01"
+        {
+            "Key"       "MOUSE4"
+            "Command"   "CustomGameSlowMotion"
+            "Name"      "Slow Motion"
+        }
+        "02"
+        {
+            "Key"       "MOUSE"
+            "Command"   "CustomGameNormalSpeed"
+            "Name"      "Normal Speed"
+        }
+    }
+}

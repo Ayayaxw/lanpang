@@ -1,0 +1,111 @@
+.BattleScorePanel1 {
+    width: 300px;
+    height: fit-children;
+    vertical-align: top;
+    horizontal-align: right;
+    background-color: rgba(0, 0, 0, 0.6);
+    border: 2px solid #000000;
+    border-radius: 10px;
+    /*layout-position: fixed;*/
+    position: -0.5% 1% 0px;
+    z-index: 100;
+    flow-children: down;
+    padding: 10px;
+    visibility: collapse;
+}
+.BattleScorePanel1[style~="collapse"] {
+    visibility: collapse;
+    opacity: 0;
+  }
+
+.OverlayPanel {
+
+    width: 100%;       /* 宽度为100% */
+    height: 120%;      /* 高度为100% */
+    z-index: -1;       /* z-index 设置为 10，确保它在最前面 */
+    /*background-color: rgba(255, 255, 255, 1); /* 设置半透明背景色 */
+    /*layout-position: fixed;*/
+
+}
+
+.ScorePanel1TopRow {
+    width: 100%;
+    height: 100px; /* 设置与标题标签相同的高度 */
+    
+    vertical-align: center; /* 垂直居中 */
+    color: #ffffff;
+    border-bottom: 2px solid #ffffff;
+    line-height: 40px; /* 确保文字垂直居中 */
+    padding-bottom: 5px;
+}
+
+#ScorePanel1TitleLabel {
+    font-size: 24px;
+    color: #ffffff;
+    text-align: center;
+    vertical-align: center; /* 垂直居中对齐文本 */
+    height: 50px; /* 设置高度 */
+    line-height: 40px; /* 垂直居中对齐文本 */
+    
+
+}
+
+.ScorePanel1LabelRow {
+    width: 100%;
+    height: 30px;
+    flow-children: right;
+    horizontal-align: center;
+    vertical-align: center;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.ScorePanel1KeyLabel {
+    font-size: 20px;
+    color: #ffffff;
+    text-align: left;
+    vertical-align: center;
+    width: 50%;
+    height: 30px;
+    line-height: 30px;
+    margin-left: 5%; /* 稍微减少左边距 */
+    padding-right: 5px; /* 添加右内边距，防止文字紧贴 */
+}
+
+.ScorePanel1ValueLabel {
+    font-size: 20px;
+    color: #ffffff;
+    text-align: left; 
+    vertical-align: center;
+    width: 45%;
+    height: 30px;
+    line-height: 30px;
+    margin-right: 5%; /* 添加右边距 */
+    padding-left: 5px; /* 添加左内边距，防止文字紧贴 */
+}
+
+.ScorePanel1TimeLabel {
+    font-size: 20px;
+    color: #ffffff;
+    text-align: left; 
+    vertical-align: center;
+    width: 45%;
+    height: 30px;
+    line-height: 30px;
+    margin-right: 5%; /* 添加右边距 */
+    padding-left: 5px; /* 添加左内边距，防止文字紧贴 */
+}
+
+#HeroPortrait
+{
+    width: 180px;
+    height: 240px;
+}
+
+#portraitHUDOverlay,
+#portraitHUD1
+{
+	width: 500px;
+	height: 500px;
+
+}

@@ -1,0 +1,75 @@
+.BattleScorePanel2 {
+    width: 300px;
+
+    flow-children: down;
+    vertical-align: top;
+    horizontal-align: right;
+    background-color: rgba(0, 0, 0, 0.6);
+    border: 2px solid #000000;
+    border-radius: 10px;
+    layout-position: fixed;
+    position: -0.5% 1% 0px;
+    z-index: 100;
+
+    padding: 10px;
+
+}
+
+#BattleScorePanel2TitleLabel {
+    
+    font-size: 24px;
+    color: #ffffff;
+    text-align: center;
+    vertical-align: center;
+    height: 50px;
+    line-height: 40px; /* 与高度相同，确保垂直居中 */
+    width: 100%; /* 确保标签占据整个宽度 */
+    text-shadow: 1px 1px 2px 3.0 #000000;
+    border-bottom: 2px solid #ffffff;
+
+}
+
+
+.BattleScorePanel2HeadersRow {
+    width: 100%;
+    height: 40px;
+    color: #ffffff;
+    padding-bottom: 5px;
+    margin-bottom: 5px;
+    text-align: center;
+}
+
+.BattleScorePanel2HeroesList {
+    width: 100%;
+    vertical-align: center;
+}
+
+/* 英雄和伤害标签的样式 */
+.BattleScorePanel2HeroRow {
+    width: 100%;
+    height: 40px; /* 每个英雄行的高度 */
+    color: #ffffff;
+    text-align: center;
+    margin-top: 5px; /* 每个英雄行之间的间距 */
+}
+
+
+.BattleScorePanel2HeroNameLabel {
+    font-size: 15px;
+    color: #ffffff; /* 确保字体颜色为白色 */
+    width: 45%;
+    text-align: left;
+    line-height: 30px;
+    margin-left: 5%;
+    text-shadow: 1px 1px 2px 3.0 #000000;
+}
+
+.BattleScorePanel2DamageLabel {
+    font-size: 15px;
+    color: #ffffff; /* 确保字体颜色为白色 */
+    width: 45%;
+    text-align: left;
+    line-height: 30px;
+    margin-left: 50%;
+    text-shadow: 1px 1px 2px 3.0 #000000;
+}

@@ -1,0 +1,118 @@
+/* Prettified by Source 2 Viewer 10.0.0.0 - https://valveresourceformat.github.io */
+
+.fc-heropick
+{
+    vertical-align: middle;
+    margin-left: 600px;
+    margin-top: 100px;
+    flow-children: down;
+    opacity: 1.0;
+    background-color: #000c;
+    transform: translateX( 0px) translateY( -80px);
+    transition-property: opacity, transform;
+    transition-duration: 0.2s;
+    z-index: 91;
+}
+
+.fc-heropick.minimized
+{
+    opacity: 0;
+    transform: translateX( -60px) translateY( -80px);
+}
+
+.fc-ability-add
+{
+    padding: 10px;
+    flow-children: right-wrap;
+    horizontal-align: middle;
+}
+
+.fc-ability-existing
+{
+    width: 800px;
+    border-top: 1px solid #5e6869;
+    padding: 10px;
+    flow-children: right-wrap;
+    horizontal-align: middle;
+}
+
+.fc-ability-panel
+{
+    margin: 5px;
+    width: 50px;
+    flow-children: down;
+}
+
+.fc-ability-img
+{
+    width: 50px;
+    height: 50px;
+}
+
+.fc-ability-button
+{
+    background-color: #3e4144;
+    border: 1px solid #4e5155;
+    width: 100%;
+    height: 28px;
+    transition-property: background-color, border, color;
+    transition-duration: 0.15s;
+    transition-timing-function: linear;
+    padding: 4px;
+}
+
+.fc-ability-button:hover
+{
+    background-color: gradient( linear, 0% 0%, 70% 0%, from( #676b70), to( #3e4144));
+    border: 1px solid #686b70;
+}
+
+.fc-ability-button.red
+{
+    background-color: #6D4A4E;
+    border: 1px solid #9b6369;
+    transition-property: background-color, border;
+    transition-duration: 0.15s;
+    transition-timing-function: ease-in-out;
+}
+
+.fc-ability-button.red:hover
+{
+    background-color: gradient( linear, 0% 0%, 70% 0%, from( #be4f5c), to( #913943));
+    border: 1px solid #eb5f70;
+}
+
+.fc-ability-button.green
+{
+    background-color: #42705B;
+    border: 1px solid #4e9e7a;
+    transition-property: background-color, border;
+    transition-duration: 0.15s;
+    transition-timing-function: ease-in-out;
+}
+
+.fc-ability-button.green:hover
+{
+    background-color: gradient( linear, 0% 0%, 70% 0%, from( #3cc486), to( #259c67));
+    border: 1px solid #3feb9d;
+}
+
+.fc-ability-button Label
+{
+    horizontal-align: center;
+    vertical-align: middle;
+    color: #D8DADE;
+    font-size: 16px;
+    text-align: center;
+    text-transform: uppercase;
+    font-family: defaultFont;
+    font-weight: normal;
+    text-overflow: shrink;
+    letter-spacing: 1px;
+}
+
+.fc-ability-button:hover Label
+{
+    color: #FFF;
+}
+

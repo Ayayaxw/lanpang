@@ -1,0 +1,10 @@
+# 忽略生成文件
+*.vcd
+*.vpk
+*.log
+/bin/
+
+# 忽略VSCode工作区设置
+.vscode/launch.json
+.vscode/tasks.json
+

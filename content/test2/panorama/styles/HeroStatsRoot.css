@@ -1,0 +1,122 @@
+/* 根面板样式 */
+.CustomHeroStatsRoot {
+    width: 100%;
+    height: fit-children;
+    margin-top: 18%; /* 距离顶部30% */
+    flow-children: right; /* 子元素水平排列 */
+    z-index: 10; /* 确保面板在前面显示，可以根据需要调整 */
+}
+
+
+.ItemCategory {
+    flow-children: down;
+    margin-bottom: 10px;
+}
+
+.ItemCategory > Label {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.CustomHeroStatsRoot.hidden{
+	opacity: 0;
+	transform: translateY(-30%);
+	transition-timing-function: cubic-bezier(0.01, 0.96, 0.32, 0.98);
+	transition-duration:1s;
+	transition-property: opacity, transform;
+}
+
+
+.ItemTabs {
+    flow-children: right;
+    horizontal-align: center;
+    margin-bottom: 10px;
+}
+
+.TabButton {
+    padding: 10px 20px;
+    margin: 0 5px;
+    background-color: #444;
+    border-radius: 5px 5px 0 0;
+}
+
+.TabButton.ActiveTab {
+    background-color: #666;
+}
+
+
+
+.ItemGrid {
+    flow-children: right-wrap;
+    padding: 10px;
+}
+
+/* 左右属性容器样式 */
+.HeroStatsContainer {
+    width: 45%; /* 左右各占据45%的宽度，中间留空 */
+    height: fit-children;
+    overflow: noclip; /* 允许内容溢出 */
+}
+
+/* 左侧属性容器 */
+#LeftHeroStatsContainer {
+    margin-left: 2.5%; /* 可根据需要调整 */
+    flow-children: down; /* 子元素垂直排列 */
+    horizontal-align: left;
+}
+
+/* 右侧属性容器 */
+#RightHeroStatsContainer {
+    margin-right: 2.5%; /* 可根据需要调整 */
+    flow-children: down; /* 子元素垂直排列 */
+    horizontal-align: right;
+}
+
+/* 单个属性面板样式 */
+.HeroStatPanel {
+    width: fit-children;
+    height: 24px;
+    margin-bottom: 10px;
+    flow-children: right; /* 图标和数值水平排列 */
+    horizontal-align: left;
+}
+
+/* 右侧属性面板调整 */
+#RightHeroStatsContainer .HeroStatPanel {
+    horizontal-align: right;
+}
+
+/* 属性图标样式 */
+.HeroStatIcon {
+    width: 24px;
+    height: 24px;
+    vertical-align: center;
+}
+
+/* 左侧属性图标 */
+#LeftHeroStatsContainer .HeroStatIcon {
+    margin-right: 5px;
+}
+
+/* 右侧属性图标 */
+#RightHeroStatsContainer .HeroStatIcon {
+    margin-left: 5px;
+}
+
+/* 属性值样式 */
+.HeroStatValue {
+    color: white;
+    font-size: 16px;
+    vertical-align: center;
+}
+
+/* 左侧属性值 */
+#LeftHeroStatsContainer .HeroStatValue {
+    text-align: left;
+}
+
+/* 右侧属性值 */
+#RightHeroStatsContainer .HeroStatValue {
+    text-align: right;
+}

@@ -1,0 +1,209 @@
+<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:vpcf61:version{39d3ce1d-9442-4407-9b78-8317145b1732} -->
+{
+	_class = "CParticleSystemDefinition"
+	m_bShouldHitboxesFallbackToRenderBounds = false
+	m_nMaxParticles = 8
+	m_BoundingBoxMin = [ -128.0, -128.0, -128.0 ]
+	m_BoundingBoxMax = [ 128.0, 128.0, 128.0 ]
+	m_flCullRadius = 1.0
+	m_nBehaviorVersion = 5
+	m_nFirstMultipleOverride_BackwardCompat = 6
+	m_controlPointConfigurations = 
+	[
+		{
+			m_name = "preview"
+			m_drivers = 
+			[
+				{
+					m_iAttachType = "PATTACH_WORLDORIGIN"
+					m_entityName = "self"
+				},
+				{
+					m_iControlPoint = 2
+					m_iAttachType = "PATTACH_WORLDORIGIN"
+					m_entityName = "self"
+				},
+				{
+					m_iControlPoint = 5
+					m_iAttachType = "PATTACH_WORLDORIGIN"
+					m_entityName = "self"
+				},
+			]
+		},
+	]
+	m_Emitters = 
+	[
+		{
+			_class = "C_OP_ContinuousEmitter"
+			m_flStartTime = 
+			{
+				m_nType = "PF_TYPE_LITERAL"
+				m_flLiteralValue = 0.7
+			}
+			m_flEmitRate = 
+			{
+				m_nType = "PF_TYPE_LITERAL"
+				m_flLiteralValue = 3.0
+			}
+		},
+	]
+	m_Initializers = 
+	[
+		{
+			_class = "C_INIT_RandomColor"
+			m_ColorMin = [ 203, 18, 21, 255 ]
+			m_ColorMax = [ 203, 18, 21, 255 ]
+		},
+		{
+			_class = "C_INIT_InitFloat"
+			m_InputValue = 
+			{
+				m_nType = "PF_TYPE_LITERAL"
+				m_flLiteralValue = 1.0
+			}
+			m_nOutputField = 1
+		},
+		{
+			_class = "C_INIT_InitFloat"
+			m_InputValue = 
+			{
+				m_nType = "PF_TYPE_RANDOM_UNIFORM"
+				m_flRandomMin = -10.0
+				m_flRandomMax = 10.0
+				m_nRandomMode = "PF_RANDOM_MODE_CONSTANT"
+				m_bHasRandomSignFlip = true
+			}
+			m_nOutputField = 4
+		},
+		{
+			_class = "C_INIT_InitFloat"
+			m_InputValue = 
+			{
+				m_nType = "PF_TYPE_LITERAL"
+				m_flLiteralValue = 128.0
+			}
+		},
+		{
+			_class = "C_INIT_InitFloat"
+			m_InputValue = 
+			{
+				m_nType = "PF_TYPE_LITERAL"
+				m_flLiteralValue = 1.0
+			}
+			m_nOutputField = 7
+		},
+		{
+			_class = "C_INIT_CreateWithinSphereTransform"
+		},
+		{
+			_class = "C_INIT_PositionOffset"
+			m_OffsetMin = [ 0.0, 0.0, 5.0 ]
+			m_OffsetMax = [ 0.0, 0.0, 5.0 ]
+		},
+	]
+	m_Operators = 
+	[
+		{
+			_class = "C_OP_BasicMovement"
+		},
+		{
+			_class = "C_OP_FadeAndKill"
+			m_flStartAlpha = 0.0
+		},
+		{
+			_class = "C_OP_ColorInterpolate"
+			m_ColorFade = [ 145, 12, 14, 255 ]
+		},
+		{
+			_class = "C_OP_InterpolateRadius"
+			m_flEndTime = 0.25
+			m_flStartScale = 0.0
+			m_flBias = 0.85
+		},
+		{
+			_class = "C_OP_RampScalarLinearSimple"
+			m_nField = 4
+			m_Rate = 10.0
+		},
+		{
+			_class = "C_OP_RampScalarLinearSimple"
+			m_flEndTime = 9999.0
+			m_Rate = -300.0
+			m_nOpEndCapState = "PARTICLE_ENDCAP_ENDCAP_ON"
+		},
+		{
+			_class = "C_OP_PositionLock"
+		},
+	]
+	m_Renderers = 
+	[
+		{
+			_class = "C_OP_RenderSprites"
+			m_nOrientationType = "PARTICLE_ORIENTATION_WORLD_Z_ALIGNED"
+			m_vecTexturesInput = 
+			[
+				{
+					m_hTexture = resource:"materials/particle/ring01.vtex"
+				},
+			]
+			m_nOutputBlendMode = "PARTICLE_OUTPUT_BLEND_MODE_ADD"
+		},
+	]
+	m_Children = 
+	[
+		{
+			m_ChildRef = resource:"particles/econ/events/ti6/teleport_start_ti6_lvl2_black.vpcf"
+		},
+		{
+			m_bEndCap = true
+			m_ChildRef = resource:"particles/econ/events/ti6/teleport_start_ti6_n_endcap.vpcf"
+		},
+		{
+			m_ChildRef = resource:"particles/econ/events/ti6/teleport_start_ti6_h.vpcf"
+		},
+		{
+			m_ChildRef = resource:"particles/econ/events/ti6/teleport_start_ti6_i.vpcf"
+		},
+		{
+			m_ChildRef = resource:"particles/econ/events/ti6/teleport_start_ti6_e.vpcf"
+		},
+		{
+			m_flDelay = 0.1
+			m_ChildRef = resource:"particles/econ/events/ti6/teleport_start_ti6_g.vpcf"
+		},
+		{
+			m_ChildRef = resource:"particles/econ/events/ti6/teleport_start_ti6_c.vpcf"
+		},
+		{
+			m_ChildRef = resource:"particles/econ/events/ti6/teleport_start_ti6_d.vpcf"
+		},
+		{
+			m_ChildRef = resource:"particles/econ/events/ti6/teleport_start_ti6_m.vpcf"
+		},
+		{
+			m_ChildRef = resource:"particles/econ/events/ti6/teleport_start_ti6_playercolor.vpcf"
+		},
+		{
+			m_ChildRef = resource:"particles/econ/events/ti6/teleport_start_ti6_lvl2_ribbon.vpcf"
+		},
+		{
+			m_bEndCap = true
+			m_ChildRef = resource:"particles/econ/events/ti6/teleport_start_ti6_dust.vpcf"
+		},
+		{
+			m_ChildRef = resource:"particles/econ/events/ti6/teleport_start_ti6_counter.vpcf"
+		},
+		{
+			m_bEndCap = true
+			m_ChildRef = resource:"particles/econ/events/ti6/teleport_start_ti6_dust_bits.vpcf"
+		},
+		{
+			m_bEndCap = true
+			m_ChildRef = resource:"particles/econ/events/ti6/teleport_start_ti6_ll.vpcf"
+		},
+		{
+			m_ChildRef = resource:"particles/econ/events/ti6/teleport_start_ti6_lvl2_twinkle.vpcf"
+			m_flDelay = 0.1
+		},
+	]
+}

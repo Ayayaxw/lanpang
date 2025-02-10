@@ -1,0 +1,93 @@
+.LeftHeroAttackPanel {
+  width: 400px;
+  height: 300px;
+  vertical-align: bottom;
+  horizontal-align: left;
+  margin-bottom: 20px;
+  margin-left: 20px;
+  flow-children: up;
+  overflow: noclip;
+}
+
+#MessageContainer {
+  flow-children: up;
+}
+
+.AttackMessage {
+  flow-children: right;
+  margin-bottom: 5px;
+  transition-property: opacity;
+  transition-duration: 0.2s;
+  transition-timing-function: linear;
+  background-color: gradient( linear, 0% 0%, 100% 0%, from( #00000099 ), to( #00000000 ) );
+  border-radius: 4px;
+}
+
+.AttackMessage Label {
+  font-size: 16px;
+  color: #ffffff;
+  text-shadow: 1px 1px 2px #000000;
+  margin-right: 4px;
+}
+
+.AttackMessage.Hidden {
+  opacity: 0;
+  visibility: collapse;
+}
+
+.AttackMessage Label.HeroNameLeft {
+  color: #66bb6a;
+}
+
+.AttackMessage Label.HeroNameRight {
+  color: #ef5350;
+}
+
+.AttackMessage Label.AbilityName {
+  color: #4fc3f7;
+}
+
+.AttackMessage Label.DamageValue {
+  color: #ffd54f;
+}
+
+/* 右侧面板样式 */
+.RightHeroAttackPanel {
+  min-width: 400px;
+  height: 300px;
+  vertical-align: bottom;
+  horizontal-align: right;
+  margin-bottom: 20px;
+  margin-right: 0px;
+  flow-children: up;
+  overflow: noclip;
+}
+
+#RightMessageContainer {
+  flow-children: up;
+  horizontal-align: right;
+}
+
+/* 右侧消息样式 */
+.RightHeroAttackPanel .AttackMessage {
+  horizontal-align: right;
+  flow-children: right;
+  margin-bottom: 5px;
+  padding-right: 10px;
+  padding-left: 10px;
+  background-color: gradient( linear, 100% 0%, 0% 0%, from( #00000099 ), to( #00000000 ) );
+  border-radius: 4px;
+  margin-left: 20px;
+}
+
+/* 右侧消息内容容器 */
+.RightHeroAttackPanel .MessageContent {
+  flow-children: right;
+  horizontal-align: right;
+  white-space: nowrap;
+}
+
+/* 消息文本样式 */
+.RightHeroAttackPanel .MessageContent Label {
+  white-space: nowrap;
+}

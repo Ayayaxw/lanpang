@@ -1,0 +1,395 @@
+.GameModeMainPanel {
+  width: 100%;
+  height: 100%;
+  z-index: 99;
+}
+
+/* 物品选择对话框样式 */
+.ItemSelectionDialog {
+  width: 80%;
+  height: 80%;
+  horizontal-align: center;
+  vertical-align: center;
+  background-color: #1e1e1e;
+  border: 2px solid #ffffff;
+  flow-children: down;
+  overflow: noclip;  /* 防止出现滚动条 */
+}
+
+/* 内容容器 */
+.ItemSelectionContent {
+  width: 100%;
+  height: 100%;
+  flow-children: down;
+  overflow: noclip;  /* 防止出现滚动条 */
+}
+
+/* 标题样式 */
+.ItemSelectionTitle {
+  font-size: 24px;
+  color: #ffffff;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.ItemGridContainer {
+  width: 99%;
+  height: 80%;
+  overflow: noclip;  /* 防止出现滚动条 */
+}
+
+/* 物品网格样式 */
+.ItemGrid {
+  width: 100%;
+  height: 100%;
+  flow-children: right-wrap;
+  overflow: squish scroll;  /* 只允许垂直滚动 */
+  margin: 10px;
+}
+
+.ItemCost {
+  color: gold;
+  font-size: 14px;
+  horizontal-align: center;
+  text-align: center;
+}
+
+/* 物品项样式 */
+.ItemEntry {
+  width: 100px;
+  height: 140px;
+  margin: 5px;
+  background-color: #2e2e2e;
+  border: 1px solid #4b4b4b;
+  flow-children: down;
+  padding: 5px;
+}
+
+/* 物品图标样式 */
+.ItemIcon {
+  width: 64px;
+  height: 50px;
+  horizontal-align: center;
+  margin-top: 5px;
+}
+
+/* 物品名称样式 */
+.ItemName {
+  width: 90px;
+  height: 20px;
+  font-size: 14px;
+  color: #ffffff;
+  text-align: center;
+  margin-top: 5px;
+  text-overflow: ellipsis;
+  overflow: noclip;
+  white-space: nowrap;
+  horizontal-align: center;
+}
+
+
+/* 数量输入框样式 */
+.ItemQuantityEntry {
+  width: 80px;
+  height: 30px;
+  horizontal-align: center;
+  background-color: #1e1e1e;
+  border: 1px solid #4b4b4b;
+  color: #ffffff;
+  text-align: center;
+  margin-top: 2px;
+}
+
+.ItemButtonContainer {
+  flow-children: right;
+  horizontal-align: center;
+}
+
+/* 确认按钮样式 */
+.ItemConfirmButton {
+  width: 120px;
+  height: 40px;
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #4a76a8 ), to( #365980 ) );
+  border: 1px solid #5b92cc;
+  align: center center;
+  
+  margin-top: 16px;
+  margin-right: 10px;
+  box-shadow: fill #00000066 -2px 5px 2px 2px;
+}
+
+.ItemConfirmButton:hover {
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #5b92cc ), to( #4a76a8 ) );
+}
+
+.ItemConfirmButton Label {
+  color: #FFFFFF;
+  font-size: 18px;
+  font-weight: bold;
+  text-transform: uppercase;
+  align: center center;
+}
+
+/* 取消按钮样式 */
+.ItemCancelButton {
+  width: 120px;
+  height: 40px;
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #a85a5a ), to( #804040 ) );
+  border: 1px solid #cc7171;
+  align: center center;
+  margin-top: 16px;
+  margin-right: 10px;
+  box-shadow: fill #00000066 -2px 5px 2px 2px;
+}
+
+.ItemCancelButton:hover {
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #cc7171 ), to( #a85a5a ) );
+}
+
+.ItemCancelButton Label {
+  color: #FFFFFF;
+  font-size: 18px;
+  font-weight: bold;
+  text-transform: uppercase;
+  align: center center;
+}
+
+
+/* 清除按钮样式 */
+.ItemClearButton {
+  width: 120px;
+  height: 40px;
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #a83c3c ), to( #802828 ) );
+  border: 1px solid #cc4444;
+  align: center center;
+  margin-top: 16px;
+  margin-right: 10px;
+  box-shadow: fill #00000066 -2px 5px 2px 2px;
+}
+
+.ItemClearButton:hover {
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #cc4444 ), to( #a83c3c ) );
+}
+
+.ItemClearButton Label {
+  color: #FFFFFF;
+  font-size: 18px;
+  font-weight: bold;
+  text-transform: uppercase;
+  align: center center;
+}
+
+
+  .GameSetupPanel {
+    flow-children: down;
+    background-color: gradient( linear, 0% 0%, 0% 100%, from( #25282aee ), to( #181a1bee ) );
+    border: 2px solid #4b4b4b;
+    box-shadow: fill #00000066 -2px 5px 2px 2px;
+    padding: 16px;
+    width: 400px;
+    margin-top: 60px;
+    margin-left: 180px;
+  }
+  
+  .GameSetupPanelTopRow {
+    width: 100%;
+    margin-bottom: 16px;
+    padding: 5px;
+    border-bottom: 2px solid #ffffff;
+  }
+  
+  .GameSetupPanelTitleLabel {
+    font-size: 32px;
+    font-weight: bold;
+    color: #E0E0E0;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-align: center;
+    
+  }
+  
+
+
+
+
+
+
+
+  .ItemControlsContainer {
+    width: 100%;
+    flow-children: down;
+    margin-right: 10px;
+  }
+  
+
+  .HeroLevelEntry {
+    width: 80px;
+    height: 40px;
+    margin-right: 10px;
+    background-color: gradient( linear, 0% 0%, 0% 100%, from( #222222 ), to( #181818 ) );
+    border: 1px solid #4b4b4b;
+    color: #FFFFFF;
+    font-size: 16px;
+    text-align: center;
+    vertical-align: center;
+  }
+
+
+  
+  .GameModeDropDown, .DifficultyDropDown {
+    width: 60%;
+    height: 32px;
+    background-color: gradient( linear, 0% 0%, 0% 100%, from( #222222 ), to( #181818 ) );
+    border: 1px solid #4b4b4b;
+  }
+  
+/* 原有的确定按钮样式 */
+.StartGameButton {
+  width: 200px;
+  height: 40px;
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #5aa15a ), to( #407240 ) );
+  border: 1px solid #6fb76f;
+  align: center center;
+  margin-top: 16px;
+}
+
+.StartGameButton:hover {
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #6fb76f ), to( #5aa15a ) );
+}
+.GameSetupPanelSettingsRow {
+    
+  flow-children: right;
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+  .GameSetupPanelSettingLabel {
+    
+    font-size: 20px;
+    color: #E0E0E0;
+    width: 40%;
+    vertical-align: center;
+  }
+
+.StartGameButton Label {
+  color: #FFFFFF;
+  font-size: 20px;
+  font-weight: bold;
+  text-transform: uppercase;
+  align: center center;
+}
+
+/* 修改按钮样式 */
+.ModifyButton {
+  width: 80px;
+  height: 30px;
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #4a76a8 ), to( #3a5a80 ) );
+  border: 1px solid #5b92cc;
+  align: center center;
+  box-shadow: fill #00000066 -2px 5px 2px 2px;
+}
+
+.ModifyButton:hover {
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #5b92cc ), to( #4a76a8 ) );
+}
+
+.ModifyButton Label {
+  color: #FFFFFF;
+  font-size: 16px;
+  font-weight: bold;
+  text-transform: uppercase;
+  align: center center;
+}
+.ButtonRow {
+  width: 100%;
+  flow-children: right;
+  horizontal-align: center;
+  margin-top: 16px;
+}
+
+
+/* 取消按钮样式 */
+.CancelButton {
+  width: 120px;
+  height: 40px;
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #a85a5a ), to( #804040 ) );
+  border: 1px solid #cc7171;
+  align: center center;
+  margin-top: 16px;
+  margin-right: 10px;
+  box-shadow: fill #00000066 -2px 5px 2px 2px;
+}
+
+.CancelButton:hover {
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #cc7171 ), to( #a85a5a ) );
+}
+
+.CancelButton Label {
+  color: #FFFFFF;
+  font-size: 18px;
+  font-weight: bold;
+  text-transform: uppercase;
+  align: center center;
+}
+
+.ChangeHeroButton:disabled {
+  background-color: #424242;
+  border: 1px solid #2e2e2e;
+}
+
+.ChangeHeroButton:disabled:hover {
+  tooltip-position: bottom;
+  tooltip-body-position: 50% 50%;
+}
+
+/* 更换英雄按钮样式 */
+.ChangeHeroButton {
+
+  width: 160px;
+  height: 40px;
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #5aa15a ), to( #407240 ) );
+  border: 1px solid #6fb76f;
+  align: center center;
+  margin-top: 16px;
+  box-shadow: fill #00000066 -2px 5px 2px 2px;
+
+}
+
+.ChangeHeroButton:hover {
+  brightness: 1.5;
+  transition-property: brightness;
+  transition-duration: 0.2s;
+}
+
+.ChangeHeroButton Label {
+  color: #FFFFFF;
+  font-size: 18px;
+  font-weight: bold;
+  text-transform: uppercase;
+  align: center center;
+}
+
+/* 英雄标签样式 */
+
+.GameModeLabel
+{
+  color: #FFFFFF;
+  font-size: 18px;
+  font-weight: normal;
+  margin-right: 10px;
+  vertical-align: center;
+}
+
+.GameSetupPanelHidden {
+  visibility: collapse;
+}
+
+
+
+
+
+
+
+
+

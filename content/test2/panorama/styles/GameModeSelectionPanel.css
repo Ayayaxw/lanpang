@@ -1,0 +1,59 @@
+.GameModeSelectionPanel {
+  margin-top: 150px;
+  margin-right: 150px;
+  horizontal-align: center;
+  width: 500px;
+  height: 400px;
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #25282A ), to( #333333 ) );
+  border: 2px solid #4d5259;
+  box-shadow: #00000066 0px 0px 8px 0px;
+  opacity: 0;
+  z-index: 92;
+  flow-children: down;
+  padding: 20px;
+  transform: translateX( -60px) translateY( -80px);
+
+  transition-property: opacity, transform;
+  transition-duration: 0.2s;
+
+
+    overflow: squish scroll;
+
+
+}
+
+
+.GameModeSelectionPanel.Visible {
+  transform: translateX( 0px) translateY( -80px);
+  opacity: 1;
+}
+
+.GameModeSelectionPanel > Label {
+  font-size: 24px;
+  color: #ffffff;
+  margin-bottom: 20px;
+  text-align: center;
+  width: 100%;
+}
+  
+  .GameModeOption {
+    width: 90%;
+    height: 50px;
+    background-color: gradient( linear, 0% 0%, 0% 100%, from( #4d4d4d ), to( #3a3a3a ) );
+    border: 1px solid #555555;
+    margin-top: 10px;
+    transition-property: background-color;
+    transition-duration: 0.2s;
+  }
+  
+  .GameModeOption:hover {
+    background-color: gradient( linear, 0% 0%, 0% 100%, from( #5a5a5a ), to( #474747 ) );
+  }
+  
+  .GameModeOption Label {
+    font-size: 18px;
+    color: #ffffff;
+    vertical-align: middle;
+    horizontal-align: center;
+    text-align: center;
+  }

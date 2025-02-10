@@ -1,0 +1,10 @@
+<root>
+  <styles>
+    <include src="file://{resources}/styles/button_container.css" />
+  </styles>
+  <scripts>
+
+  </scripts>
+
+
+</root>

@@ -1,0 +1,5 @@
+"UnlitGeneric"
+{
+    "$basetexture" "picture/1"
+    "$translucent" "1" // 如果你的PNG包含透明部分
+}

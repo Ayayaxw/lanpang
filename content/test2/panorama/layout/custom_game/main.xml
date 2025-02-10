@@ -1,0 +1,821 @@
+<root>
+  <styles>
+    <include src="s2r://panorama/styles/dotastyles.vcss_c" />
+    <include src="file://{resources}/styles/MainPanel.css" />
+
+
+
+
+    <include src="file://{resources}/styles/fc-heropick.css" />
+
+    <include src="file://{resources}/styles/BattleStartCountdownContainer.css" />
+
+
+    <include src="file://{resources}/styles/MainButtonContainer.css" />
+    <include src="file://{resources}/styles/ScoreButton1.css" />
+    <include src="file://{resources}/styles/ScoreButton2.css" />
+    <include src="file://{resources}/styles/GameModeMainPanel.css" /> 
+    <include src="file://{resources}/styles/GameModeSelectionPanel.css" />
+    <!-- <include src="file://{resources}/styles/facet_details_custom.css" /> -->
+    <include src="file://{resources}/styles/HeroVersus.css" />
+    <include src="file://{resources}/styles/HeroVersusTop.css" />
+    <include src="file://{resources}/styles/HeroStatsRoot.css" />
+    <include src="file://{resources}/styles/HeroSelectionSubRow.css" />
+    <include src="file://{resources}/styles/attack_info.css" />
+    <include src="file://{resources}/styles/CameraControlPanel.css" />
+    <include src="file://{resources}/styles/AbilitiesContainer.css" />
+    <include src="file://{resources}/styles/hero_chaos.css" />
+    <include src="file://{resources}/styles/hero_chaos_score.css" />
+    <include src="file://{resources}/styles/hero_chaos_killboard.css" />
+    <include src="file://{resources}/styles/floating_text.css" />
+
+
+
+<!-- 
+    <include src="file://{resources}/styles/Dota/ui_hero_facet_picker.css" />
+    <include src="file://{resources}/styles/Dota/dashboard_page_hero_new_v2.css" /> -->
+    
+  
+  </styles>
+  <scripts>
+    <!--初始化隐藏-->
+    <include src="file://{resources}/scripts/HideDefaultButton.js" />
+    <include src="file://{resources}/scripts/CameraControlPanel.js" />
+    <include src="file://{resources}/scripts/CommonFunction.js" />
+    <include src="file://{resources}/scripts/AbilitiesContainer.js" />
+    <include src="file://{resources}/scripts/hero_chaos.js" />
+    <include src="file://{resources}/scripts/hero_chaos_score.js" />
+    <include src="file://{resources}/scripts/hero_chaos_killboard.js" />
+    <include src="file://{resources}/scripts/Init/HideDOTA2Panel.js" />
+
+
+    <!--按钮功能-->
+    <include src="file://{resources}/scripts/ScoreButton1.js" />
+    <include src="file://{resources}/scripts/ScoreButton2.js" />
+    <include src="file://{resources}/scripts/ModeMenuButton.js" />
+    <include src="file://{resources}/scripts/HideMenuButton.js" />
+    <include src="file://{resources}/scripts/GameSpeedControl.js" />
+    <include src="file://{resources}/scripts/floating_text.js" />
+
+    <include src="file://{resources}/scripts/MatchUI/CameraController.js" />
+    <include src="file://{resources}/scripts/MatchUI/CountdownContainer.js" />
+    <include src="file://{resources}/scripts/MatchUI/HeroVersus.js" />
+    <include src="file://{resources}/scripts/MatchUI/HeroVersusTop.js" />
+    <include src="file://{resources}/scripts/MatchUI/attack_info.js" />
+    <include src="file://{resources}/scripts/Common/PrintMaster.js" />
+
+
+  </scripts>
+    <!-- 主面板 -->
+
+
+
+  <Panel class="MainPanel" hittest="false" > 
+
+
+
+  <!-- <DOTAScenePanel class="Greenpanel_1" 
+    id="Greenpanel_1" 
+    map="maps/ui/dota_hud_loadout_2022" 
+    particleonly="false" 
+    unit="npc_dota_hero_kez"
+    antialias="true"
+    camera="camera_1"
+
+    light="global_light"
+    rotateonhover="true"
+  />
+  
+
+  <Panel id="Greenpanel" class = "Greenpanel"/> -->
+
+  <Panel id="CustomHeroStatsRoot" class="CustomHeroStatsRoot hidden">
+      <Panel id="LeftHeroStatsContainer" class="HeroStatsContainer" />
+      <Panel id="RightHeroStatsContainer" class="HeroStatsContainer" />
+  </Panel>
+
+  <Panel hittest="false" style="width:100%; height:100%;">
+      <Panel id="FloatingTextContainer" class="FloatingTextContainer" hittest="false"/>
+  </Panel>
+
+  <Panel hittest="false" style="width:100%; height:100%;">
+      <Panel id="AbilitiesContainer" class="AbilitiesContainer" hittest="false"/>
+  </Panel>
+
+
+  <Panel class="HUDContainer hidden" id = "HUDContainer" >
+    <Image class="HUDBackground" src="s2r://panorama/images/events/crownfall/fight/hud/hud_background_png.vtex" scaling="stretch-to-fit-preserve-aspect" />
+    <Panel class="RedGlow Left" />
+    <Panel class="RedGlow Right" />
+    <Panel class="HUDHeroContainer Left">
+      <Panel class="PortraitAndSheildContainer">
+      
+        <Panel class="HeroPortraitContainer">
+              <DOTAHeroImage id="HeroPortraitLeft" 
+            class="HeroPortrait" 
+            heroimagestyle="landscape"
+            scaling="stretch-to-fit-preserve-aspect" />
+        </Panel>
+        <Panel class="ShieldContainer">
+          <Panel class="ShieldIconContainer">
+            <Image class="ShieldIcon" id = "leftShieldIcon" src="s2r://panorama/images/primary_attribute_icons/primary_attribute_icon_agility_psd.vtex" texturewidth="48px" textureheight="48px" scaling="stretch-to-fit-preserve-aspect" />
+            <Image class="ShieldIconBroken" src="s2r://panorama/images/events/crownfall/fight/hud/shield_icon_broken_png.vtex" texturewidth="48px" textureheight="48px" scaling="stretch-to-fit-preserve-aspect" />
+          </Panel>
+          <Panel class="ShieldBarContainer">
+            <Panel class="ShieldBarBackground" />
+            <Panel class="ShieldBar" id="ShieldBarLeft" />
+          </Panel>
+        </Panel>
+        <Panel class="ScoreContainer">
+          <Label text="#DOTA_FightingGame_HUD_Score" class="ScoreLabel LabelMedium" />
+          <Panel class="LeftRightFlow">
+            <Label text="分数" class="ScoreValue TitleLarge" />
+            <Label text="啊啊啊啊啊啊啊啊啊啊" class="ScorePTS TitleSmall" />
+          </Panel>
+        </Panel>
+      </Panel>
+      <Panel class="HPBarInfoContainer">
+        <Panel id="LeftHeroStatusContainer">
+          <Panel id="HPBarBG" />
+          <Panel id="LeftHPBarMID" />
+          <Panel id="LeftHPBarTextContainer" >
+            <Label id="LeftHPBarText" text="3352" /> 
+          </Panel>
+          <Panel id="LeftHPBarFG" class="normal_hp_bar">
+
+            <DOTAScenePanel class="HPParticles" map="scenes/hud/healthbarburner" renderdeferred="false" rendershadows="false" camera="camera_1" hittest="false" particleonly="true" />
+          </Panel>
+        </Panel>
+        <Panel class="HeroNameContainer">
+          <Label id="LeftHeroName" text="左边的英雄名" />
+          <Label id="LeftHeroName1" text="命石名" />  
+          <!-- 添加技能图标容器 -->
+          <!-- <Panel id="LeftHeroAbilities" class="AbilitiesContainer">
+
+          </Panel> -->
+          <Panel class="FillWidth" />
+          <Panel id="LeftRoundPips">
+            <Panel id="RoundPip1" class="RoundPipIcon" />
+            <Panel id="RoundPip2" class="RoundPipIcon" />
+          </Panel>
+        </Panel>
+        <Panel id="SingleUseActionContainerLeft" class="SingleUseActionContainer">
+          <Image id="SingleUseActionImage" class="AbilityImage" scaling="stretch-to-fit-preserve-aspect" />
+        </Panel>
+      </Panel>
+    </Panel>
+    <Panel id="CountdownContainer">
+      <Image class="TimerShadow" src="s2r://panorama/images/events/crownfall/fight/hud/timer_shadow_png.vtex" scaling="stretch-to-fit-preserve-aspect" />
+      <Image class="TimerBackgroundImage" src="s2r://panorama/images/events/crownfall/fight/hud/timer_background_image_png.vtex" scaling="stretch-to-fit-preserve-aspect" />
+      <DOTAParticleScenePanel class="TimerParticles" hittest="false" particleName="particles/econ/courier/courier_hermit_crab/hermit_crab_lotus_ambient_smoke.vpcf" renderdeferred="true" particleonly="false" startActive="true" cameraOrigin="50 0 0" lookAt="0 0 40" fov="60" />
+      <Image class="TimerBorder" src="s2r://panorama/images/events/crownfall/fight/hud/timer_border_png.vtex" scaling="stretch-to-fit-preserve-aspect" />
+      <Panel class="RoundTimerContainer">
+        <Label id="RoundCounter" class="LabelLarge" text="1技能0CD" />
+        <Label id="TimeCountdown" text="60" />
+      </Panel>
+    </Panel>
+    <Panel class="HUDHeroContainer Right">
+      <Panel class="PortraitAndSheildContainer">
+        <Panel class="HeroPortraitContainer">
+              <DOTAHeroImage id="HeroPortraitRight" 
+            class="HeroPortrait" 
+            heroimagestyle="landscape"
+            scaling="stretch-to-fit-preserve-aspect" />
+        </Panel>
+        <Panel class="ShieldContainer">
+          <Panel class="ShieldIconContainer">
+
+            <Image class="ShieldIcon" id = "rightShieldIcon" src="s2r://panorama/images/primary_attribute_icons/primary_attribute_icon_agility_psd.vtex" texturewidth="48px" textureheight="48px" scaling="stretch-to-fit-preserve-aspect" />
+
+            <Image class="ShieldIconBroken" src="s2r://panorama/images/events/crownfall/fight/hud/shield_icon_broken_png.vtex" texturewidth="48px" textureheight="48px" scaling="stretch-to-fit-preserve-aspect" />
+          </Panel>
+          <Panel class="ShieldBarContainer">
+            <Panel class="ShieldBarBackground" />
+            <Panel class="ShieldBar" id="ShieldBarRight" />
+          </Panel>
+        </Panel>
+      </Panel>
+      <Panel class="HPBarInfoContainer">
+        <Panel id="RightHeroStatusContainer">
+          <Panel id="HPBarBG" />
+          <Panel id="RightHPBarTextContainer" >
+            <Label id="RightHPBarText" text="3352" /> 
+          </Panel>
+          <Panel id="RightHPBarMID" />
+          <Panel id="RightHPBarFG" class="normal_hp_bar">
+            <DOTAScenePanel class="HPParticles" map="scenes/hud/healthbarburner" renderdeferred="false" rendershadows="false" camera="camera_1" hittest="false" particleonly="true" />
+          </Panel>
+        </Panel>
+        <Panel class="HeroNameContainer">
+          <Label id="RightHeroName" text="右边的英雄名" />
+          <Label id="RightHeroName1" text="命石名" />  
+          <!-- <Panel id="RightHeroAbilities" class="AbilitiesContainer">
+          </Panel> -->
+          <Panel class="FillWidth" />
+          <Panel id="RoundPips">
+            <Panel id="RoundPip1" class="RoundPipIcon" />
+            <Panel id="RoundPip2" class="RoundPipIcon" />
+          </Panel>
+        </Panel>
+        <Panel id="SingleUseActionContainerRight" class="SingleUseActionContainer">
+          <Image id="SingleUseActionImage" class="AbilityImage" scaling="stretch-to-fit-preserve-aspect" />
+        </Panel>
+      </Panel>
+    </Panel>
+  </Panel>
+
+
+
+
+<!-- 
+<DOTAScenePanel id="green_hero"  map="background" light="main_light" camera="main_camera" particleonly="false"/>
+              <DOTAScenePanel class="leftHeroScene" id="leftHeroScene" map="maps/ui/dota_hud_loadout_wk" particleonly="false" unit="npc_dota_hero_juggernaut"/> -->
+  <!-- <Panel id="CustomTooltipContainer" class = "CustomTooltipContainer"/>
+
+    <Panel class="MultiAbilityTooltipsExample">
+        <Panel id="TooltipContainer" />
+        <Panel class="ButtonContainer">
+            <Button id="AddTooltipButton" class="ButtonBevel" onactivate="AddTooltip()">
+                <Label text="添加技能介绍" />
+            </Button>
+        </Panel>
+    </Panel> -->
+
+      <!-- <DOTAScenePanel class="scene" id="scene" light="main_light" camera="main_camera" map="background"  particleonly="false"/> -->
+  <!-- <DOTAScenePanel class="scene" id="scene" map="maps/ui/dota_hud_loadout_2022" particleonly="false" unit="npc_dota_hero_marci"/>
+
+  <Panel id="Greenpanel" class = "Greenpanel"/>  -->
+
+
+
+
+       <!-- <DOTAParticleScenePanel class="CurtainsSmokeFX" hittest="false" map="scenes/dota_ui_particle_scene_panel_empty" camera="default_camera"  particleonly="true"/>  -->
+
+      <!-- <DOTAScenePanel class="CurtainsTopRightGodRays" hittest="false" map="scenes/loadout_preview_rays" camera="camera_1" particleonly="true"/>
+      <DOTAScenePanel class="CurtainsSpotlightParticles" hittest= "false" map="scenes/international_2024/international_2024_dashboard_background" camera="camera_dashboard" particleonly="true"/>
+            <Image class="CurtainsBG" src="s2r://panorama/images/compendium/international2024/circus_bg_png.vtex" defaultsrc="" scaling="contain" />
+      <Image class="CurtainsAegis2024" src="s2r://panorama/images/compendium/international2024/logos/aegis2024_large_png.vtex"  scaling="contain"/> -->
+
+
+
+     <!--    <Image class="BackgroundFloor" src="s2r://panorama/images/compendium/international2024/background_floor_png.vtex" defaultsrc="" scaling="contain" />
+ -->
+      <Panel class="HeroVersusContainer hidden" id="HeroVersusContainer" hittest="false">
+        <!-- 顶部黑边 -->
+        <Panel class="HeroVersusCinematicBar HeroVersusTopBar hidden" id="HeroVersusTopBar"/>
+
+        <Panel class="HeroVersusBackground hidden" id="HeroVersusBackground">
+          <DOTAScenePanel class="CurtainsTopRightGodRays" hittest="false" map="scenes/loadout_preview_rays" camera="camera_1" particleonly="true"/>
+          <DOTAScenePanel class="CurtainsSpotlightParticles" hittest= "false" map="scenes/international_2024/international_2024_dashboard_background" camera="camera_dashboard" particleonly="true"/>
+
+        </Panel>
+
+
+
+        <Panel class="HeroPreview1 Left_Hero hidden" id="Left_Hero">
+        
+            <Image class="CurtainsLeft" httest ="false" src="s2r://panorama/images/compendium/international2024/rewards/curtain_png.vtex"  />
+          <Panel class="leftHero" id="leftHero">
+          
+            <DOTAScenePanel class="leftHeroScene" id="leftHeroScene" map="maps/ui/sphere_test" particleonly="false" unit="npc_dota_hero_juggernaut"/>
+
+          </Panel>
+        </Panel>
+        
+        <Panel class="LeftHeroNameContainer hidden" id="LeftHeroNameContainer">
+          <Panel class="LeftTiltClass" id="LeftTiltClass">
+
+            <Label class="LeftHeroNameEnglish" id = "LeftHeroNameEnglish" text="Phantom Lancer"/>
+
+            <Panel class="LeftChineseNameWrapper">
+              <Label class="LeftHeroNameChinese" id="LeftHeroNameChinese" text="主宰"/>
+              <Label class="LeftHeroStoneName" id="LeftHeroStoneName" text="剑圣"/>
+            </Panel>
+            
+          </Panel>
+        </Panel>
+        
+        <Panel class="VersusSymbol hidden" id="VersusSymbol">
+
+          <!-- <Label style="z-index: 100;" text="VS"/> -->
+          <Image class="CurtainsAegis2024" src="s2r://panorama/images/compendium/international2024/logos/aegis2024_large_png.vtex"  scaling="contain"/>
+                    <DOTAScenePanel class="HeroParticles" map="backgrounds/accept_popup_test" camera="shot_camera" particleonly="true" />
+          
+        </Panel>
+        
+        <Panel class="HeroPreview1 Right_Hero hidden" id="Right_Hero">
+                            <Image class="CurtainsRight" httest ="false" src="s2r://panorama/images/compendium/international2024/rewards/curtain_png.vtex"  />
+          <Panel class="rightHero" id="rightHero">
+            <DOTAScenePanel class="rightHeroScene" id="rightHeroScene" map="maps/ui/dota_hud_loadout_2022" particleonly="false" unit="npc_dota_hero_marci"/>
+
+          </Panel>
+        </Panel>
+
+        <Panel class="RightHeroNameContainer hidden" id="RightHeroNameContainer">
+          <Panel class="RightTiltClass" id="RightTiltClass">
+            <Label class="RightHeroNameEnglish" id="RightHeroNameEnglish" text="MARCI"/>
+            <Panel class="RightChineseNameWrapper">
+              <Label class="RightHeroStoneName" id="RightHeroStoneName" text="唯一挚友"/>
+              <Label class="RightHeroNameChinese" id="RightHeroNameChinese" text="玛西"/>
+            </Panel>
+          </Panel>
+        </Panel>
+
+        <!-- 底部黑边 -->
+        <Panel class="HeroVersusCinematicBar HeroVersusBottomBar hidden" id="HeroVersusBottomBar"/>
+      </Panel>
+
+
+      <Panel id="MainButtonContainer" class="MainButtonContainer">
+          <Button id="ScoreButton1" class="ScoreButton">
+          <Label text="积分版1" />
+          </Button>
+          <Button id="ScoreButton2" class="ScoreButton">
+          <Label text="积分版2" />
+          </Button>
+          <Button id="ModeMenuButton" class="ScoreButton">
+          <Label text="开始游戏" />
+          </Button>
+
+          <Button id="HideDefaultButton" class="ScoreButton">
+              <Label id="HideDefaultButtonLabel" text="隐藏主面板" />
+          </Button>
+
+          <Button id="HideMenuButton" class="ScoreButton">
+              <Label id="HideMenuButtonLabel" text="隐藏菜单" />
+          </Button>
+
+          <Button id="ToggleAnimationButton" class="ScoreButton">
+              <Label id="ToggleAnimationButtonLabel" text="开启入场动画" />
+          </Button>
+          <Button id="CameraControlButton" class="ScoreButton">
+              <Label text="相机控制" />
+          </Button>
+
+
+      </Panel>
+
+
+      <!-- 相机控制面板 -->
+      <Panel id="CameraControlPanel" class="CameraControlPanel hidden">
+          <Panel class="CameraControlHeader">
+              <Label text="相机控制" />
+              <Button id="CloseCameraPanel" class="CloseButton">
+
+              </Button>
+          </Panel>
+
+          <!-- 在 CameraControlHeader 和第一个 ControlSection 之间添加 -->
+          <Panel class="ControlSection">
+              <Label text="基础设置" />
+              <Panel class="BasicSettingsControls">
+                  <!-- 默认距离控制 -->
+                  <Panel class="DefaultDistanceRow">
+                      <Label text="默认视距:" />
+                      <TextEntry id="DefaultDistanceValue" text="1600" />
+                      <Button id="ApplyDistanceButton" class="DotaCamSettings_ConfirmButton">
+                          <Label text="确定" />
+                      </Button>
+                      <Label class="RangeHintLabel" text="(100-6000)" />
+                  </Panel>
+                  
+                  <!-- 迷雾控制 -->
+                  <Panel class="FogControlRow">
+                      <Label text="迷雾显示:" />
+                      <ToggleButton id="FogToggle" class="FogToggle" selected="true">
+                          <Label id="FogToggleLabel"  text="开启" />
+                      </ToggleButton>
+                  </Panel>
+              </Panel>
+          </Panel>
+
+          <Panel class="CameraControlContent">
+            <!-- 位置控制 -->
+            <Panel class="ControlSection">
+                <Label text="位置控制" />
+                <Panel class="PositionControls">
+                    <Panel class="CoordControl">
+                        <Label text="X:" />
+                        <TextEntry id="CameraXValue" text="0" />
+                        <Panel class="ArrowButtons">
+                            <Button id="XUp" class="ArrowButton">
+                                <Label text="↑" />
+                            </Button>
+                            <Button id="XDown" class="ArrowButton">
+                                <Label text="↓" />
+                            </Button>
+                        </Panel>
+                    </Panel>
+                    <Panel class="CoordControl">
+                        <Label text="Y:" />
+                        <TextEntry id="CameraYValue" text="0" />
+                        <Panel class="ArrowButtons">
+                            <Button id="YUp" class="ArrowButton">
+                                <Label text="↑" />
+                            </Button>
+                            <Button id="YDown" class="ArrowButton">
+                                <Label text="↓" />
+                            </Button>
+                        </Panel>
+                    </Panel>
+                    <Panel class="CoordControl">
+                        <Label text="Z:" />
+                        <TextEntry id="CameraZValue" text="1200" />
+                        <Panel class="ArrowButtons">
+                            <Button id="ZUp" class="ArrowButton">
+                                <Label text="↑" />
+                            </Button>
+                            <Button id="ZDown" class="ArrowButton">
+                                <Label text="↓" />
+                            </Button>
+                        </Panel>
+                    </Panel>
+                </Panel>
+            </Panel>
+
+              <!-- 角度控制 -->
+              <!-- 角度控制和距离控制 -->
+              <Panel class="ControlSection">
+                  <Panel class="SliderRow">
+                      <Panel class="SliderContainer">
+                          <Label text="俯仰角" />
+                          <Slider id="CameraPitch" min="0" max="1" value="1" />
+                          <TextEntry id="CameraPitchValue" text="0" />
+                      </Panel>
+                      <Panel class="SliderContainer">
+                          <Label text="水平角" />
+                          <Slider id="CameraYaw" min="0" max="1" value="0" />
+                          <TextEntry id="CameraYawValue" text="100" />
+                      </Panel>
+                      <Panel class="SliderContainer">
+                          <Label text="距离" />
+                          <Slider id="CameraDistance" min="0" max="3000" value="1200" />
+                          <TextEntry id="CameraDistanceValue" text="1200" />
+                      </Panel>
+                      <Panel class="SliderContainer">
+                          <Label text="高度偏移" />
+                          <Slider id="CameraHeightOffset" class="DotaCamHeight_Slider" min="0" max="1" value="0.5" />
+                          <TextEntry id="CameraHeightOffsetValue" class="DotaCamHeight_Value" text="0" />
+                      </Panel>
+                  </Panel>
+              </Panel>
+
+
+
+              <!-- 预设位置按钮 -->
+              <Panel class="ControlSection">
+                  <Label text="预设位置" />
+                  <Panel class="PresetButtons">
+                      <Button id="PresetTop" class="PresetButton">
+                          <Label text="俯视" />
+                      </Button>
+                      <Button id="PresetSide" class="PresetButton">
+                          <Label text="侧视" />
+                      </Button>
+                      <Button id="PresetDefault" class="PresetButton">
+                          <Label text="默认" />
+                      </Button>
+                  </Panel>
+              </Panel>
+            <!-- 相机动作记录 -->
+            <Panel class="ControlSection">
+                <Label text="相机动作" />
+                <Panel class="CameraActionControls">
+                    <Panel class="ActionGroup">
+                        <Panel class="ActionInputRow">
+                            <TextEntry id="TransitionTime1" class="TimeInput" text="1.0" />
+                            <Label text="秒" />
+                            <Button id="RecordPosition1" class="ActionButton">
+                                <Label text="记录位置1" />
+                            </Button>
+                            <Button id="PlayPosition1" class="ActionButton">
+                                <Label text="播放位置1(4)" />
+                            </Button>
+                        </Panel>
+                        <Panel class="ActionInputRow">
+                            <TextEntry id="TransitionTime2" class="TimeInput" text="1.0" />
+                            <Label text="秒" />
+                            <Button id="RecordPosition2" class="ActionButton">
+                                <Label text="记录位置2" />
+                            </Button>
+                            <Button id="PlayPosition2" class="ActionButton">
+                                <Label text="播放位置2(5)" />
+                            </Button>
+                        </Panel>
+                        <Panel class="ActionInputRow">
+                            <TextEntry id="TransitionTime3" class="TimeInput" text="1.0" />
+                            <Label text="秒" />
+                            <Button id="RecordPosition3" class="ActionButton">
+                                <Label text="记录位置3" />
+                            </Button>
+                            <Button id="PlayPosition3" class="ActionButton">
+                                <Label text="播放位置3(6)" />
+                            </Button>
+                        </Panel>
+                        <Panel class="ActionInputRow">
+                            <TextEntry id="TransitionTime4" class="TimeInput" text="1.0" />
+                            <Label text="秒" />
+                            <Button id="RecordPosition4" class="ActionButton">
+                                <Label text="记录位置4" />
+                            </Button>
+                            <Button id="PlayPosition4" class="ActionButton">
+                                <Label text="播放位置4(7)" />
+                            </Button>
+                        </Panel>
+                        <Panel class="ActionInputRow">
+                            <TextEntry id="TransitionTime5" class="TimeInput" text="1.0" />
+                            <Label text="秒" />
+                            <Button id="RecordPosition5" class="ActionButton">
+                                <Label text="记录位置5" />
+                            </Button>
+                            <Button id="PlayPosition5" class="ActionButton">
+                                <Label text="播放位置5(8)" />
+                            </Button>
+                        </Panel>
+                        <Panel class="ActionInputRow">
+                            <TextEntry id="TransitionTime6" class="TimeInput" text="1.0" />
+                            <Label text="秒" />
+                            <Button id="RecordPosition6" class="ActionButton">
+                                <Label text="记录位置6" />
+                            </Button>
+                            <Button id="PlayPosition6" class="ActionButton">
+                                <Label text="播放位置6(9)" />
+                            </Button>
+                        </Panel>
+                    </Panel>
+                </Panel>
+            </Panel>
+
+          </Panel>
+      </Panel>
+
+      <!-- 积分版1 -->
+      <Panel class="BattleScorePanel1" id="BattleScorePanel1" />
+
+
+      <!-- 积分版2 -->
+      <Panel class="BattleScorePanel2" id="BattleScorePanel2" style="visibility: collapse;">
+      <Label id="BattleScorePanel2TitleLabel" text="积分板" />
+        <Panel class="BattleScorePanel2TopRow">
+          
+        </Panel>
+        <Panel class="BattleScorePanel2HeadersRow">
+          <Label class="BattleScorePanel2HeroNameLabel" text="英雄名" />
+          <Label class="BattleScorePanel2DamageLabel" text="造成伤害" />
+        </Panel>
+        <Panel id="BattleScorePanel2HeroesList" class="BattleScorePanel2HeroesList">
+          <Label class="BattleScorePanel2HeroNameLabel" text="123" />
+          <Label class="BattleScorePanel2DamageLabel" text="123" />
+        </Panel>
+      </Panel>
+
+
+      <!-- 模式主菜单 -->
+
+    <Panel class="GameModeMainPanel" id="GameModeMainPanel" style="visibility: collapse;">
+      <Panel class="GameSetupPanel" id="GameSetupPanel">
+        <Panel class="GameSetupPanelTopRow">
+          <Label class="GameSetupPanelTitleLabel" text="游戏设置" />
+        </Panel>
+
+        <Panel class="GameSetupPanelSettingsRow">
+          <Label class="GameSetupPanelSettingLabel" text="游戏模式" />
+          <Label id="CurrentGameModeLabel" class="GameModeLabel" text="未选择" />
+          <Button id="ModifyGameModeButton" class="ModifyButton">
+            <Label text="修改" />
+          </Button>
+        </Panel>
+
+    <!-- 自己的英雄设置 -->
+    <Panel class="GameSetupPanelSettingsRow2" id="SelfHeroRow" style="visibility: collapse;">
+      <Panel class="HeroSelectionMainRow">
+        <Label class="GameSetupPanelSettingLabel1" text="英雄（自己）" />
+        <Panel class="HeroSelectionRightContent">
+          <Panel class="HeroLabelContainer">
+            <Label id="SelfHeroLabel" class="HeroLabel" text="未选择英雄" />
+            <Button id="ModifySelfHeroButton" class="ModifyButton">
+              <Label text="修改" />
+            </Button>
+          </Panel>
+        </Panel>
+      </Panel>
+      <Panel id="SelfHeroRow3" class="GameSetupPanelSettingsRow3 GameSetupPanelhidden">
+        <Panel class="HeroSelectionSubRow">
+          <Panel id="SelfHeroItemPanel" class="HeroItemPanel">
+            <!-- 物品条目将动态添加到这里 -->
+          </Panel>
+        </Panel>
+        <Panel class="HeroControlContainer">
+          <Button id="AddSelfItemButton" class="AddItemButton">
+            <Label text="添加物品" />
+          </Button>
+          <ToggleButton id="SelfHeroAIToggle" class="HeroAIToggle">
+            <Label class="HeroAIToggleLabel" text="开启AI" />
+          </ToggleButton>
+        </Panel>
+      </Panel>
+
+      <Panel id="SelfHeroRow4" class="GameSetupPanelSettingsRow4 GameSetupPanelhidden">
+        <Panel class="StrategySelectionRow">
+          <Label class="StrategyLabel" text="整体策略(AI):" />
+          <Label id="SelfOverallStrategyLabel" class="StrategyValue" text="未选择" />
+          <Button id="ModifySelfOverallStrategyButton" class="ModifyButton">
+            <Label text="修改" />
+          </Button>
+        </Panel>
+        <Panel class="StrategySelectionRow">
+          <Label class="StrategyLabel" text="英雄策略(AI):" />
+          <Label id="SelfHeroStrategyLabel" class="StrategyValue" text="未选择" />
+          <Button id="ModifySelfHeroStrategyButton" class="ModifyButton">
+            <Label text="修改" />
+          </Button>
+        </Panel>
+      </Panel>
+    </Panel>
+
+
+
+    <!-- 对手的英雄设置 -->
+    <Panel class="GameSetupPanelSettingsRow2" id="OpponentHeroRow" style="visibility: collapse;">
+      <Panel class="HeroSelectionMainRow">
+        <Label class="GameSetupPanelSettingLabel1" text="英雄（对手）" />
+        <Panel class="HeroSelectionRightContent">
+          <Panel class="HeroLabelContainer">
+            <Label id="OpponentHeroLabel" class="HeroLabel" text="未选择英雄" />
+            <Button id="ModifyOpponentHeroButton" class="ModifyButton">
+              <Label text="修改" />
+            </Button>
+          </Panel>
+        </Panel>
+      </Panel>
+      <Panel id="OpponentHeroRow3" class="GameSetupPanelSettingsRow3 GameSetupPanelhidden">
+        <Panel class="HeroSelectionSubRow">
+          <Panel id="OpponentHeroItemPanel" class="HeroItemPanel">
+            <!-- 物品条目将动态添加到这里 -->
+          </Panel>
+        </Panel>
+        <Panel class="HeroControlContainer">
+          <Button id="AddOpponentItemButton" class="AddItemButton">
+            <Label text="添加物品" />
+          </Button>
+          <ToggleButton id="OpponentHeroAIToggle" class="HeroAIToggle" selected="true">
+            <Label class="HeroAIToggleLabel" text="开启AI" />
+          </ToggleButton>
+        </Panel>
+      </Panel>
+      <Panel id="OpponentHeroRow4" class="GameSetupPanelSettingsRow4 GameSetupPanelhidden">
+        <Panel class="StrategySelectionRow">
+          <Label class="StrategyLabel" text="整体策略(AI):" />
+          <Label id="OpponentOverallStrategyLabel" class="StrategyValue" text="未选择" />
+          <Button id="ModifyOpponentOverallStrategyButton" class="ModifyButton">
+            <Label text="修改" />
+          </Button>
+        </Panel>
+        <Panel class="StrategySelectionRow">
+          <Label class="StrategyLabel" text="英雄策略(AI):" />
+          <Label id="OpponentHeroStrategyLabel" class="StrategyValue" text="未选择" />
+          <Button id="ModifyOpponentHeroStrategyButton" class="ModifyButton">
+            <Label text="修改" />
+          </Button>
+        </Panel>
+      </Panel>
+    </Panel>
+
+
+        <Panel class="ButtonRow">
+          <Button id="CancelButton" class="CancelButton">
+            <Label text="取消" />
+          </Button>
+          <Button id="ChangeHeroButton" class="ChangeHeroButton">
+            <Label text="开始游戏" />
+          </Button>
+        </Panel>
+      </Panel>
+      <!-- 英雄选择面板 -->
+      <Panel class="fc-heropick minimized" id="FcHeroPickPanel">
+        <DOTAUIHeroPicker id="HeroPicker" facet-select-popup="true" />
+        <Panel class="fc-ability-add" id="AbilityAdd" />
+        <Panel class="fc-ability-existing" id="AbilityExisting" />
+      </Panel>
+            <!-- 添加新的物品选择面板 -->
+      <Panel id="ItemSelectionDialog" class="ItemSelectionDialog" style="visibility: collapse;">
+          <Panel class="ItemSelectionContent">
+              <Label text="选择物品" class="ItemSelectionTitle" />
+              <Panel id="ItemTabs" class="ItemTabs">
+                  <Button id="NormalItemsTab" class="TabButton">
+                      <Label text="普通物品" />
+                  </Button>
+                  <Button id="SpecialItemsTab" class="TabButton">
+                      <Label text="特殊物品" />
+                  </Button>
+                  <Button id="NeutralItemsTab" class="TabButton">
+                      <Label text="中立物品" />
+                  </Button>
+                  <Button id="CustomItemsTab" class="TabButton">
+                      <Label text="自定义物品" />
+                  </Button>
+              </Panel>
+              <Panel id="ItemGridContainer" class="ItemGridContainer">
+
+                  <Panel id="NormalItemsGrid" class="ItemGrid">
+                      <!-- 普通物品将动态添加到这里 -->
+                  </Panel>
+                  <Panel id="SpecialItemsGrid" class="ItemGrid">
+                      <!-- 特殊物品将动态添加到这里 -->
+                  </Panel>
+                  <Panel id="NeutralItemsGrid" class="ItemGrid">
+                      <!-- 中立物品将动态添加到这里 -->
+                  </Panel>
+                  <Panel id="CustomItemsGrid" class="ItemGrid">
+                      <!-- 自定义物品将动态添加到这里 -->
+                  </Panel>
+              </Panel>
+              <Panel class="ItemButtonContainer">
+                  <Button id="ClearAllItemsButton" class="ItemClearButton">
+                    <Label text="清除所有" />
+                </Button>
+                  <Button id="ConfirmItemSelectionButton" class="ItemConfirmButton">
+                      <Label text="确认选择" />
+                  </Button>
+                  <Button id="CancelItemSelectionButton" class="ItemCancelButton">
+                      <Label text="取消" />
+                  </Button>
+              </Panel>
+          </Panel>
+      </Panel>
+
+
+    <Panel id="StrategySelectionPanel" class="StrategySelectionPanel GameSetupPanelhidden" hittest="false">
+      <Label class="StrategySelectionTitle" text="选择策略" />
+      <Panel id="StrategyList" class="StrategyList" />
+      <Button id="ConfirmStrategySelection" class="ConfirmButton">
+        <Label text="确认选择" />
+      </Button>
+    </Panel>
+
+      <!-- 选择模式 -->
+      <Panel id="GameModeSelectionPanel" class="GameModeSelectionPanel">
+        <Label text="选择游戏模式" />
+      </Panel>
+    </Panel>
+
+
+      <!-- 倒计时控件 -->
+      <Panel id="BattleStartCountdownContainer" hittest="false">
+        <Label id="CountdownText" class="CountdownText" text="" />
+        <Panel id="blurOverlay" class="BlurOverlayStyle" hittest="false"/>
+      </Panel>
+
+
+    <Panel class="LeftHeroAttackPanel">
+        <Panel id="MessageContainer">
+            <!-- 预先创建10个消息面板 -->
+            <Label class="AttackMessage" id="Message0" text="" />
+            <Label class="AttackMessage" id="Message1" text="" />
+            <Label class="AttackMessage" id="Message2" text="" />
+            <Label class="AttackMessage" id="Message3" text="" />
+            <Label class="AttackMessage" id="Message4" text="" />
+            <Label class="AttackMessage" id="Message5" text="" />
+            <Label class="AttackMessage" id="Message6" text="" />
+            <Label class="AttackMessage" id="Message7" text="" />
+            <Label class="AttackMessage" id="Message8" text="" />
+            <Label class="AttackMessage" id="Message9" text="" />
+        </Panel>
+    </Panel>
+    <Panel class="RightHeroAttackPanel">
+    <Panel id="RightMessageContainer">
+        <!-- 预先创建10个消息面板 -->
+        <Label class="AttackMessage" id="RightMessage0" text="" />
+        <Label class="AttackMessage" id="RightMessage1" text="" />
+        <Label class="AttackMessage" id="RightMessage2" text="" />
+        <Label class="AttackMessage" id="RightMessage3" text="" />
+        <Label class="AttackMessage" id="RightMessage4" text="" />
+        <Label class="AttackMessage" id="RightMessage5" text="" />
+        <Label class="AttackMessage" id="RightMessage6" text="" />
+        <Label class="AttackMessage" id="RightMessage7" text="" />
+        <Label class="AttackMessage" id="RightMessage8" text="" />
+        <Label class="AttackMessage" id="RightMessage9" text="" />
+    </Panel>
+</Panel>
+    <Panel id="hero_chaos_TeamPanelsContainer" class="hero_chaos_TeamPanelsContainer hero_chaos_hidden">
+    </Panel>
+    
+<Panel class="hero_chaos_score_root hero_chaos_score_root_hidden" id="hero_chaos_score_root" hittest="false">
+</Panel>
+
+<Panel class="hero_chaos_killboard_root" id ="hero_chaos_killboard_root">
+    <Panel class="hero_chaos_killboard_feed" id = "hero_chaos_killboard_feed">
+        <!-- <Panel class="hero_chaos_killboard_item">
+            <DOTAHeroImage class="hero_chaos_killboard_hero_icon" heroname="npc_dota_hero_axe" heroimagestyle="icon"/>
+            <Label class="hero_chaos_killboard_hero_name hero_chaos_killboard_hero_name_str" text="巨斧" />
+            <Label class="hero_chaos_killboard_kill_text" text="击杀了" />
+            <DOTAHeroImage class="hero_chaos_killboard_hero_icon" heroname="npc_dota_hero_lion" heroimagestyle="icon"/>
+            <Label class="hero_chaos_killboard_hero_name hero_chaos_killboard_hero_name_int" text="莱恩" />
+        </Panel> -->
+    </Panel>
+</Panel>
+
+  </Panel>
+
+
+</root>

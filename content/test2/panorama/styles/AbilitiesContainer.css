@@ -1,0 +1,125 @@
+.AbilitiesContainer {
+    width: 100%;
+    height: 100%;
+    flow-children: none;
+
+}
+
+.AbilitiesContainerhidden {
+    visibility: collapse;
+}
+
+.HeroAbilitiesPanel {
+    flow-children: right;
+    horizontal-align: left;
+    vertical-align: top;
+    /*border: 2px solid #00ff0033;  /* 默认边框颜色 */
+    transform: rotateX(0deg);
+}
+
+/* 可以根据需要为不同英雄设置不同的边框颜色 */
+.HeroAbilitiesPanel.TeamRadiant {
+    border: 2px solid #00ff0033;  /* 天辉边框 */
+}
+
+.HeroAbilitiesPanel.TeamDire {
+    border: 2px solid #ff000033;  /* 夜魇边框 */
+}
+
+.HeroAbilitiesPanel.StrengthHero {
+    border: 2px solid #F3303033;  /* 力量红色 */
+}
+
+.HeroAbilitiesPanel.AgilityHero {
+    border: 2px solid #1BC05B33;  /* 敏捷绿色 */
+}
+
+.HeroAbilitiesPanel.IntelligenceHero {
+    border: 2px solid #3D8DFF33;  /* 智力蓝色 */
+}
+
+.HeroAbilitiesPanel.UniversalHero {
+    border: 2px solid #BF47FF33;  /* 全才紫色 */
+}
+
+.AbilityIconContainer {
+    width: 20px;
+    height: 20px;
+    border: 1px solid; /* 使用border属性来设置完整的边框 */
+    background-color: gradient( linear, 0% 0%, 0% 100%, from( #252525 ), to( #0f0f0f ) );
+    transition-property: brightness;
+    transition-duration: 0.2s;
+}
+
+.AbilityIcon {
+    width: 100%;
+    height: 100%;
+    saturation: 1;
+    brightness: 1;
+    transition-property: brightness, saturation;
+    transition-duration: 0.2s;
+}
+
+.AbilityCooldown {
+    width: 100%;
+    height: 100%;
+    background-color: gradient( linear, 0% 0%, 0% 100%, from( #00000099 ), to( #000000cc ) );
+    visibility: collapse;
+}
+
+.AbilityChargeCounter {
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: bold;
+    text-align: right;
+    vertical-align: bottom;
+    horizontal-align: right;
+    text-shadow: 1px 1px 2px 2.0 #000000;
+    margin-right: 2px;
+    margin-bottom: 1px;
+    z-index: 2;
+}
+
+.AbilityDisabled {
+    width: 100%;
+    height: 100%;
+    background-color: gradient( linear, 0% 0%, 0% 100%, from( #00000099 ), to( #000000cc ) );
+    visibility: collapse;
+}
+
+.AbilityIcon.Disabled {
+    saturation: 0.3;
+    brightness: 0.3;
+}
+
+.AbilityCooldownText {
+    color: white;
+    font-size: 8px;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: center;
+    horizontal-align: center;
+    text-shadow: 0px 0px 6px 3.0 #000000;
+    text-overflow: clip;
+    overflow: noclip;
+    white-space: nowrap;
+    width: fit-children;
+}
+
+.AbilityNoMana {
+    width: 100%;
+    height: 100%;
+    background-color: gradient( linear, 0% 0%, 0% 100%, from( #2222ff44 ), to( #2222ff88 ) );
+    visibility: collapse;
+}
+
+.PassiveAbility {
+    opacity: 1;
+    border: 1px solid #666666;
+}
+
+.PassiveAbility .AbilityIcon {
+    saturation: 1;
+    brightness: 1;
+}
+

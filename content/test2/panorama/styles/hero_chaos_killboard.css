@@ -1,0 +1,95 @@
+.hero_chaos_killboard_root {
+    width: fit-children;
+    height: fit-children;
+    horizontal-align: right;
+    margin-right: 20px;
+    margin-top: 20px;
+    flow-children: down;
+}
+
+.hero_chaos_killboard_feed {
+    flow-children: down;
+    max-height: 300px;
+    overflow: scroll;
+}
+
+
+.hero_chaos_killboard_item:hover {
+    background-color: gradient( linear, 0% 0%, 100% 0%, from( rgba(0, 0, 0, 0.6) ), to( rgba(0, 0, 0, 0.9) ) );
+}
+
+.hero_chaos_killboard_hero_icon {
+    width: 24px;
+    height: 24px;
+    img-shadow: 0px 0px 2px 2.0 #000000;
+}
+
+.hero_chaos_killboard_item {
+    flow-children: right;
+    align: center center;
+    padding: 3px 6px;
+    margin: 3px 0px;
+    background-color: gradient( linear, 0% 0%, 100% 0%, from( rgba(0, 0, 0, 0.5) ), to( rgba(0, 0, 0, 0.8) ) );
+    border-radius: 2px;
+    box-shadow: 0px 1px 3px #00000066;
+}
+
+.hero_chaos_killboard_hero_name {
+    padding: 2px 2px;
+    font-weight: medium;
+    font-size: 14px;
+    margin: 0px 2px;
+    align: center center;
+}
+
+.hero_chaos_killboard_kill_text {
+    margin: 0px 5px;
+    color: #ffffff;
+    font-size: 14px;
+    align: center center;
+}
+
+.hero_chaos_killboard_hero_name_1 {
+    color: #ff4d4d;
+    text-shadow: 0px 0px 3px #ff4d4d66;
+}
+
+.hero_chaos_killboard_hero_name_2 {
+    color: #00ff7f;
+    text-shadow: 0px 0px 3px #00ff7f66;
+}
+
+.hero_chaos_killboard_hero_name_4 {
+    color: #00bfff;
+    text-shadow: 0px 0px 3px #00bfff66;
+}
+
+.hero_chaos_killboard_hero_name_8 {
+    color: #da70d6;
+    text-shadow: 0px 0px 3px #da70d666;
+}
+
+@keyframes 'fadeIn' {
+    0% {
+        opacity: 0;
+        transform: translateX( 20px );
+    }
+    
+    100% {
+        opacity: 1;
+        transform: translateX( 0px );
+    }
+}
+
+.hero_chaos_killboard_item {
+    animation-name: fadeIn;
+    animation-duration: 0.3s;
+    animation-timing-function: ease-out;
+}
+.hero_chaos_killboard_item_fadeout {
+    opacity: 0;
+    transform: translateX( 20px );
+    transition-property: opacity, transform;
+    transition-duration: 0.3s;
+    transition-timing-function: ease-out;
+}

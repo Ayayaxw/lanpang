@@ -1,0 +1,507 @@
+.HeroVersusContainer {
+    width: 100%;
+    height: 100%;
+    opacity: 1;
+
+
+
+  }
+  
+  .HeroVersusContainer.hidden {
+    opacity: 0;
+  }
+
+
+
+  .HeroVersusContainer.out {
+    opacity: 0;
+
+  }
+
+  .HeroPreview1 {
+    width: 100%;
+    height: 200%;
+    overflow: noclip;
+    z-index: 11;
+  }
+  .leftHeroScene{
+    width: 100%;
+    height: 120%;
+    overflow: noclip;
+    
+    
+  }
+
+  .leftHero {
+    width: 100%;
+    height: 100%;
+    
+  }
+
+  .leftHero.flip{
+    transform: scaleX(-1);
+    overflow: noclip;
+
+  }
+
+  .Left_Hero {
+    overflow: noclip;
+    transform: translateX(-40%)translateY(-60%);
+    horizontal-align: left;
+    vertical-align: top;
+    opacity: 1.0;
+    transition-property: opacity, transform;
+    transition-timing-function: cubic-bezier(0.01, 0.96, 0.32, 0.98);
+    transition-duration:1s;
+    
+
+    opacity-brush: gradient( linear, 90% 0%, 100% 0%, from( #FFFFFFFF ), to( #FFFFFF00 ) );
+
+  }
+
+  .Left_Hero.hidden {
+    opacity: 0.0;
+    transform: translateX(-100%) translateY(-60%);
+    transition-timing-function: cubic-bezier(0.01, 0.96, 0.32, 0.98);
+  }
+
+  .rightHeroScene {
+    width: 100%;
+    height: 100%;
+    overflow: noclip;
+    z-index: 10;
+  }
+
+  .Right_Hero {
+    overflow: noclip;
+    transform: translateX(40%)translateY(-60%);
+    vertical-align: top;
+    horizontal-align: right;
+    opacity: 1.0;
+    transition-property: opacity, transform;
+    transition-timing-function: cubic-bezier(0.01, 0.96, 0.32, 0.98);
+    transition-duration:1s;
+    opacity-brush: gradient( linear, 0% 0%, 10% 0%, from( #FFFFFF00 ), to( #FFFFFFFF ) );
+  }
+
+  .rightHero {
+    width: 100%;
+    height: 120%;
+    z-index: 10;
+    
+  }
+  .rightHero.flip{
+    transform: scaleX(-1);
+    overflow: noclip;
+  }
+
+
+  .Right_Hero.hidden {
+    opacity: 0.0;
+    transform: translateX(100%) translateY(-60%);
+    transition-timing-function: cubic-bezier(0.01, 0.96, 0.32, 0.98);
+  }
+
+  .HeroVersusCinematicBar {
+    width: 100%;
+    height: 15%;  /* 可以调整这个值来改变黑边的高度 */
+    background-color: black;
+
+  }
+
+
+  .HeroVersusTopBar {
+    z-index: 1;  /* 确保黑边在其他元素之上 */
+    vertical-align: top;
+    opacity: 1.0;
+    transition-duration:1s;
+    transform: translateY( 0px);
+    transition-property: opacity, transform;
+    transition-timing-function: cubic-bezier(0.01, 0.96, 0.32, 0.98);
+  }
+
+  .HeroVersusTopBar.hidden {
+    opacity: 0;
+    transform: translateY(-20%);
+    transition-timing-function: cubic-bezier(0.01, 0.96, 0.32, 0.98);
+  }
+  
+  .HeroVersusBottomBar {
+    vertical-align: bottom;
+    opacity: 1.0;
+    transition-duration:1s;
+    transform: translateY( 0px);
+    transition-property: opacity, transform;
+    transition-timing-function: cubic-bezier(0.01, 0.96, 0.32, 0.98);
+    z-index: 9999;
+  }
+
+  .HeroVersusBottomBar.hidden {
+    opacity: 0;
+    transform: translateY(20%);
+    transition-timing-function: cubic-bezier(0.01, 0.96, 0.32, 0.98);
+  }
+
+
+  .VersusSymbol {
+    width: 100%;
+    height: 100%;
+    vertical-align: center;
+    horizontal-align: center;
+    z-index: 1;
+    opacity: 1;
+    transform: translateY(0);
+    transition-duration: 1s;
+    transition-property: opacity, transform;
+    transition-timing-function: cubic-bezier(0.17, 0.89, 0.32, 1.49);
+}
+  
+  .VersusSymbol.hidden {
+    opacity: 0;
+    transition-timing-function: cubic-bezier(0.01, 0.96, 0.32, 0.98);
+    transform: translateY(100px);
+    
+  }
+  
+  .VersusSymbol Label {
+    font-size: 150px;
+    vertical-align: center;
+    horizontal-align: center;
+    font-weight: bold;
+    color: gradient( linear, 0% 0%, 0% 100%, from( #ff3300 ), to( #ffcc00 ) );
+    text-shadow: 3px 3px 4px #000000, 0 0 15px #ff0000, 0 0 30px #ff0000;
+  
+
+}
+
+
+
+
+ 
+  .HeroVersusBackground
+  {
+
+    width: 100%;
+    height: 100%;
+    opacity: 1.0;
+    transition-duration:1s;
+    transition-property: opacity, transform;
+    transition-timing-function: cubic-bezier(0.01, 0.96, 0.32, 0.98);
+    z-index: 100;
+  }
+
+  .HeroVersusBackground.hidden
+  {
+    opacity: 0;
+  }
+
+  .HeroParticles
+  {
+    width:  100%;
+    z-index: -100;
+    height: 100%;
+  }
+
+  .LeftHeroNameEnglish {
+    font-size: 82px;
+    font-weight: bold;
+    color: #ffffff;
+    text-shadow: 2px 2px 4px #000000;
+    text-transform: uppercase;
+    horizontal-align: left;
+    text-decoration: underline;
+  }
+  
+
+
+
+  .RightHeroNameEnglish {
+    font-size: 80px;
+    font-weight: bold;
+    color: #ffffff;
+    text-shadow: 2px 2px 4px #000000;
+    text-transform: uppercase;
+    horizontal-align: right;
+    text-decoration: underline;
+  }
+
+  .LeftChineseNameWrapper {
+    flow-children: right;
+    horizontal-align: left;
+  }
+
+  .RightChineseNameWrapper {
+    flow-children: right;
+    horizontal-align: right;
+  }
+  
+  .LeftHeroNameChinese {
+    font-size: 80px;
+    font-weight: bold;
+    color: #ffffff;
+    vertical-align: bottom;
+    text-shadow: 2px 2px 4px #000000;
+  }
+  
+  .RightHeroNameChinese {
+    font-size: 80px;
+    font-weight: bold;
+    color: #ffffff;
+    vertical-align: bottom;
+    text-shadow: 2px 2px 4px #000000;
+    horizontal-align: right;
+  }
+  .LeftHeroStoneName {
+    font-size: 48px;
+    font-weight: bold;
+    color: #cccccc;
+    text-shadow: 1px 1px 2px #000000;
+    vertical-align: bottom;
+    margin-left: 20px;
+    margin-right: 20px;
+    margin-bottom: 5px;
+  }
+
+  .RightHeroStoneName {
+    font-size: 48px;
+    font-weight: bold;
+    color: #cccccc;
+    text-shadow: 1px 1px 2px #000000;
+    vertical-align: bottom;
+    margin-left: 20px;
+    margin-right: 20px;
+    margin-bottom: 5px;
+    horizontal-align: right;
+  }
+  
+  .LeftHeroNameUnderline {
+    height: 3px;
+    background-color: #ff0000;
+    margin-top: -10px;
+    horizontal-align: left;
+    z-index: 101;  
+    width: 50%;  
+  }
+  .RightHeroNameUnderline {
+    height: 3px;
+    background-color: #ff0000;
+    margin-top: -10px;
+    horizontal-align: right;
+    z-index: 101;  
+    width: 50%;  
+  }
+  
+#LeftHeroNameContainer {
+  horizontal-align: left;
+
+  width: 1200px;
+  height: fit-children;
+  vertical-align: bottom;
+  margin-bottom: 160px;
+  z-index: 100;
+  opacity: 1.0;
+  transition-property: opacity, transform;
+  transition-timing-function: cubic-bezier(0.01, 0.96, 0.32, 0.98);
+  transition-duration:0.5s;
+
+}
+#LeftHeroNameContainer.hidden {
+  opacity: 0;
+  transition-property: opacity, transform;
+  transition-timing-function: cubic-bezier(0.01, 0.96, 0.32, 0.98);
+  transition-duration:0.5s;
+  transform: translateX(-40%);
+}
+
+#LeftTiltClass{
+  flow-children: down;
+  margin-left: 150px;
+  transform: skew(-10deg); /* 左侧容器向右倾斜 */
+  horizontal-align: left;
+
+}
+
+#RightTiltClass{
+  flow-children: down;
+  margin-right: 150px;
+  horizontal-align: right;
+  transform: skew(-10deg); /* 左侧容器向右倾斜 */
+}
+
+
+#RightHeroNameContainer {
+  horizontal-align: right;
+
+  width: 1200px;
+  height: fit-children;
+  vertical-align: bottom;
+  margin-bottom: 160px;
+  z-index: 100;
+  opacity: 1.0;
+  transition-property: opacity, transform;
+  transition-timing-function: cubic-bezier(0.01, 0.96, 0.32, 0.98);
+  transition-duration:0.5s;
+}
+
+#RightHeroNameContainer.hidden {
+  opacity: 0;
+  transition-property: opacity, transform;
+  transition-timing-function: cubic-bezier(0.01, 0.96, 0.32, 0.98);
+  transition-duration:0.5s;
+  transform: translateX(40%);
+}
+
+
+#scene
+{
+  width:100%;
+  height:100%;
+  overflow: noclip;
+}
+
+.CurtainsLeft
+{
+  transform: translateX(-20%);
+  width:100%;
+  height:100%;
+  z-index: 0;
+}
+
+
+.CurtainsRight
+{
+
+  transform: scaleX(-1)translateX(20%);
+  width:100%;
+  height:100%;
+  z-index: 2;
+}
+
+
+.CurtainsTopRightGodRays
+{
+  width:100%;
+  z-index: 10;
+  height:100%;
+}
+
+.CurtainsSmokeFX
+{
+  width:100%;
+  height:100%;
+}
+
+.CurtainsSpotlightParticles
+{
+  width:100%;
+  height:100%;
+  z-index: 100;
+}
+
+.CurtainsBG
+{
+  width:100%;
+  height:100%;
+}
+.CurtainsAegis2024
+{  width:100%;
+  height:100%;
+}
+
+#Greenpanel
+{
+  width:200%;
+  height:200%;
+  background-color: rgb(17, 255, 0);
+  z-index: 10;
+  horizontal-align: center;
+  vertical-align: center;
+  overflow: noclip;
+}
+
+
+.Greenpanel_1
+{
+  z-index: 10100;
+  width: 50%;
+  height: 100%;        /* 减小高度使画面更紧凑 */
+  ui-scale: 100%;
+  overflow: noclip;
+  horizontal-align: center;
+  vertical-align: center;
+  transform: translateY(20px) scale3d(0.9, 0.9, 0.9);
+}
+.Greenpanel_BG
+{
+  width: 50%;
+  height: 50%; /* 调整高度以适应新内容 */
+  /*background-color: rgba(255, 255, 255, 1); /* 半透明灰色背景 */
+  z-index: 50000; /* 确保面板在最前面 */
+  overflow: noclip;
+  horizontal-align: center;
+  vertical-align: center;
+}
+
+
+/* .MultiAbilityTooltipsExample {
+  width: 100%;
+  height: 100%;
+  flow-children: down;
+}
+
+#TooltipContainer {
+  flow-children: right-wrap;
+  padding: 10px;
+}
+
+.TooltipPanel {
+  margin: 10px;
+  flow-children: down;
+}
+
+.TooltipAnchor {
+  width: 300px;
+  height: 400px;
+}
+
+.ButtonContainer {
+  horizontal-align: center;
+  margin-top: 20px;
+}
+
+.ButtonBevel {
+  padding: 10px 20px;
+}
+
+.HideLeftArrow.TooltipContainer #LeftArrow,
+.HideLeftArrow.TooltipContainer.LeftArrowVisible #LeftArrow {
+  visibility: collapse;
+}
+
+.CustomTooltip {
+  width: 300px;
+  height: 200px;
+  background-color: #000000dd;
+  border: 1px solid #444444;
+  padding: 10px;
+  flow-children: down;
+}
+
+.CustomTooltip DOTAAbilityImage {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 10px;
+}
+
+.CustomTooltip Label {
+  color: white;
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+#CustomTooltipContainer
+{  
+  width: 300px;
+  height: 200px;
+  background-color: #000000dd;
+} */

@@ -1,0 +1,51 @@
+.MainButtonContainer {
+    flow-children: right;
+    horizontal-align: left;
+    vertical-align: top;
+    margin-top: 10px;
+    margin-left: 100px;
+    transition-property: opacity, visibility;
+    transition-duration: 0.3s;
+    opacity: 1;
+    z-index: 100;
+    
+}
+
+.MainButtonContainer.hidden {
+    opacity: 0.001;
+
+}
+
+.MainButtonContainer.hidden:hover {
+    opacity: 1;
+
+}
+.ScoreButton {
+    width: 100px;
+    height: 40px;
+    margin-right: 10px;
+    background-color: gradient( linear, 0% 0%, 0% 100%, from( #5aa15a ), to( #2d662d ) );
+    border: 1px solid #ffffff40;
+    border-radius: 4px;
+    box-shadow: fill #00000066 -2px 5px 2px 2px;
+    
+}
+
+
+
+.ScoreButton Label {
+    font-size: 16px;
+    color: white;
+    vertical-align: center;
+    horizontal-align: center;
+    text-transform: uppercase;
+}
+
+.ScoreButton:hover {
+    background-color: gradient( linear, 0% 0%, 0% 100%, from( #6ab76a ), to( #3c7f3c ) );
+
+}
+
+.ScoreButton:active {
+    background-color: gradient( linear, 0% 0%, 0% 100%, from( #4c8b4c ), to( #254f25 ) );
+}

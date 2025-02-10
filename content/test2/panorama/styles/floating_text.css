@@ -1,0 +1,30 @@
+.FloatingTextContainer {
+    width: 100%;
+    height: 100%;
+    flow-children: none;
+}
+
+.EntityFloatingText {
+    flow-children: down;
+    horizontal-align: center;
+    vertical-align: bottom;
+    margin-bottom: 30px;
+    transition-property: position;
+    transition-duration: 0.1s;
+}
+
+.EntityTextLabel {
+    text-align: center;
+    horizontal-align: center;
+    text-shadow: 4px 4px 4px black;
+    font-weight: bold;
+    font-size: 32px;
+    color: #00FF00;
+    padding: 5px;
+    background-color: #000000aa;
+    width: 200px;
+}
+
+.FloatingTextContainerHidden {
+    visibility: collapse;
+}

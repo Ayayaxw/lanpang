@@ -1,0 +1,250 @@
+.hero_chaos_TeamPanelsContainer {
+    flow-children: right;
+    padding: 4.5px;  /* 3 * 1.5 */
+    height: 84px;    /* 56 * 1.5 */
+    horizontal-align: center;
+}
+
+.hero_chaos_TeamPanel {
+    width: 250px;  /* 165 * 1.5 */
+    background-color: #18181ce6;
+    border-radius: 4.5px;  /* 3 * 1.5 */
+    padding: 4.5px 9px;    /* 3 * 1.5, 6 * 1.5 */
+    flow-children: down;
+    margin: 0px 6px;       /* 4 * 1.5 */
+}
+
+.hero_chaos_UpperSection {
+    flow-children: right;
+    width: 100%;
+    height: 42px;    /* 28 * 1.5 */
+}
+
+.hero_chaos_TeamTitle {
+    width: 30px;     /* 20 * 1.5 */
+    height: 30px;    /* 20 * 1.5 */
+    border-radius: 50%;
+    margin-right: 6px;   /* 4 * 1.5 */
+    wash-color: #ffffff;
+    opacity: 0.8;
+}
+
+.hero_chaos_HeroesSection {
+    flow-children: right;
+    height: 36px;    /* 24 * 1.5 */
+    width: fill-parent-flow(1.0);
+}
+
+.hero_chaos_HeroPortrait {
+    width: 63px;     /* 42 * 1.5 */
+    height: 36px;    /* 24 * 1.5 */
+    border: 1.5px solid #ffffff33;  /* 1 * 1.5 */
+    border-radius: 3px;    /* 2 * 1.5 */
+    margin-right: 4.5px;   /* 3 * 1.5 */
+}
+
+.hero_chaos_Secondary {
+    width: 24px;     /* 16 * 1.5 */
+    height: 21px;    /* 14 * 1.5 */
+    opacity: 0.8;
+}
+
+.hero_chaos_SecondarySection {
+    flow-children: right;
+    height: 100%;
+}
+
+.hero_chaos_Secondary.no_next_hero {
+    brightness: 0.2;
+    contrast: 0.8;
+    saturation: 0;
+}
+
+.show_overlay {
+    visibility: visible;
+}
+
+/* 添加这些新样式 */
+.hero_chaos_TeamPanelOverlay {
+    width: 100%;
+    height: 100%;
+    background-color: #00000099;
+    visibility: collapse;
+    opacity: 0.8;
+    z-index: 2;
+}
+
+.hero_chaos_OutWrapper {
+    width: 100%;
+    height: 100%;
+    visibility: collapse;
+}
+
+.hero_chaos_OutLabel {
+    color: #FF4747;
+    font-size: 36px;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px #000000;
+    horizontal-align: center;
+    vertical-align: center;
+    visibility: collapse;
+    z-index: 3;
+    text-align: center;
+    width: 100%;
+    
+    height: 100%;
+    opacity: 0.8;
+}
+
+.team_eliminated {
+    brightness: 0.3;
+    saturation: 0.2;
+}
+
+.show_team_overlay {
+    visibility: visible;
+}
+.hero_chaos_StatsContainer {
+    flow-children: right; /* 改为横向排列 */
+    width: fit-children; /* 适应内容宽度 */
+    height: 100%;
+
+}
+
+.hero_chaos_RemainingCount {
+    color: white;
+    font-size: 18px;    /* 12 * 1.5 */
+    text-shadow: 1.5px 1.5px 3px 2.0 #000000;  /* 1 * 1.5 */
+    vertical-align: top;
+    margin-left: 3px;   /* 2 * 1.5 */
+}
+
+
+.hero_chaos_DeathsCount {
+    flow-children: right;
+    height: 24px;    /* 16 * 1.5 */
+    width: 45px;     /* 30 * 1.5 */
+    horizontal-align: right;
+}
+
+/* 死亡英雄图标样式 */
+.hero_chaos_DeathsIcon {
+    wash-color: #ff4242;
+}
+
+.hero_chaos_RemainingIcon {
+    width: 18px;     /* 12 * 1.5 */
+    height: 18px;    /* 12 * 1.5 */
+    wash-color: #ffffff;
+    opacity: 0.8;
+    vertical-align: center;
+    margin: 0px 3px;    /* 2 * 1.5 */
+}
+/* 死亡英雄数量标签样式 */
+.hero_chaos_DeathsCountLabel {
+    font-size: 18px;
+    vertical-align: center;
+    text-shadow: 1.5px 1.5px 1.5px 1.0 #000000;
+    color: #ff4242;  /* 改用color而不是wash-color */
+    text-align: center;
+    font-weight: bold;
+    margin: 0px; /* 重置margin */
+}
+
+.hero_chaos_LowerSection {
+    flow-children: right;
+    width: 100%;
+    height: 24px;    /* 16 * 1.5 */
+    margin-top: 0px;    /* 2 * 1.5 */
+}
+
+.hero_chaos_HealthContainer {
+    width: fill-parent-flow(1.0);
+    height: 100%;
+    margin-right: 12px;   /* 8 * 1.5 */
+}
+
+.hero_chaos_HealthBar {
+    width: 100%;
+    height: 6px;     /* 4 * 1.5 */
+    background-color: #ffffff26;
+    border-radius: 3px;    /* 2 * 1.5 */
+    vertical-align: center;
+}
+
+.hero_chaos_HealthFill {
+    width: 80%;
+    height: 100%;
+}
+
+/* 修改血条颜色样式 */
+.hero_chaos_1 .hero_chaos_HealthFill {
+    width: 80%;
+    height: 100%;
+    background-color: gradient( linear, 0% 0%, 100% 0%, from( #F33030 ), to( #992020 ) );
+}
+
+.hero_chaos_2 .hero_chaos_HealthFill {
+    width: 80%;
+    height: 100%;
+    background-color: gradient( linear, 0% 0%, 100% 0%, from( #1BC05B ), to( #147B3B ) );
+}
+
+.hero_chaos_4 .hero_chaos_HealthFill {
+    width: 80%;
+    height: 100%;
+    background-color: gradient( linear, 0% 0%, 100% 0%, from( #3D8DFF ), to( #2860B3 ) );
+}
+
+.hero_chaos_8 .hero_chaos_HealthFill {
+    width: 80%;
+    height: 100%;
+    background-color: gradient( linear, 0% 0%, 100% 0%, from( #BF47FF ), to( #8431B3 ) );
+}
+
+
+.hero_chaos_KillsCount {
+    flow-children: right;
+    height: 24px;
+    width: fit-children;
+}
+
+.hero_chaos_DeathsIcon,
+.hero_chaos_KillsIcon {
+    width: 18px;
+    height: 18px;
+    opacity: 0.8;
+    vertical-align: center;
+    margin: 0px 3px;
+}
+
+.hero_chaos_DeathsCountLabel,
+.hero_chaos_KillsCountLabel {
+    font-size: 18px;
+    vertical-align: center;
+    text-shadow: 1.5px 1.5px 1.5px 1.0 #000000;
+    text-align: center;
+    font-weight: bold;
+    margin: 0px;
+}
+
+/* 各属性面板的特殊样式 */
+.hero_chaos_1 {
+    border-left: 3px solid #F33030;    /* 2 * 1.5 */
+}
+
+.hero_chaos_2 {
+    border-left: 3px solid #1BC05B;    /* 2 * 1.5 */
+}
+
+.hero_chaos_4 {
+    border-left: 3px solid #3D8DFF;    /* 2 * 1.5 */
+}
+
+.hero_chaos_8 {
+    border-left: 3px solid #BF47FF;    /* 2 * 1.5 */
+}
+.hero_chaos_hidden {
+    opacity: 0;
+    visibility: collapse;
+}

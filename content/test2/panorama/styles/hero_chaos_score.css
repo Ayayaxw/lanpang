@@ -1,0 +1,191 @@
+.hero_chaos_score_root {
+    width: 280px;
+    height: fit-children;
+    horizontal-align: left;
+    margin-left: 20px;
+    vertical-align: middle;
+}
+
+.hero_chaos_score_board {
+    width: 100%;
+    flow-children: down;
+    background-color: rgba(0, 0, 0, 0.9);
+    border-radius: 8px;
+    padding: 12px;
+}
+
+.hero_chaos_score_title {
+    width: 100%;
+    font-size: 14px;
+    font-weight: bold;
+    color: #ffffff;
+    padding-bottom: 5px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.hero_chaos_score_section {
+    width: 100%;
+    margin-bottom: 12px;
+    flow-children: down;
+}
+
+.hero_chaos_score_section_title {
+    width: 100%;
+    font-size: 13px;
+    color: #ffffff;
+    margin-bottom: 8px;
+}
+
+.hero_chaos_score_kills {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-radius: 3px;
+    padding: 3px 5px;
+    width: 22%;
+    text-align: left;
+    font-size: 12px;
+    margin: 0px 2px;
+    color: white;
+}
+
+.hero_chaos_score_damage {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-radius: 3px;
+    padding: 3px 5px;
+    width: 30%;
+    text-align: left;
+    font-size: 12px;
+    margin-left:2px;
+    color: white;
+}
+
+.hero_chaos_score_team_grid,
+.hero_chaos_score_current_grid,
+.hero_chaos_score_personal_grid {
+    width: 100%;
+    flow-children: down;
+    padding: 0px 5px;
+}
+
+
+
+.hero_chaos_score_header_row {
+    width: 100%;
+    height: 24px;
+    flow-children: right;
+}
+
+.hero_chaos_score_root_hidden{
+    opacity: 0;
+    visibility: collapse;
+}
+
+.hero_chaos_score_team_item,
+.hero_chaos_score_personal_item {
+    width: 100%;
+    height: 32px;
+    flow-children: right;
+    margin-top: 4px;
+}
+
+.hero_chaos_score_column_header {
+    color: #ffffff80;
+    font-size: 12px;
+    padding: 2px 5px;
+    text-align: left;  /* 改为左对齐 */
+    width: 25%;
+}
+
+.hero_chaos_score_value {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-radius: 3px;
+    padding: 3px 5px;
+    width: 22%;
+    text-align: left;
+    font-size: 12px;
+    margin: 0px 2px;
+    color: white;  /* 添加这行，设置文字颜色为白色 */
+}
+
+.hero_chaos_score_rank {
+    width: 12%;  /* 从20%减少到12% */
+    text-align: left;
+    font-size: 13px;
+    font-weight: bold;
+    margin-left: 5px;
+}
+
+/* 排名颜色 */
+.rank_first {
+    color: #ffd700;
+}
+
+.rank_second {
+    color: #c0c0c0;
+}
+
+.rank_third {
+    color: #cd7f32;
+}
+
+.rank_normal {
+    color: #ffffff80;
+}
+
+.hero_chaos_score_hero,
+.hero_chaos_score_team {
+    width: 33%;  /* 从25%增加到33% */
+    padding: 3px 5px;
+    background-color: rgba(255, 255, 255, 0.08);
+    border-radius: 3px;
+    text-align: left;
+    font-size: 12px;
+    margin: 0px 2px;
+    color: white;
+    white-space: nowrap;
+    text-overflow: clip;
+}
+
+.hero_chaos_score_divider {
+    width: 100%;
+    height: 1px;
+    margin: 12px 0px;
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* 属性颜色和边框 */
+.hero_chaos_1 {
+    border-left: 2px solid #FF6B6B;
+
+}
+
+.hero_chaos_2 {
+    border-left: 2px solid #4ECB71;
+    
+}
+
+.hero_chaos_4 {
+    border-left: 2px solid #5B9FFF;
+
+}
+
+.hero_chaos_8 {
+    border-left: 2px solid #CF70FF;
+
+}
+
+.hero_chaos_score_team_1 {
+    color: #FF6B6B;
+}
+
+.hero_chaos_score_team_2 {
+    color: #4ECB71;
+}
+
+.hero_chaos_score_team_4 {
+    color: #5B9FFF;
+}
+
+.hero_chaos_score_team_8 {
+    color: #CF70FF;
+}

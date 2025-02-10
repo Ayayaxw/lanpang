@@ -28,6 +28,7 @@ require("challenges/Duel_1VS30")
 require("challenges/MillGrinding")  
 require("challenges/SuperCreepChallenge90CD")  
 require("challenges/mode_5v5")  
+require("challenges/mode_10v10")  
 
 
 Main.Challenges = {
@@ -41,6 +42,7 @@ Main.Challenges = {
     Work_Work_2 = 0006,
     DeathRandom = 0007,
     super_hero_chaos = 0008,
+    mode_10v10 = 0009,
 
     --超级兵刷兵大赛1开头
     CreepChallenge_500MegaCreeps = 1000,
@@ -59,6 +61,7 @@ Main.Challenges = {
     Illusion_3X = 2009,
     Duel_1VS30 = 2010,
     mode_5v5 = 2011,
+    
 
     --单人模式3开头
     MonkeyKing = 3001,
@@ -101,6 +104,7 @@ Main.ModeConfig = {
     [Main.Challenges.MillGrinding] = {"SelfHeroRow"},
     [Main.Challenges.SuperCreepChallenge90CD] = {"SelfHeroRow"},
     [Main.Challenges.mode_5v5] = {"SelfHeroRow", "OpponentHeroRow"},
+    [Main.Challenges.mode_10v10] = {"SelfHeroRow", "OpponentHeroRow"},
 }
 
 
@@ -109,6 +113,7 @@ Main.currentChallenge = nil
 function Main:SendGameModesData()
     -- 定义游戏模式
     local gameModes = {
+        {code = Main.Challenges.mode_10v10, name = "10v10对决"},
         {code = Main.Challenges.mode_5v5, name = "5v5对决"},
         {code = Main.Challenges.SuperCreepChallenge90CD, name = "90%减CD击杀大赛"},
         {code = Main.Challenges.MillGrinding, name = "人马拉磨"},

@@ -193,7 +193,7 @@ var heroData = {
     135: { name: "破晓辰星",       englishName: "Dawnbreaker",      codeName: "dawnbreaker",      facingRight: true,  heightAdjust: 10, heroAttribute: 1, avatarAdjust: 0,  avatarFacingRight: true  },
     136: { name: "玛西",           englishName: "Marci",            codeName: "marci",            facingRight: true,  heightAdjust: 10, heroAttribute: 8, avatarAdjust: 0,  avatarFacingRight: true  },
     137: { name: "獸",             englishName: "Primal Beast",     codeName: "primal_beast",     facingRight: true,  heightAdjust: 0,  heroAttribute: 1, avatarAdjust: 50,  avatarFacingRight: true  },
-    138: { name: "琼英碧灵",       englishName: "Muerta",           codeName: "muerta",           facingRight: false, heightAdjust: 5,  heroAttribute: 4, avatarAdjust: 30, avatarFacingRight: true  },
+    138: { name: "琼英碧灵",       englishName: "Muerta",           codeName: "muerta",           facingRight: false, heightAdjust: 15,  heroAttribute: 4, avatarAdjust: 30, avatarFacingRight: true  },
     139: { name: "unknown",       englishName: "unknown",           codeName: "unknown",     facingRight: true,  heightAdjust: 0,  heroAttribute: 1, avatarAdjust: 50,  avatarFacingRight: true  },
     140: { name: "unknown",       englishName: "unknown",           codeName: "unknown",           facingRight: false, heightAdjust: 5,  heroAttribute: 4, avatarAdjust: 30, avatarFacingRight: true  },
     141: { name: "unknown",       englishName: "unknown",           codeName: "unknown",     facingRight: true,  heightAdjust: 0,  heroAttribute: 1, avatarAdjust: 50,  avatarFacingRight: true  },

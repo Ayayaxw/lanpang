@@ -161,14 +161,29 @@ function CommonAI:IsSkillReady(skill)
 
     -- 判断技能是否因缠绕效果无法使用
     local function IsAbilityDisabledByRoot(unit, ability)
-        -- 获取单位是否被缠绕
+        -- 获取单位是否被缠绕或有特定modifier
         local isRooted = unit:IsRooted()
-
-        -- 如果单位被缠绕，进一步检查技能是否受影响
-        if isRooted then
+        local hasRootingModifier = false
+        
+        -- 检查特定的modifier
+        local rootModifiers = {
+            "modifier_puck_coiled",
+            "modifier_tidehunter_dead_in_the_water"
+        }
+        
+        -- 遍历检查是否有任意一个rooting modifier
+        for _, modifierName in ipairs(rootModifiers) do
+            if unit:HasModifier(modifierName) then
+                hasRootingModifier = true
+                break
+            end
+        end
+    
+        -- 如果单位被缠绕或有特定modifier，进一步检查技能是否受影响
+        if isRooted or hasRootingModifier then
             -- 获取技能的行为属性
             local abilityBehavior = ability:GetBehavior()
-
+    
             -- 检查 abilityBehavior 是否为 nil
             if abilityBehavior == nil then
                 self:log("错误：技能 " .. abilityName .. " 的 abilityBehavior 为 nil")
@@ -182,7 +197,7 @@ function CommonAI:IsSkillReady(skill)
             end
         end
         
-        return false
+        return false 
     end
 
     -- 检查技能是否隐藏（排除特定技能）

@@ -197,38 +197,57 @@ function CommonAI:HandleEnemyTargetAction(entity,target,abilityInfo,targetInfo)
         abilityInfo.castPoint = CommonAI:calculateAdjustedCastPoint(entity, targetInfo.targetPos, abilityInfo.castPoint)
 
     elseif abilityInfo.abilityName == "muerta_dead_shot" then
-        if self.originTargetPosition then
+        if self.treetarget then
             -- 检查技能是否准备就绪
             if abilityInfo.skill:IsFullyCastable() then
                 -- 获取技能索引
                 local abilityIndex = abilityInfo.skill:GetEntityIndex()
-                self:log("Ability index: " .. abilityIndex)
-    
+                self:log("技能索引: " .. abilityIndex)
+            
                 -- 获取目标位置
-                local targetPosition = self.originTargetPosition
-                local treeIndex = self.target:entindex()
+                local targetPosition = self.target:GetAbsOrigin()
                 local startPosition = entity:GetOrigin()
+                local treeIndex = self.treetarget and self.treetarget:entindex() or nil
                 
-                local order1 = {
-                    UnitIndex = entity:entindex(),
-                    OrderType = DOTA_UNIT_ORDER_VECTOR_TARGET_POSITION,
-                    Position = targetPosition,
-                    TargetIndex = GetTreeIdForEntityIndex(treeIndex),
-                    AbilityIndex = abilityIndex,
-                }
-
-                local order2 = {
-                    UnitIndex = entity:entindex(),
-                    OrderType = DOTA_UNIT_ORDER_CAST_TARGET_TREE,
-                    TargetIndex = GetTreeIdForEntityIndex(treeIndex),
-                    AbilityIndex = abilityIndex,
-                    Position = targetPosition,
-                }
-
-                ExecuteOrderFromTable(order1)
-                ExecuteOrderFromTable(order2)
-                print("开枪！")
-                abilityInfo.castPoint = CommonAI:calculateAdjustedCastPoint(entity, self.originTargetPosition, abilityInfo.castPoint)
+                print("起始位置: X=" .. startPosition.x .. ", Y=" .. startPosition.y .. ", Z=" .. startPosition.z)
+                print("目标位置: X=" .. targetPosition.x .. ", Y=" .. targetPosition.y .. ", Z=" .. targetPosition.z)
+                if treeIndex then
+                    print("树木索引: " .. treeIndex)
+                end
+                print("原始施法前摇: " .. tostring(abilityInfo.castPoint))
+            
+                if self.treetarget then
+                    local order1 = {
+                        UnitIndex = entity:entindex(),
+                        OrderType = DOTA_UNIT_ORDER_VECTOR_TARGET_POSITION,
+                        Position = targetPosition,
+                        TargetIndex = GetTreeIdForEntityIndex(treeIndex),
+                        AbilityIndex = abilityIndex,
+                    }
+                
+                    local order2 = {
+                        UnitIndex = entity:entindex(),
+                        OrderType = DOTA_UNIT_ORDER_CAST_TARGET_TREE,
+                        TargetIndex = GetTreeIdForEntityIndex(treeIndex),
+                        AbilityIndex = abilityIndex,
+                        Position = targetPosition,
+                    }
+                
+                    print("指令1详情:")
+                    print("单位索引: " .. order1.UnitIndex)
+                    print("目标树木索引: " .. order1.TargetIndex)
+                
+                    print("指令2详情:")
+                    print("单位索引: " .. order2.UnitIndex)
+                    print("目标树木索引: " .. order2.TargetIndex)
+                
+                    ExecuteOrderFromTable(order1)
+                    ExecuteOrderFromTable(order2)
+                    print("开枪！")
+                end
+                
+                local newCastPoint = CommonAI:calculateAdjustedCastPoint(entity, targetPosition, abilityInfo.castPoint)
+                abilityInfo.castPoint = newCastPoint
             else
                 entity:CastAbilityOnTarget(self.target, abilityInfo.skill, 0)
                 abilityInfo.castPoint = CommonAI:calculateAdjustedCastPoint(entity, targetInfo.targetPos, abilityInfo.castPoint)

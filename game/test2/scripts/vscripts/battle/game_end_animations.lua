@@ -53,7 +53,8 @@ function Main:DisableHeroWithModifiers(unit, duration)
         "modifier_silence", 
         "modifier_rooted",
         "modifier_break",
-        "modifier_muted"
+        "modifier_muted",
+        "modifier_damage_reduction_100",
     }
     
     for _, modifier in ipairs(modifiers) do

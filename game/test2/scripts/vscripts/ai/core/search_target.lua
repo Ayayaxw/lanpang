@@ -539,17 +539,42 @@ function CommonAI:FindBestAllyHeroTarget(entity, ability, requiredModifiers, min
     -- 排序函数
     local sortFunction = function(a, b)
         if sortBy == "health_percent" then
-            return a:GetHealthPercent() < b:GetHealthPercent()
+            local healthPercentA = a:GetHealthPercent()
+            local healthPercentB = b:GetHealthPercent()
+            if healthPercentA == healthPercentB then
+                return a:GetEntityIndex() < b:GetEntityIndex()
+            end
+            return healthPercentA < healthPercentB
         elseif sortBy == "health" then
-            return a:GetHealth() < b:GetHealth()
+            local healthA = a:GetHealth()
+            local healthB = b:GetHealth()
+            if healthA == healthB then
+                return a:GetEntityIndex() < b:GetEntityIndex()
+            end
+            return healthA < healthB
         elseif sortBy == "attack" then
-            return a:GetAttackDamage() > b:GetAttackDamage()
+            -- 使用当前最小最大攻击力的平均值
+            local attackA = (a:GetDamageMin() + a:GetDamageMax()) / 2
+            local attackB = (b:GetDamageMin() + b:GetDamageMax()) / 2
+            
+            if attackA == attackB then
+                return a:GetEntityIndex() < b:GetEntityIndex()
+            end
+            return attackA > attackB
         elseif sortBy == "distance" then
             local distA = (a:GetOrigin() - entity:GetOrigin()):Length2D()
             local distB = (b:GetOrigin() - entity:GetOrigin()):Length2D()
+            if distA == distB then
+                return a:GetEntityIndex() < b:GetEntityIndex()
+            end
             return distA < distB
         elseif sortBy == "mana_percent" then
-            return a:GetManaPercent() < b:GetManaPercent()
+            local manaPercentA = a:GetManaPercent()
+            local manaPercentB = b:GetManaPercent()
+            if manaPercentA == manaPercentB then
+                return a:GetEntityIndex() < b:GetEntityIndex()
+            end
+            return manaPercentA < manaPercentB
         elseif sortBy == "nearest_to_enemy" then
             -- 如果是自身且允许选择自身，优先级最高
             if canBeSelf then
@@ -569,20 +594,26 @@ function CommonAI:FindBestAllyHeroTarget(entity, ability, requiredModifiers, min
                 false
             )
             
+            local minDistA = math.huge
+            local minDistB = math.huge
+            
             if #enemies > 0 then
-                local minDistA = math.huge
-                local minDistB = math.huge
-                
                 for _, enemy in pairs(enemies) do
                     local distA = (a:GetOrigin() - enemy:GetOrigin()):Length2D()
                     local distB = (b:GetOrigin() - enemy:GetOrigin()):Length2D()
                     minDistA = math.min(minDistA, distA)
                     minDistB = math.min(minDistB, distB)
                 end
-                return minDistA < minDistB
             end
+            
+            if minDistA == minDistB then
+                return a:GetEntityIndex() < b:GetEntityIndex()
+            end
+            return minDistA < minDistB
         end
-        return false
+        
+        -- 如果没有匹配到任何排序方式，使用EntityIndex作为默认排序
+        return a:GetEntityIndex() < b:GetEntityIndex()
     end
 
     -- 分别对英雄和非英雄单位进行排序

@@ -535,7 +535,7 @@ end
 function CommonAI:AdjustAbilityTarget(entity, abilityInfo, target)
     -- 处理特定技能的特殊逻辑，例如 muerta_dead_shot
     if abilityInfo.abilityName == "muerta_dead_shot" then
-        return self:HandleMuertaDeadShot(entity, target,abilityInfo.skill)
+        return self:HandleMuertaDeadShot(entity,abilityInfo.skill)
     elseif abilityInfo.abilityName == "tiny_tree_grab" then
         return self:HandleTinyTreeGrab(entity)
     elseif abilityInfo.abilityName == "shredder_timber_chain" then
@@ -670,31 +670,39 @@ end
     -- end
 
 
-function CommonAI:HandleMuertaDeadShot(entity, target, ability)
-    local searchCenter = target:GetAbsOrigin()
-    self.originTargetPosition = target:GetAbsOrigin()
-    local searchRadius = self:GetSkillCastRange(entity, ability)
-    local trees = GridNav:GetAllTreesAroundPoint(searchCenter, searchRadius, true)
-    local closestTree = nil
-    local closestDistance = math.huge
-
-    for _, tree in pairs(trees) do
-        local treePos = tree:GetAbsOrigin()
-        local treeDistanceToPlayer = (treePos - entity:GetOrigin()):Length2D()
-        if treeDistanceToPlayer < closestDistance then
-            closestTree = tree
-            closestDistance = treeDistanceToPlayer
+    function CommonAI:HandleMuertaDeadShot(entity, ability)
+        local searchCenter = self.target:GetAbsOrigin()
+        local searchRadius = self:GetSkillCastRange(entity, ability)
+        local trees = GridNav:GetAllTreesAroundPoint(searchCenter, searchRadius, true)
+        local closestTree = nil
+        local closestDistance = math.huge
+    
+        -- 初始化已使用树木的表
+        if not self.usedTrees then
+            self.usedTrees = {}
         end
+    
+        for _, tree in pairs(trees) do
+            local treePos = tree:GetAbsOrigin()
+            local treeDistanceToPlayer = (treePos - entity:GetOrigin()):Length2D()
+            -- 检查这棵树是否被使用过
+            if treeDistanceToPlayer < closestDistance and not self.usedTrees[tree:entindex()] then
+                closestTree = tree
+                closestDistance = treeDistanceToPlayer
+            end
+        end
+    
+        if closestTree then
+            self:log("已经为琼英碧灵找好了树木目标")
+            self.treetarget = closestTree
+            -- 标记这棵树为已使用
+            self.usedTrees[closestTree:entindex()] = true
+        else
+            self:log("未找到合适的树木目标")
+            self.treetarget = nil
+        end
+        return self.target
     end
-
-    if closestTree then
-        self:log("已经为琼英碧灵找好了树木目标")
-        return closestTree
-    else
-        self:log("未找到合适的树木目标，保持原目标")
-        return target
-    end
-end
 
 
 function CommonAI:ClampPositionToRect(position, left, right, top, bottom)

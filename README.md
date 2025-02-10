@@ -1,7 +1,7 @@
 # LanPang Dota2 MOD  
   
-![Dota2](https://img.shields.io/badge/Dota2-MOD-orange)  
-![License](https://img.shields.io/badge/License-Non--Commercial-blue)  
+![Dota2](https://img.shields.io/badge/Dota2-MOD-orange)
+![License](https://img.shields.io/badge/License-Non--Commercial-blue)
   
 蓝胖超人斗蛐蛐地图  
   
@@ -15,7 +15,6 @@ lanpang
 │ └── test2/ # Dota2游戏目录  
 │ ├── scripts/ # Lua脚本  
 │ └── npc/ # 单位定义  
-├── .vscode/ # IDE配置  
 ├── LICENSE # 开源协议  
 └── README.md # 项目文档  
   

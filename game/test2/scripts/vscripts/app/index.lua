@@ -1486,6 +1486,13 @@ function Main:OnRequestUnitInfo(event)
     local unitEntIndex = event.unit_ent_index
     local unit = EntIndexToHScript(unitEntIndex)
     if unit and IsValidEntity(unit) then
+
+        if unit:IsRooted() then
+            print(string.format("Unit %s is rooted", unit:GetUnitName()))
+        else
+            print(string.format("Unit %s is not rooted", unit:GetUnitName()))
+        end
+
         local unitName = unit:GetUnitName()
         local modifiers = {}
         for i = 0, unit:GetModifierCount() - 1 do

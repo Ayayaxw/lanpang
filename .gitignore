@@ -8,3 +8,4 @@
 .vscode/launch.json
 .vscode/tasks.json
 content/test2/maps/dota.vmap
+game/test2/tools_thumbnail_cache.bin

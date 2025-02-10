@@ -2,6 +2,7 @@
 *.vcd
 *.vpk
 *.log
+*.bin
 /bin/
 
 # 忽略VSCode工作区设置

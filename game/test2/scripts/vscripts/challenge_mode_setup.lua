@@ -28,6 +28,7 @@ require("challenges/Duel_1VS30")
 require("challenges/MillGrinding")  
 require("challenges/SuperCreepChallenge90CD")  
 require("challenges/mode_5v5")  
+require("challenges/mode_5v5_2")  
 require("challenges/mode_10v10")  
 
 
@@ -61,6 +62,7 @@ Main.Challenges = {
     Illusion_3X = 2009,
     Duel_1VS30 = 2010,
     mode_5v5 = 2011,
+    mode_5v5_2 = 2022,
     
 
     --单人模式3开头
@@ -104,6 +106,7 @@ Main.ModeConfig = {
     [Main.Challenges.MillGrinding] = {"SelfHeroRow"},
     [Main.Challenges.SuperCreepChallenge90CD] = {"SelfHeroRow"},
     [Main.Challenges.mode_5v5] = {"SelfHeroRow", "OpponentHeroRow"},
+    [Main.Challenges.mode_5v5_2] = {"SelfHeroRow", "OpponentHeroRow"},
     [Main.Challenges.mode_10v10] = {"SelfHeroRow", "OpponentHeroRow"},
 }
 
@@ -115,6 +118,7 @@ function Main:SendGameModesData()
     local gameModes = {
         {code = Main.Challenges.mode_10v10, name = "10v10对决"},
         {code = Main.Challenges.mode_5v5, name = "5v5对决"},
+        {code = Main.Challenges.mode_5v5_2, name = "5v5对决2"},
         {code = Main.Challenges.SuperCreepChallenge90CD, name = "90%减CD击杀大赛"},
         {code = Main.Challenges.MillGrinding, name = "人马拉磨"},
         {code = Main.Challenges.Duel_1VS30, name = "1级还是30级?"},
@@ -254,6 +258,14 @@ function Main:RequestStrategyData()
         {
             name = "禁用大招",
             id = "ultimate_disable"
+        },
+        {
+            name = "不到半血绝不放大",
+            id = "6"
+        },
+        {
+            name = "不到80%血绝不放大",
+            id = "7"
         },
     }
 

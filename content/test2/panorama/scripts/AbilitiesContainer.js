@@ -1,6 +1,7 @@
 (function() {
     let trackedHeroes = new Map(); // {entityId: panelId}
     let isAvoiding = false;
+    let enableOverlapDetection = false; // 新增：控制是否开启重叠检测的全局变量
 
     const PANEL_CONFIG = {
         ICON_WIDTH: 20,
@@ -198,6 +199,7 @@
     }
 
     function UpdatePanelPositions() {
+        
         const mainContainer = $('#AbilitiesContainer');
         let allPositions = [];
 
@@ -215,8 +217,8 @@
             }
         });
 
-        // 解决重叠问题
-        const adjustedPositions = resolveOverlap(allPositions);
+        // 根据enableOverlapDetection决定是否进行重叠检测
+        const adjustedPositions = enableOverlapDetection ? resolveOverlap(allPositions) : allPositions;
 
         // 应用新位置
         adjustedPositions.forEach(pos => {
@@ -320,6 +322,12 @@
     }
 
     function OnUpdateAbilitiesStatus(data) {
+        // 修改判断逻辑，使用严格的布尔值判断
+        enableOverlapDetection = data.enableOverlapDetection === true || data.enableOverlapDetection === undefined;
+        
+        // 或者更简单的方式
+        // enableOverlapDetection = Boolean(data.enableOverlapDetection);
+        
         UpdateHeroAbilities(data);
         $('#AbilitiesContainer').RemoveClass('AbilitiesContainerhidden');
     }
@@ -327,47 +335,44 @@
 
     function ClearAllPanels() {
         const mainContainer = $('#AbilitiesContainer');
-        if (!mainContainer) {
-            $.Msg("错误: 清理面板时无法找到技能容器");
-            return;
-        }
-    
+        if (!mainContainer) return;
+
         // 立即隐藏容器
         mainContainer.AddClass('AbilitiesContainerhidden');
-    
-        // 获取所有子面板，不仅仅依赖trackedHeroes
+
+        // 使用倒序循环避免索引错乱
         const children = mainContainer.Children();
-        const childCount = children.length;
-        
-        $.Msg(`开始清理面板，当前子面板数量: ${childCount}`);
-        $.Msg(`当前已追踪的英雄数量: ${trackedHeroes.size}`);
-    
-        // 清理所有子面板
-        for (let i = 0; i < childCount; i++) {
+        for (let i = children.length - 1; i >= 0; i--) {
             const panel = children[i];
             if (panel) {
+                // 先移除子元素再删除父容器
                 panel.RemoveAndDeleteChildren();
                 panel.DeleteAsync(0.0);
-                $.Msg(`删除面板 ${i + 1}/${childCount}`);
             }
         }
-    
+
         // 强制清空容器
         mainContainer.RemoveAndDeleteChildren();
-        
-        // 清空追踪Map
-        trackedHeroes.clear();
-    
-        // 确保容器保持隐藏
-        $.Schedule(0.1, () => {
-            if (mainContainer) {
-                mainContainer.RemoveAndDeleteChildren();
-                mainContainer.AddClass('AbilitiesContainerhidden');
-                $.Msg("延迟检查：确保容器被隐藏");
-            }
+
+        // 使用Promise等待所有删除完成
+        const waitForDeletion = () => {
+            return new Promise(resolve => {
+                $.Schedule(0.1, () => {
+                    if (mainContainer.Children().length === 0) {
+                        resolve();
+                    } else {
+                        resolve(waitForDeletion());
+                    }
+                });
+            });
+        };
+
+        waitForDeletion().then(() => {
+            // 最终清理
+            trackedHeroes.clear();
+            $.Msg("[最终清理] 所有面板已确认删除");
+            mainContainer.AddClass('AbilitiesContainerhidden');
         });
-    
-        $.Msg("所有技能面板清理完成");
     }
 
     function RemoveHeroPanel(entityId) {

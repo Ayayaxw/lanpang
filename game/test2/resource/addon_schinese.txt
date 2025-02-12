@@ -29,6 +29,38 @@
 		"DOTA_Tooltip_ability_divide_on_death_Lore"            "即便是死亡，也只会让我变得更强大。"
 		"DOTA_Tooltip_modifier_reduced_ability_cost"              "奥术增幅"
 		"DOTA_Tooltip_modifier_reduced_ability_cost_Description"  "技能冷却时间减少90%%\n技能魔法消耗减少90%%"
+
+
+		// 怨灵系带
+		"DOTA_Tooltip_ability_item_wraith_band_custom"        "怨灵系带·改"
+		"DOTA_Tooltip_ability_item_wraith_band_custom_Description" "提供三倍于系带的属性"
+		"DOTA_Tooltip_ability_item_wraith_band_custom_Lore"   "小小专属"
+		"DOTA_Tooltip_ability_item_wraith_band_custom_bonus_agility"         "+敏捷"
+		"DOTA_Tooltip_ability_item_wraith_band_custom_bonus_strength"        "+力量"
+		"DOTA_Tooltip_ability_item_wraith_band_custom_bonus_intellect"       "+智力"
+		"DOTA_Tooltip_ability_item_wraith_band_custom_bonus_attack_speed"    "+攻击速度"
+		"DOTA_Tooltip_ability_item_wraith_band_custom_bonus_armor"           "+护甲"
+
+		// 空灵挂件
+		"DOTA_Tooltip_ability_item_null_talisman_custom"        "空灵挂件·改"
+		"DOTA_Tooltip_ability_item_null_talisman_custom_Description" "提供三倍于挂件的属性"
+		"DOTA_Tooltip_ability_item_null_talisman_custom_Lore"   "蓝胖专属"
+		"DOTA_Tooltip_ability_item_null_talisman_custom_bonus_intellect"           "+智力"
+		"DOTA_Tooltip_ability_item_null_talisman_custom_bonus_strength"            "+力量"
+		"DOTA_Tooltip_ability_item_null_talisman_custom_bonus_agility"             "+敏捷"
+		"DOTA_Tooltip_ability_item_null_talisman_custom_bonus_max_mana_percentage" "+最大魔法值"
+		"DOTA_Tooltip_ability_item_null_talisman_custom_bonus_mana_regen"          "+魔法恢复"
+
+		// 护腕
+		"DOTA_Tooltip_ability_item_bracer_custom"        "护腕·改"
+		"DOTA_Tooltip_ability_item_bracer_custom_Description" "提供三倍于护腕的属性"
+		"DOTA_Tooltip_ability_item_bracer_custom_Lore"   "美杜莎专属"
+		"DOTA_Tooltip_ability_item_bracer_custom_bonus_strength"        "+力量"
+		"DOTA_Tooltip_ability_item_bracer_custom_bonus_agility"         "+敏捷"
+		"DOTA_Tooltip_ability_item_bracer_custom_bonus_intellect"       "+智力"
+		"DOTA_Tooltip_ability_item_bracer_custom_bonus_damage"          "+攻击力"
+		"DOTA_Tooltip_ability_item_bracer_custom_bonus_health_regen"    "+生命恢复"
+		"DOTA_Tooltip_ability_item_bracer_custom_bonus_health"          "+生命值"
 	}
 
 }

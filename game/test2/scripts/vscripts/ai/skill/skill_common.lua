@@ -183,6 +183,7 @@ function CommonAI:GetAbilityBehavior(skill, distance, aoeRadius)
         luna_eclipse = DOTA_ABILITY_BEHAVIOR.POINT,
         earth_spirit_geomagnetic_grip = DOTA_ABILITY_BEHAVIOR.POINT,
         phoenix_icarus_dive = DOTA_ABILITY_BEHAVIOR.POINT,
+        dragon_knight_breathe_fire = DOTA_ABILITY_BEHAVIOR.POINT,
 
         furion_wrath_of_nature = DOTA_ABILITY_BEHAVIOR.UNIT_TARGET,
         dawnbreaker_solar_guardian = DOTA_ABILITY_BEHAVIOR.UNIT_TARGET,
@@ -203,9 +204,13 @@ function CommonAI:GetAbilityBehavior(skill, distance, aoeRadius)
     if abilityName == "earthshaker_enchant_totem" then
 
         if distance < aoeRadius or self:containsStrategy(self.hero_strategy, "边走边图腾") then
+            print("施法距离够了")
             finalAbilityBehavior = DOTA_ABILITY_BEHAVIOR.UNIT_TARGET
         elseif self:containsStrategy(self.hero_strategy, "原地图腾") then
             finalAbilityBehavior = DOTA_ABILITY_BEHAVIOR.UNIT_TARGET
+        else
+            print("图腾起飞")
+            finalAbilityBehavior = DOTA_ABILITY_BEHAVIOR.POINT
         end
 
     end

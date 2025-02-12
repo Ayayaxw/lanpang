@@ -91,10 +91,25 @@ function Main:HeroBenefits(heroName, hero, overallStrategy, heroStrategy)
                 local y = hero:GetAbsOrigin().y + 300 * math.sin(rad)
                 local position = Vector(x, y, hero:GetAbsOrigin().z)
                 
-                CreateTempTree(position, 30)
+                -- 检查50码范围内是否有单位或树木
+                local units = FindUnitsInRadius(hero:GetTeamNumber(),
+                    position,
+                    nil,
+                    50,
+                    DOTA_UNIT_TARGET_TEAM_BOTH,
+                    DOTA_UNIT_TARGET_ALL,
+                    DOTA_UNIT_TARGET_FLAG_NONE,
+                    FIND_ANY_ORDER,
+                    false)
+                    
+                local trees = GridNav:GetAllTreesAroundPoint(position, 50, true)
+                
+                if #units == 0 and #trees == 0 then
+                    CreateTempTree(position, 30)
+                end
             end
         end
-        
+
         -- 外圈树木（10棵，600码半径）
         for i = 1, 10 do
             local angle = i * (360 / 10)
@@ -106,7 +121,22 @@ function Main:HeroBenefits(heroName, hero, overallStrategy, heroStrategy)
                 local y = hero:GetAbsOrigin().y + 600 * math.sin(rad)
                 local position = Vector(x, y, hero:GetAbsOrigin().z)
                 
-                CreateTempTree(position, 30)
+                -- 检查50码范围内是否有单位或树木
+                local units = FindUnitsInRadius(hero:GetTeamNumber(),
+                    position,
+                    nil,
+                    50,
+                    DOTA_UNIT_TARGET_TEAM_BOTH,
+                    DOTA_UNIT_TARGET_ALL,
+                    DOTA_UNIT_TARGET_FLAG_NONE,
+                    FIND_ANY_ORDER,
+                    false)
+                    
+                local trees = GridNav:GetAllTreesAroundPoint(position, 50, true)
+                
+                if #units == 0 and #trees == 0 then
+                    CreateTempTree(position, 30)
+                end
             end
         end
     end
@@ -255,63 +285,6 @@ function Main:HeroBenefits(heroName, hero, overallStrategy, heroStrategy)
         end
     end
 
-    if heroName == "npc_dota_hero_silencer" then
-        print("创建沉默术士的可穿戴假人")
-    
-        -- 移除英雄本身的穿戴装备
-        local wearable = hero:FirstMoveChild()
-        while wearable ~= nil do
-            if wearable:GetClassname() == "dota_item_wearable" then
-                local nextWearable = wearable:NextMovePeer()
-                UTIL_Remove(wearable)
-                wearable = nextWearable
-            else
-                wearable = wearable:NextMovePeer()
-            end
-        end
-    
-        local dummyName = "npc_dota_hero_silencer_wearable_dummy"
-        local dummy = CreateUnitByName(dummyName, hero:GetAbsOrigin(), false, hero, hero, hero:GetTeamNumber())
-        
-        if dummy then
-            dummy:FollowEntity(hero, true)
-            dummy:AddNewModifier(dummy, nil, "modifier_wearable", {})
-
-            hero.wearableDummy = dummy
-            print("成功创建并附加可穿戴假人到沉默术士")
-        else
-            print("无法为沉默术士创建可穿戴假人")
-        end
-    end
-
-    if heroName == "npc_dota_hero_puck" then
-        print("创建帕克的可穿戴假人")
-    
-        -- 移除英雄本身的穿戴装备
-        local wearable = hero:FirstMoveChild()
-        while wearable ~= nil do
-            if wearable:GetClassname() == "dota_item_wearable" then
-                local nextWearable = wearable:NextMovePeer()
-                UTIL_Remove(wearable)
-                wearable = nextWearable
-            else
-                wearable = wearable:NextMovePeer()
-            end
-        end
-    
-        local dummyName = "npc_dota_hero_puck_wearable_dummy"
-        local dummy = CreateUnitByName(dummyName, hero:GetAbsOrigin(), false, hero, hero, hero:GetTeamNumber())
-        
-        if dummy then
-            dummy:FollowEntity(hero, true)
-            dummy:AddNewModifier(dummy, nil, "modifier_wearable", {})
-    
-            hero.wearableDummy = dummy
-            print("成功创建并附加可穿戴假人到帕克")
-        else
-            print("无法为帕克创建可穿戴假人")
-        end
-    end
 
 
     if heroName == "npc_dota_hero_chen" then
@@ -766,6 +739,94 @@ function Main:HeroPreparation(heroName, hero, overallStrategy, heroStrategy)
                 self:RestoreOriginalValues()
                 return nil
             end)
+        end
+    end
+    if heroName == "npc_dota_hero_sven" then
+        local heroTeam = hero:GetTeamNumber()
+        local enemyTeam = heroTeam == DOTA_TEAM_GOODGUYS and DOTA_TEAM_BADGUYS or DOTA_TEAM_GOODGUYS
+    
+        -- 创建食人魔魔法师
+        local ogre = CreateUnitByName(
+            "npc_dota_hero_ogre_magi",
+            hero:GetAbsOrigin() + Vector(100, 0, 0),
+            true,
+            nil,
+            nil,
+            enemyTeam
+        )
+    
+        if ogre then
+            -- 添加无敌状态
+            ogre:AddNewModifier(ogre, nil, "modifier_damage_reduction_100", {})
+            
+            -- 添加缴械modifier
+            ogre:AddNewModifier(ogre, nil, "modifier_disarmed", {})
+    
+            -- 2秒后清理
+            Timers:CreateTimer(2.0, function()
+                if ogre and not ogre:IsNull() then
+                    UTIL_Remove(ogre)
+                end
+                return nil
+            end)
+        end
+    end
+    
+    if heroName == "npc_dota_hero_silencer" then
+        print("创建沉默术士的可穿戴假人")
+    
+        -- 移除英雄本身的穿戴装备
+        local wearable = hero:FirstMoveChild()
+        while wearable ~= nil do
+            if wearable:GetClassname() == "dota_item_wearable" then
+                local nextWearable = wearable:NextMovePeer()
+                UTIL_Remove(wearable)
+                wearable = nextWearable
+            else
+                wearable = wearable:NextMovePeer()
+            end
+        end
+    
+        local dummyName = "npc_dota_hero_silencer_wearable_dummy"
+        local dummy = CreateUnitByName(dummyName, hero:GetAbsOrigin(), false, hero, hero, hero:GetTeamNumber())
+        
+        if dummy then
+            dummy:FollowEntity(hero, true)
+            dummy:AddNewModifier(dummy, nil, "modifier_wearable", {})
+
+            hero.wearableDummy = dummy
+            print("成功创建并附加可穿戴假人到沉默术士")
+        else
+            print("无法为沉默术士创建可穿戴假人")
+        end
+    end
+
+    if heroName == "npc_dota_hero_puck" then
+        print("创建帕克的可穿戴假人")
+    
+        -- 移除英雄本身的穿戴装备
+        local wearable = hero:FirstMoveChild()
+        while wearable ~= nil do
+            if wearable:GetClassname() == "dota_item_wearable" then
+                local nextWearable = wearable:NextMovePeer()
+                UTIL_Remove(wearable)
+                wearable = nextWearable
+            else
+                wearable = wearable:NextMovePeer()
+            end
+        end
+    
+        local dummyName = "npc_dota_hero_puck_wearable_dummy"
+        local dummy = CreateUnitByName(dummyName, hero:GetAbsOrigin(), false, hero, hero, hero:GetTeamNumber())
+        
+        if dummy then
+            dummy:FollowEntity(hero, true)
+            dummy:AddNewModifier(dummy, nil, "modifier_wearable", {})
+    
+            hero.wearableDummy = dummy
+            print("成功创建并附加可穿戴假人到帕克")
+        else
+            print("无法为帕克创建可穿戴假人")
         end
     end
 end

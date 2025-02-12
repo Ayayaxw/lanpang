@@ -693,11 +693,7 @@ function CommonAI:FindBestEnemyHeroTarget(entity, ability, requiredModifiers, mi
     minRemainingTime = minRemainingTime or 0
     sortBy = sortBy or "distance" -- 默认按距离排序
 
-
-
-
     if self:containsStrategy(self.global_strategy, "不允许对非英雄释放控制") then
-
         forceHero = true -- 如果有"允许对非英雄释放技能"策略，则默认不强制英雄单位
        
     else
@@ -705,7 +701,6 @@ function CommonAI:FindBestEnemyHeroTarget(entity, ability, requiredModifiers, mi
             forceHero = false -- 没有该策略时保持原来的默认值，强制英雄单位
         end
     end
-
 
     -- 获取技能行为和施法距离
     local behavior = self:GetAbilityBehavior(ability, 0, 0)
@@ -719,6 +714,12 @@ function CommonAI:FindBestEnemyHeroTarget(entity, ability, requiredModifiers, mi
     else
         local aoeRadius = self:GetSkillAoeRadius(ability)
         searchRadius = castRange + aoeRadius + 200
+    end
+    
+    -- 确保搜索范围不小于攻击范围
+    local attackRange = self.entity:Script_GetAttackRange() + 100
+    if searchRadius < attackRange then
+        searchRadius = attackRange
     end
 
     local targetType = forceHero and DOTA_UNIT_TARGET_HERO or DOTA_UNIT_TARGET_ALL
@@ -830,13 +831,10 @@ function CommonAI:FindBestEnemyHeroTarget(entity, ability, requiredModifiers, mi
             -- 计算增益BUFF数量
             local function CountBuffs(unit)
                 local count = 0
-                for i = 0, unit:GetModifierCount() - 1 do
-                    local modifierName = unit:GetModifierNameByIndex(i)
-                    if modifierName then
-                        local modifier = unit:FindModifierByName(modifierName)
-                        if modifier and not modifier:IsDebuff() then
-                            count = count + 1
-                        end
+                local modifiers = unit:FindAllModifiers()
+                for _, modifier in pairs(modifiers) do
+                    if modifier and not modifier:IsDebuff() then
+                        count = count + 1
                     end
                 end
                 return count

@@ -525,11 +525,12 @@ function CommonAI:HandleTinyTreeGrab(entity)
 
     if closestTree then
         self:log("已经为小小找到了最近的树木目标")
-        return closestTree
+        self.treetarget = closestTree
     else
         self:log("小小周围没有找到可抓取的树木")
-        return false
+        self.treetarget = nil
     end
+    return self.target
 end
 
 function CommonAI:AdjustAbilityTarget(entity, abilityInfo, target)
@@ -542,6 +543,8 @@ function CommonAI:AdjustAbilityTarget(entity, abilityInfo, target)
         return self:HandleShredderTimberChain(entity)
     elseif abilityInfo.abilityName == "earth_spirit_geomagnetic_grip" then
         return self:HandleEarthSpiritGeomagneticGrip(entity)
+    else 
+        self.treetarget = nil
     end
     return false
 end
@@ -670,39 +673,31 @@ end
     -- end
 
 
-    function CommonAI:HandleMuertaDeadShot(entity, ability)
-        local searchCenter = self.target:GetAbsOrigin()
-        local searchRadius = self:GetSkillCastRange(entity, ability)
-        local trees = GridNav:GetAllTreesAroundPoint(searchCenter, searchRadius, true)
-        local closestTree = nil
-        local closestDistance = math.huge
-    
-        -- 初始化已使用树木的表
-        if not self.usedTrees then
-            self.usedTrees = {}
+function CommonAI:HandleMuertaDeadShot(entity, ability)
+    local searchCenter = self.target:GetAbsOrigin()
+    local searchRadius = self:GetSkillCastRange(entity, ability)
+    local trees = GridNav:GetAllTreesAroundPoint(searchCenter, searchRadius, true)
+    local closestTree = nil
+    local closestDistance = math.huge
+
+    for _, tree in pairs(trees) do
+        local treePos = tree:GetAbsOrigin()
+        local treeDistanceToPlayer = (treePos - entity:GetOrigin()):Length2D()
+        if treeDistanceToPlayer < closestDistance then
+            closestTree = tree
+            closestDistance = treeDistanceToPlayer
         end
-    
-        for _, tree in pairs(trees) do
-            local treePos = tree:GetAbsOrigin()
-            local treeDistanceToPlayer = (treePos - entity:GetOrigin()):Length2D()
-            -- 检查这棵树是否被使用过
-            if treeDistanceToPlayer < closestDistance and not self.usedTrees[tree:entindex()] then
-                closestTree = tree
-                closestDistance = treeDistanceToPlayer
-            end
-        end
-    
-        if closestTree then
-            self:log("已经为琼英碧灵找好了树木目标")
-            self.treetarget = closestTree
-            -- 标记这棵树为已使用
-            self.usedTrees[closestTree:entindex()] = true
-        else
-            self:log("未找到合适的树木目标")
-            self.treetarget = nil
-        end
-        return self.target
     end
+
+    if closestTree then
+        self:log("已经为琼英碧灵找好了树木目标")
+        self.treetarget = closestTree
+    else
+        self:log("未找到合适的树木目标")
+        self.treetarget = nil
+    end
+    return self.target
+end
 
 
 function CommonAI:ClampPositionToRect(position, left, right, top, bottom)
@@ -759,28 +754,20 @@ function CommonAI:HandleUnitTargetAbility(entity, abilityInfo, target, targetInf
         end
 
     elseif abilityInfo.targetTeam ~= DOTA_UNIT_TARGET_TEAM_FRIENDLY then
-        -- 对敌军施放技能
-        if not self.originTargetPosition then
-            local targetName
-            if target.GetUnitName then
-                targetName = target:GetUnitName()
-            else
-                targetName = "未知单位"
-            end
-            self:log(string.format("找到目标 %s 准备施放技能 %s", targetName, abilityInfo.abilityName))
-        end
         if abilityInfo.castRange > 0 then
-            if self:IsInRange(target, abilityInfo.castRange) then
+            local currentTarget = self.treetarget or target
+            if self:IsInRange(currentTarget, abilityInfo.castRange) then
                 -- 敌人在施法范围内
-                self:HandleEnemyTargetAction(entity, target, abilityInfo, targetInfo)
-                self:OnSpellCast(entity, abilityInfo.skill, abilityInfo.castPoint, abilityInfo.channelTime, target)
+                self:HandleEnemyTargetAction(entity, currentTarget, abilityInfo, targetInfo)
+                self:OnSpellCast(entity, abilityInfo.skill, abilityInfo.castPoint, abilityInfo.channelTime, currentTarget)
             else
                 -- 敌人不在施法范围内
-                if self:HandleEnemyTargetOutofRangeAction(entity, target, abilityInfo, targetInfo) then
-                    self:OnSpellCast(entity, abilityInfo.skill, abilityInfo.castPoint, abilityInfo.channelTime, target)
+                if self:HandleEnemyTargetOutofRangeAction(entity, currentTarget, abilityInfo, targetInfo) then
+                    self:OnSpellCast(entity, abilityInfo.skill, abilityInfo.castPoint, abilityInfo.channelTime, currentTarget)
                 elseif self.currentState ~= AIStates.Channeling then
                     -- 移动到施法距离内
-                    self:MoveToRange(targetInfo.targetPos, abilityInfo.castRange)
+                    local targetPosition = self.treetarget and self.treetarget:GetAbsOrigin() or targetInfo.targetPos
+                    self:MoveToRange(targetPosition, abilityInfo.castRange)
                     self:SetState(AIStates.Seek)
                     self:log(string.format("不在施法范围内，移动到施法范围，进入Seek状态，目标距离: %.2f，施法距离: %.2f", targetInfo.distance, abilityInfo.castRange))
                 end
@@ -1215,27 +1202,34 @@ function CommonAI:HandleAttack(target, abilityInfo, targetInfo)
         return self.nextThinkTime
     end
 
--- 检查目标是否无敌
-if target:IsInvulnerable() then
-    -- 目标无敌时只移动不设置攻击状态
-    local order = {
-        UnitIndex = self.entity:entindex(),
-        OrderType = DOTA_UNIT_ORDER_MOVE_TO_POSITION,
-        TargetIndex = target:entindex(),
-        Position = targetInfo and targetInfo.targetPos or target:GetAbsOrigin()
-    }
-    ExecuteOrderFromTable(order)
-else
-    -- 目标不是无敌时正常执行攻击
-    self:SetState(AIStates.Attack)
-    local order = {
-        UnitIndex = self.entity:entindex(),
-        OrderType = DOTA_UNIT_ORDER_ATTACK_TARGET,
-        TargetIndex = target:entindex(),
-        Position = targetInfo and targetInfo.targetPos or target:GetAbsOrigin()
-    }
-    ExecuteOrderFromTable(order)
-end
+    -- 检查目标是否无敌
+    if not self:CanAttackTarget(self.entity, target) then
+        print("对面无敌了")
+        -- 目标无敌时只移动不设置攻击状态
+        local order = {
+            UnitIndex = self.entity:entindex(),
+            OrderType = DOTA_UNIT_ORDER_MOVE_TO_POSITION,
+            TargetIndex = target:entindex(),
+            Position = targetInfo and targetInfo.targetPos or target:GetAbsOrigin()
+        }
+        ExecuteOrderFromTable(order)
+    else
+                -- 已在攻击状态
+        if self.entity:IsAttacking() then
+            self:log("已经在攻击状态")
+            return self.nextThinkTime
+        end
+        -- 目标不是无敌时正常执行攻击
+        self:SetState(AIStates.Attack)
+        local order = {
+            UnitIndex = self.entity:entindex(),
+            OrderType = DOTA_UNIT_ORDER_ATTACK_TARGET,
+            TargetIndex = target:entindex(),
+            Position = targetInfo and targetInfo.targetPos or target:GetAbsOrigin()
+        }
+        ExecuteOrderFromTable(order)
+    end
+
     local targetName = "unknown"
     if target and type(target.GetUnitName) == "function" then
         targetName = target:GetUnitName()
@@ -1244,6 +1238,57 @@ end
     
     return self.nextThinkTime
 end
+
+function CommonAI:CanAttackTarget(entity, target)
+    -- 检查目标是否无法被选中或无敌
+    if target:IsUnselectable() or target:IsInvulnerable() then
+        return false
+    end
+    
+    -- 检查目标是否处于虚无状态
+    local isTargetEthereal = target:HasModifier("modifier_muerta_pierce_the_veil_buff") 
+        or target:HasModifier("modifier_pugna_decrepify")
+        or target:HasModifier("modifier_ghost_state")
+        or target:HasModifier("modifier_item_ethereal_blade_ethereal")
+        or target:HasModifier("modifier_necrolyte_ghost_shroud_active")
+        
+    -- 如果目标处于虚无状态，检查攻击者是否有可以攻击虚无单位的buff
+    if isTargetEthereal then
+        local canAttackEthereal = entity:HasModifier("modifier_item_revenants_brooch_active") 
+            or entity:HasModifier("modifier_muerta_supernatural")
+        
+        if not canAttackEthereal then
+            return false
+        end
+    end
+
+
+    local distance = (entity:GetAbsOrigin() - target:GetAbsOrigin()):Length2D()
+    if target and type(target.FindModifierByName) == "function" then
+        local magneticFieldModifier = target:FindModifierByName("modifier_arc_warden_magnetic_field_evasion")
+        if magneticFieldModifier and distance > 300 then
+            -- 检查是否有金箍棒
+            local hasMonkeyKingBar = false
+            for i = 0, 8 do
+                local item = entity:GetItemInSlot(i)
+                if item and item:GetName() == "item_monkey_king_bar" then
+                    hasMonkeyKingBar = true
+                    break
+                end
+            end
+            
+            if not hasMonkeyKingBar then
+                self:log("目标处于磁场效果中且距离过远,且没有金箍棒")
+                return false
+            end
+        end
+    end
+
+
+    
+    return true
+end
+
 
 function CommonAI:HandleFamiliarGuard()
     -- 寻找维萨吉本体

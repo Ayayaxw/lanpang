@@ -113,6 +113,13 @@ function CommonAI:HandleEnemyTargetAction(entity,target,abilityInfo,targetInfo)
             abilityInfo.castPoint = CommonAI:calculateAdjustedCastPoint(entity, targetInfo.targetPos, abilityInfo.castPoint)
         end
 
+    elseif abilityInfo.abilityName == "tiny_tree_grab" then
+        if self.treetarget then
+            entity:CastAbilityOnTarget(self.treetarget, abilityInfo.skill, 0)
+            abilityInfo.castPoint = CommonAI:calculateAdjustedCastPoint(entity, targetInfo.targetPos, abilityInfo.castPoint)
+        end
+        
+
 
     elseif abilityInfo.abilityName == "terrorblade_sunder" then
         local radius = 800

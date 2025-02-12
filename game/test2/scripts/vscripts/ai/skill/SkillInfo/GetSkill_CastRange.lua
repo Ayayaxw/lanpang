@@ -352,35 +352,7 @@ function CommonAI:GetSkillCastRange(entity, ability)
             castRange = totemCastRange + totemAoeRadius + 1
         end
 
-    elseif abilityName == "tiny_toss" then
-        local searchRadius = 300
-        local targetTeam = DOTA_UNIT_TARGET_TEAM_BOTH
-        local targetType = DOTA_UNIT_TARGET_ALL
-        local targetFlags = DOTA_UNIT_TARGET_FLAG_NONE
-        local findOrder = FIND_ANY_ORDER
-    
-        local units = FindUnitsInRadius(
-            entity:GetTeamNumber(),
-            entity:GetAbsOrigin(),
-            nil,
-            searchRadius,
-            targetTeam,
-            targetType,
-            targetFlags,
-            findOrder,
-            false
-        )
-    
-        local availableUnits = {}
-        for _, unit in ipairs(units) do
-            if unit ~= entity then
-                table.insert(availableUnits, unit)
-            end
-        end
-    
-        if #availableUnits > 0 then
-            castRange = 300
-        end
+
 
     elseif abilityName == "earth_spirit_rolling_boulder" then
         local stoneCallerAbility = entity:FindAbilityByName("earth_spirit_stone_caller")

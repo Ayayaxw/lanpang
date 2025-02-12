@@ -1,4 +1,4 @@
-function Main:Init_mode_5v5(event, playerID)
+function Main:Init_mode_5v5_2(event, playerID)
     -- 1. 基础参数初始化
     self.currentMatchID = self:GenerateUniqueID()    
     SendToServerConsole("host_timescale 1")
@@ -31,14 +31,6 @@ function Main:Init_mode_5v5(event, playerID)
                 hero:AddNewModifier(hero, nil, "modifier_item_aghanims_shard", {})
                 hero:AddNewModifier(hero, nil, "modifier_item_ultimate_scepter_consumed", {})
                 HeroMaxLevel(hero)
-                local ability = hero:AddAbility("attribute_amplifier_passive")
-                Timers:CreateTimer(0.2, function()
-                    if ability then
-                        print("给与技能")
-                        ability:SetLevel(1)  -- 因为这是一个最大等级为1的被动技能
-                    end
-                end)
-
             end,
         },
         FRIENDLY = {
@@ -54,15 +46,6 @@ function Main:Init_mode_5v5(event, playerID)
         BATTLEFIELD = {
             function(hero)
                 hero:AddNewModifier(hero, nil, "modifier_auto_elevation_large", {})
-                if hero:IsTempestDouble() or hero:IsIllusion() then
-                    
-                    local ability = hero:AddAbility("attribute_amplifier_passive")
-                    Timers:CreateTimer(0, function()
-                        if ability then  -- 再判断添加是否成功
-                            ability:SetLevel(1)
-                        end
-                    end)
-                end
             end,
         }
     }
@@ -127,50 +110,85 @@ function Main:Init_mode_5v5(event, playerID)
     -- 创建数组存储双方英雄
     self.leftTeamHeroes = {}
     self.rightTeamHeroes = {}
-    
-    -- 计算英雄间距
-    local heroSpacing = 200
-    local startY = 200  -- 从最下面开始往上排
 
-    -- 创建左方10个英雄
-    for i = 1, 5 do
-        local spawnPos = Vector(-550, startY + (i-1) * heroSpacing, 128)
-        CreateHero(playerID, heroName, selfFacetId, spawnPos, DOTA_TEAM_GOODGUYS, false, function(hero)
-            if hero then
-                self:ConfigureHero(hero, true, playerID)
-                self:EquipHeroItems(hero, selfEquipment)
-                table.insert(self.leftTeamHeroes, hero)
-                
-                if selfAIEnabled then
-                    Timers:CreateTimer(self.duration - 0.7, function()
-                        if self.currentTimer ~= timerId or hero_duel.EndDuel then return end
-                        CreateAIForHero(hero, selfOverallStrategy, selfHeroStrategy, "leftTeamHero"..#self.leftTeamHeroes)
-                        return nil
-                    end)
-                end
+    -- 计算英雄间距
+    local heroSpacing = 200  -- Y轴间距
+    local rowSpacing = math.floor(heroSpacing * math.sqrt(3) / 2)  -- Y轴间距
+    local startY = 200       -- 起始Y坐标
+
+    -- 左方阵营的X坐标（从前到后）
+    local leftXPositions = {
+        -200,   -- 第一排
+        -600    -- 第二排
+    }
+
+    -- 右方阵营的X坐标（从前到后）
+    local rightXPositions = {
+        500,    -- 第一排
+        900     -- 第二排
+    }
+
+    -- 创建左方5个英雄
+    local positions = {
+        {row = 1, units = {{x = leftXPositions[1], y = -rowSpacing}, {x = leftXPositions[1], y = rowSpacing}}},  -- 第一排2个
+        {row = 2, units = {{x = leftXPositions[2], y = -2*rowSpacing}, {x = leftXPositions[2], y = 0}, {x = leftXPositions[2], y = 2*rowSpacing}}}  -- 第二排3个
+    }
+
+    local currentHero = 1
+    for _, row in ipairs(positions) do
+        for _, pos in ipairs(row.units) do
+            if currentHero <= 5 then
+                local spawnPos = Vector(pos.x, startY + pos.y, 128)
+                CreateHero(playerID, heroName, selfFacetId, spawnPos, DOTA_TEAM_GOODGUYS, false, function(hero)
+                    if hero then
+                        self:ConfigureHero(hero, true, playerID)
+                        self:EquipHeroItems(hero, selfEquipment)
+                        table.insert(self.leftTeamHeroes, hero)
+                        
+                        if selfAIEnabled then
+                            Timers:CreateTimer(self.duration - 0.7, function()
+                                if self.currentTimer ~= timerId or hero_duel.EndDuel then return end
+                                CreateAIForHero(hero, selfOverallStrategy, selfHeroStrategy, "leftTeamHero"..#self.leftTeamHeroes)
+                                return nil
+                            end)
+                        end
+                    end
+                end)
+                currentHero = currentHero + 1
             end
-        end)
+        end
     end
 
-    -- 创建右方10个英雄
-    for i = 1, 5 do
-        local spawnPos = Vector(850, startY + (i-1) * heroSpacing, 128)
-        CreateHero(playerID, opponentHeroName, opponentFacetId, spawnPos, DOTA_TEAM_BADGUYS, false, function(hero)
-            if hero then
-                self:ConfigureHero(hero, false, playerID)
-                self:EquipHeroItems(hero, opponentEquipment)
-                table.insert(self.rightTeamHeroes, hero)
-                self:ListenHeroHealth(hero)
-                
-                if opponentAIEnabled then
-                    Timers:CreateTimer(self.duration - 0.7, function()
-                        if self.currentTimer ~= timerId or hero_duel.EndDuel then return end
-                        CreateAIForHero(hero, opponentOverallStrategy, opponentHeroStrategy, "rightTeamHero"..#self.rightTeamHeroes)
-                        return nil
-                    end)
-                end
+    -- 创建右方5个英雄
+    positions = {
+        {row = 1, units = {{x = rightXPositions[1], y = -rowSpacing}, {x = rightXPositions[1], y = rowSpacing}}},  -- 第一排2个
+        {row = 2, units = {{x = rightXPositions[2], y = -2*rowSpacing}, {x = rightXPositions[2], y = 0}, {x = rightXPositions[2], y = 2*rowSpacing}}}  -- 第二排3个
+    }
+
+    currentHero = 1
+    for _, row in ipairs(positions) do
+        for _, pos in ipairs(row.units) do
+            if currentHero <= 5 then
+                local spawnPos = Vector(pos.x, startY + pos.y, 128)
+                CreateHero(playerID, opponentHeroName, opponentFacetId, spawnPos, DOTA_TEAM_BADGUYS, false, function(hero)
+                    if hero then
+                        self:ConfigureHero(hero, false, playerID)
+                        self:EquipHeroItems(hero, opponentEquipment)
+                        table.insert(self.rightTeamHeroes, hero)
+                        self:ListenHeroHealth(hero)
+                        
+                        if opponentAIEnabled then
+                            Timers:CreateTimer(self.duration - 0.7, function()
+                                if self.currentTimer ~= timerId or hero_duel.EndDuel then return end
+                                CreateAIForHero(hero, opponentOverallStrategy, opponentHeroStrategy, "rightTeamHero"..#self.rightTeamHeroes)
+                                return nil
+                            end)
+                        end
+                    end
+                end)
+                currentHero = currentHero + 1
             end
-        end)
+        end
     end
 
     -- 6. 赛前准备阶段
@@ -236,28 +254,55 @@ function Main:Init_mode_5v5(event, playerID)
         if self.currentTimer ~= timerId or hero_duel.EndDuel then return end
         
         -- 让左方所有英雄回到原位
-        for i, hero in pairs(self.leftTeamHeroes) do
-            if hero and not hero:IsNull() then
-                local spawnPos = Vector(-550, 200 + (i-1) * heroSpacing, 128)
-                self:PrepareHeroForDuel(
-                    hero,                    -- 英雄单位
-                    spawnPos,               -- 原始召唤位置
-                    self.duration - 5,       -- 限制效果持续时间
-                    Vector(1, 0, 0)         -- 朝向右侧
-                )
+        currentHero = 1
+        positions = {
+            {row = 1, units = {{x = leftXPositions[1], y = -rowSpacing}, {x = leftXPositions[1], y = rowSpacing}}},  -- 第一排2个
+            {row = 2, units = {{x = leftXPositions[2], y = -2*rowSpacing}, {x = leftXPositions[2], y = 0}, {x = leftXPositions[2], y = 2*rowSpacing}}}  -- 第二排3个
+        }
+        
+        for _, row in ipairs(positions) do
+            for _, pos in ipairs(row.units) do
+                if currentHero <= #self.leftTeamHeroes then
+                    local hero = self.leftTeamHeroes[currentHero]
+                    if hero and not hero:IsNull() then
+                        local spawnPos = Vector(pos.x, startY + pos.y, 128)
+                        self:StartAbilitiesMonitor(hero,false)
+                        
+                        self:PrepareHeroForDuel(
+                            hero,
+                            spawnPos,
+                            self.duration - 5,
+                            Vector(1, 0, 0)
+                        )
+                    end
+                    currentHero = currentHero + 1
+                end
             end
         end
     
         -- 让右方所有英雄回到原位
-        for i, hero in pairs(self.rightTeamHeroes) do
-            if hero and not hero:IsNull() then
-                local spawnPos = Vector(850, 200 + (i-1) * heroSpacing, 128)
-                self:PrepareHeroForDuel(
-                    hero,                    -- 英雄单位
-                    spawnPos,               -- 原始召唤位置
-                    self.duration - 5,       -- 限制效果持续时间
-                    Vector(-1, 0, 0)        -- 朝向左侧
-                )
+        currentHero = 1
+        positions = {
+            {row = 1, units = {{x = rightXPositions[1], y = -rowSpacing}, {x = rightXPositions[1], y = rowSpacing}}},  -- 第一排2个
+            {row = 2, units = {{x = rightXPositions[2], y = -2*rowSpacing}, {x = rightXPositions[2], y = 0}, {x = rightXPositions[2], y = 2*rowSpacing}}}  -- 第二排3个
+        }
+        
+        for _, row in ipairs(positions) do
+            for _, pos in ipairs(row.units) do
+                if currentHero <= #self.rightTeamHeroes then
+                    local hero = self.rightTeamHeroes[currentHero]
+                    if hero and not hero:IsNull() then
+                        local spawnPos = Vector(pos.x, startY + pos.y, 128)
+                        self:StartAbilitiesMonitor(hero,false)
+                        self:PrepareHeroForDuel(
+                            hero,
+                            spawnPos,
+                            self.duration - 5,
+                            Vector(-1, 0, 0)
+                        )
+                    end
+                    currentHero = currentHero + 1
+                end
             end
         end
     end)
@@ -309,7 +354,7 @@ function Main:Init_mode_5v5(event, playerID)
     end)
 end
 
-function Main:OnUnitKilled_mode_5v5(killedUnit, args)
+function Main:OnUnitKilled_mode_5v5_2(killedUnit, args)
     local killedUnit = EntIndexToHScript(args.entindex_killed)
     local killer = EntIndexToHScript(args.entindex_attacker)
 
@@ -320,7 +365,7 @@ function Main:OnUnitKilled_mode_5v5(killedUnit, args)
     -- 检查是否一方全部阵亡
     local leftTeamAlive = false
     local rightTeamAlive = false
-
+    self:StopAbilitiesMonitor(killedUnit)
     -- 检查左方队伍
     for _, hero in pairs(self.leftTeamHeroes) do
         if not hero:IsNull() and hero:IsAlive() then
@@ -376,7 +421,7 @@ function Main:OnUnitKilled_mode_5v5(killedUnit, args)
     end
 end
 
-function Main:OnNPCSpawned_mode_5v5(spawnedUnit, event)
+function Main:OnNPCSpawned_mode_5v5_2(spawnedUnit, event)
     if not self:isExcludedUnit(spawnedUnit) then
         self:ApplyConfig(spawnedUnit, "BATTLEFIELD")
     end

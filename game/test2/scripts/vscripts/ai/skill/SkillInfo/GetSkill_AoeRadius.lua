@@ -265,6 +265,10 @@ function CommonAI:GetSkillAoeRadius(ability)
                 aoeRadius = 1000
             end
         end
+    elseif abilityName == "tidehunter_ravage" then
+
+        aoeRadius = aoeRadius - 100
+
 
     elseif abilityName == "ember_spirit_searing_chains" then
         local remnants = FindUnitsInRadius(

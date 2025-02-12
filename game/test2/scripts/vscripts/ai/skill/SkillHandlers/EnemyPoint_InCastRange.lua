@@ -1431,55 +1431,60 @@ function CommonAI:HandleEnemyPoint_InCastRange(entity,target,abilityInfo,targetI
             ["storm_spirit_ball_lightning"] = true,
             ["dawnbreaker_celestial_hammers"] = true,
         }
-        local predictCastAbilities = {
-            ["invoker_sun_strike"] = true,
-
-            -- 可以继续添加需要预判的技能
+    
+        -- 定义始终在脚下释放的技能表
+        local selfCastAbilities = {
+            ["dragon_knight_breathe_fire"] = true
         }
-        -- 计算目标距离
+    
+        -- 定义需要预判的技能表
+        local predictCastAbilities = {
+            ["invoker_sun_strike"] = true
+        }
+    
         local distance = (targetInfo.targetPos - entity:GetAbsOrigin()):Length2D()
+        local targetName = target.GetUnitName and target:GetUnitName() or "未知单位"
         
-        if distance <= abilityInfo.aoeRadius and self:containsStrategy(self.global_strategy, "防守策略") then--not targetCastAbilities[abilityInfo.abilityName] then
-            -- 计算英雄朝向目标的方向
+        -- 处理始终在脚下释放的技能
+        if selfCastAbilities[abilityInfo.abilityName] then
             local direction = (targetInfo.targetPos - entity:GetAbsOrigin()):Normalized()
-            -- 在英雄前方1码的位置
-            local castPosition = entity:GetAbsOrigin() + direction * 100 -- 100单位 = 1码
-            
+            local castPosition = entity:GetAbsOrigin() + direction * 100
             entity:CastAbilityOnPosition(castPosition, abilityInfo.skill, 0)
-            local targetName = target.GetUnitName and target:GetUnitName() or "未知单位"
-            self:log(string.format("目标 %s 在AoE范围内（%d），在前方1码处释放技能 %s", 
+            self:log(string.format("技能 %s 在脚下1码处释放", abilityInfo.abilityName))
+        
+        -- 处理AOE范围内且处于防守策略的情况
+        elseif distance <= abilityInfo.aoeRadius and 
+               self:containsStrategy(self.global_strategy, "防守策略") and
+               not targetCastAbilities[abilityInfo.abilityName] then
+            local direction = (targetInfo.targetPos - entity:GetAbsOrigin()):Normalized()
+            local castPosition = entity:GetAbsOrigin() + direction * 100
+            entity:CastAbilityOnPosition(castPosition, abilityInfo.skill, 0)
+            self:log(string.format("目标 %s 在AoE范围内(%d)，在前方1码处释放技能 %s", 
                 targetName, abilityInfo.aoeRadius, abilityInfo.abilityName))
+        
+        -- 处理需要预判的技能
         elseif predictCastAbilities[abilityInfo.abilityName] then
-            -- 获取目标朝向
             local targetForward = target:GetForwardVector()
-            -- 计算预判位置（在目标朝向上延伸aoeRadius的距离）
             local predictedPos = targetInfo.targetPos + targetForward * abilityInfo.aoeRadius
-            
-            -- 计算英雄到预判位置的距离
             local distanceToPredict = (predictedPos - entity:GetAbsOrigin()):Length2D()
-            -- 计算英雄朝向预判位置的方向
             local directionToPredict = (predictedPos - entity:GetAbsOrigin()):Normalized()
             
-            -- 如果预判位置在施法范围内，且和英雄当前朝向夹角不太大（小于90度），则使用预判位置
             if distanceToPredict <= abilityInfo.castRange and 
-                entity:GetForwardVector():Dot(directionToPredict) > 0 then
+               entity:GetForwardVector():Dot(directionToPredict) > 0 then
                 entity:CastAbilityOnPosition(predictedPos, abilityInfo.skill, 0)
-                local targetName = target.GetUnitName and target:GetUnitName() or "未知单位"
-                self:log(string.format("对目标 %s 进行预判施放技能 %s，预判位置 %s", 
+                self:log(string.format("对目标 %s 预判施放技能 %s，位置 %s", 
                     targetName, abilityInfo.abilityName, tostring(predictedPos)))
             else
-                -- 如果预判位置不合适，使用原始目标位置
                 entity:CastAbilityOnPosition(targetInfo.targetPos, abilityInfo.skill, 0)
-                local targetName = target.GetUnitName and target:GetUnitName() or "未知单位"
                 self:log(string.format("预判位置不合适，对目标 %s 直接施放技能 %s", 
                     targetName, abilityInfo.abilityName))
             end
+        
+        -- 其他情况直接对目标位置释放
         else
-            -- 如果目标不在范围内，或技能在特定技能表中，按原来的方式释放
             entity:CastAbilityOnPosition(targetInfo.targetPos, abilityInfo.skill, 0)
-            local targetName = target.GetUnitName and target:GetUnitName() or "未知单位"
-            self:log(string.format("找到目标 %s 准备施放技能 %s", targetName, abilityInfo.abilityName))
-            self:log(string.format("目标地点是 %s ", targetInfo.targetPos))
+            self:log(string.format("对目标 %s 施放技能 %s，位置 %s", 
+                targetName, abilityInfo.abilityName, tostring(targetInfo.targetPos)))
         end
         
         abilityInfo.castPoint = CommonAI:calculateAdjustedCastPoint(entity, targetInfo.targetPos, abilityInfo.castPoint)

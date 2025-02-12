@@ -735,13 +735,7 @@ function Main:ClearAllUnitsExcept()
                 end
 
                 -- 移除所有修饰器
-                local modifierCount = unit:GetModifierCount()
-                for i = modifierCount - 1, 0, -1 do
-                    local modifier = unit:GetModifierNameByIndex(i)
-                    if modifier then
-                        unit:RemoveModifierByName(modifier)
-                    end
-                end
+                unit:RemoveAllModifiers(0, true, true, true)  -- 移除所有(0)修饰器，立即移除，永久移除，不是死亡导致的移除
                 if unit:GetUnitName() == "npc_dota_hero_medusa" then
                     unit:SetAbsOrigin(Vector(10000, 10000, 128))
                     unit:RemoveModifierByName("modifier_invulnerable")
@@ -759,14 +753,7 @@ function Main:ClearAllUnitsExcept()
                 end
             else
                 -- 非英雄单位的处理
-                -- 移除所有修饰器
-                local modifierCount = unit:GetModifierCount()
-                for i = modifierCount - 1, 0, -1 do
-                    local modifier = unit:GetModifierNameByIndex(i)
-                    if modifier then
-                        unit:RemoveModifierByName(modifier)
-                    end
-                end
+                unit:RemoveAllModifiers(0, true, true, true)  -- 移除所有(0)修饰器，立即移除，永久移除，不是死亡导致的移除
 
                 -- 移除无敌状态
                 unit:RemoveModifierByName("modifier_invulnerable")
@@ -883,7 +870,7 @@ function Main:MonitorUnitsStatus()
     CustomGameEventManager:Send_ServerToAllClients("update_unit_status", statsData)
     
     -- 调用技能状态监控函数
-    self:MonitorAbilitiesStatus()
+    --self:MonitorAbilitiesStatus()
 end
 
 
@@ -895,7 +882,7 @@ function Main:ClearAbilitiesPanel()
 
 end
 
-function Main:MonitorAbilitiesStatus(hero)
+function Main:MonitorAbilitiesStatus(hero,enableOverlapDetection)
     if not hero or hero:IsNull() then 
         --print("[技能监控] 英雄对象为空或无效")
         return 
@@ -990,14 +977,10 @@ function Main:MonitorAbilitiesStatus(hero)
     local abilitiesData = {
         abilities = calculateAbilitiesStatus(hero),
         entityId = hero:GetEntityIndex(),
-        teamId = hero:GetTeamNumber()
+        teamId = hero:GetTeamNumber(),
+        enableOverlapDetection = enableOverlapDetection
     }
 
-    -- print(string.format("[发送数据] 准备发送数据到前端 - 英雄ID: %d, 队伍: %d", 
-    --     abilitiesData.entityId, 
-    --     abilitiesData.teamId
-    -- ))
-    
     CustomGameEventManager:Send_ServerToAllClients("update_abilities_status", abilitiesData)
     --print("[发送数据] 数据已发送到前端")
 end
@@ -1053,7 +1036,7 @@ end
 
 
 -- 在你的游戏逻辑中定时调用这个函数
-function Main:StartAbilitiesMonitor(hero)
+function Main:StartAbilitiesMonitor(hero,enableOverlapDetection)
     if not hero or hero:IsNull() then return end
     
     local entityId = hero:GetEntityIndex()
@@ -1070,7 +1053,7 @@ function Main:StartAbilitiesMonitor(hero)
         endTime = 0.1,
         callback = function()
             if not hero or hero:IsNull() then return nil end
-            self:MonitorAbilitiesStatus(hero)
+            self:MonitorAbilitiesStatus(hero,false)
             return 0.1
         end
     })
@@ -1424,18 +1407,17 @@ function Main:OnRequestNearbyUnitsInfo(event)
                 -- 获取modifier信息
                 print("检查状态效果:")
                 entityInfo.modifiers = {}
-                if entity.GetModifierCount then
-                    local modCount = entity:GetModifierCount()
-                    print("状态效果总数: " .. modCount)
+                if entity.FindAllModifiers then
+                    local modifiers = entity:FindAllModifiers()
+                    print("状态效果总数: " .. #modifiers)
                     
-                    for i = 0, modCount - 1 do
-                        local modifierName = entity:GetModifierNameByIndex(i)
-                        local modifier = entity:FindModifierByName(modifierName)
-                        local remainingTime = modifier and modifier:GetRemainingTime() or -1
-                        local duration = modifier and modifier:GetDuration() or -1
-                        local stackCount = modifier and modifier:GetStackCount() or 0
+                    for i, modifier in pairs(modifiers) do
+                        local modifierName = modifier:GetName()
+                        local remainingTime = modifier:GetRemainingTime()
+                        local duration = modifier:GetDuration()
+                        local stackCount = modifier:GetStackCount()
                         
-                        print(string.format("  状态效果 #%d:", i + 1))
+                        print(string.format("  状态效果 #%d:", i))
                         print("    名称: " .. modifierName)
                         print(string.format("    持续时间: %.2f", duration))
                         print(string.format("    剩余时间: %.2f", remainingTime))
@@ -1481,26 +1463,54 @@ function Main:OnRequestNearbyUnitsInfo(event)
     print("数据已发送给玩家 " .. playerID)
     print("================================")
 end
+
+function CDOTA_BaseNPC:IsLeashed()
+    if not IsServer() then return end
+    
+    for _, mod in pairs(self:FindAllModifiers()) do
+        local tables = {}
+        mod:CheckStateToTable(tables)
+        local bkb_allowed = true
+    
+        if mod:GetAbility() then 
+            local behavior = mod:GetAbility():GetAbilityTargetFlags()
+    
+            if bit.band(behavior, DOTA_UNIT_TARGET_FLAG_MAGIC_IMMUNE_ENEMIES) == 0 and self:IsDebuffImmune() then 
+                bkb_allowed = false
+            end 
+        end 
+    
+        if bkb_allowed == true then 
+            for state_name, mod_table in pairs(tables) do
+                if tostring(state_name) == tostring(MODIFIER_STATE_TETHERED) then
+                     return true
+                end
+            end
+        end
+    end
+    return false
+end
+    
 function Main:OnRequestUnitInfo(event)
     local playerID = event.PlayerID
     local unitEntIndex = event.unit_ent_index
     local unit = EntIndexToHScript(unitEntIndex)
     if unit and IsValidEntity(unit) then
 
-        if unit:IsRooted() then
-            print(string.format("Unit %s is rooted", unit:GetUnitName()))
+        if unit:IsLeashed() then
+            print(string.format("Unit %s is IsLeashed", unit:GetUnitName()))
         else
-            print(string.format("Unit %s is not rooted", unit:GetUnitName()))
+            print(string.format("Unit %s is not IsLeashed", unit:GetUnitName()))
         end
 
         local unitName = unit:GetUnitName()
         local modifiers = {}
-        for i = 0, unit:GetModifierCount() - 1 do
-            local modifierName = unit:GetModifierNameByIndex(i)
-            local modifier = unit:FindModifierByName(modifierName)
-            local remainingTime = modifier and modifier:GetRemainingTime() or -1
-            local duration = modifier and modifier:GetDuration() or -1
-            local stackCount = modifier and modifier:GetStackCount() or 0
+        local unitModifiers = unit:FindAllModifiers()
+        for _, modifier in pairs(unitModifiers) do
+            local modifierName = modifier:GetName()
+            local remainingTime = modifier:GetRemainingTime()
+            local duration = modifier:GetDuration()
+            local stackCount = modifier:GetStackCount()
             table.insert(modifiers, {
                 name = modifierName,
                 remaining_time = remainingTime,

@@ -34,16 +34,15 @@ function CommonAI:IsNotUnderModifiers(caster, forbiddenModifiers, log)
 end
 
 function CommonAI:CountModifiers(unit, modifierName)
-    if not unit or not unit.GetModifierCount then
+    if not unit or not unit.FindAllModifiers then
         return 0
     end
 
     local count = 0
-    local modifierCount = unit:GetModifierCount()
-
-    for i = 0, modifierCount - 1 do
-        local modifier = unit:GetModifierNameByIndex(i)
-        if modifier and modifier == modifierName then
+    local modifiers = unit:FindAllModifiers()
+    
+    for _, modifier in pairs(modifiers) do
+        if modifier and modifier:GetName() == modifierName then
             count = count + 1
         end
     end

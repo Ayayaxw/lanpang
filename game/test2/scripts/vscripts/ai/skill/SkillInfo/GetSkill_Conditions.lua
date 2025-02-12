@@ -104,7 +104,7 @@ HeroSkillConditions = {
                     return true
                 else
                     -- 寻找魔法值百分比最低的目标
-                    self.target = self:FindBestEnemyHeroTarget(
+                    local potentialTarget = self:FindBestEnemyHeroTarget(
                         caster,
                         ability,
                         {},
@@ -112,6 +112,11 @@ HeroSkillConditions = {
                         "mana_percent",
                         true
                     )
+                    
+                    -- 只有在找到的目标不为nil时才赋值
+                    if potentialTarget then
+                        self.target = potentialTarget
+                    end
                     
                     -- 敌法师生命值低于30%且找到目标时返回true
                     if caster:GetHealthPercent() < 30 and self.target then
@@ -159,13 +164,17 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("bane_fiends_grip")
                 if not ability then return false end
                 
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     nil,
                     nil,
                     "control" 
                 )
+                
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
                 
                 return self.target ~= nil
             end
@@ -192,7 +201,7 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("bane_nightmare")
                 if not ability then return false end
                 
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     nil,
@@ -200,7 +209,11 @@ HeroSkillConditions = {
                     "control" 
                 )
                 
-                return self.target ~= nil
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+                
+                return potentialTarget ~= nil
             end
         },
     },
@@ -256,7 +269,7 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("snapfire_firesnap_cookie")
                 if not ability then return false end
                 
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     nil,
@@ -264,7 +277,11 @@ HeroSkillConditions = {
                     "control" 
                 )
                 
-                return self.target ~= nil
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+                
+                return potentialTarget ~= nil
             end
         },
     },
@@ -294,7 +311,7 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("winter_wyvern_winters_curse")
                 if not ability then return false end
                 
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     nil,
@@ -302,7 +319,11 @@ HeroSkillConditions = {
                     "control" 
                 )
                 
-                return self.target ~= nil
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+                
+                return potentialTarget ~= nil
             end
         },
     },
@@ -334,7 +355,7 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("axe_culling_blade")
                 if not ability then return false end
                 
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     nil,
@@ -342,6 +363,10 @@ HeroSkillConditions = {
                     "health_percent",  
                     true      -- 只允许英雄单位
                 )
+                
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
                 
                 if caster:GetHealthPercent() >= 20 and (not self.target or self.target:GetHealth() >= 575) then
                     return false
@@ -355,7 +380,7 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("axe_berserkers_call")
                 if not ability then return false end
                 
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     nil,
@@ -363,7 +388,11 @@ HeroSkillConditions = {
                     "control" 
                 )
                 
-                return self.target ~= nil
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+                
+                return potentialTarget ~= nil
             end
         },
     },
@@ -391,7 +420,7 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("skeleton_king_hellfire_blast")
                 if not ability then return false end
                 
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     nil,
@@ -399,7 +428,11 @@ HeroSkillConditions = {
                     "control" 
                 )
                 
-                return self.target ~= nil
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+                
+                return potentialTarget ~= nil
             end
         },
     },
@@ -504,7 +537,7 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("disruptor_static_storm")
                 if not ability then return false end
                 
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     nil,
@@ -512,7 +545,11 @@ HeroSkillConditions = {
                     "control" 
                 )
                 
-                return self.target ~= nil
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+                
+                return potentialTarget ~= nil
             end
         },
     },
@@ -540,7 +577,7 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("lich_sinister_gaze")
                 if not ability then return false end
                 
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     nil,
@@ -548,7 +585,11 @@ HeroSkillConditions = {
                     "control" 
                 )
                 
-                return self.target ~= nil
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+                
+                return potentialTarget ~= nil
             end
         },
     },
@@ -579,7 +620,7 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("shadow_shaman_voodoo")
                 if not ability then return false end
                 
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     nil,
@@ -587,7 +628,11 @@ HeroSkillConditions = {
                     "control" 
                 )
                 
-                return self.target ~= nil
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+                
+                return potentialTarget ~= nil
             end
         },
         ["shadow_shaman_shackles"] = {
@@ -595,7 +640,7 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("shadow_shaman_shackles")
                 if not ability then return false end
                 
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     nil,
@@ -603,7 +648,11 @@ HeroSkillConditions = {
                     "control" 
                 )
                 
-                return self.target ~= nil
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+                
+                return potentialTarget ~= nil
             end
         }
     },
@@ -642,7 +691,7 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("ogre_magi_fireblast")
                 if not ability then return false end
                 
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     nil,
@@ -650,7 +699,11 @@ HeroSkillConditions = {
                     "control" 
                 )
                 
-                return self.target ~= nil
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+                
+                return potentialTarget ~= nil
             end
         },
         
@@ -659,7 +712,7 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("ogre_magi_unrefined_fireblast")
                 if not ability then return false end
                 
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     nil,
@@ -667,7 +720,11 @@ HeroSkillConditions = {
                     "control" 
                 )
                 
-                return self.target ~= nil
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+                
+                return potentialTarget ~= nil
             end
         },
         ["ogre_magi_bloodlust"] = {
@@ -754,7 +811,7 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("lion_voodoo")
                 if not ability then return false end
                 
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     nil,
@@ -762,7 +819,11 @@ HeroSkillConditions = {
                     "control" 
                 )
                 
-                return self.target ~= nil
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+                
+                return potentialTarget ~= nil
             end
         },
         ["lion_impale"] = {
@@ -770,7 +831,7 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("lion_impale")
                 if not ability then return false end
                 
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     nil,
@@ -778,7 +839,11 @@ HeroSkillConditions = {
                     "control" 
                 )
                 
-                return self.target ~= nil
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+                
+                return potentialTarget ~= nil
             end
         },
         ["lion_mana_drain"] = {
@@ -818,7 +883,7 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("rubick_telekinesis")
                 if not ability then return false end
                 
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     nil,
@@ -826,7 +891,11 @@ HeroSkillConditions = {
                     "control" 
                 )
                 
-                return self.target ~= nil
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+                
+                return potentialTarget ~= nil
             end
         },
     },
@@ -837,15 +906,19 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("riki_smoke_screen")
                 if not ability then return false end
                 
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     nil,
                     nil,
                     "control" 
                 )
+                
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
 
-                return self.target ~= nil and self:NeedsModifierRefresh(caster,{"modifier_riki_tricks_of_the_trade_phase"}, 0.2)
+                return potentialTarget ~= nil and self:NeedsModifierRefresh(caster,{"modifier_riki_tricks_of_the_trade_phase"}, 0.2)
             end
         },
         ["riki_tricks_of_the_trade"] = {
@@ -873,7 +946,7 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("sven_storm_bolt")
                 if not ability then return false end
                 
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     nil,
@@ -881,7 +954,11 @@ HeroSkillConditions = {
                     "control" 
                 )
                 
-                return self.target ~= nil
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+
+                return potentialTarget ~= nil
             end
         },
     },
@@ -943,7 +1020,7 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("faceless_void_chronosphere")
                 if not ability then return false end
                 
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     nil,
@@ -951,7 +1028,11 @@ HeroSkillConditions = {
                     "control" 
                 )
                 
-                return self.target ~= nil
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+
+                return potentialTarget ~= nil
             end
         },
     },
@@ -1110,16 +1191,20 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("centaur_hoof_stomp")
                 if not ability then return false end
                 
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     nil,
                     nil,
-                    "control",  
-                    true             -- 只允许英雄单位
+                    "control" ,
+                    true
                 )
                 
-                return self.target ~= nil
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+
+                return potentialTarget ~= nil
             end
         },
     },
@@ -1140,7 +1225,7 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("centaur_khan_war_stomp")
                 if not ability then return false end
                 
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     nil,
@@ -1148,7 +1233,11 @@ HeroSkillConditions = {
                     "control" 
                 )
                 
-                return self.target ~= nil
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+
+                return potentialTarget ~= nil
             end
         },
     },
@@ -1165,7 +1254,7 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("dragon_knight_dragon_tail")
                 if not ability then return false end
                 
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     nil,
@@ -1173,7 +1262,11 @@ HeroSkillConditions = {
                     "control" 
                 )
                 
-                return self.target ~= nil
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+
+                return potentialTarget ~= nil
             end
         },
     },
@@ -1190,7 +1283,7 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("spirit_breaker_charge_of_darkness")
                 if not ability then return false end
                 
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     nil,
@@ -1198,7 +1291,11 @@ HeroSkillConditions = {
                     "control" 
                 )
                 
-                return self.target ~= nil
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+
+                return potentialTarget ~= nil
             end
         },
         
@@ -1207,7 +1304,7 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("spirit_breaker_nether_strike")
                 if not ability then return false end
                 
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     nil,
@@ -1215,7 +1312,11 @@ HeroSkillConditions = {
                     "control" 
                 )
                 
-                return self.target ~= nil
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+
+                return potentialTarget ~= nil
             end
         },
 
@@ -1254,7 +1355,7 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("primal_beast_pulverize")
                 if not ability then return false end
                 
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     nil,
@@ -1262,7 +1363,11 @@ HeroSkillConditions = {
                     "control" 
                 )
                 
-                return self.target ~= nil
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+
+                return potentialTarget ~= nil
             end
         },
         ["primal_beast_onslaught_release"] = {
@@ -1427,7 +1532,7 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("tidehunter_ravage")
                 if not ability then return false end
                 
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     nil,
@@ -1435,7 +1540,11 @@ HeroSkillConditions = {
                     "control" 
                 )
                 
-                return self.target ~= nil
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+
+                return potentialTarget ~= nil
             end
         },
     },
@@ -1464,7 +1573,7 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("lina_light_strike_array")
                 if not ability then return false end
                 
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     nil,
@@ -1472,7 +1581,11 @@ HeroSkillConditions = {
                     "control" 
                 )
                 
-                return self.target ~= nil
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+
+                return potentialTarget ~= nil
             end
         },
     },
@@ -1511,7 +1624,7 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("chaos_knight_chaos_bolt")
                 if not ability then return false end
                 
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     nil,
@@ -1519,7 +1632,11 @@ HeroSkillConditions = {
                     "control" 
                 )
                 
-                return self.target ~= nil
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+
+                return potentialTarget ~= nil
             end
         },
     },
@@ -1828,7 +1945,7 @@ HeroSkillConditions = {
                     return true
                 else
                     -- 寻找血量百分比最低的目标
-                    self.target = self:FindBestEnemyHeroTarget(
+                    local potentialTarget = self:FindBestEnemyHeroTarget(
                         caster,
                         ability,  -- 传入获取到的ability
                         {},
@@ -1836,6 +1953,10 @@ HeroSkillConditions = {
                         "health_percent",
                         true
                     )
+                    
+                    if potentialTarget then
+                        self.target = potentialTarget
+                    end
                     
                     if caster:GetHealthPercent() >= 20 and (not self.target or self.target:GetHealthPercent() >= 50) then
                         return false
@@ -2272,7 +2393,7 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("enigma_malefice")
                 if not ability then return false end
                 
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     nil,
@@ -2280,7 +2401,11 @@ HeroSkillConditions = {
                     "control" 
                 )
                 
-                return self.target ~= nil
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+
+                return potentialTarget ~= nil
             end
         },
         ["enigma_black_hole"] = {
@@ -2288,7 +2413,7 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("enigma_black_hole")
                 if not ability then return false end
                 
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     nil,
@@ -2296,7 +2421,11 @@ HeroSkillConditions = {
                     "control" 
                 )
                 
-                return self.target ~= nil
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+
+                return potentialTarget ~= nil
             end
         },
         
@@ -2353,7 +2482,7 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("slardar_slithereen_crush")
                 if not ability then return false end
                 
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     {"modifier_slardar_amplify_damage"},
@@ -2362,7 +2491,11 @@ HeroSkillConditions = {
                     false      -- 只允许英雄单位
                 )
                 
-                return self.target ~= nil
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+                
+                return potentialTarget ~= nil
 
             end
         },
@@ -2371,7 +2504,7 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("slardar_slithereen_crush")
                 if not ability then return false end
                 
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     nil,
@@ -2379,7 +2512,11 @@ HeroSkillConditions = {
                     "control" 
                 )
                 
-                return self.target ~= nil
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+
+                return potentialTarget ~= nil
             end
         },
     },
@@ -2406,7 +2543,7 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("magnataur_reverse_polarity")
                 if not ability then return false end
                 
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     nil,
@@ -2414,7 +2551,11 @@ HeroSkillConditions = {
                     "control" 
                 )
                 
-                return self.target ~= nil
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+
+                return potentialTarget ~= nil
             end
         },
     },
@@ -2923,15 +3064,19 @@ HeroSkillConditions = {
                 end
                 
                 -- 如果target没有大招modifier，按原逻辑执行
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     {"modifier_naga_siren_ensnare"},
                     0.2,
                     "control" 
                 )
-                
-                return self.target ~= nil
+
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+
+                return potentialTarget ~= nil
             end
         }
     },
@@ -2996,7 +3141,7 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("morphling_adaptive_strike_str")
                 if not ability then return false end
                 
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     nil,
@@ -3004,7 +3149,11 @@ HeroSkillConditions = {
                     "control" 
                 )
                 
-                return self.target ~= nil
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+
+                return potentialTarget ~= nil
             end
         },
 
@@ -3359,7 +3508,7 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("marci_companion_run")
                 if not ability then return false end
                 
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     nil,
@@ -3367,9 +3516,11 @@ HeroSkillConditions = {
                     "control" 
                 )
                 
-                if not self.target then
-                    return false
+                if potentialTarget then
+                    self.target = potentialTarget
                 end
+
+                return potentialTarget ~= nil
 
             end
         },
@@ -3430,7 +3581,7 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("nyx_assassin_impale")
                 if not ability then return false end
                 
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     nil,
@@ -3438,7 +3589,11 @@ HeroSkillConditions = {
                     "control" 
                 )
                 
-                return self.target ~= nil
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+
+                return potentialTarget ~= nil
             end
         },
         ["nyx_assassin_jolt"] = {
@@ -3465,16 +3620,20 @@ HeroSkillConditions = {
                     local ability = caster:FindAbilityByName("nyx_assassin_spiked_carapace")
                     if not ability then return false end
                     
-                    self.target = self:FindBestEnemyHeroTarget(
+                    local potentialTarget = self:FindBestEnemyHeroTarget(
                         caster,
                         ability,
                         nil,
                         nil,
-                        "control",  
-                        true      -- 只允许英雄单位
+                        "control" ,
+                        true
                     )
                     
-                    return self.target ~= nil
+                    if potentialTarget then
+                        self.target = potentialTarget
+                    end
+    
+                    return potentialTarget ~= nil
                 end
             end
         },
@@ -3647,7 +3806,7 @@ HeroSkillConditions = {
         
                 -- 寻找最佳目标
                 local ability = caster:FindAbilityByName("storm_spirit_electric_vortex")
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     {"modifier_storm_spirit_electric_vortex_pull"},
@@ -3655,12 +3814,11 @@ HeroSkillConditions = {
                     "distance",
                     true  -- 只允许英雄单位
                 )
-        
-                if self.target then
-                    log(string.format("[STORM_TEST] 找到合适的目标: %s", self.target:GetUnitName()))
+                
+                if potentialTarget then
+                    self.target = potentialTarget
                     return true
                 else
-                    log("[STORM_TEST] 没有找到合适的目标")
                     return false
                 end
             end
@@ -3703,7 +3861,7 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("beastmaster_primal_roar")
                 if not ability then return false end
                 
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     nil,
@@ -3711,7 +3869,11 @@ HeroSkillConditions = {
                     "control" 
                 )
                 
-                return self.target ~= nil
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+
+                return potentialTarget ~= nil
             end
         },
     },
@@ -3901,7 +4063,7 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("jakiro_ice_path")
                 if not ability then return false end
                 
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     nil,
@@ -3909,7 +4071,11 @@ HeroSkillConditions = {
                     "control" 
                 )
                 
-                return self.target ~= nil
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+
+                return potentialTarget ~= nil
             end
         },
     },
@@ -3959,7 +4125,7 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("leshrac_split_earth")
                 if not ability then return false end
                 
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     nil,
@@ -3967,7 +4133,11 @@ HeroSkillConditions = {
                     "control" 
                 )
                 
-                return self.target ~= nil
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+
+                return potentialTarget ~= nil
             end
         },
     },
@@ -4547,16 +4717,24 @@ HeroSkillConditions = {
                     local ability = caster:FindAbilityByName("earthshaker_enchant_totem")
                     if not ability then return false end
                     
-                    self.target = self:FindBestEnemyHeroTarget(
+                    if self.target and (caster:GetAbsOrigin() - self.target:GetAbsOrigin()):Length2D() > 250 then
+                        return true
+                    end
+                    
+                    local potentialTarget = self:FindBestEnemyHeroTarget(
                         caster,
                         ability,
                         nil,
                         nil,
-                        "control",  
-                        true      -- 只允许英雄单位
+                        "control" ,
+                        true
                     )
                     
-                    return self.target ~= nil
+                    if potentialTarget then
+                        self.target = potentialTarget
+                    end
+    
+                    return potentialTarget ~= nil
                 end
             end
         },
@@ -4565,7 +4743,7 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("earthshaker_fissure")
                 if not ability then return false end
                 
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     nil,
@@ -4573,7 +4751,11 @@ HeroSkillConditions = {
                     "control" 
                 )
                 
-                return self.target ~= nil
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+
+                return potentialTarget ~= nil
             end
         },
         ["earthshaker_echo_slam"] = {
@@ -4589,7 +4771,7 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("earthshaker_echo_slam")
                 if not ability then return false end
                 
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     nil,
@@ -4597,7 +4779,11 @@ HeroSkillConditions = {
                     "control" 
                 )
                 
-                return self.target ~= nil
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+
+                return potentialTarget ~= nil
             end
         },
     },
@@ -4780,7 +4966,7 @@ HeroSkillConditions = {
                     "health_percent"
                 )
                 
-                return self.Ally and self.Ally:GetHealthPercent() < 30
+                return self.Ally and self.Ally:GetHealthPercent() < 50
             end
         },
 
@@ -4971,7 +5157,7 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("rattletrap_hookshot")
                 if not ability then return false end
                 
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     nil,
@@ -4979,7 +5165,11 @@ HeroSkillConditions = {
                     "control" 
                 )
                 
-                return self.target ~= nil
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+
+                return potentialTarget ~= nil
             end
         },
     },
@@ -4989,7 +5179,7 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("vengefulspirit_magic_missile")
                 if not ability then return false end
                 
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     nil,
@@ -4997,7 +5187,11 @@ HeroSkillConditions = {
                     "control" 
                 )
                 
-                return self.target ~= nil
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+
+                return potentialTarget ~= nil
             end
         },
 
@@ -5015,7 +5209,7 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("sandking_burrowstrike")
                 if not ability then return false end
                 
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     nil,
@@ -5023,7 +5217,11 @@ HeroSkillConditions = {
                     "control" 
                 )
                 
-                return self.target ~= nil
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+
+                return potentialTarget ~= nil
             end
         },
     },
@@ -5033,7 +5231,7 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("pudge_dismember")
                 if not ability then return false end
                 
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     nil,
@@ -5041,7 +5239,11 @@ HeroSkillConditions = {
                     "control" 
                 )
                 
-                return self.target ~= nil
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+
+                return potentialTarget ~= nil
             end
         },
     },
@@ -5051,7 +5253,7 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("batrider_flaming_lasso")
                 if not ability then return false end
                 
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     nil,
@@ -5059,7 +5261,11 @@ HeroSkillConditions = {
                     "control" 
                 )
                 
-                return self.target ~= nil
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+
+                return potentialTarget ~= nil
             end
         },
     },
@@ -5071,7 +5277,7 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("void_spirit_aether_remnant")
                 if not ability then return false end
                 
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     nil,
@@ -5079,7 +5285,11 @@ HeroSkillConditions = {
                     "control" 
                 )
                 
-                return self.target ~= nil
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+
+                return potentialTarget ~= nil
             end
         },
         
@@ -5109,47 +5319,44 @@ HeroSkillConditions = {
                     "modifier_ember_spirit_fire_remnant",
                 }
                 
-                if self:IsNotUnderModifiers(caster, forbiddenModifiers, log) then
-                    return true
-                else
-                    local fireRemnantAbility = caster:FindAbilityByName("ember_spirit_fire_remnant")
-                    local requiredModifier = "modifier_ember_spirit_fire_remnant_timer"
-                    -- 检查是否处于躲避模式
-                    if self:containsStrategy(self.hero_strategy, "躲避模式") or self:containsStrategy(self.hero_strategy, "躲避模式1000码") then
-                        -- 在躲避模式下，如果有任何Fire Remnant modifier，就返回false
-                        if caster:HasModifier("modifier_ember_spirit_fire_remnant") then
-                            self:log("躲避模式：检测到Fire Remnant modifier，返回false")
-                            return false
+                -- 检查是否处于躲避模式
+                if self:containsStrategy(self.hero_strategy, "躲避模式") or self:containsStrategy(self.hero_strategy, "躲避模式1000码") then
+                    -- 在躲避模式下才检查forbiddenModifiers
+                    if not self:IsNotUnderModifiers(caster, forbiddenModifiers, log) then
+                        self:log("躲避模式：检测到禁用modifier，返回false")
+                        return false
+                    end
+                end
+                
+                local fireRemnantAbility = caster:FindAbilityByName("ember_spirit_fire_remnant")
+                local requiredModifier = "modifier_ember_spirit_fire_remnant_timer"
+                
+                if fireRemnantAbility and fireRemnantAbility:GetCurrentAbilityCharges() == 0 then
+                    local allModifiers = caster:FindAllModifiersByName(requiredModifier)
+                    self:log(string.format("Fire Remnant: Found %d modifiers", #allModifiers))
+                    
+                    local allBelowThreshold = true
+                    
+                    for i, modifier in ipairs(allModifiers) do
+                        local remainingTime = modifier:GetRemainingTime()
+                        self:log(string.format("Remnant %d: Remaining time %.2f", i, remainingTime))
+                        
+                        if remainingTime > 43.9 then
+                            allBelowThreshold = false
+                            self:log(string.format("Fire Remnant: Remnant %d has remaining time > 43.9", i))
+                            break
                         end
                     end
                     
-                    if fireRemnantAbility and fireRemnantAbility:GetCurrentAbilityCharges() == 0 then
-                        local allModifiers = caster:FindAllModifiersByName(requiredModifier)
-                        self:log(string.format("Fire Remnant: Found %d modifiers", #allModifiers))
-                        
-                        local allBelowThreshold = true
-                        
-                        for i, modifier in ipairs(allModifiers) do
-                            local remainingTime = modifier:GetRemainingTime()
-                            self:log(string.format("Remnant %d: Remaining time %.2f", i, remainingTime))
-                            
-                            if remainingTime > 43.9 then
-                                allBelowThreshold = false
-                                self:log(string.format("Fire Remnant: Remnant %d has remaining time > 43.9", i))
-                                break
-                            end
-                        end
-                        
-                        if allBelowThreshold then
-                            self:log("Fire Remnant: All remnants have remaining time <= 43.9, returning true")
-                            return true
-                        else
-                            self:log("Fire Remnant: Not all remnants have remaining time <= 43.9, returning false")
-                            return false
-                        end
+                    if allBelowThreshold then
+                        self:log("Fire Remnant: All remnants have remaining time <= 43.9, returning true")
+                        return true
                     else
+                        self:log("Fire Remnant: Not all remnants have remaining time <= 43.9, returning false")
                         return false
                     end
+                else
+                    return true
                 end
             end
         },
@@ -5317,7 +5524,7 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("windrunner_shackleshot")
                 if not ability then return false end
                 
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     nil,
@@ -5325,7 +5532,11 @@ HeroSkillConditions = {
                     "control" 
                 )
                 
-                return self.target ~= nil
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+
+                return potentialTarget ~= nil
             end
         },
         ["windrunner_powershot"] = {
@@ -5364,7 +5575,7 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("brewmaster_storm_cyclone")
                 
                 -- 先找正在持续施法的目标
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     {},
@@ -5372,15 +5583,16 @@ HeroSkillConditions = {
                     "channeling",
                     true
                 )
-        
+            
                 -- 如果找到目标且正在持续施法
-                if self.target and self.target:IsChanneling() then
+                if potentialTarget and potentialTarget:IsChanneling() then
+                    self.target = potentialTarget
                     log(string.format("[PANDA_TEST] 找到正在持续施法的目标: %s", self.target:GetUnitName()))
                     return true
                 end
                 
                 -- 如果没找到持续施法的目标，找增益BUFF最多的目标
-                self.target = self:FindBestEnemyHeroTarget(
+                potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     {},
@@ -5388,16 +5600,17 @@ HeroSkillConditions = {
                     "dispellable_buffs",
                     true
                 )
-        
-                if self.target then
-                    log(string.format("[PANDA_TEST] 找到增益BUFF最多的目标: %s", self.target:GetUnitName()))
+            
+                if potentialTarget then
                     -- 检查是否有撒旦状态
-                    if self.target:HasModifier("modifier_item_satanic_unholy") then
+                    if potentialTarget:HasModifier("modifier_item_satanic_unholy") then
+                        self.target = potentialTarget
+                        log(string.format("[PANDA_TEST] 找到增益BUFF最多的目标: %s", self.target:GetUnitName()))
                         log("[PANDA_TEST] 目标有撒旦状态")
                         return true
                     end
                 end
-        
+            
                 log("[PANDA_TEST] 没有找到合适的目标")
                 return false
             end
@@ -5406,7 +5619,7 @@ HeroSkillConditions = {
             function(self, caster, log)
                 local ability = caster:FindAbilityByName("brewmaster_storm_dispel_magic")
                 
-                self.target = self:FindBestEnemyHeroTarget(
+                local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
                     {},
@@ -5414,8 +5627,9 @@ HeroSkillConditions = {
                     "dispellable_buffs",  -- 按BUFF数量排序
                     false                 -- 允许非英雄单位
                 )
-        
-                if self.target then
+            
+                if potentialTarget then
+                    self.target = potentialTarget
                     return true
                 end
                 
@@ -5860,10 +6074,19 @@ function CommonAI:CheckSkillConditions(entity, heroName)
 
     for _, ability in ipairs(abilities) do
         local abilityName = ability:GetAbilityName()
+        
+        -- 先检查大招
+        local ultimateCheck = self:CheckUltimateConditions(ability, entity)
+        if not ultimateCheck then
+            if not self:tableContains(self.disabledSkills[heroName], abilityName) then
+                table.insert(self.disabledSkills[heroName], abilityName)
+            end
+            goto continue
+        end
+        
         local conditions = isSpecialHero and self:FindConditionsForAbility(abilityName) or heroConditions[abilityName]
-
+    
         if conditions then
-            --self:log(string.format("检查技能 %s 的条件", abilityName))
             if SkillMeetsConditions(self, entity, abilityName, conditions, function(msg) self:log(msg) end) then
                 self:log(string.format("技能 %s 条件满足", abilityName))
                 for i, skill in ipairs(self.disabledSkills[heroName]) do
@@ -5876,19 +6099,38 @@ function CommonAI:CheckSkillConditions(entity, heroName)
                     end
                 end
             else
-                --self:log(string.format("技能 %s 条件不满足", abilityName))
                 if not self:tableContains(self.disabledSkills[heroName], abilityName) then
                     table.insert(self.disabledSkills[heroName], abilityName)
-                    --self:log(string.format("技能 %s 已加入禁用列表", abilityName))
                 end
             end
         else
             --self:log(string.format("技能 %s 没有定义的条件", abilityName))
         end
+        
+        ::continue::
     end
 end
 
+function CommonAI:CheckUltimateConditions(ability, entity)
+    if ability:GetAbilityType() == ABILITY_TYPE_ULTIMATE then
+        local healthPct = entity:GetHealthPercent()
+        print("检测到大招:", ability:GetAbilityName(), "当前血量百分比:", healthPct)
+        
+        if self:containsStrategy(self.global_strategy, "不到半血绝不放大") and healthPct > 50 then
+            print("启用策略:不到半血绝不放大,血量大于50%,禁止释放大招")
+            return false
+        end
+        
+        if self:containsStrategy(self.global_strategy, "不到80%血绝不放大") and healthPct > 80 then
+            print("启用策略:不到80%血绝不放大,血量大于80%,禁止释放大招") 
+            return false
+        end
+    end
+    return true
+end
+
 function CommonAI:FindConditionsForAbility(abilityName)
+
     for _, heroConditions in pairs(HeroSkillConditions) do
         if heroConditions[abilityName] then
             return heroConditions[abilityName]

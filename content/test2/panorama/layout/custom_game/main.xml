@@ -74,7 +74,7 @@
 
 
 
-  <!-- <DOTAScenePanel class="Greenpanel_1" 
+<!--   <DOTAScenePanel class="Greenpanel_1" 
     id="Greenpanel_1" 
     map="maps/ui/dota_hud_loadout_2022" 
     particleonly="false" 
@@ -86,7 +86,6 @@
     rotateonhover="true"
   />
   
-
   <Panel id="Greenpanel" class = "Greenpanel"/> -->
 
   <Panel id="CustomHeroStatsRoot" class="CustomHeroStatsRoot hidden">

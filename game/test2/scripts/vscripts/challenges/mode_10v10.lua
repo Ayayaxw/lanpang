@@ -14,7 +14,7 @@ function Main:Init_mode_10v10(event, playerID)
     hero_duel.EndDuel = false
     
     -- 设置摄像机位置
-    SendCameraPositionToJS(Main.largeSpawnCenter + Vector(0, 500, 0), 1)
+    SendCameraPositionToJS(Main.largeSpawnCenter + Vector(0, 200, 0), 1)
 
     -- 击杀计数初始化
     hero_duel.killCount = 0
@@ -281,6 +281,8 @@ function Main:Init_mode_10v10(event, playerID)
                     local hero = self.leftTeamHeroes[currentHero]
                     if hero and not hero:IsNull() then
                         local spawnPos = Vector(pos.x, startY + pos.y, 128)
+                        self:StartAbilitiesMonitor(hero,false)
+                        
                         self:PrepareHeroForDuel(
                             hero,
                             spawnPos,
@@ -309,6 +311,7 @@ function Main:Init_mode_10v10(event, playerID)
                     local hero = self.rightTeamHeroes[currentHero]
                     if hero and not hero:IsNull() then
                         local spawnPos = Vector(pos.x, startY + pos.y, 128)
+                        self:StartAbilitiesMonitor(hero,false)
                         self:PrepareHeroForDuel(
                             hero,
                             spawnPos,
@@ -380,7 +383,7 @@ function Main:OnUnitKilled_mode_10v10(killedUnit, args)
     -- 检查是否一方全部阵亡
     local leftTeamAlive = false
     local rightTeamAlive = false
-
+    self:StopAbilitiesMonitor(killedUnit)
     -- 检查左方队伍
     for _, hero in pairs(self.leftTeamHeroes) do
         if not hero:IsNull() and hero:IsAlive() then

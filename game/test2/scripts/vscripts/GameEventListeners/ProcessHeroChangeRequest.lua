@@ -80,6 +80,9 @@ function Main:DeleteCurrentArenaHeroes()
     -- 遍历并清除当前竞技场中的英雄
     Main:ClearAbilitiesPanel()
     Main:ClearAllFloatingText()
+    Timers:CreateTimer(1, function()
+        Main:ClearAbilitiesPanel()
+    end)
     for index, hero in ipairs(Main.currentArenaHeroes) do
         if hero and not hero:IsNull() and hero.GetPlayerID then
             local playerID = hero:GetPlayerID()

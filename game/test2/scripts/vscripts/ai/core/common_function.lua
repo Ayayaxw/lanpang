@@ -160,44 +160,27 @@ function CommonAI:IsSkillReady(skill)
     local abilityName = skill:GetAbilityName()  -- 只调用一次 GetAbilityName
 
     -- 判断技能是否因缠绕效果无法使用
-    local function IsAbilityDisabledByRoot(unit, ability)
-        -- 获取单位是否被缠绕或有特定modifier
+    local function IsAbilityDisabledByRootOrLeash(unit, ability)
+        -- Check if unit is rooted
         local isRooted = unit:IsRooted()
-        local hasRootingModifier = false
         
-        -- 检查特定的modifier
-        local rootModifiers = {
-            "modifier_puck_coiled",
-            "modifier_tidehunter_dead_in_the_water"
-        }
+        -- Check if unit is leashed
+        local hasLeashModifier = unit:IsLeashed()
         
-        -- 遍历检查是否有任意一个rooting modifier
-        for _, modifierName in ipairs(rootModifiers) do
-            if unit:HasModifier(modifierName) then
-                hasRootingModifier = true
-                break
-            end
-        end
-    
-        -- 如果单位被缠绕或有特定modifier，进一步检查技能是否受影响
-        if isRooted or hasRootingModifier then
-            -- 获取技能的行为属性
+        -- If unit is rooted or leashed, check ability behavior
+        if isRooted or hasLeashModifier then
             local abilityBehavior = ability:GetBehavior()
-    
-            -- 检查 abilityBehavior 是否为 nil
+            
             if abilityBehavior == nil then
-                self:log("错误：技能 " .. abilityName .. " 的 abilityBehavior 为 nil")
                 return false
             end
             
-            -- 检查技能行为是否包含DOTA_ABILITY_BEHAVIOR_ROOT_DISABLE
             if bit.band(abilityBehavior, DOTA_ABILITY_BEHAVIOR_ROOT_DISABLES) ~= 0 then
-                self:log("技能 " .. abilityName .. " 因缠绕效果无法使用")
                 return true
             end
         end
         
-        return false 
+        return false
     end
 
     -- 检查技能是否隐藏（排除特定技能）
@@ -225,7 +208,7 @@ function CommonAI:IsSkillReady(skill)
     end
 
     -- 检查技能是否因缠绕效果无法使用
-    if IsAbilityDisabledByRoot(owner, skill) then
+    if IsAbilityDisabledByRootOrLeash(owner, skill) then
         return false
     end
 
@@ -438,21 +421,10 @@ function CommonAI:IsUnableToAttack(entity, target)
         return true
     end
 
-    -- 已在攻击状态
-    if entity:IsAttacking() then
-        printReason("已经在攻击状态")
-        return true
-    end
+
 
     -- 检查磁场效果
     local distance = (entity:GetAbsOrigin() - target:GetAbsOrigin()):Length2D()
-    if target and type(target.FindModifierByName) == "function" then
-        local magneticFieldModifier = target:FindModifierByName("modifier_arc_warden_magnetic_field_evasion")
-        if magneticFieldModifier and distance > 325 then
-            printReason("目标处于磁场效果中且距离过远")
-            return true
-        end
-    end
 
     -- 检查原地不动策略
     if self:containsStrategy(self.global_strategy, "原地不动") then

@@ -1,13 +1,4 @@
 
-function PrintAllModifiers(unit)
-    print("正在打印单位 " .. unit:GetUnitName() .. " 的所有 modifier：")
-    for i = 0, unit:GetModifierCount() - 1 do
-        local modifier = unit:GetModifierNameByIndex(i)
-        print(i + 1 .. ": " .. modifier)
-    end
-    print("Modifier 列表结束")
-end
-
 -- 在文件顶部或适当的位置定义这个变量
 local DEBUG_PRINT = true
 

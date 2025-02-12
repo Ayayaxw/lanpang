@@ -1464,6 +1464,31 @@ function Main:OnRequestNearbyUnitsInfo(event)
     print("================================")
 end
 
+
+function CDOTA_Buff:IsFearDebuff()
+    local tables = {}
+    self:CheckStateToTable(tables)
+    
+    for state_name, mod_table in pairs(tables) do
+        if tostring(state_name) == tostring(MODIFIER_STATE_FEARED) then
+             return true
+        end
+    end
+    return false
+end
+
+function CDOTA_Buff:IsTauntDebuff()
+    local tables = {}
+    self:CheckStateToTable(tables)
+    
+    for state_name, mod_table in pairs(tables) do
+        if tostring(state_name) == tostring(MODIFIER_STATE_TAUNTED) then
+             return true
+        end
+    end
+    return false
+end
+
 function CDOTA_BaseNPC:IsLeashed()
     if not IsServer() then return end
     

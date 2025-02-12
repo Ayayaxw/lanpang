@@ -248,6 +248,8 @@ function CommonAI:GetSkillAoeRadius(ability)
             local attackRange = caster:Script_GetAttackRange()
             aoeRadius = attackRange
         end
+    elseif abilityName == "nevermore_requiem" and self:containsStrategy(self.hero_strategy, "全图摇大") then
+        aoeRadius = 9999
     elseif abilityName == "enchantress_bunny_hop" then
         if caster then
             local attackRange = caster:Script_GetAttackRange()

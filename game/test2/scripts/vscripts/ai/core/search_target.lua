@@ -55,7 +55,9 @@ function CommonAI:FindHeroTarget(entity)
         local hasExcludedModifier = unit:HasModifier("modifier_ringmaster_the_box_buff") or 
                                   unit:HasModifier("modifier_slark_depth_shroud") or
                                   unit:HasModifier("modifier_slark_shadow_dance") or
-                                  unit:HasModifier("modifier_dark_willow_shadow_realm_buff")
+                                  unit:HasModifier("modifier_dark_willow_shadow_realm_buff") or
+                                  unit:HasModifier("modifier_skeleton_king_reincarnation_scepter_active")
+
         
         if isEligible and not hasExcludedModifier then
             local distance = (unit:GetOrigin() - entity:GetOrigin()):Length2D()
@@ -151,11 +153,21 @@ function CommonAI:FindPreferredTarget(entity, preferredUnitNames)
     for _, unit in pairs(units) do
         local unitName = unit:GetUnitName()
         
-        -- 只检查是否匹配优先单位名称
-        for _, prefName in ipairs(preferredUnitNames) do
-            if string.find(unitName, prefName, 1, true) then
-                self:log("找到目标单位: " .. unitName)
-                return unit, enemyCount
+        -- 检查是否有需要排除的modifier
+        local hasExcludedModifier = unit:HasModifier("modifier_ringmaster_the_box_buff") or 
+                                   unit:HasModifier("modifier_slark_depth_shroud") or
+                                   unit:HasModifier("modifier_slark_shadow_dance") or 
+                                   unit:HasModifier("modifier_dark_willow_shadow_realm_buff") or
+                                   unit:HasModifier("modifier_skeleton_king_reincarnation_scepter_active")
+
+        -- 只有当单位没有被排除的modifier时才进行检查
+        if not hasExcludedModifier then
+            -- 只检查是否匹配优先单位名称
+            for _, prefName in ipairs(preferredUnitNames) do
+                if string.find(unitName, prefName, 1, true) then
+                    self:log("找到目标单位: " .. unitName)
+                    return unit, enemyCount
+                end
             end
         end
         
@@ -538,82 +550,65 @@ function CommonAI:FindBestAllyHeroTarget(entity, ability, requiredModifiers, min
 
     -- 排序函数
     local sortFunction = function(a, b)
-        if sortBy == "health_percent" then
-            local healthPercentA = a:GetHealthPercent()
-            local healthPercentB = b:GetHealthPercent()
-            if healthPercentA == healthPercentB then
-                return a:GetEntityIndex() < b:GetEntityIndex()
+        local compareValues = function()
+            if sortBy == "health_percent" then
+                return a:GetHealthPercent(), b:GetHealthPercent()
+            elseif sortBy == "health" then
+                return a:GetHealth(), b:GetHealth()
+            elseif sortBy == "attack" then
+                -- 使用当前最小最大攻击力的平均值
+                return (a:GetDamageMin() + a:GetDamageMax()) / 2, (b:GetDamageMin() + b:GetDamageMax()) / 2
+            elseif sortBy == "distance" then
+                return (a:GetOrigin() - entity:GetOrigin()):Length2D(), (b:GetOrigin() - entity:GetOrigin()):Length2D()
+            elseif sortBy == "mana_percent" then
+                return a:GetManaPercent(), b:GetManaPercent()
+            elseif sortBy == "nearest_to_enemy" then
+                local enemies = FindUnitsInRadius(
+                    entity:GetTeamNumber(),
+                    entity:GetOrigin(),
+                    nil,
+                    1500,
+                    DOTA_UNIT_TARGET_TEAM_ENEMY,
+                    DOTA_UNIT_TARGET_HERO,
+                    DOTA_UNIT_TARGET_FLAG_NOT_ILLUSIONS,
+                    FIND_ANY_ORDER,
+                    false
+                )
+                
+                local minDistA = math.huge
+                local minDistB = math.huge
+                
+                if #enemies > 0 then
+                    for _, enemy in pairs(enemies) do
+                        local distA = (a:GetOrigin() - enemy:GetOrigin()):Length2D()
+                        local distB = (b:GetOrigin() - enemy:GetOrigin()):Length2D()
+                        minDistA = math.min(minDistA, distA)
+                        minDistB = math.min(minDistB, distB)
+                    end
+                end
+                
+                return minDistA, minDistB
             end
-            return healthPercentA < healthPercentB
-        elseif sortBy == "health" then
-            local healthA = a:GetHealth()
-            local healthB = b:GetHealth()
-            if healthA == healthB then
-                return a:GetEntityIndex() < b:GetEntityIndex()
-            end
-            return healthA < healthB
-        elseif sortBy == "attack" then
-            -- 使用当前最小最大攻击力的平均值
-            local attackA = (a:GetDamageMin() + a:GetDamageMax()) / 2
-            local attackB = (b:GetDamageMin() + b:GetDamageMax()) / 2
-            
-            if attackA == attackB then
-                return a:GetEntityIndex() < b:GetEntityIndex()
-            end
-            return attackA > attackB
-        elseif sortBy == "distance" then
-            local distA = (a:GetOrigin() - entity:GetOrigin()):Length2D()
-            local distB = (b:GetOrigin() - entity:GetOrigin()):Length2D()
-            if distA == distB then
-                return a:GetEntityIndex() < b:GetEntityIndex()
-            end
-            return distA < distB
-        elseif sortBy == "mana_percent" then
-            local manaPercentA = a:GetManaPercent()
-            local manaPercentB = b:GetManaPercent()
-            if manaPercentA == manaPercentB then
-                return a:GetEntityIndex() < b:GetEntityIndex()
-            end
-            return manaPercentA < manaPercentB
-        elseif sortBy == "nearest_to_enemy" then
-            -- 如果是自身且允许选择自身，优先级最高
+            return 0, 0
+        end
+
+        local valueA, valueB = compareValues()
+        
+        if valueA == valueB then
+            -- 当值相等时,如果允许对自己施法,优先选择自己
             if canBeSelf then
                 if a == entity then return true end
                 if b == entity then return false end
             end
-            
-            local enemies = FindUnitsInRadius(
-                entity:GetTeamNumber(),
-                entity:GetOrigin(),
-                nil,
-                1500,
-                DOTA_UNIT_TARGET_TEAM_ENEMY,
-                DOTA_UNIT_TARGET_HERO,
-                DOTA_UNIT_TARGET_FLAG_NOT_ILLUSIONS,
-                FIND_ANY_ORDER,
-                false
-            )
-            
-            local minDistA = math.huge
-            local minDistB = math.huge
-            
-            if #enemies > 0 then
-                for _, enemy in pairs(enemies) do
-                    local distA = (a:GetOrigin() - enemy:GetOrigin()):Length2D()
-                    local distB = (b:GetOrigin() - enemy:GetOrigin()):Length2D()
-                    minDistA = math.min(minDistA, distA)
-                    minDistB = math.min(minDistB, distB)
-                end
-            end
-            
-            if minDistA == minDistB then
-                return a:GetEntityIndex() < b:GetEntityIndex()
-            end
-            return minDistA < minDistB
+            return a:GetEntityIndex() < b:GetEntityIndex()
         end
         
-        -- 如果没有匹配到任何排序方式，使用EntityIndex作为默认排序
-        return a:GetEntityIndex() < b:GetEntityIndex()
+        -- attack比较是从大到小,其他都是从小到大
+        if sortBy == "attack" then
+            return valueA > valueB
+        else
+            return valueA < valueB
+        end
     end
 
     -- 分别对英雄和非英雄单位进行排序
@@ -639,51 +634,37 @@ function CommonAI:FindBestAllyHeroTarget(entity, ability, requiredModifiers, min
 end
 
 function CommonAI:GetLongestControlDebuff(entity)
-    --print("GetLongestControlDebuff执行了")
     if not entity or not entity:IsAlive() then 
-        --print("GetLongestControlDebuff: 单位无效或已死亡")
         return false 
     end
     
     local longest_duration = 0
     local longest_modifier = nil
     
-    -- 获取单位身上所有modifier
     local modifiers = entity:FindAllModifiers()
-    --print("GetLongestControlDebuff: 开始检查单位的所有modifier")
     
-    -- 遍历所有modifier
     for _, modifier in pairs(modifiers) do
         local modifierName = modifier:GetName()
-        -- 检查是否是眩晕或变羊或噩梦
+        -- 检查是否是眩晕、变羊、噩梦、恐惧或嘲讽
         local isStun = modifier:IsStunDebuff()
         local isHex = modifier:IsHexDebuff()
-        local isNightmare = (modifierName == "modifier_bane_nightmare")
+        local isNightmare = (modifierName == "modifier_bane_nightmare") 
+        local isFear = modifier:IsFearDebuff()
+        local isTaunt = modifier:IsTauntDebuff()
         
-        -- print(string.format("检查modifier: %s", modifierName))
-        -- print(string.format("是否眩晕: %s", tostring(isStun)))
-        -- print(string.format("是否变羊: %s", tostring(isHex)))
-        -- print(string.format("是否噩梦: %s", tostring(isNightmare)))
-        
-        if isStun or isHex or isNightmare then
+        if isStun or isHex or isNightmare or isFear or isTaunt then
             local remaining_time = modifier:GetRemainingTime()
-            --print(string.format("发现控制效果: %s, 剩余时间: %.2f", modifierName, remaining_time))
-            -- 更新最长持续时间的modifier
             if remaining_time > longest_duration then
                 longest_duration = remaining_time
                 longest_modifier = modifier
-                --print(string.format("更新最长控制效果为: %s, 持续时间: %.2f", modifierName, remaining_time))
             end
         end
     end
     
-    -- 如果找到控制效果，返回modifier和剩余时间，否则返回false
     if longest_modifier then
-        --print(string.format("最终返回控制效果: %s, 持续时间: %.2f", longest_modifier:GetName(), longest_duration))
         return longest_modifier, longest_duration
     end
     
-    --print("GetLongestControlDebuff: 未找到任何控制效果")
     return false
 end
 
@@ -716,10 +697,12 @@ function CommonAI:FindBestEnemyHeroTarget(entity, ability, requiredModifiers, mi
         searchRadius = castRange + aoeRadius + 200
     end
     
-    -- 确保搜索范围不小于攻击范围
-    local attackRange = self.entity:Script_GetAttackRange() + 100
-    if searchRadius < attackRange then
-        searchRadius = attackRange
+    -- 确保搜索范围不小于目标距离
+    if self.target then
+        local distanceToTarget = (self.target:GetAbsOrigin() - self.entity:GetAbsOrigin()):Length2D()
+        if searchRadius < distanceToTarget then
+            searchRadius = distanceToTarget
+        end
     end
 
     local targetType = forceHero and DOTA_UNIT_TARGET_HERO or DOTA_UNIT_TARGET_ALL

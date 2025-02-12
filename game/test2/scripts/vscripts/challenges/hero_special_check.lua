@@ -1,5 +1,7 @@
+
 function IsHeroTrulyDead(killedUnit, callback)
     local unitName = killedUnit:GetUnitName()
+
 
     -- 骷髅王判断简化为使用 IsReincarnating
     if killedUnit:IsReincarnating() then

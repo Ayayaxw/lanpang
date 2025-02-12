@@ -799,6 +799,11 @@ HeroSkillConditions = {
                 return false
             end
         },
+        ["abyssal_underlord_dark_portal"] = {
+            function(self, caster, log)
+                return false
+            end
+        },
     },
 
 
@@ -1218,6 +1223,26 @@ HeroSkillConditions = {
         ["doom_bringer_scorched_earth"] = {
             function(self, caster, log)                
                 return self:NeedsModifierRefresh(caster,{"modifier_doom_bringer_scorched_earth_effect"}, 0.5)
+            end
+        },
+        ["doom_bringer_doom"] = {
+            function(self, caster, log)
+                local ability = caster:FindAbilityByName("doom_bringer_doom")
+                if not ability then return false end
+                
+                local potentialTarget = self:FindBestEnemyHeroTarget(
+                    caster,
+                    ability,
+                    {"modifier_doom_bringer_doom_aura_enemy"},
+                    0.5,
+                    "control" 
+                )
+                
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+
+                return potentialTarget ~= nil
             end
         },
         ["centaur_khan_war_stomp"] = {
@@ -2336,11 +2361,7 @@ HeroSkillConditions = {
                 end
             end
         },
-        ["phantom_lancer_doppelwalk"] = {
-            function(self, caster, log)
-                return caster:GetHealthPercent()<80
-            end
-        },
+
 
     },
     ["npc_dota_hero_enigma"] = {
@@ -2745,7 +2766,25 @@ HeroSkillConditions = {
                 if self:containsStrategy(self.hero_strategy, "满血开恐惧") then
                     return true
                 end
-                return caster:GetHealthPercent()<90
+                local ability = caster:FindAbilityByName("terrorblade_terror_wave")
+                if not ability then
+                    return false
+                end
+                -- 如果target没有大招modifier，按原逻辑执行
+                local potentialTarget = self:FindBestEnemyHeroTarget(
+                    caster,
+                    ability,
+                    {"modifier_terrorblade_fear"},
+                    0.5,
+                    "control" 
+                )
+
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+
+                return potentialTarget ~= nil and caster:GetHealthPercent()<50
+
             end
         }
     },
@@ -2792,20 +2831,31 @@ HeroSkillConditions = {
     ["npc_dota_hero_dawnbreaker"] = {
         ["dawnbreaker_solar_guardian"] = {
             function(self, caster, log)
+                if self:containsStrategy(self.hero_strategy, "满血开大") then
+                    self.Ally = caster
+                    return true
+                end
+
+
                 local ability = caster:FindAbilityByName("dawnbreaker_solar_guardian")
                 if not ability then return false end
         
                 self.Ally = self:FindBestAllyHeroTarget(
                     caster,
                     ability,
-                    {},
-                    0,
+                    nil,
+                    nil,
                     "health_percent"
                 )
         
                 return self.Ally and self.Ally:GetHealthPercent() < 50
             end
-        }
+        },
+        ["dawnbreaker_land"] = {
+            function(self, caster, log)
+                return false
+            end
+        },
     },
     ["npc_dota_hero_witch_doctor"] = {
         ["witch_doctor_voodoo_switcheroo"] = {
@@ -3028,18 +3078,18 @@ HeroSkillConditions = {
                 if not ability then return false end
     
                 local healthThreshold
-                if self:containsStrategy(self.hero_strategy, "半血唱歌") then
-                    healthThreshold = 50
+                if self:containsStrategy(self.hero_strategy, "残血唱歌") then
+                    healthThreshold = 30
                 elseif self:containsStrategy(self.hero_strategy, "满血唱歌") then
                     healthThreshold = 100
                 else
-                    healthThreshold = 30
+                    healthThreshold = 50
                 end
     
                 self.Ally = self:FindBestAllyHeroTarget(
                     caster,
                     ability,
-                    {"modifier_naga_siren_song_of_the_siren_aura"},
+                    {"modifier_naga_siren_song_of_the_siren_aura","modifier_naga_siren_song_of_the_siren_healing"},
                     0,
                     "health_percent",  -- 按血量百分比排序
                     true,    -- 只允许英雄单位
@@ -3917,6 +3967,26 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("treant_living_armor")
                 if not ability then return false end
     
+                local potentialTarget = self:FindBestEnemyHeroTarget(
+                    caster,
+                    ability,
+                    {"modifier_treant_overgrowth"},
+                    0.5,
+                    "control" 
+                )
+                
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+
+                return potentialTarget ~= nil
+            end
+        },
+        ["treant_overgrowth"] = {
+            function(self, caster, log)
+                local ability = caster:FindAbilityByName("treant_overgrowth")
+                if not ability then return false end
+    
                 self.Ally = self:FindBestAllyHeroTarget(
                     caster,
                     ability,
@@ -3927,7 +3997,8 @@ HeroSkillConditions = {
     
                 return self.Ally ~= nil
             end
-        }
+        },
+
     },
 
     ["npc_dota_hero_viper"] = {
@@ -4479,12 +4550,36 @@ HeroSkillConditions = {
     ["npc_dota_hero_life_stealer"] = {
         ["life_stealer_infest"] = {
             function(self, caster, log)
-                local casterHealthPercent = caster:GetHealth() / caster:GetMaxHealth() * 100
-    
-                if casterHealthPercent < 25 then
+                local ability = caster:FindAbilityByName("life_stealer_infest")
+                if not ability then return false end
+                
+                -- 生命值低于30%时直接返回true
+                if caster:GetHealthPercent() < 30 then
                     return true
                 end
                 
+                -- 生命值30%-50%时，需要找到合适目标
+                if caster:GetHealthPercent() < 50 then
+                    local potentialTarget = self:FindBestEnemyHeroTarget(
+                        caster,
+                        ability,
+                        {"modifier_life_stealer_infest_enemy_hero"},
+                        0.5,
+                        "distance"
+                    )
+                    
+                    if potentialTarget then
+                        self.target = potentialTarget
+                    end
+        
+                    return potentialTarget ~= nil
+                end
+        
+                return false
+            end
+        },
+        ["life_stealer_consume"] = {
+            function(self, caster, log)
                 return false
             end
         },
@@ -4620,7 +4715,23 @@ HeroSkillConditions = {
     ["npc_dota_hero_huskar"] = {
         ["huskar_inner_fire"] = {
             function(self, caster, log)
-                return self:NeedsModifierRefresh(self.target, {"modifier_huskar_life_break_taunt"}, 0.5) and self:IsNotUnderModifiers(caster, {"modifier_huskar_life_break_charge"}, log)
+                
+                local ability = caster:FindAbilityByName("huskar_inner_fire")
+                if not ability then return false end
+                
+                local potentialTarget = self:FindBestEnemyHeroTarget(
+                    caster,
+                    ability,
+                    {"modifier_huskar_life_break_taunt"},
+                    0.5,
+                    "distance"
+                )
+                
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+
+                return potentialTarget ~= nil and self:IsNotUnderModifiers(caster, {"modifier_huskar_life_break_charge"}, log)
             end
         }
     },
@@ -6074,14 +6185,24 @@ function CommonAI:CheckSkillConditions(entity, heroName)
 
     for _, ability in ipairs(abilities) do
         local abilityName = ability:GetAbilityName()
-        
-        -- 先检查大招
-        local ultimateCheck = self:CheckUltimateConditions(ability, entity)
-        if not ultimateCheck then
-            if not self:tableContains(self.disabledSkills[heroName], abilityName) then
-                table.insert(self.disabledSkills[heroName], abilityName)
+        if ability:GetAbilityType() == ABILITY_TYPE_ULTIMATE then
+            local ultimateCheck = self:CheckUltimateConditions(ability, entity)
+            if not ultimateCheck then
+                if not self:tableContains(self.disabledSkills[heroName], abilityName) then
+                    table.insert(self.disabledSkills[heroName], abilityName)
+                end
+                goto continue
+            else
+                -- 大招通过检查后从禁用列表移除
+                for i, skill in ipairs(self.disabledSkills[heroName]) do
+                    if skill == abilityName then
+                        local abilityIndex = ability and ability:GetAbilityIndex() or -1
+                        table.remove(self.disabledSkills[heroName], i)
+                        self:log(string.format("大招 %s 通过检查,已从禁用列表中移除，技能索引为: %d", abilityName, abilityIndex))
+                        break
+                    end
+                end
             end
-            goto continue
         end
         
         local conditions = isSpecialHero and self:FindConditionsForAbility(abilityName) or heroConditions[abilityName]
@@ -6112,20 +6233,23 @@ function CommonAI:CheckSkillConditions(entity, heroName)
 end
 
 function CommonAI:CheckUltimateConditions(ability, entity)
-    if ability:GetAbilityType() == ABILITY_TYPE_ULTIMATE then
-        local healthPct = entity:GetHealthPercent()
-        print("检测到大招:", ability:GetAbilityName(), "当前血量百分比:", healthPct)
-        
-        if self:containsStrategy(self.global_strategy, "不到半血绝不放大") and healthPct > 50 then
-            print("启用策略:不到半血绝不放大,血量大于50%,禁止释放大招")
-            return false
-        end
-        
-        if self:containsStrategy(self.global_strategy, "不到80%血绝不放大") and healthPct > 80 then
-            print("启用策略:不到80%血绝不放大,血量大于80%,禁止释放大招") 
-            return false
-        end
+    if not ability:GetAbilityType() == ABILITY_TYPE_ULTIMATE then
+        return true -- 不是大招直接返回true，不参与检查
     end
+
+    local healthPct = entity:GetHealthPercent()
+    print("检测到大招:", ability:GetAbilityName(), "当前血量百分比:", healthPct)
+    
+    if self:containsStrategy(self.global_strategy, "不到半血绝不放大") and healthPct > 50 then
+        print("启用策略:不到半血绝不放大,血量大于50%,禁止释放大招")
+        return false
+    end
+    
+    if self:containsStrategy(self.global_strategy, "不到80%血绝不放大") and healthPct > 80 then
+        print("启用策略:不到80%血绝不放大,血量大于80%,禁止释放大招") 
+        return false
+    end
+    print("可以放大了")
     return true
 end
 

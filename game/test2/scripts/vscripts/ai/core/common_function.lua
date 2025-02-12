@@ -240,8 +240,10 @@ function CommonAI:MoveToRange(targetPosition, range)
             ExecuteOrderFromTable(order)
             self:log("滚滚老奶奶跟随")
         else
-            self.entity:MoveToPosition(movePosition)
-            self:log(string.format("移动至距离 %s %d 范围内的位置 %s", tostring(targetPosition), range, tostring(movePosition)))
+            if not self.entity:IsChanneling() then
+                self.entity:MoveToPosition(movePosition)
+                self:log(string.format("移动至距离 %s %d 范围内的位置 %s", tostring(targetPosition), range, tostring(movePosition)))
+            end
         end
     else
         self:log("已在施法范围内，无需移动")
@@ -353,7 +355,8 @@ function CommonAI:IsUnableToCastAbility(entity, skill)
         ["modifier_void_spirit_aether_remnant_pull"] = "虚空之灵以太残影拉扯",
         ["modifier_brewmaster_primal_split_delay"] = "酒仙醉拳",
         ["modifier_meepo_megameepo"] = "米波合体",
-        ["modifier_witch_doctor_voodoo_switcheroo"] = "巫医变形"
+        ["modifier_witch_doctor_voodoo_switcheroo"] = "巫医变形",
+        ["modifier_dawnbreaker_solar_guardian_disable"] = "破晓晨星大招"
     }
 
     for modifierName, description in pairs(negativeModifiers) do
@@ -420,9 +423,6 @@ function CommonAI:IsUnableToAttack(entity, target)
         printReason("当前状态: " .. self.currentState)
         return true
     end
-
-
-
     -- 检查磁场效果
     local distance = (entity:GetAbsOrigin() - target:GetAbsOrigin()):Length2D()
 

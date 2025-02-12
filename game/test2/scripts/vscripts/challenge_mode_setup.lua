@@ -117,8 +117,8 @@ function Main:SendGameModesData()
     -- 定义游戏模式
     local gameModes = {
         {code = Main.Challenges.mode_10v10, name = "10v10对决"},
-        {code = Main.Challenges.mode_5v5, name = "5v5对决"},
-        {code = Main.Challenges.mode_5v5_2, name = "5v5对决2"},
+        {code = Main.Challenges.mode_5v5, name = "5v5对决-三倍属性版"},
+        {code = Main.Challenges.mode_5v5_2, name = "5v5对决"},
         {code = Main.Challenges.SuperCreepChallenge90CD, name = "90%减CD击杀大赛"},
         {code = Main.Challenges.MillGrinding, name = "人马拉磨"},
         {code = Main.Challenges.Duel_1VS30, name = "1级还是30级?"},
@@ -271,6 +271,13 @@ function Main:RequestStrategyData()
 
     --if self:containsStrategy(self.hero_strategy, "躲避模式") then
     local hero_strategies = {
+        npc_dota_hero_dawnbreaker = {  -- 天怒法师
+        {
+            name = "满血开大",
+            id = "1"
+        },
+
+    },
         npc_dota_hero_skywrath_mage = {  -- 天怒法师
             {
                 name = "大招弹射",
@@ -448,6 +455,10 @@ function Main:RequestStrategyData()
             {
                 name = "满血开大",
                 id = "1"
+            },
+            {
+                name = "全图摇大",
+                id = "2"
             },
         },
         npc_dota_hero_pangolier = {  -- 石鳞剑士

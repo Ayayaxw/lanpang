@@ -68,7 +68,7 @@ function CommonAI:Ini_MediumPrioritySkills()
             npc_dota_hero_enigma = {"enigma_midnight_pulse","enigma_black_hole"},
             npc_dota_hero_visage = {"visage_stone_form_self_cast"},
             npc_dota_hero_kez = {"kez_switch_weapons"},
-            npc_dota_hero_drow_ranger = {"drow_ranger_glacier"},
+            npc_dota_hero_drow_ranger = {"drow_ranger_glacier","drow_ranger_wave_of_silence"},
             npc_dota_hero_pangolier = {"pangolier_rollup"},
             npc_dota_hero_shadow_shaman = {"shadow_shaman_voodoo"},
             npc_dota_hero_weaver = {"weaver_time_lapse"},

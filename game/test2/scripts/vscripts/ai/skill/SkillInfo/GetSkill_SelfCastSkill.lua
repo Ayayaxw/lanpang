@@ -23,12 +23,13 @@ function CommonAI:isSelfCastAbility(abilityName)
         selfCastSkills["abyssal_underlord_firestorm"] = true
     end
     if abilityName == "doom_bringer_doom" then
-        if self:containsStrategy(self.hero_strategy, "不大自己") then
-            selfCastSkills["doom_bringer_doom"] = false
-        end
+
         if self.entity:HasScepter() then
             selfCastSkills["doom_bringer_doom"] = true
         else
+            selfCastSkills["doom_bringer_doom"] = false
+        end
+        if self:containsStrategy(self.hero_strategy, "不大自己") then
             selfCastSkills["doom_bringer_doom"] = false
         end
     end

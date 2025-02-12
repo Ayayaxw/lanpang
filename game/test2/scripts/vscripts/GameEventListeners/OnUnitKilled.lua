@@ -2,6 +2,33 @@ function Main:OnUnitKilled(args)
     -- 获取被杀死的单位的entindex
     local killedUnit = EntIndexToHScript(args.entindex_killed)
     
+    -- 如果是米波克隆体，找到本体
+    if killedUnit:GetUnitName() == "npc_dota_hero_meepo" and killedUnit:IsClone() then
+        local mainMeepo = self:GetRealOwner(killedUnit)
+        if mainMeepo then
+            local playerID = killedUnit:GetPlayerOwnerID()
+            -- 使用playerID作为key来存储每个玩家的米波死亡时间
+            if not self.meepoDeathTimes then
+                self.meepoDeathTimes = {}
+            end
+            
+            local currentTime = GameRules:GetGameTime()
+            -- 检查这个玩家的米波是否在短时间内死亡过
+            if self.meepoDeathTimes[playerID] and (currentTime - self.meepoDeathTimes[playerID]) < 0.1 then
+                print("这个玩家的米波刚刚死过，跳过此次处理")
+                return
+            end
+            
+            -- 记录这个玩家的米波死亡时间
+            self.meepoDeathTimes[playerID] = currentTime
+            
+            print("米波死啦，找到了本体")
+            -- 更新 args 中的 entindex_killed
+            args.entindex_killed = mainMeepo:GetEntityIndex()
+            killedUnit = mainMeepo
+        end
+    end
+
     -- 获取当前的挑战模式ID
     local challengeId = self.currentChallenge
 
@@ -30,6 +57,24 @@ function Main:OnUnitKilled(args)
     else
         print("未知的挑战模式ID: " .. tostring(challengeId))
     end
+end
+
+-- 添加查找米波本体的辅助函数
+function Main:FindMainMeepo(meepoClone)
+    local player = meepoClone:GetPlayerOwner()
+    if not player then return nil end
+    
+    -- 获取该玩家控制的所有单位
+    local allUnits = player:GetAllControlledUnits()
+    
+    for _, unit in pairs(allUnits) do
+        if unit:GetUnitName() == "npc_dota_hero_meepo" 
+           and not unit:IsClone()
+           and unit:IsRealHero() then
+            return unit
+        end
+    end
+    return nil
 end
 
 -- function Main:OnUnitKilled(args)

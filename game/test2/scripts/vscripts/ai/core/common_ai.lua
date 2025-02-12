@@ -231,7 +231,7 @@ function CommonAI:Think(entity)
                 self:log("弱幻象单位当前无法攻击目标")
             end
         end
-        return 0.5
+        return 1
     end
 
 
@@ -1217,6 +1217,40 @@ function CommonAI:HandleAttack(target, abilityInfo, targetInfo)
                 -- 已在攻击状态
         if self.entity:IsAttacking() then
             self:log("已经在攻击状态")
+            
+            -- 获取当前攻击目标
+            local currentTarget = self.entity:GetAttackTarget()
+            
+            -- 检查当前目标周围是否有骷髅王大招特效,以及是否有其他没有该特效的敌人
+            if currentTarget then
+                -- 检查当前目标是否有骷髅王大招特效
+                local hasSkeletonKingModifier = currentTarget:HasModifier("modifier_skeleton_king_reincarnation_scepter_active")
+                
+                if hasSkeletonKingModifier then
+                    -- 寻找周围其他敌方单位
+                    local nearbyUnits = FindUnitsInRadius(self.entity:GetTeamNumber(),
+                                                        self.entity:GetOrigin(),
+                                                        nil,
+                                                        self.entity:Script_GetAttackRange() + 300,
+                                                        DOTA_UNIT_TARGET_TEAM_ENEMY,
+                                                        DOTA_UNIT_TARGET_ALL,
+                                                        DOTA_UNIT_TARGET_FLAG_MAGIC_IMMUNE_ENEMIES + 
+                                                        DOTA_UNIT_TARGET_FLAG_NOT_ILLUSIONS,
+                                                        FIND_ANY_ORDER,
+                                                        false)
+                                                        
+                    -- 检查是否有其他没有该特效的敌人
+                    for _, unit in pairs(nearbyUnits) do
+                        if unit ~= currentTarget and not unit:HasModifier("modifier_skeleton_king_reincarnation_scepter_active") then
+                            -- 发出停止攻击指令
+                            self.entity:Stop()
+                            self:log("目标有骷髅王大招特效且有其他目标,停止当前攻击")
+                            return self.nextThinkTime
+                        end
+                    end
+                end
+            end
+            
             return self.nextThinkTime
         end
         -- 目标不是无敌时正常执行攻击
@@ -1283,9 +1317,6 @@ function CommonAI:CanAttackTarget(entity, target)
             end
         end
     end
-
-
-    
     return true
 end
 

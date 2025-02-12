@@ -31,6 +31,7 @@ function Main:Init_mode_5v5_2(event, playerID)
                 hero:AddNewModifier(hero, nil, "modifier_item_aghanims_shard", {})
                 hero:AddNewModifier(hero, nil, "modifier_item_ultimate_scepter_consumed", {})
                 HeroMaxLevel(hero)
+                hero:AddNewModifier(hero, nil, "modifier_auto_elevation_large", {})
             end,
         },
         FRIENDLY = {
@@ -45,7 +46,7 @@ function Main:Init_mode_5v5_2(event, playerID)
         },
         BATTLEFIELD = {
             function(hero)
-                hero:AddNewModifier(hero, nil, "modifier_auto_elevation_large", {})
+                
             end,
         }
     }
@@ -114,7 +115,7 @@ function Main:Init_mode_5v5_2(event, playerID)
     -- 计算英雄间距
     local heroSpacing = 200  -- Y轴间距
     local rowSpacing = math.floor(heroSpacing * math.sqrt(3) / 2)  -- Y轴间距
-    local startY = 200       -- 起始Y坐标
+    local startY = 600       -- 起始Y坐标
 
     -- 左方阵营的X坐标（从前到后）
     local leftXPositions = {
@@ -362,32 +363,64 @@ function Main:OnUnitKilled_mode_5v5_2(killedUnit, args)
         return
     end
 
-    -- 检查是否一方全部阵亡
-    local leftTeamAlive = false
-    local rightTeamAlive = false
+    -- 记录死亡的英雄
+    if not self.deadHeroes then
+        self.deadHeroes = {
+            leftTeam = {},
+            rightTeam = {}
+        }
+    end
+
+    -- 根据队伍记录死亡英雄
+    local isLeftTeam = false
+    local isRightTeam = false
+    
+    for _, hero in pairs(self.leftTeamHeroes) do
+        if hero == killedUnit then
+            self.deadHeroes.leftTeam[hero:GetEntityIndex()] = true
+            isLeftTeam = true
+            break
+        end
+    end
+    
+    if not isLeftTeam then
+        for _, hero in pairs(self.rightTeamHeroes) do
+            if hero == killedUnit then
+                self.deadHeroes.rightTeam[hero:GetEntityIndex()] = true
+                isRightTeam = true
+                break
+            end
+        end
+    end
+
     self:StopAbilitiesMonitor(killedUnit)
+
+    -- 检查是否一方全部阵亡
+    local leftTeamAllDead = true
+    local rightTeamAllDead = true
+
     -- 检查左方队伍
     for _, hero in pairs(self.leftTeamHeroes) do
-        if not hero:IsNull() and hero:IsAlive() then
-            leftTeamAlive = true
+        if not hero:IsNull() and not self.deadHeroes.leftTeam[hero:GetEntityIndex()] then
+            leftTeamAllDead = false
             break
         end
     end
 
     -- 检查右方队伍
     for _, hero in pairs(self.rightTeamHeroes) do
-        if not hero:IsNull() and hero:IsAlive() then
-            rightTeamAlive = true
+        if not hero:IsNull() and not self.deadHeroes.rightTeam[hero:GetEntityIndex()] then
+            rightTeamAllDead = false
             break
         end
     end
 
     -- 判断胜负
-    if not leftTeamAlive or not rightTeamAlive then
+    if leftTeamAllDead or rightTeamAllDead then
         hero_duel.EndDuel = true
         
         -- 获取获胜方和最后一击英雄
-        local winningTeam = leftTeamAlive and "成功" or "失败"
+        local winningTeam = not leftTeamAllDead and "绿方" or "红方"
         local killerName = killer:GetUnitName()
         
         -- 记录比赛结果
@@ -395,26 +428,28 @@ function Main:OnUnitKilled_mode_5v5_2(killedUnit, args)
             "[LanPang_RECORD][",
             self.currentMatchID,
             "]",
-            "[比赛结束]挑战".. winningTeam
+            "[比赛结束]".. winningTeam .. "获胜"
         )
 
-        -- 只对获胜方的第一个存活英雄播放胜利特效
-        local winningHeroes = leftTeamAlive and self.leftTeamHeroes or self.rightTeamHeroes
+        -- 只对获胜方的第一个未记录死亡的英雄播放胜利特效
+        local winningHeroes = not leftTeamAllDead and self.leftTeamHeroes or self.rightTeamHeroes
+        local winningDeadHeroes = not leftTeamAllDead and self.deadHeroes.leftTeam or self.deadHeroes.rightTeam
+        
         for _, hero in pairs(winningHeroes) do
-            if not hero:IsNull() and hero:IsAlive() then
+            if not hero:IsNull() and not winningDeadHeroes[hero:GetEntityIndex()] then
                 self:PlayVictoryEffects(hero)
-                break  -- 只对第一个存活的英雄播放
+                break
             end
         end
 
-        -- 禁用所有幸存英雄
+        -- 禁用所有未记录死亡的英雄
         for _, hero in pairs(self.leftTeamHeroes) do
-            if not hero:IsNull() and hero:IsAlive() then
+            if not hero:IsNull() and not self.deadHeroes.leftTeam[hero:GetEntityIndex()] then
                 self:DisableHeroWithModifiers(hero, self.endduration)
             end
         end
         for _, hero in pairs(self.rightTeamHeroes) do
-            if not hero:IsNull() and hero:IsAlive() then
+            if not hero:IsNull() and not self.deadHeroes.rightTeam[hero:GetEntityIndex()] then
                 self:DisableHeroWithModifiers(hero, self.endduration)
             end
         end

@@ -169,20 +169,81 @@ function Main:HeroBenefits(heroName, hero, overallStrategy, heroStrategy)
     end
 
     if heroName == "npc_dota_hero_wisp" then
+        print("【小精灵连接】开始处理小精灵连接逻辑")
+        
+        -- 搜索全图所有小精灵，使用英雄所在的队伍
+        local wisps = FindUnitsInRadius(
+            hero:GetTeamNumber(),  -- 改为使用英雄的队伍编号
+            Vector(0,0,0),
+            nil,
+            FIND_UNITS_EVERYWHERE,
+            DOTA_UNIT_TARGET_TEAM_FRIENDLY,
+            DOTA_UNIT_TARGET_HERO,
+            DOTA_UNIT_TARGET_FLAG_NONE,
+            FIND_ANY_ORDER,
+            false
+        )
 
-        local gnoll = CreateUnitByName("npc_dota_roshan", 
-            hero:GetAbsOrigin() + RandomVector(RandomFloat(100, 200)), 
-            true, nil, nil, DOTA_TEAM_NEUTRALS)
-        if gnoll then
-            local ability = hero:FindAbilityByName("wisp_tether")
-            if ability then
-                gnoll:SetOwner(hero)
-                gnoll:SetControllableByPlayer(hero:GetPlayerID(), true)
-                -- 确保是同阵营
-                gnoll:SetTeam(hero:GetTeam())
-                hero:SetCursorCastTarget(gnoll)
-                ability:OnSpellStart()
+        -- 过滤出所有小精灵并按实体索引排序
+        local sortedWisps = {}
+        for _, w in pairs(wisps) do
+            if w:GetUnitName() == "npc_dota_hero_wisp" then
+                print(string.format("【小精灵连接】发现小精灵，实体索引: %d，所属队伍: %d", 
+                    w:GetEntityIndex(), w:GetTeamNumber()))
+                table.insert(sortedWisps, w)
             end
+        end
+        table.sort(sortedWisps, function(a,b) return a:GetEntityIndex() < b:GetEntityIndex() end)
+
+        print(string.format("【小精灵连接】找到 %d 个小精灵", #sortedWisps))
+        for i, wisp in ipairs(sortedWisps) do
+            print(string.format("【小精灵连接】第 %d 个小精灵，实体索引: %d", i, wisp:GetEntityIndex()))
+        end
+
+        -- 如果只有一个小精灵，创建肉山并连接
+        if #sortedWisps == 1 then
+            print("【小精灵连接】只有一个小精灵，准备创建并连接肉山")
+            local roshan = CreateUnitByName("npc_dota_roshan", 
+                hero:GetAbsOrigin() + RandomVector(200), 
+                true, nil, nil, hero:GetTeamNumber())
+            if roshan then
+                roshan:SetOwner(hero)
+                roshan:SetControllableByPlayer(hero:GetPlayerID(), true)
+                hero:SetCursorCastTarget(roshan)
+                print(string.format("【小精灵连接】小精灵(实体索引:%d)准备连接到肉山(实体索引:%d)", 
+                    hero:GetEntityIndex(), roshan:GetEntityIndex()))
+                hero:FindAbilityByName("wisp_tether"):OnSpellStart()
+                print("【小精灵连接】连接肉山完成")
+            else
+                print("【小精灵连接】肉山创建失败")
+            end
+            return
+        end
+
+        -- 创建环形连接
+        if #sortedWisps > 1 then
+            print("【小精灵连接】开始创建环形连接")
+            for i = 1, #sortedWisps do
+                local current = sortedWisps[i]
+                local nextWisp = sortedWisps[i % #sortedWisps + 1]
+                
+                -- 确保不会自己连接自己
+                if current ~= nextWisp then
+                    print(string.format("【小精灵连接】第 %d 个小精灵(实体索引:%d)准备连接到第 %d 个小精灵(实体索引:%d)", 
+                        i, 
+                        current:GetEntityIndex(),
+                        (i % #sortedWisps + 1),
+                        nextWisp:GetEntityIndex()))
+                    
+                    current:SetCursorCastTarget(nextWisp)
+                    current:FindAbilityByName("wisp_tether"):OnSpellStart()
+                    
+                    print(string.format("【小精灵连接】第 %d 个小精灵连接完成", i))
+                else
+                    print(string.format("【小精灵连接】警告：第 %d 个小精灵试图连接自己，已跳过", i))
+                end
+            end
+            print("【小精灵连接】环形连接创建完成")
         end
     end
 
@@ -580,6 +641,17 @@ function Main:HeroBenefits(heroName, hero, overallStrategy, heroStrategy)
             print(string.format("屠夫获得腐肉层数: %d", stacks))
         end
     end
+    if heroName == "npc_dota_hero_silencer" then
+        local heroLevel = hero:GetLevel()
+        local stacks = math.floor(heroLevel / 3)
+        -- 设置智力窃取层数
+        hero:SetModifierStackCount("modifier_silencer_brain_drain", hero, stacks)
+        print(string.format("沉默术士获得智力窃取层数: %d", stacks))
+        -- 增加30点智力
+        hero:ModifyIntellect(30)
+        print("沉默术士获得30点智力")
+
+    end
 
     if heroName == "npc_dota_hero_legion_commander" then
         local heroLevel = hero:GetLevel()
@@ -707,6 +779,14 @@ function Main:HeroPreparation(heroName, hero, overallStrategy, heroStrategy)
                 morphling_replicate = {
                     duration = 1    
                 },
+                morphling_morph_agi = {
+                    points_per_tick = 2,
+                    morph_cooldown = 0.01    
+                },
+                morphling_morph_str = {
+                    points_per_tick = 2,
+                    morph_cooldown = 0.01    
+                },
             },
         }
         self:UpdateAbilityModifiers(ability_modifiers)
@@ -774,7 +854,7 @@ function Main:HeroPreparation(heroName, hero, overallStrategy, heroStrategy)
     
     if heroName == "npc_dota_hero_silencer" then
         print("创建沉默术士的可穿戴假人")
-    
+        hero:AddNewModifier(hero, nil, "modifier_sheepstick_debuff", {duration = 8})
         -- 移除英雄本身的穿戴装备
         local wearable = hero:FirstMoveChild()
         while wearable ~= nil do
@@ -786,7 +866,7 @@ function Main:HeroPreparation(heroName, hero, overallStrategy, heroStrategy)
                 wearable = wearable:NextMovePeer()
             end
         end
-    
+        
         local dummyName = "npc_dota_hero_silencer_wearable_dummy"
         local dummy = CreateUnitByName(dummyName, hero:GetAbsOrigin(), false, hero, hero, hero:GetTeamNumber())
         
@@ -827,6 +907,27 @@ function Main:HeroPreparation(heroName, hero, overallStrategy, heroStrategy)
             print("成功创建并附加可穿戴假人到帕克")
         else
             print("无法为帕克创建可穿戴假人")
+        end
+    end
+
+    
+    if heroName == "npc_dota_hero_invoker" then
+        local wex = hero:FindAbilityByName("invoker_wex")
+        local quas = hero:FindAbilityByName("invoker_quas") 
+        local invoke = hero:FindAbilityByName("invoker_invoke")
+
+        if wex and quas and invoke then
+            print("释放3次wex和1次invoke")
+            wex:OnSpellStart()
+            wex:OnSpellStart() 
+            wex:OnSpellStart()
+            invoke:OnSpellStart()
+
+            print("释放2次wex,1次quas和1次invoke")
+            wex:OnSpellStart()
+            wex:OnSpellStart()
+            quas:OnSpellStart()
+            invoke:OnSpellStart()
         end
     end
 end

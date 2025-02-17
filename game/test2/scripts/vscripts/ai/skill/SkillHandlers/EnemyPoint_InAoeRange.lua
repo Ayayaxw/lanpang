@@ -269,9 +269,6 @@ function CommonAI:HandleEnemyPoint_InAoeRange(entity,target,abilityInfo,targetIn
             end
         end
 
-
-    
-    
     elseif abilityInfo.abilityName == "skywrath_mage_mystic_flare" and entity:HasScepter() then
         self:log("天怒大自动放歪")
         -- 计算施法位置
@@ -440,22 +437,40 @@ function CommonAI:HandleEnemyPoint_InAoeRange(entity,target,abilityInfo,targetIn
         abilityInfo.castPoint = CommonAI:calculateAdjustedCastPoint(entity, castPosition, abilityInfo.castPoint)
         return true
 
+
     else
+        if bit.band(abilityInfo.abilityBehavior, DOTA_ABILITY_BEHAVIOR_VECTOR_TARGETING) ~= 0 then
 
+            -- 计算矢量施法的起点（最大施法距离位置）和终点（敌人当前位置）
+            local vectorStart = entity:GetOrigin() + targetInfo.targetDirection * abilityInfo.castRange
+            local vectorEnd = targetInfo.targetPos
+
+            -- 执行施法
+            self:log(string.format("矢量施法：从 %s 到 %s (施法距离%.2f)", 
+                tostring(vectorStart), 
+                tostring(vectorEnd),
+                abilityInfo.castRange))
+                
+            self:CastVectorSkillToTwoPoints(entity, abilityInfo.skill, vectorStart, vectorEnd)
+            abilityInfo.castPoint = CommonAI:calculateAdjustedCastPoint(entity, vectorStart, abilityInfo.castPoint)
+            
+            return true
     -- 计算施法位置
-        local castPosition = entity:GetOrigin() + targetInfo.targetDirection * abilityInfo.castRange
+        else
+            local castPosition = entity:GetOrigin() + targetInfo.targetDirection * abilityInfo.castRange
 
-        -- 打印施法信息
-        self:log(string.format("在施法距离+作用范围内，准备施放技能: %s，目标距离: %.2f，施法距离: %.2f，作用范围: %.2f", abilityInfo.abilityName, targetInfo.distance, abilityInfo.castRange, abilityInfo.aoeRadius))
-        self:log(string.format("施法位置: %s", tostring(castPosition)))
+            -- 打印施法信息
+            self:log(string.format("在施法距离+作用范围内，准备施放技能: %s，目标距离: %.2f，施法距离: %.2f，作用范围: %.2f", abilityInfo.abilityName, targetInfo.distance, abilityInfo.castRange, abilityInfo.aoeRadius))
+            self:log(string.format("施法位置: %s", tostring(castPosition)))
 
-        -- 计算当前单位与施法位置的距离
-        local distanceToCastPosition = (castPosition - entity:GetOrigin()):Length2D()
-        self:log(string.format("当前单位与施法位置的距离: %.2f", distanceToCastPosition))
+            -- 计算当前单位与施法位置的距离
+            local distanceToCastPosition = (castPosition - entity:GetOrigin()):Length2D()
+            self:log(string.format("当前单位与施法位置的距离: %.2f", distanceToCastPosition))
 
-        -- 施放技能
-        entity:CastAbilityOnPosition(castPosition, abilityInfo.skill, 0)
-        abilityInfo.castPoint = CommonAI:calculateAdjustedCastPoint(entity, castPosition, abilityInfo.castPoint)
+            -- 施放技能
+            entity:CastAbilityOnPosition(castPosition, abilityInfo.skill, 0)
+            abilityInfo.castPoint = CommonAI:calculateAdjustedCastPoint(entity, castPosition, abilityInfo.castPoint)
+        end
 
     end
 end

@@ -8,6 +8,7 @@ function CommonAI:Ini_MediumPrioritySkills()
             npc_dota_hero_tidehunter = {"tidehunter_ravage"},
             npc_dota_hero_spectre = {"spectre_dispersion"},
             npc_dota_hero_juggernaut = {"juggernaut_swift_slash","juggernaut_omni_slash","juggernaut_healing_ward"},
+
             --npc_dota_hero_riki = {"riki_smoke_screen","riki_tricks_of_the_trade"},
             npc_dota_hero_razor = {"razor_eye_of_the_storm","razor_static_link","razor_plasma_field"},
             npc_dota_hero_faceless_void = {"faceless_void_chronosphere","faceless_void_time_dilation"},
@@ -27,8 +28,8 @@ function CommonAI:Ini_MediumPrioritySkills()
             npc_dota_hero_phantom_assassin = {"phantom_assassin_fan_of_knives"},
             npc_dota_hero_witch_doctor = {"witch_doctor_paralyzing_cask"},
             npc_dota_hero_jakiro = {"jakiro_ice_path","jakiro_macropyre"},
-            npc_dota_hero_death_prophet = {"death_prophet_exorcism","death_prophet_spirit_siphon",},
-            npc_dota_hero_leshrac = {"leshrac_pulse_nova","leshrac_greater_lightning_storm","leshrac_lightning_storm"},
+            npc_dota_hero_death_prophet = {"death_prophet_silence"},
+            npc_dota_hero_leshrac = {"leshrac_pulse_nova","leshrac_defilement","leshrac_split_earth","leshrac_greater_lightning_storm"},
             npc_dota_hero_tinker = {"tinker_laser","tinker_march_of_the_machines","tinker_warp_grenade","tinker_rearm"},
             npc_dota_hero_necrolyte = {},
             npc_dota_hero_queenofpain = {"queenofpain_scream_of_pain","queenofpain_sonic_wave"},
@@ -38,10 +39,11 @@ function CommonAI:Ini_MediumPrioritySkills()
             npc_dota_hero_huskar = {""},
             npc_dota_hero_magnataur = {"magnataur_reverse_polarity","magnataur_horn_toss","magnataur_reversed_reverse_polarity"},
             npc_dota_hero_disruptor = {"disruptor_static_storm","disruptor_kinetic_field"},
-            npc_dota_hero_puck = {"puck_dream_coil"},
+            npc_dota_hero_zuus = {"zuus_heavenly_jump","zuus_cloud"},
+
             npc_dota_hero_mirana = {"mirana_starfall"},
             npc_dota_hero_dark_seer = {"dark_seer_wall_of_replica","dark_seer_surge","dark_seer_vacuum",},
-            npc_dota_hero_sand_king = {"sandking_burrowstrike","sandking_sand_storm"},
+            
             npc_dota_hero_dazzle = {"dazzle_shallow_grave","dazzle_poison_touch"},
             npc_dota_hero_batrider = {"batrider_firefly","batrider_flaming_lasso"},
             npc_dota_hero_venomancer = {"venomancer_noxious_plague","venomancer_plague_ward"},
@@ -66,7 +68,7 @@ function CommonAI:Ini_MediumPrioritySkills()
             npc_dota_hero_windrunner = {"windrunner_windrun","windrunner_shackleshot","windrunner_focusfire","windrunner_gale_force"},
             npc_dota_hero_nyx_assassin = {"nyx_assassin_spiked_carapace","nyx_assassin_impale","nyx_assassin_burrow","nyx_assassin_vendetta"},
             npc_dota_hero_enigma = {"enigma_midnight_pulse","enigma_black_hole"},
-            npc_dota_hero_visage = {"visage_stone_form_self_cast"},
+            npc_dota_hero_visage = {"visage_gravekeepers_cloak"},
             npc_dota_hero_kez = {"kez_switch_weapons"},
             npc_dota_hero_drow_ranger = {"drow_ranger_glacier","drow_ranger_wave_of_silence"},
             npc_dota_hero_pangolier = {"pangolier_rollup"},
@@ -115,6 +117,9 @@ function CommonAI:UpdateSkillPriorityBasedOnStrategy()
         
         ["优先虚弱"] = function(self)
             self.mediumPrioritySkills.npc_dota_hero_bane = {"bane_enfeeble", "bane_fiends_grip"}
+        end,
+        ["先招小树人"] = function(self)
+            self.mediumPrioritySkills.npc_dota_hero_furion = {"furion_sprout", "furion_force_of_nature"}
         end,
         
         ["优先力量打击"] = function(self)

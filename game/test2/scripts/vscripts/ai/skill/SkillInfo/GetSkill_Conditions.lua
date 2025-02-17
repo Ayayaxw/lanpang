@@ -87,7 +87,9 @@ HeroSkillConditions = {
                     ability,
                     {""},
                     0,
-                    "nearest_to_enemy"  -- 优先给离敌人最近的友军加电离子
+                    "distance" ,
+                    true,
+                    false
                 )
                 
                 return self.Ally ~= nil
@@ -149,7 +151,7 @@ HeroSkillConditions = {
                     "health_percent"  -- 按血量百分比排序
                 )
                 if self:containsStrategy(self.hero_strategy, "满血开大") then
-                    print("该满血开大了")
+                    self:log("该满血开大了")
                     return self.Ally
                 else
                     return self.Ally and self.Ally:GetHealthPercent() < 30
@@ -326,11 +328,42 @@ HeroSkillConditions = {
                 return potentialTarget ~= nil
             end
         },
+        ["winter_wyvern_splinter_blast"] = {
+            function(self, caster, log)
+                local ability = caster:FindAbilityByName("winter_wyvern_winters_curse")
+                if not ability then return false end
+                
+                local potentialTarget = self:FindBestEnemyHeroTarget(
+                    caster,
+                    ability,
+                    nil,
+                    0.5,
+                    "control" 
+                )
+                
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+                
+                return potentialTarget ~= nil
+            end
+        },
     },
     ["npc_dota_hero_chen"] = {
         ["chen_hand_of_god"] = {
             function(self, caster, log)
-                return caster:GetHealthPercent()<50
+                local ability = caster:FindAbilityByName("chen_hand_of_god")
+                if not ability then return false end
+        
+                self.Ally = self:FindBestAllyHeroTarget(
+                    caster, 
+                    ability,
+                    nil,
+                    nil,
+                    "health_percent"
+                )
+        
+                return self.Ally ~= nil and self.Ally:GetHealthPercent() < 50
             end
         },
     },
@@ -540,8 +573,8 @@ HeroSkillConditions = {
                 local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
-                    nil,
-                    nil,
+                    {"modifier_disruptor_static_storm"},
+                    0,
                     "control" 
                 )
                 
@@ -605,7 +638,10 @@ HeroSkillConditions = {
                     ability,
                     nil,  -- 不需要检查buff
                     nil,  -- 不需要检查剩余时间
-                    "nearest_to_enemy"  -- 优先给离敌人最近的友军释放
+                    "nearest_to_enemy",  -- 优先给离敌人最近的友军释放
+                    true,
+                    true,
+                    true
                 )
                 
                 return self.Ally ~= nil
@@ -873,13 +909,33 @@ HeroSkillConditions = {
     ["npc_dota_hero_rubick"] = {
         ["rubick_spell_steal"] = {
             function(self, caster, log)
-                -- 确保有目标且目标是英雄
-                if self.target and self.target:IsHero() then
-                    -- 检查目标是否使用过技能
-                    if Main.heroesUsedAbility[self.target:GetEntityIndex()] then
+                -- 获取所有敌方英雄
+                local enemies = FindUnitsInRadius(
+                    caster:GetTeamNumber(),
+                    caster:GetAbsOrigin(),
+                    nil,
+                    1500, -- 搜索范围，可以根据需要调整
+                    DOTA_UNIT_TARGET_TEAM_ENEMY,
+                    DOTA_UNIT_TARGET_HERO,
+                    DOTA_UNIT_TARGET_FLAG_NONE,
+                    FIND_CLOSEST,
+                    false
+                )
+                
+                -- 遍历所有找到的英雄
+                for _, enemy in pairs(enemies) do
+                    local unitName = enemy:GetUnitName()
+                    if enemy:IsRealHero() and 
+                       not string.find(unitName, "npc_dota_lone_druid_bear") and 
+                       Main.heroesUsedAbility[enemy:GetEntityIndex()] then
+                        -- 找到符合条件的最近英雄，更新target并返回true
+                        self.target = enemy
+                        self:log("找到使用过技能的最近敌方英雄: " .. unitName)
                         return true
                     end
                 end
+                
+                self:log("未找到使用过技能的敌方英雄")
                 return false
             end
         },
@@ -892,7 +948,7 @@ HeroSkillConditions = {
                     caster,
                     ability,
                     nil,
-                    nil,
+                    1,
                     "control" 
                 )
                 
@@ -1538,7 +1594,7 @@ HeroSkillConditions = {
     },
 
     ["npc_dota_hero_zuus"] = {
-        ["zuus_cloud"] = {
+        ["zuus_heavenly_jump"] = {
             function(self, caster, log)
                 if self:containsStrategy(self.hero_strategy, "对琼英碧灵专用") then
                     local heavenly_jump = caster:FindAbilityByName("zuus_heavenly_jump")
@@ -1546,7 +1602,20 @@ HeroSkillConditions = {
                         return false
                     end
                 end
-                return true
+                if self:containsStrategy(self.hero_strategy, "主动进攻") then
+                    return true
+                end
+                
+                if self.target then
+                    local distance = (self.target:GetAbsOrigin() - caster:GetAbsOrigin()):Length2D()
+                    local healthPercent = caster:GetHealthPercent()
+                    
+                    if distance < 200 or healthPercent < 20 then
+                        return true
+                    end
+                end
+                
+                return false
             end
         },
     },
@@ -1910,7 +1979,42 @@ HeroSkillConditions = {
             end
         },
     },
-
+    ["npc_dota_hero_dark_willow"] = {
+        ["dark_willow_pixie_dust"] = {
+            function(self, caster, log)
+                if self:containsStrategy(self.hero_strategy, "主动靠近作祟") then
+                    return true
+                else
+                    local ability = caster:FindAbilityByName("dark_willow_pixie_dust")
+                    local aoeRadius = self:GetSkillAoeRadius(ability)
+                    
+                    -- 搜索范围内的敌方单位
+                    local enemies = FindUnitsInRadius(
+                        caster:GetTeamNumber(),
+                        caster:GetAbsOrigin(),
+                        nil,
+                        aoeRadius,
+                        DOTA_UNIT_TARGET_TEAM_ENEMY,
+                        DOTA_UNIT_TARGET_HERO + DOTA_UNIT_TARGET_BASIC,
+                        DOTA_UNIT_TARGET_FLAG_NONE,
+                        FIND_ANY_ORDER,
+                        false
+                    )
+                    
+                    -- 检查是否有非魔法免疫的敌方单位
+                    for _, enemy in pairs(enemies) do
+                        if not enemy:IsMagicImmune() then
+                            log("范围内发现非魔法免疫的敌方单位，可以使用妖精之尘")
+                            return true
+                        end
+                    end
+                    
+                    log("范围内没有可用目标，不使用妖精之尘")
+                    return false
+                end
+            end
+        },
+    },
 
     
     ["npc_dota_templar_assassin_psionic_trap"] = {
@@ -1921,6 +2025,45 @@ HeroSkillConditions = {
                 else
                     return true
                 end
+            end
+        },
+    },
+
+    ["npc_dota_hero_furion"] = {
+        ["furion_force_of_nature"] = {
+            function(self, caster, log)
+                local ability = caster:FindAbilityByName("furion_force_of_nature")
+                local searchRadius = math.max(400, self:GetSkillCastRange(caster, ability))
+                local trees = GridNav:GetAllTreesAroundPoint(caster:GetAbsOrigin(), searchRadius, true)
+                
+                if #trees > 0 then
+                    log(string.format("先知周围 %d 码范围内发现树木，可以使用召唤树人", searchRadius))
+                    return true
+                else
+                    log(string.format("先知周围 %d 码范围内没有发现树木，无法使用召唤树人", searchRadius))
+                    return false
+                end
+            end
+        },
+        ["furion_wrath_of_nature"] = {
+            function(self, caster, log)
+                local ability = caster:FindAbilityByName("furion_wrath_of_nature")
+                if not ability then return false end
+
+                -- 寻找血量百分比最低的目标
+                local potentialTarget = self:FindBestEnemyHeroTarget(
+                    caster,
+                    ability,
+                    nil,
+                    nil,
+                    "distance"
+                )
+                
+                if potentialTarget then
+                    self.target = potentialTarget
+                    return true
+                end
+                return false
             end
         },
     },
@@ -1950,6 +2093,102 @@ HeroSkillConditions = {
                 return self.Ally ~= nil
             end
         },
+        ["wisp_spirits"] = {
+            function(self, caster, log)
+                -- 检查是否有神杖
+                if caster:HasScepter() then
+                    -- 计算生命值百分比
+                    local healthPercent = caster:GetHealthPercent()
+                    if healthPercent < 30 then
+                        log("有神杖且生命值低于20%(" .. healthPercent .. "%)，开启小精灵")
+                        return true
+                    else
+                        log("有神杖但生命值高于20%(" .. healthPercent .. "%)，不开启小精灵")
+                        return false
+                    end
+                else
+                    log("没有神杖，直接开启小精灵")
+                    return true
+                end
+            end
+        },
+        ["wisp_tether_break"] = {
+            function(self, caster, log)
+                return false
+            end
+        },
+        ["wisp_spirits_in"] = {
+            function(self, caster, log)
+                if not self.target then
+                    return false
+                end
+
+                local distance = (self.target:GetAbsOrigin() - caster:GetAbsOrigin()):Length2D()
+                local ability = caster:FindAbilityByName("wisp_spirits_in")
+                local currentState = ability:GetToggleState()
+                
+                -- 如果距离小于330，需要保持in开启
+                if distance < 520 then
+                    if not currentState then
+                        log("目标距离" .. distance .. "小于330，需要开启in")
+                        return true
+                    end
+                -- 如果距离在330-550之间，需要交替切换
+                elseif distance <= 460 then
+                    -- 初始化上次切换时间
+                    self.lastSpiritToggleTime = self.lastSpiritToggleTime or GameRules:GetGameTime()
+                    
+                    -- 检查是否已经过了1秒
+                    if GameRules:GetGameTime() - self.lastSpiritToggleTime >= 1.0 then
+                        -- 如果out是开启状态，我们就开启in
+                        local outAbility = caster:FindAbilityByName("wisp_spirits_out")
+                        if outAbility:GetToggleState() then
+                            log("目标在中间距离" .. distance .. "，切换到in")
+                            self.lastSpiritToggleTime = GameRules:GetGameTime()
+                            return true
+                        end
+                    end
+                end
+                
+                return false
+            end
+        },
+        ["wisp_spirits_out"] = {
+            function(self, caster, log)
+                if not self.target then
+                    return false
+                end
+
+                local distance = (self.target:GetAbsOrigin() - caster:GetAbsOrigin()):Length2D()
+                local ability = caster:FindAbilityByName("wisp_spirits_out")
+                local currentState = ability:GetToggleState()
+                
+                -- 如果距离大于550，需要保持out开启
+                if distance > 520 then
+                    if not currentState then
+                        log("目标距离" .. distance .. "大于550，需要开启out")
+                        return true
+                    end
+                -- 如果距离在330-550之间，需要交替切换
+                elseif distance >= 330 then
+                    -- 初始化上次切换时间
+                    self.lastSpiritToggleTime = self.lastSpiritToggleTime or GameRules:GetGameTime()
+                    
+                    -- 检查是否已经过了1秒
+                    if GameRules:GetGameTime() - self.lastSpiritToggleTime >= 1.0 then
+                        -- 如果in是开启状态，我们就开启out
+                        local inAbility = caster:FindAbilityByName("wisp_spirits_in")
+                        if inAbility:GetToggleState() then
+                            log("目标在中间距离" .. distance .. "，切换到out")
+                            self.lastSpiritToggleTime = GameRules:GetGameTime()
+                            return true
+                        end
+                    end
+                end
+                
+                return false
+            end
+        },
     },
 
     ["npc_dota_hero_necrolyte"] = {
@@ -1965,28 +2204,29 @@ HeroSkillConditions = {
             function(self, caster, log)
                 -- 先获取死神镰刀技能
                 local ability = caster:FindAbilityByName("necrolyte_reapers_scythe")
-    
+                if not ability then return false end
+
+                -- 寻找血量百分比最低的目标
+                local potentialTarget = self:FindBestEnemyHeroTarget(
+                    caster,
+                    ability,
+                    {},
+                    0,
+                    "health_percent",
+                    true
+                )
+                
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+
                 if self:containsStrategy(self.hero_strategy, "满血直接斩") then
-                    return true
+                    return potentialTarget ~= nil
                 else
-                    -- 寻找血量百分比最低的目标
-                    local potentialTarget = self:FindBestEnemyHeroTarget(
-                        caster,
-                        ability,  -- 传入获取到的ability
-                        {},
-                        0,
-                        "health_percent",
-                        true
-                    )
-                    
-                    if potentialTarget then
-                        self.target = potentialTarget
-                    end
-                    
-                    if caster:GetHealthPercent() >= 20 and (not self.target or self.target:GetHealthPercent() >= 50) then
+                    if caster:GetHealthPercent() >= 50 and (not self.target or self.target:GetHealthPercent() >= 50) then
                         return false
                     else
-                        return true
+                        return potentialTarget ~= nil
                     end
                 end
             end
@@ -2174,6 +2414,8 @@ HeroSkillConditions = {
                 end
             end
         },
+
+
     },
     -- ["npc_dota_hero_undying"] = {
     --     ["undying_tombstone"] = {
@@ -2437,8 +2679,8 @@ HeroSkillConditions = {
                 local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
-                    nil,
-                    nil,
+                    {"modifier_enigma_black_hole_pull"},
+                    0,
                     "control" 
                 )
                 
@@ -3128,7 +3370,18 @@ HeroSkillConditions = {
 
                 return potentialTarget ~= nil
             end
-        }
+        },
+        ["naga_siren_song_of_the_siren_cancel"] = {
+            function(self, caster, log)
+                return false
+            end
+        },
+        ["naga_siren_reel_in"] = {
+            function(self, caster, log)
+                return false
+            end
+        },
+        
     },
     ["npc_dota_hero_medusa"] = {
         ["medusa_split_shot"] = {
@@ -3576,7 +3829,19 @@ HeroSkillConditions = {
         },
 
     },
+    ["npc_dota_hero_crystal_maiden"] = {
+        ["crystal_maiden_freezing_field_stop"] = {
+            function(self, caster, log)
+                return false
+            end
+        },
+    },
     ["npc_dota_hero_pangolier"] = {
+        ["pangolier_gyroshell_stop"] = {
+            function(self, caster, log)
+                return false
+            end
+        },
         ["pangolier_swashbuckle"] = {
             function(self, caster, log)
                 local forbiddenModifiers = {
@@ -3611,9 +3876,7 @@ HeroSkillConditions = {
         },
         ["pangolier_rollup_stop"] = {
             function(self, caster, log)
-                -- if  GetRealEnemyHeroesWithinDistance(caster, 250, log) == 0 then
-                --     return true
-                -- else
+
                     return false
                 -- end
             end
@@ -3652,6 +3915,11 @@ HeroSkillConditions = {
                     "modifier_nyx_assassin_vendetta"
                 }
                 return self:IsNotUnderModifiers(caster, forbiddenModifiers, log)
+            end
+        },
+        ["nyx_assassin_unburrow"] = {
+            function(self, caster, log)
+                return false
             end
         },
         ["nyx_assassin_vendetta"] = {
@@ -3877,15 +4145,36 @@ HeroSkillConditions = {
     ["npc_dota_hero_keeper_of_the_light"] = {
         ["keeper_of_the_light_recall"] = {
             function(self, caster, log)
-                if hasHeroesNearby(self,caster, 1000) then
-                    return true
-                else
-                    return false
-                end
+                local ability = caster:FindAbilityByName("keeper_of_the_light_recall")
+                if not ability then return false end
+        
+                self.Ally = self:FindBestAllyHeroTarget(
+                    caster,
+                    ability,
+                    {},
+                    nil,
+                    "distance",
+                    true,
+                    false
+                )
+        
+                return self.Ally ~= nil
+
             end
         },
         ["keeper_of_the_light_chakra_magic"] = {
             function(self, caster, log)
+                if self:containsStrategy(self.hero_strategy, "查克拉只给自己") then
+                    local excludeAbilities = {
+                        ["keeper_of_the_light_spirit_form"] = true
+                    }
+                    self.Ally = caster
+                    return self:checkAbilities(caster, excludeAbilities)
+                end
+
+
+
+
                 local ability = caster:FindAbilityByName("keeper_of_the_light_chakra_magic")
                 if not ability then return false end
         
@@ -3893,11 +4182,11 @@ HeroSkillConditions = {
                     caster,
                     ability,
                     {},
-                    0,
+                    nil,
                     "mana_percent"
                 )
         
-                if self.Ally and self.Ally:GetManaPercent() < 80 then
+                if self.Ally and self.Ally:GetManaPercent() < 95 then
                     return true
                 end
                 
@@ -4153,20 +4442,7 @@ HeroSkillConditions = {
     ["npc_dota_hero_leshrac"] = {
         ["leshrac_greater_lightning_storm"] = {
             function(self, caster, log)
-                local currentHealth = caster:GetHealth()
-                local maxHealth = caster:GetMaxHealth()
-                
-                if currentHealth < maxHealth then
-                    if log then
-                        log(string.format("Leshrac 当前生命值: %d/%d, 不是满血", currentHealth, maxHealth))
-                    end
-                    return true
-                else
-                    if log then
-                        log(string.format("Leshrac 当前生命值: %d/%d, 是满血", currentHealth, maxHealth))
-                    end
-                    return false
-                end
+                return true
             end
         },
         ["leshrac_diabolic_edict"] = {
@@ -4317,6 +4593,12 @@ HeroSkillConditions = {
         },
         ["tinker_rearm"] = {
             function(self, caster, log)
+                -- 首先检查魔法值
+                if caster:GetMana() < 300 then
+                    self:log("魔法值小于300，返回false")
+                    return false
+                end
+        
                 local abilities = {}
                 local cooldown_count = 0
                 
@@ -4367,7 +4649,21 @@ HeroSkillConditions = {
                         return false
                     end
                 end
-                return true
+                local ability = caster:FindAbilityByName("pugna_decrepify")
+                if not ability then return false end
+                local potentialTarget = self:FindBestEnemyHeroTarget(
+                    caster,
+                    ability,
+                    {"modifier_pugna_decrepify"},
+                    0.5,
+                    "distance"
+                )
+                
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+    
+                return potentialTarget ~= nil
 
             end
         },
@@ -4528,6 +4824,12 @@ HeroSkillConditions = {
     ["npc_dota_hero_oracle"] = {
         ["oracle_false_promise"] = {
             function(self, caster, log)
+                if self:containsStrategy(self.hero_strategy, "满血开大") then
+                    self.Ally = caster
+                    return true
+                end
+
+
                 local ability = caster:FindAbilityByName("oracle_false_promise")
                 if not ability then return false end
         
@@ -4746,7 +5048,10 @@ HeroSkillConditions = {
                     ability,
                     {"modifier_dark_seer_ion_shell"},
                     0.5,
-                    "nearest_to_enemy"  -- 优先给离敌人最近的友军加电离子
+                    "distance",
+                    true,
+                    true,
+                    true
                 )
                 
                 return self.Ally ~= nil
@@ -4762,7 +5067,7 @@ HeroSkillConditions = {
                     ability,
                     {"modifier_dark_seer_surge"},
                     0.5,
-                    "attack"  -- 优先给攻击力最高的友军加加速
+                    "distance"
                 )
                 
                 return self.Ally ~= nil
@@ -4775,6 +5080,13 @@ HeroSkillConditions = {
             function(self, caster, log)
                 local ability = caster:FindAbilityByName("dazzle_shallow_grave")
                 if not ability then return false end
+
+                if self:containsStrategy(self.hero_strategy, "满血薄葬") then
+                    self.Ally = caster
+                    return true
+                end
+
+
         
                 local checkTime = 0.5
                 if self:containsStrategy(self.hero_strategy, "剩1秒续薄葬") then
@@ -5259,28 +5571,25 @@ HeroSkillConditions = {
                 return self:NeedsModifierRefresh(caster, requiredModifiers, 0.5)
             end
         },
-
-
-
-
         ["rattletrap_hookshot"] = {
             function(self, caster, log)
                 local ability = caster:FindAbilityByName("rattletrap_hookshot")
-                if not ability then return false end
-                
-                local potentialTarget = self:FindBestEnemyHeroTarget(
-                    caster,
-                    ability,
-                    nil,
-                    nil,
-                    "control" 
-                )
-                
-                if potentialTarget then
-                    self.target = potentialTarget
+                if not ability then 
+                    print("【阻挡检测】没有找到发条的钩子技能，返回false")
+                    return false 
                 end
-
-                return potentialTarget ~= nil
+            
+                local potentialTarget = self:FindClosestUnblockedEnemyHero(caster, ability, true, 300)
+            
+                if potentialTarget then
+                    local realHeroStr = potentialTarget:IsTempestDouble() and "(假)" or "(真)"
+                    print("【阻挡检测】找到目标: " .. potentialTarget:GetUnitName() .. realHeroStr .. "，返回true")
+                    self.target = potentialTarget
+                    return true
+                else
+                    print("【阻挡检测】没有找到合适目标，返回false")
+                    return false
+                end
             end
         },
     },
@@ -5355,6 +5664,23 @@ HeroSkillConditions = {
                 end
 
                 return potentialTarget ~= nil
+            end
+        },
+        ["pudge_meat_hook"] = {
+            function(self, caster, log)
+                local ability = caster:FindAbilityByName("pudge_meat_hook")
+                if not ability then return false end
+
+
+                local potentialTarget = self:FindClosestUnblockedEnemyHero(caster,ability, false)
+
+                if potentialTarget then
+                    self.target = potentialTarget
+                    return true
+                else
+                    return false
+                end
+
             end
         },
     },
@@ -5664,10 +5990,22 @@ HeroSkillConditions = {
     ["npc_dota_brewmaster"] = {
         ["brewmaster_primal_split_cancel"] = {
             function(self, caster, log)
-                local nearbyUnits = FindUnitsInRadius(caster:GetTeamNumber(), caster:GetOrigin(), nil, 1000, DOTA_UNIT_TARGET_TEAM_BOTH, DOTA_UNIT_TARGET_ALL, DOTA_UNIT_TARGET_FLAG_NONE, FIND_ANY_ORDER, false)
+                local nearbyUnits = FindUnitsInRadius(
+                    caster:GetTeamNumber(), 
+                    caster:GetOrigin(), 
+                    nil, 
+                    1000, 
+                    DOTA_UNIT_TARGET_TEAM_BOTH, 
+                    DOTA_UNIT_TARGET_ALL, 
+                    DOTA_UNIT_TARGET_FLAG_NONE, 
+                    FIND_ANY_ORDER, 
+                    false
+                )
+                
                 local brewmasterUnitsCount = 0
                 for _, unit in pairs(nearbyUnits) do
-                    if isBrewmasterUnit(unit:GetUnitName()) then
+                    -- 检查是否是熊猫单位且属于同一个玩家
+                    if isBrewmasterUnit(unit:GetUnitName()) and unit:GetPlayerOwnerID() == caster:GetPlayerOwnerID() then
                         brewmasterUnitsCount = brewmasterUnitsCount + 1
                     end
                 end
@@ -5691,7 +6029,7 @@ HeroSkillConditions = {
                     ability,
                     {},
                     0,
-                    "channeling",
+                    "channeling", 
                     true
                 )
             
@@ -5722,29 +6060,32 @@ HeroSkillConditions = {
                     end
                 end
             
+                -- 如果周围有敌方英雄，选择最近的一个
+                local enemies = FindUnitsInRadius(
+                    caster:GetTeamNumber(),
+                    caster:GetAbsOrigin(),
+                    nil,
+                    ability:GetCastRange(Vector(0,0,0), nil),
+                    DOTA_UNIT_TARGET_TEAM_ENEMY,
+                    DOTA_UNIT_TARGET_HERO,
+                    DOTA_UNIT_TARGET_FLAG_NONE,
+                    FIND_CLOSEST,
+                    false
+                )
+            
+                if #enemies > 1 then
+                    self.target = enemies[1]
+                    log(string.format("[PANDA_TEST] 找到周围的敌方英雄: %s", self.target:GetUnitName()))
+                    return true
+                end
+            
                 log("[PANDA_TEST] 没有找到合适的目标")
                 return false
             end
         },
         ["brewmaster_storm_dispel_magic"] = {
             function(self, caster, log)
-                local ability = caster:FindAbilityByName("brewmaster_storm_dispel_magic")
-                
-                local potentialTarget = self:FindBestEnemyHeroTarget(
-                    caster,
-                    ability,
-                    {},
-                    0,
-                    "dispellable_buffs",  -- 按BUFF数量排序
-                    false                 -- 允许非英雄单位
-                )
-            
-                if potentialTarget then
-                    self.target = potentialTarget
-                    return true
-                end
-                
-                log("[PANDA_TEST] 没有找到带有增益BUFF的目标")
+
                 return false
             end
         },
@@ -5857,6 +6198,9 @@ HeroSkillConditions = {
         },
         ["visage_gravekeepers_cloak"] = {
             function(self, caster, log)
+                if self:containsStrategy(self.hero_strategy, "满血石化") then
+                    return true
+                end
                 return caster:GetHealthPercent() < 30
             end
         },
@@ -5901,25 +6245,36 @@ HeroSkillConditions = {
                     nil,
                     1200,
                     DOTA_UNIT_TARGET_TEAM_FRIENDLY,
-                    DOTA_UNIT_TARGET_ALL,
+                    DOTA_UNIT_TARGET_HERO,  -- 已经限定了只搜索英雄单位
                     DOTA_UNIT_TARGET_FLAG_NONE,
-                    FIND_ANY_ORDER,
+                    FIND_CLOSEST,
                     false
                 )
                 
-                local bearFound = false
+                local casterPlayer = caster:GetPlayerOwner()
+                
                 for _, unit in pairs(units) do
-                    if not unit:IsHero() and unit:GetUnitName() == "npc_dota_lone_druid_bear" then
-                        bearFound = true
-                        -- 如果熊的血量低于10%返回true
+                    local unitName = unit:GetUnitName()
+                    self:log("找到单位：" .. unitName)
+                    
+                    -- 添加 not IsIllusion 判断来排除幻象
+                    if not unit:IsIllusion() and
+                       string.find(unitName, "npc_dota_lone_druid_bear") and
+                       unit:GetPlayerOwner() == casterPlayer then
+                        -- 找到自己的熊了，如果血量低于10%需要重新召唤
                         if unit:GetHealthPercent() < 10 then
+                            self:log("找到熊但血量低于10%，需要重新召唤")
                             return true
                         end
+                        -- 熊血量正常，不需要重新召唤
+                        self:log("找到熊且血量正常，不需要重新召唤")
+                        return false
                     end
                 end
                 
-                -- 如果没找到熊返回true
-                return not bearFound
+                -- 没找到熊，需要召唤
+                self:log("没找到熊，需要召唤")
+                return true
             end
         }
     },
@@ -6160,10 +6515,6 @@ function CommonAI:CheckSkillConditions(entity, heroName)
     local isSpecialHero = heroName == "npc_dota_hero_morphling" or heroName == "npc_dota_hero_rubick"
     local heroConditions = isSpecialHero and {} or (HeroSkillConditions[conditionName] or {})
 
-    if not isSpecialHero and not next(heroConditions) then
-        self:log(string.format("英雄 %s 没有定义的技能条件", heroName))
-        return
-    end
 
     self:log(string.format("检查英雄 %s 的技能条件", heroName))
 
@@ -6185,24 +6536,45 @@ function CommonAI:CheckSkillConditions(entity, heroName)
 
     for _, ability in ipairs(abilities) do
         local abilityName = ability:GetAbilityName()
+        self:log(string.format("检查英雄 %s 的技能 %s", heroName, abilityName))
         if ability:GetAbilityType() == ABILITY_TYPE_ULTIMATE then
+            self:log(string.format("检查英雄 %s 的大招 %s", heroName, abilityName))
+            
             local ultimateCheck = self:CheckUltimateConditions(ability, entity)
             if not ultimateCheck then
+                -- 未通过检查的日志
+                local currentHp = entity:GetHealthPercent()
+                self:log(string.format("英雄 %s 的大招 %s 未通过检查，当前血量 %.1f%%", 
+                    heroName, abilityName, currentHp))
+                
                 if not self:tableContains(self.disabledSkills[heroName], abilityName) then
                     table.insert(self.disabledSkills[heroName], abilityName)
+                    self:log(string.format("已将大招 %s 添加到 %s 的禁用列表中", abilityName, heroName))
+                else
+                    self:log(string.format("大招 %s 已在 %s 的禁用列表中", abilityName, heroName))
                 end
                 goto continue
             else
-                -- 大招通过检查后从禁用列表移除
+                -- 通过检查的日志
+                self:log(string.format("英雄 %s 的大招 %s 通过检查", heroName, abilityName))
+                
+                -- 检查是否在禁用列表中
+                local found = false
                 for i, skill in ipairs(self.disabledSkills[heroName]) do
                     if skill == abilityName then
+                        found = true
                         local abilityIndex = ability and ability:GetAbilityIndex() or -1
                         table.remove(self.disabledSkills[heroName], i)
                         self:log(string.format("大招 %s 通过检查,已从禁用列表中移除，技能索引为: %d", abilityName, abilityIndex))
                         break
                     end
                 end
+                if not found then
+                    self:log(string.format("大招 %s 不在禁用列表中，无需移除", abilityName))
+                end
             end
+        else
+            self:log(string.format("技能 %s 不是大招，跳过检查", abilityName))
         end
         
         local conditions = isSpecialHero and self:FindConditionsForAbility(abilityName) or heroConditions[abilityName]
@@ -6238,18 +6610,18 @@ function CommonAI:CheckUltimateConditions(ability, entity)
     end
 
     local healthPct = entity:GetHealthPercent()
-    print("检测到大招:", ability:GetAbilityName(), "当前血量百分比:", healthPct)
+    self:log("检测到大招:", ability:GetAbilityName(), "当前血量百分比:", healthPct)
     
     if self:containsStrategy(self.global_strategy, "不到半血绝不放大") and healthPct > 50 then
-        print("启用策略:不到半血绝不放大,血量大于50%,禁止释放大招")
+        self:log("启用策略:不到半血绝不放大,血量大于50%,禁止释放大招")
         return false
     end
     
     if self:containsStrategy(self.global_strategy, "不到80%血绝不放大") and healthPct > 80 then
-        print("启用策略:不到80%血绝不放大,血量大于80%,禁止释放大招") 
+        self:log("启用策略:不到80%血绝不放大,血量大于80%,禁止释放大招") 
         return false
     end
-    print("可以放大了")
+    self:log("可以放大了")
     return true
 end
 
@@ -6459,6 +6831,11 @@ function SkillMeetsConditions(self, caster, abilityName, conditions, log)
     end
     return true
 end
+
+
+
+
+
 
 
 

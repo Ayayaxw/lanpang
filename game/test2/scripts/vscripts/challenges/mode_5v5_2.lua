@@ -18,6 +18,7 @@ function Main:Init_mode_5v5_2(event, playerID)
 
     -- 击杀计数初始化
     hero_duel.killCount = 0
+    hero_duel.deadHeroes = nil
 
     -- 2. 英雄配置
     local teams = {DOTA_TEAM_GOODGUYS, DOTA_TEAM_BADGUYS}
@@ -364,8 +365,8 @@ function Main:OnUnitKilled_mode_5v5_2(killedUnit, args)
     end
 
     -- 记录死亡的英雄
-    if not self.deadHeroes then
-        self.deadHeroes = {
+    if not hero_duel.deadHeroes then
+        hero_duel.deadHeroes = {
             leftTeam = {},
             rightTeam = {}
         }
@@ -377,7 +378,7 @@ function Main:OnUnitKilled_mode_5v5_2(killedUnit, args)
     
     for _, hero in pairs(self.leftTeamHeroes) do
         if hero == killedUnit then
-            self.deadHeroes.leftTeam[hero:GetEntityIndex()] = true
+            hero_duel.deadHeroes.leftTeam[hero:GetEntityIndex()] = true
             isLeftTeam = true
             break
         end
@@ -386,7 +387,7 @@ function Main:OnUnitKilled_mode_5v5_2(killedUnit, args)
     if not isLeftTeam then
         for _, hero in pairs(self.rightTeamHeroes) do
             if hero == killedUnit then
-                self.deadHeroes.rightTeam[hero:GetEntityIndex()] = true
+                hero_duel.deadHeroes.rightTeam[hero:GetEntityIndex()] = true
                 isRightTeam = true
                 break
             end
@@ -401,7 +402,7 @@ function Main:OnUnitKilled_mode_5v5_2(killedUnit, args)
 
     -- 检查左方队伍
     for _, hero in pairs(self.leftTeamHeroes) do
-        if not hero:IsNull() and not self.deadHeroes.leftTeam[hero:GetEntityIndex()] then
+        if not hero:IsNull() and not hero_duel.deadHeroes.leftTeam[hero:GetEntityIndex()] then
             leftTeamAllDead = false
             break
         end
@@ -409,7 +410,7 @@ function Main:OnUnitKilled_mode_5v5_2(killedUnit, args)
 
     -- 检查右方队伍
     for _, hero in pairs(self.rightTeamHeroes) do
-        if not hero:IsNull() and not self.deadHeroes.rightTeam[hero:GetEntityIndex()] then
+        if not hero:IsNull() and not hero_duel.deadHeroes.rightTeam[hero:GetEntityIndex()] then
             rightTeamAllDead = false
             break
         end
@@ -433,7 +434,7 @@ function Main:OnUnitKilled_mode_5v5_2(killedUnit, args)
 
         -- 只对获胜方的第一个未记录死亡的英雄播放胜利特效
         local winningHeroes = not leftTeamAllDead and self.leftTeamHeroes or self.rightTeamHeroes
-        local winningDeadHeroes = not leftTeamAllDead and self.deadHeroes.leftTeam or self.deadHeroes.rightTeam
+        local winningDeadHeroes = not leftTeamAllDead and hero_duel.deadHeroes.leftTeam or hero_duel.deadHeroes.rightTeam
         
         for _, hero in pairs(winningHeroes) do
             if not hero:IsNull() and not winningDeadHeroes[hero:GetEntityIndex()] then
@@ -444,12 +445,12 @@ function Main:OnUnitKilled_mode_5v5_2(killedUnit, args)
 
         -- 禁用所有未记录死亡的英雄
         for _, hero in pairs(self.leftTeamHeroes) do
-            if not hero:IsNull() and not self.deadHeroes.leftTeam[hero:GetEntityIndex()] then
+            if not hero:IsNull() and not hero_duel.deadHeroes.leftTeam[hero:GetEntityIndex()] then
                 self:DisableHeroWithModifiers(hero, self.endduration)
             end
         end
         for _, hero in pairs(self.rightTeamHeroes) do
-            if not hero:IsNull() and not self.deadHeroes.rightTeam[hero:GetEntityIndex()] then
+            if not hero:IsNull() and not hero_duel.deadHeroes.rightTeam[hero:GetEntityIndex()] then
                 self:DisableHeroWithModifiers(hero, self.endduration)
             end
         end

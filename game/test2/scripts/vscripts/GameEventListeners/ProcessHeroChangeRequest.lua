@@ -1,6 +1,17 @@
 function Main:ProcessHeroChangeRequest(event)
     print("开始处理英雄更改请求")
+    
+    -- 先摧毁全图树木
+    print("【树木处理】开始摧毁全图树木")
+    local mapCenter = Vector(0, 0, 0)
+    local mapRadius = 8000  -- 地图半径，确保覆盖整个地图
+    GridNav:DestroyTreesAroundPoint(mapCenter, mapRadius, false)
+    print("【树木处理】树木摧毁完成")
+    
+    -- 重新生成树木
+    print("【树木处理】开始重新生成树木")
     GridNav:RegrowAllTrees()
+    print("【树木处理】树木重新生成完成")
 
     local playerID = 0  -- 假设是玩家0，如果需要可以修改
     local player = PlayerResource:GetPlayer(playerID)
@@ -94,7 +105,7 @@ function Main:DeleteCurrentArenaHeroes()
             end
             
             -- 如果是美杜莎，先将其传送到远处
-            if hero:GetUnitName() == "npc_dota_hero_medusa" then
+            if hero:GetUnitName() == "npc_dota_hero_medusa" or hero:GetUnitName() == "npc_dota_hero_tinker" then
                 hero:SetAbsOrigin(Vector(10000, 10000, 128))
             end
             Timers:CreateTimer(0.1, function()

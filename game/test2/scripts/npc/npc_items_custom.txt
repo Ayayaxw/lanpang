@@ -30,30 +30,27 @@
 
 	"item_null_talisman_custom"
 	{
-		"ID"                            "1000004"
-		"BaseClass"                     "item_lua"
-		"ScriptFile"                    "items/item_null_talisman_custom"
-		"AbilityTextureName"            "item_null_talisman"
-		"AbilityBehavior"               "DOTA_ABILITY_BEHAVIOR_PASSIVE"
+		"ID"                    "1000004"
+		"BaseClass"             "item_lua"
+		"ScriptFile"            "items/item_null_talisman_custom"
+		"AbilityTextureName"    "item_null_talisman"
+		"AbilityBehavior"       "DOTA_ABILITY_BEHAVIOR_PASSIVE"
 
-		// Item Info
-		"ItemCost"                      "505"
-		"ItemShopTags"                  "damage;int;agi;str"
-		"ItemQuality"                   "common"
-		"ItemAliases"                   "null talisman"
-		"SuggestEarlygame"              "1"
+		"ItemCost"              "505"
+		"ItemShopTags"          "damage;int;agi;str"
+		"ItemQuality"           "common"
+		"ItemAliases"           "null talisman"
 
-		// Special    
 		"AbilityValues"
 		{
 			"bonus_intellect"           "15"
 			"bonus_strength"            "6"
 			"bonus_agility"             "6"
-			"bonus_max_mana_percentage" "9"
+			"bonus_max_mana_percentage" "9"  // 百分比值（实际是绝对值加成）
 			"bonus_mana_regen"          "3.0"
 		}
 	}
-
+	
 	"item_bracer_custom"
 	{
 		"ID"                            "1000005"

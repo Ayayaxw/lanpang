@@ -18,13 +18,25 @@ function modifier_item_null_talisman_stats:DeclareFunctions()
         MODIFIER_PROPERTY_STATS_INTELLECT_BONUS,
         MODIFIER_PROPERTY_STATS_STRENGTH_BONUS,
         MODIFIER_PROPERTY_STATS_AGILITY_BONUS,
-        MODIFIER_PROPERTY_MANA_BONUS_PERCENTAGE,
+        MODIFIER_PROPERTY_EXTRA_MANA_PERCENTAGE,  -- 使用100号属性
         MODIFIER_PROPERTY_MANA_REGEN_CONSTANT
     }
 end
 
+
+
 local function GetItemCount(unit)
+    -- 检查 unit 是否为 nil
+    if not unit then
+        return 0
+    end
+
     local count = 0
+    -- 检查 GetItemInSlot 方法是否存在
+    if not unit.GetItemInSlot then
+        return 0
+    end
+
     for i = 0, 8 do
         local item = unit:GetItemInSlot(i)
         if item and item:GetName() == "item_null_talisman_custom" then
@@ -32,6 +44,10 @@ local function GetItemCount(unit)
         end
     end
     return count
+end
+
+function modifier_item_null_talisman_stats:GetModifierExtraManaPercentage()
+    return self:GetAbility():GetSpecialValueFor("bonus_max_mana_percentage") * GetItemCount(self:GetParent())
 end
 
 function modifier_item_null_talisman_stats:GetModifierBonusStats_Intellect()
@@ -46,9 +62,6 @@ function modifier_item_null_talisman_stats:GetModifierBonusStats_Agility()
     return self:GetAbility():GetSpecialValueFor("bonus_agility") * GetItemCount(self:GetParent())
 end
 
-function modifier_item_null_talisman_stats:GetModifierManaBonus_Percentage()
-    return self:GetAbility():GetSpecialValueFor("bonus_max_mana_percentage") * GetItemCount(self:GetParent())
-end
 
 function modifier_item_null_talisman_stats:GetModifierConstantManaRegen()
     return self:GetAbility():GetSpecialValueFor("bonus_mana_regen") * GetItemCount(self:GetParent())

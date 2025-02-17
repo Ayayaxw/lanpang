@@ -48,7 +48,7 @@
 		"DOTA_Tooltip_ability_item_null_talisman_custom_bonus_intellect"           "+智力"
 		"DOTA_Tooltip_ability_item_null_talisman_custom_bonus_strength"            "+力量"
 		"DOTA_Tooltip_ability_item_null_talisman_custom_bonus_agility"             "+敏捷"
-		"DOTA_Tooltip_ability_item_null_talisman_custom_bonus_max_mana_percentage" "+最大魔法值"
+		"DOTA_Tooltip_ability_item_null_talisman_custom_bonus_max_mana_percentage" "+%最大魔法值"
 		"DOTA_Tooltip_ability_item_null_talisman_custom_bonus_mana_regen"          "+魔法恢复"
 
 		// 护腕

@@ -1521,12 +1521,58 @@ function Main:OnRequestUnitInfo(event)
     local unitEntIndex = event.unit_ent_index
     local unit = EntIndexToHScript(unitEntIndex)
     if unit and IsValidEntity(unit) then
-
+        -- 打印束缚状态
         if unit:IsLeashed() then
-            print(string.format("Unit %s is IsLeashed", unit:GetUnitName()))
+            print(string.format("【单位状态】%s 处于束缚状态", unit:GetUnitName()))
         else
-            print(string.format("Unit %s is not IsLeashed", unit:GetUnitName()))
+            print(string.format("【单位状态】%s 未处于束缚状态", unit:GetUnitName()))
         end
+
+        -- 打印激活的技能
+        print(string.format("【单位技能】%s 当前激活的技能：", unit:GetUnitName()))
+        for i = 0, unit:GetAbilityCount() - 1 do
+            local ability = unit:GetAbilityByIndex(i)
+            if ability and ability:GetToggleState() then
+                print(string.format("    - %s", ability:GetAbilityName()))
+            end
+        end
+
+        -- 查找最近的单位
+        local nearbyUnits = FindUnitsInRadius(
+            unit:GetTeamNumber(),
+            unit:GetAbsOrigin(),
+            nil,
+            99999, -- 搜索范围设为最大以找到最近的单位
+            DOTA_UNIT_TARGET_TEAM_BOTH,  -- 搜索所有队伍
+            DOTA_UNIT_TARGET_ALL,        -- 搜索所有类型单位
+            DOTA_UNIT_TARGET_FLAG_NONE,
+            FIND_CLOSEST,                -- 按距离排序
+            false
+        )
+
+        -- 找到最近的非自身单位
+        local closestUnit = nil
+        local closestDistance = 99999
+        for _, nearbyUnit in pairs(nearbyUnits) do
+            if nearbyUnit ~= unit then
+                local distance = (nearbyUnit:GetAbsOrigin() - unit:GetAbsOrigin()):Length2D()
+                closestUnit = nearbyUnit
+                closestDistance = distance
+                break  -- 因为已经按距离排序，第一个非自身单位就是最近的
+            end
+        end
+
+        if closestUnit then
+            print(string.format("【最近单位】%s 最近的单位是 %s，距离 %.0f", 
+                unit:GetUnitName(),
+                closestUnit:GetUnitName(),
+                closestDistance
+            ))
+        else
+            print(string.format("【最近单位】%s 附近没有其他单位", unit:GetUnitName()))
+        end
+
+    
 
         local unitName = unit:GetUnitName()
         local modifiers = {}

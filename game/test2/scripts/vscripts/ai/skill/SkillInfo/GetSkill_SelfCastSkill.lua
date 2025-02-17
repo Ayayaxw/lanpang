@@ -33,9 +33,6 @@ function CommonAI:isSelfCastAbility(abilityName)
             selfCastSkills["doom_bringer_doom"] = false
         end
     end
-
-
-
     -- ES跳判定
     if abilityName == "earthshaker_enchant_totem" then
         local totemAbility = self.entity:FindAbilityByName("earthshaker_enchant_totem")

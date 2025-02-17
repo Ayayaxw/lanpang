@@ -267,6 +267,10 @@ function Main:RequestStrategyData()
             name = "不到80%血绝不放大",
             id = "7"
         },
+        {
+            name = "不在骨法棒子里放技能",
+            id = "8"
+        },
     }
 
     --if self:containsStrategy(self.hero_strategy, "躲避模式") then
@@ -324,6 +328,12 @@ function Main:RequestStrategyData()
                 id = "1"
             },
         },
+        npc_dota_hero_oracle = {  -- 齐天大圣 
+        {
+            name = "满血开大",
+            id = "1"
+        },
+    },
         npc_dota_hero_mirana = {  -- 米拉娜
             {
                 name = "优先跳",
@@ -359,6 +369,10 @@ function Main:RequestStrategyData()
             {
                 name = "无限薄葬",
                 id = "infinite_grave"
+            },
+            {
+                name = "满血薄葬",
+                id = "1"
             },
         },
         npc_dota_hero_kez = {  -- 凯
@@ -425,6 +439,22 @@ function Main:RequestStrategyData()
                 id = "1"
             },
         },
+        npc_dota_hero_dark_willow = {  -- 熊战士
+            {
+                name = "暗影之境直接开",
+                id = "1"
+            },
+            {
+                name = "主动靠近作祟",
+                id = "2"
+            },
+        },
+        npc_dota_hero_furion = {  -- 熊战士
+            {
+                name = "先招小树人",
+                id = "1"
+            },
+        },
         npc_dota_hero_ursa = {  -- 熊战士
             {
                 name = "用跳赶路",
@@ -449,6 +479,16 @@ function Main:RequestStrategyData()
             {
                 name = "贴脸不射箭",
                 id = "no_close_powershot"
+            },
+        },
+        npc_dota_hero_phoenix = {  -- 风行者
+            {
+                name = "满血开大",
+                id = "1"
+            },
+            {
+                name = "半血开大",
+                id = "2"
             },
         },
         npc_dota_hero_nevermore = {  -- 风行者
@@ -513,6 +553,10 @@ function Main:RequestStrategyData()
             {
                 name = "小鸟挡箭",
                 id = "familiars_block"
+            },
+            {
+                name = "满血石化",
+                id = "1"
             },
         },
         npc_dota_hero_enigma = {  -- 谜团
@@ -800,6 +844,10 @@ function Main:RequestStrategyData()
                 name = "虚无自己",
                 id = "1"
             },
+            {
+                name = "不虚无自己",
+                id = "2"
+            },
         },
         npc_dota_hero_meepo = {  
             {
@@ -865,6 +913,12 @@ function Main:RequestStrategyData()
             {
                 name = "对琼英碧灵专用",
                 id = "counter_puck"
+            },
+        },
+        npc_dota_hero_keeper_of_the_light = {  -- 宙斯
+            {
+                name = "查克拉只给自己",
+                id = "1"
             },
         },
         npc_dota_hero_naga_siren = {  -- 娜迦海妖

@@ -225,6 +225,74 @@ function CommonAI:MoveToRange(targetPosition, range)
         return
     end
 
+    local target = self.target
+    local myPos = self.entity:GetAbsOrigin()
+    local targetPos = target:GetAbsOrigin()
+    local direction = (targetPos - myPos):Normalized()
+    local attackRange = self.entity:Script_GetAttackRange()
+    
+    -- 获取范围内所有单位
+    local units = FindUnitsInRadius(
+        self.entity:GetTeamNumber(),
+        myPos,
+        nil,
+        attackRange,
+        DOTA_UNIT_TARGET_TEAM_BOTH,
+        DOTA_UNIT_TARGET_ALL,
+        DOTA_UNIT_TARGET_FLAG_NONE,
+        FIND_ANY_ORDER,
+        false
+    )
+    
+    local nearestCog = nil
+    local nearestDistance = attackRange
+    
+    for _, unit in pairs(units) do
+        if unit:GetUnitName() == "npc_dota_rattletrap_cog" then
+            local cogPos = unit:GetAbsOrigin()
+            local cogToSelf = cogPos - myPos
+            
+            -- 检查是否在朝向敌人的方向
+            local dotProduct = direction:Dot(cogToSelf:Normalized())
+            if dotProduct > 0 then
+                local distance = (cogPos - myPos):Length2D()
+                if distance < nearestDistance then
+                    nearestCog = unit
+                    nearestDistance = distance
+                end
+            end
+        end
+    end
+    
+    if nearestCog then
+        -- 检查是否可以攻击
+        if self:IsUnableToAttack(self.entity, nearestCog) then
+            return self.nextThinkTime
+        end
+        
+        -- 检查是否已经在攻击这个目标
+        if not (self.entity:IsAttacking() and self.entity:GetAttackTarget() == nearestCog) then
+            self:SetState(AIStates.Attack)
+            local order = {
+                UnitIndex = self.entity:entindex(),
+                OrderType = DOTA_UNIT_ORDER_ATTACK_TARGET,
+                TargetIndex = nearestCog:entindex(),
+                Position = nearestCog:GetAbsOrigin()
+            }
+            ExecuteOrderFromTable(order)
+            
+        end
+        return 
+    end
+
+
+
+
+
+
+
+
+
     local distance = (self.entity:GetOrigin() - targetPosition):Length2D()
     
     if distance > range then
@@ -367,8 +435,7 @@ function CommonAI:IsUnableToCastAbility(entity, skill)
     end
 
     -- 特殊挑战模式判断
-    if Main.currentChallenge == Main.Challenges.CD0_1skill and entity:HasModifier("modifier_pugna_nether_ward_aura") then
-        printReason("在CD0_1skill挑战中受到骨法守卫光环效果")
+    if self:containsStrategy(self.global_strategy, "不在骨法棒子里放技能") and entity:HasModifier("modifier_pugna_nether_ward_aura") then
         return true
     end
 

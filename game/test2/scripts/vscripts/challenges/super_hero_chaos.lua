@@ -1,15 +1,11 @@
-function Main:Cleanup_super_hero_chaos()
-
-end
-
 
 
 function Main:Init_super_hero_chaos(event, playerID)
     -- 初始化全局变量
     self.showTeamPanel = true
     self.isTestMode = false
-    self.heroesPerTeam = 1  -- 每个队伍初始传送的英雄数量，作为独立参数
-    self.preCreatePerTeam = 3  -- 每个队伍初始创建的英雄数量，作为独立参数
+    self.heroesPerTeam = 3  -- 每个队伍初始传送的英雄数量，作为独立参数
+    self.preCreatePerTeam = 7  -- 每个队伍初始创建的英雄数量，作为独立参数
     self.currentDeployIndex = 1  -- 当前部署的英雄索引
     hero_duel.EndDuel = false  -- 标记战斗是否结束
     self.currentTimer = (self.currentTimer or 0) + 1
@@ -32,14 +28,14 @@ function Main:Init_super_hero_chaos(event, playerID)
         },
         
         TOURNAMENT = {
-            [1] = {type = "1", name = "被奴役的人马"},
-            [2] = {type = "2", name = "农场主"}
+            [1] = {type = "1", name = "力量"},
+            [2] = {type = "2", name = "敏捷"}
         }
         -- 可以在这里添加更多的队伍配置
     }
 
     -- 设置当前使用的队伍配置类型
-    self.teamConfig = "ATTRIBUTE"  -- 可以是 "ATTRIBUTE" 或 "TOURNAMENT" 或其他配置
+    self.teamConfig = "TOURNAMENT"  -- 可以是 "ATTRIBUTE" 或 "TOURNAMENT" 或其他配置
     
     -- 设置实际使用的队伍类型
     self.teamTypes = TEAM_CONFIGS[self.teamConfig]
@@ -286,28 +282,36 @@ function Main:SetupCombatBuffs(hero)
     end
     
     print(string.format("正在设置英雄战斗状态: %s", hero:GetUnitName()))
-    --hero:AddNewModifier(hero, nil, "modifier_reduced_ability_cost", {})
+    
     HeroMaxLevel(hero)
     hero:AddNewModifier(hero, nil, "modifier_item_aghanims_shard", {})
     hero:AddNewModifier(hero, nil, "modifier_item_ultimate_scepter_consumed", {})
     hero:AddNewModifier(hero, nil, "modifier_auto_elevation_large", {})
 
+    -- 给所有英雄添加 item_titan_sliver
+    hero:AddItemByName("item_titan_sliver")
 
-    -- hero:AddItemByName("item_trident")
-    -- hero:AddItemByName("item_ultimate_orb")
-    -- hero:AddItemByName("item_ultimate_orb")
-    -- hero:AddItemByName("item_heart")
-    -- hero:AddItemByName("item_heart")
-    -- hero:AddItemByName("item_heart")
-    -- hero:AddItemByName("item_heart")
-    -- hero:AddItemByName("item_heart")
-    -- hero:AddItemByName("item_heart")
+    -- 查找英雄type
+    local heroName = hero:GetUnitName()
+    local heroType = nil
+    
+    for _, heroData in pairs(heroes_precache) do
+        if heroData.name == heroName then
+            heroType = heroData.type
+            break
+        end
+    end
 
-    -- 添加装备
-    -- 
-    -- local bkb = hero:AddItemByName("item_black_king_bar")
-    -- -- 使用BKB
-    -- hero:CastAbilityNoTarget(bkb, -1)
+    -- 根据type添加对应装备
+    if heroType == 1 then
+        for i = 1, 6 do
+            hero:AddItemByName("item_bracer_custom")
+        end
+    elseif heroType == 2 then
+        for i = 1, 6 do
+            hero:AddItemByName("item_wraith_band_custom")
+        end
+    end
     
     print(string.format("英雄战斗状态设置完成: %s", hero:GetUnitName()))
 end
@@ -621,121 +625,116 @@ function Main:OnUnitKilled_super_hero_chaos(killedUnit, args)
 end
 -- 在初始化时
 function Main:InitializeHeroSequence()
-    -- local heroesGroup1 = {
-    --     "npc_dota_hero_centaur",
-    --     "npc_dota_hero_centaur",
-    --     "npc_dota_hero_centaur",
-    --     "npc_dota_hero_centaur",
-    --     "npc_dota_hero_centaur",
-    --     "npc_dota_hero_centaur",
-    --     "npc_dota_hero_centaur",
-    --     "npc_dota_hero_centaur",
-    --     "npc_dota_hero_centaur",
-    --     "npc_dota_hero_centaur",
-    --     "npc_dota_hero_centaur",
-    --     "npc_dota_hero_centaur",
-    --     "npc_dota_hero_centaur",
-    --     "npc_dota_hero_centaur",
-    --     "npc_dota_hero_centaur",
-    --     "npc_dota_hero_centaur",
-    --     "npc_dota_hero_centaur",
-    --     "npc_dota_hero_centaur",
-    --     "npc_dota_hero_centaur",
-    --     "npc_dota_hero_centaur",
-    --     "npc_dota_hero_centaur",
-    --     "npc_dota_hero_centaur",
-    --     "npc_dota_hero_centaur",
-    --     "npc_dota_hero_centaur",
-    --     "npc_dota_hero_centaur",
-    --     "npc_dota_hero_centaur",
-    --     "npc_dota_hero_centaur",
-    --     "npc_dota_hero_centaur",
-    --     "npc_dota_hero_centaur",
-    --     "npc_dota_hero_centaur",
-    --     "npc_dota_hero_centaur",
-    --     "npc_dota_hero_centaur",
-    --     "npc_dota_hero_centaur",
-    --     "npc_dota_hero_centaur",
-        
-    -- }
+    local heroesGroup1 = {
+        "npc_dota_hero_night_stalker", "npc_dota_hero_night_stalker", "npc_dota_hero_night_stalker",
+        "npc_dota_hero_tidehunter", "npc_dota_hero_tidehunter", "npc_dota_hero_tidehunter",
+        "npc_dota_hero_axe", "npc_dota_hero_axe", "npc_dota_hero_axe",
+        "npc_dota_hero_elder_titan", "npc_dota_hero_elder_titan", "npc_dota_hero_elder_titan",
+        "npc_dota_hero_mars", "npc_dota_hero_mars", "npc_dota_hero_mars",
+        "npc_dota_hero_doom_bringer", "npc_dota_hero_doom_bringer", "npc_dota_hero_doom_bringer",
+        "npc_dota_hero_slardar", "npc_dota_hero_slardar", "npc_dota_hero_slardar",
+        "npc_dota_hero_ogre_magi", "npc_dota_hero_ogre_magi", "npc_dota_hero_ogre_magi",
+        "npc_dota_hero_pudge", "npc_dota_hero_pudge", "npc_dota_hero_pudge",
+        "npc_dota_hero_legion_commander", "npc_dota_hero_legion_commander", "npc_dota_hero_legion_commander",
+        "npc_dota_hero_dragon_knight", "npc_dota_hero_dragon_knight", "npc_dota_hero_dragon_knight",
+        "npc_dota_hero_undying", "npc_dota_hero_undying", "npc_dota_hero_undying",
+        "npc_dota_hero_abyssal_underlord", "npc_dota_hero_abyssal_underlord", "npc_dota_hero_abyssal_underlord", 
+        "npc_dota_hero_chaos_knight", "npc_dota_hero_chaos_knight", "npc_dota_hero_chaos_knight",
+        "npc_dota_hero_tusk", "npc_dota_hero_tusk", "npc_dota_hero_tusk",
+        "npc_dota_hero_shredder", "npc_dota_hero_shredder", "npc_dota_hero_shredder",
+        "npc_dota_hero_bristleback", "npc_dota_hero_bristleback", "npc_dota_hero_bristleback",
+        "npc_dota_hero_tiny", "npc_dota_hero_tiny", "npc_dota_hero_tiny",
+        "npc_dota_hero_kunkka", "npc_dota_hero_kunkka", "npc_dota_hero_kunkka",
+        "npc_dota_hero_alchemist", "npc_dota_hero_alchemist", "npc_dota_hero_alchemist",
+        "npc_dota_hero_life_stealer", "npc_dota_hero_life_stealer", "npc_dota_hero_life_stealer",
+        "npc_dota_hero_dawnbreaker", "npc_dota_hero_dawnbreaker", "npc_dota_hero_dawnbreaker",
+        "npc_dota_hero_sven", "npc_dota_hero_sven", "npc_dota_hero_sven",
+        "npc_dota_hero_huskar", "npc_dota_hero_huskar", "npc_dota_hero_huskar",
+        "npc_dota_hero_primal_beast", "npc_dota_hero_primal_beast", "npc_dota_hero_primal_beast",
+        "npc_dota_hero_earth_spirit", "npc_dota_hero_earth_spirit", "npc_dota_hero_earth_spirit",
+        "npc_dota_hero_centaur", "npc_dota_hero_centaur", "npc_dota_hero_centaur",
+        "npc_dota_hero_omniknight", "npc_dota_hero_omniknight", "npc_dota_hero_omniknight",
+        "npc_dota_hero_spirit_breaker", "npc_dota_hero_spirit_breaker", "npc_dota_hero_spirit_breaker",
+        "npc_dota_hero_skeleton_king", "npc_dota_hero_skeleton_king", "npc_dota_hero_skeleton_king",
+        "npc_dota_hero_treant", "npc_dota_hero_treant", "npc_dota_hero_treant",
+        "npc_dota_hero_earthshaker", "npc_dota_hero_earthshaker", "npc_dota_hero_earthshaker"
+    }
     
-    -- local heroesGroup2 = {
-    --     "npc_dota_hero_faceless_void",
-    --     "npc_dota_hero_juggernaut",
-    --     "npc_dota_hero_winter_wyvern",
-    --     "npc_dota_hero_viper",
-    --     "npc_dota_hero_kez",
-    --     "npc_dota_hero_windrunner",
-    --     "npc_dota_hero_magnataur",
-    --     "npc_dota_hero_razor",
-    --     "npc_dota_hero_dark_seer",
-    --     "npc_dota_hero_death_prophet",
-    --     "npc_dota_hero_monkey_king",
-    --     "npc_dota_hero_dragon_knight",
-    --     "npc_dota_hero_ogre_magi",
-    --     "npc_dota_hero_bloodseeker",
-    --     "npc_dota_hero_batrider",
-    --     "npc_dota_hero_necrolyte",
-    --     "npc_dota_hero_doom_bringer",
-    --     "npc_dota_hero_visage",
-    --     "npc_dota_hero_ursa",
-    --     "npc_dota_hero_silencer",
-    --     "npc_dota_hero_ember_spirit",
-    --     "npc_dota_hero_pangolier",
-    --     "npc_dota_hero_jakiro",
-    --     "npc_dota_hero_shadow_shaman",
-    --     "npc_dota_hero_nevermore",
-    --     "npc_dota_hero_phantom_lancer",
-    --     "npc_dota_hero_sand_king",
-    --     "npc_dota_hero_techies",
-    --     "npc_dota_hero_witch_doctor",
-    --     "npc_dota_hero_huskar",
-    --     "npc_dota_hero_luna",
-    --     "npc_dota_hero_venomancer",
-    --     "npc_dota_hero_arc_warden",
-    --     "npc_dota_hero_clinkz"
-    -- }
+    local heroesGroup2 = {
+        "npc_dota_hero_slark", "npc_dota_hero_slark", "npc_dota_hero_slark",
+        "npc_dota_hero_bloodseeker", "npc_dota_hero_bloodseeker", "npc_dota_hero_bloodseeker",
+        "npc_dota_hero_templar_assassin", "npc_dota_hero_templar_assassin", "npc_dota_hero_templar_assassin",
+        "npc_dota_hero_phantom_lancer", "npc_dota_hero_phantom_lancer", "npc_dota_hero_phantom_lancer",
+        "npc_dota_hero_weaver", "npc_dota_hero_weaver", "npc_dota_hero_weaver",
+        "npc_dota_hero_medusa", "npc_dota_hero_medusa", "npc_dota_hero_medusa",
+        "npc_dota_hero_morphling", "npc_dota_hero_morphling", "npc_dota_hero_morphling",
+        "npc_dota_hero_ursa", "npc_dota_hero_ursa", "npc_dota_hero_ursa",
+        "npc_dota_hero_juggernaut", "npc_dota_hero_juggernaut", "npc_dota_hero_juggernaut",
+        "npc_dota_hero_antimage", "npc_dota_hero_antimage", "npc_dota_hero_antimage",
+        "npc_dota_hero_phantom_assassin", "npc_dota_hero_phantom_assassin", "npc_dota_hero_phantom_assassin",
+        "npc_dota_hero_riki", "npc_dota_hero_riki", "npc_dota_hero_riki",
+        "npc_dota_hero_luna", "npc_dota_hero_luna", "npc_dota_hero_luna",
+        "npc_dota_hero_kez", "npc_dota_hero_kez", "npc_dota_hero_kez",
+        "npc_dota_hero_faceless_void", "npc_dota_hero_faceless_void", "npc_dota_hero_faceless_void",
+        "npc_dota_hero_bounty_hunter", "npc_dota_hero_bounty_hunter", "npc_dota_hero_bounty_hunter",
+        "npc_dota_hero_viper", "npc_dota_hero_viper", "npc_dota_hero_viper",
+        "npc_dota_hero_razor", "npc_dota_hero_razor", "npc_dota_hero_razor",
+        "npc_dota_hero_nevermore", "npc_dota_hero_nevermore", "npc_dota_hero_nevermore",
+        "npc_dota_hero_ember_spirit", "npc_dota_hero_ember_spirit", "npc_dota_hero_ember_spirit",
+        "npc_dota_hero_drow_ranger", "npc_dota_hero_drow_ranger", "npc_dota_hero_drow_ranger",
+        "npc_dota_hero_naga_siren", "npc_dota_hero_naga_siren", "npc_dota_hero_naga_siren",
+        "npc_dota_hero_clinkz", "npc_dota_hero_clinkz", "npc_dota_hero_clinkz",
+        "npc_dota_hero_terrorblade", "npc_dota_hero_terrorblade", "npc_dota_hero_terrorblade",
+        "npc_dota_hero_arc_warden", "npc_dota_hero_arc_warden", "npc_dota_hero_arc_warden",
+        "npc_dota_hero_troll_warlord", "npc_dota_hero_troll_warlord", "npc_dota_hero_troll_warlord",
+        "npc_dota_hero_gyrocopter", "npc_dota_hero_gyrocopter", "npc_dota_hero_gyrocopter",
+        "npc_dota_hero_sniper", "npc_dota_hero_sniper", "npc_dota_hero_sniper",
+        "npc_dota_hero_spectre", "npc_dota_hero_spectre", "npc_dota_hero_spectre",
+        "npc_dota_hero_meepo", "npc_dota_hero_meepo", "npc_dota_hero_meepo",
+        "npc_dota_hero_hoodwink", "npc_dota_hero_hoodwink", "npc_dota_hero_hoodwink",
+        "npc_dota_hero_monkey_king", "npc_dota_hero_monkey_king", "npc_dota_hero_monkey_king"
+    }
     
     -- 创建一个查找表来确定英雄类型
 
         -- Group3: 筛选英雄池。当Group1和Group2都不启用时，
     -- 使用原始type分类方式，但只使用这个组里列出的英雄
-    local heroesGroup3 = {
-        "npc_dota_hero_earthshaker",
-        "npc_dota_hero_kunkka",
-        "npc_dota_hero_tiny",
-        "npc_dota_hero_abyssal_underlord",
-        "npc_dota_hero_elder_titan",
-        "npc_dota_hero_axe",
-        "npc_dota_hero_tidehunter",
-        "npc_dota_hero_sven",
-        "npc_dota_hero_weaver",
-        "npc_dota_hero_troll_warlord",
-        "npc_dota_hero_razor",
-        "npc_dota_hero_drow_ranger",
-        "npc_dota_hero_morphling",
-        "npc_dota_hero_slark",
-        "npc_dota_hero_bloodseeker",
-        "npc_dota_hero_meepo",
-        "npc_dota_hero_juggernaut",
-        "npc_dota_hero_phantom_assassin",
-        "npc_dota_hero_lich",
-        "npc_dota_hero_necrolyte",
-        "npc_dota_hero_crystal_maiden",
-        "npc_dota_hero_disruptor",
-        "npc_dota_hero_warlock",
-        "npc_dota_hero_leshrac",
-        "npc_dota_hero_jakiro",
-        "npc_dota_hero_pugna",
-        "npc_dota_hero_lina",
-        "npc_dota_hero_abaddon",
-        "npc_dota_hero_rattletrap",
-        "npc_dota_hero_winter_wyvern",
-        "npc_dota_hero_sand_king",
-        "npc_dota_hero_invoker",
-        "npc_dota_hero_dazzle",
-        "npc_dota_hero_enigma"
-    }
+    -- local heroesGroup3 = {
+    --     "npc_dota_hero_earthshaker",
+    --     "npc_dota_hero_kunkka",
+    --     "npc_dota_hero_tiny",
+    --     "npc_dota_hero_abyssal_underlord",
+    --     "npc_dota_hero_elder_titan",
+    --     "npc_dota_hero_axe",
+    --     "npc_dota_hero_tidehunter",
+    --     "npc_dota_hero_sven",
+    --     "npc_dota_hero_weaver",
+    --     "npc_dota_hero_troll_warlord",
+    --     "npc_dota_hero_razor",
+    --     "npc_dota_hero_drow_ranger",
+    --     "npc_dota_hero_morphling",
+    --     "npc_dota_hero_slark",
+    --     "npc_dota_hero_bloodseeker",
+    --     "npc_dota_hero_meepo",
+    --     "npc_dota_hero_juggernaut",
+    --     "npc_dota_hero_phantom_assassin",
+    --     "npc_dota_hero_lich",
+    --     "npc_dota_hero_necrolyte",
+    --     "npc_dota_hero_crystal_maiden",
+    --     "npc_dota_hero_disruptor",
+    --     "npc_dota_hero_warlock",
+    --     "npc_dota_hero_leshrac",
+    --     "npc_dota_hero_jakiro",
+    --     "npc_dota_hero_pugna",
+    --     "npc_dota_hero_lina",
+    --     "npc_dota_hero_abaddon",
+    --     "npc_dota_hero_rattletrap",
+    --     "npc_dota_hero_winter_wyvern",
+    --     "npc_dota_hero_sand_king",
+    --     "npc_dota_hero_invoker",
+    --     "npc_dota_hero_dazzle",
+    --     "npc_dota_hero_enigma"
+    -- }
     local useOriginalType = not heroesGroup1 and not heroesGroup2
     local useGroup3Filter = heroesGroup3 ~= nil
     local heroTypeMap = {}
@@ -851,7 +850,8 @@ function Main:InitializeHeroSequence()
             self.heroSequence[heroType].sequence = sequence
         else
             -- 非测试模式，直接随机打乱所有英雄
-            self.heroSequence[heroType].sequence = table.shuffle(heroPool)
+            --self.heroSequence[heroType].sequence = table.shuffle(heroPool)
+            self.heroSequence[heroType].sequence = heroPool
         end
         
         -- 设置总数和初始索引

@@ -848,6 +848,12 @@ function CommonAI:HandleEnemyPoint_InCastRange(entity,target,abilityInfo,targetI
         abilityInfo.castPoint = CommonAI:calculateAdjustedCastPoint(entity, castPosition, abilityInfo.castPoint)
         return true
 
+    elseif abilityInfo.abilityName == "queenofpain_blink" then
+        local castPosition = targetInfo.targetPos - (targetInfo.targetDirection * 200)
+        entity:CastAbilityOnPosition(castPosition, abilityInfo.skill, 0)
+        abilityInfo.castPoint = CommonAI:calculateAdjustedCastPoint(entity, castPosition, abilityInfo.castPoint)
+        return true
+
     elseif abilityInfo.abilityName == "bloodseeker_blood_bath" then
         -- 计算方向向量并归一化
         if self:containsStrategy(self.hero_strategy, "血祭封走位") then
@@ -1197,10 +1203,10 @@ function CommonAI:HandleEnemyPoint_InCastRange(entity,target,abilityInfo,targetI
             local distanceToTarget = (targetPos - entityPos):Length2D()
             local castPosition = targetPos
             
-            if distanceToTarget <= 200 then
+            
                 -- 如果距离小于200，计算目标背后200码的位置
-                castPosition = targetPos + direction * 350
-            end
+            castPosition = targetPos + direction * 350
+            
         
             entity:CastAbilityOnPosition(castPosition, abilityInfo.skill, 0)
             
@@ -1420,6 +1426,13 @@ function CommonAI:HandleEnemyPoint_InCastRange(entity,target,abilityInfo,targetI
     
     
     else
+
+
+
+
+
+
+
         -- 定义需要对着目标释放的技能表（即使在AOE范围内也不对脚下释放）
         local targetCastAbilities = {
             ["drow_ranger_multishot"] = true,
@@ -1479,7 +1492,59 @@ function CommonAI:HandleEnemyPoint_InCastRange(entity,target,abilityInfo,targetI
                 self:log(string.format("预判位置不合适，对目标 %s 直接施放技能 %s", 
                     targetName, abilityInfo.abilityName))
             end
+        elseif bit.band(abilityInfo.abilityBehavior, DOTA_ABILITY_BEHAVIOR_VECTOR_TARGETING) ~= 0 then
+
+            local maxCastDistance = abilityInfo.castRange + abilityInfo.aoeRadius
+            
+            -- 动态设置目标flags
+            local targetFlags = DOTA_UNIT_TARGET_FLAG_NONE
+
+            targetFlags = bit.bor(targetFlags, DOTA_UNIT_TARGET_FLAG_NOT_ILLUSIONS)
+
         
+            -- 直接内联搜索逻辑
+            local enemies = FindUnitsInRadius(
+                entity:GetTeamNumber(),
+                entity:GetOrigin(),
+                nil,
+                maxCastDistance,
+                DOTA_UNIT_TARGET_TEAM_ENEMY,
+                DOTA_UNIT_TARGET_HERO + DOTA_UNIT_TARGET_BASIC,
+                targetFlags,
+                FIND_ANY_ORDER,
+                false
+            )
+        
+            -- 寻找最远单位
+            local farthestDist = 0
+            local farthestEnemy = nil
+            for _, enemy in ipairs(enemies) do
+                local dist = (enemy:GetOrigin() - entity:GetOrigin()):Length2D()
+                if dist > farthestDist then
+                    farthestDist = dist
+                    farthestEnemy = enemy
+                end
+            end
+        
+            -- 计算施法点
+            local vectorStart = targetInfo.targetPos
+            local vectorEnd = vectorStart
+            if farthestEnemy then
+                local direction = (farthestEnemy:GetOrigin() - entity:GetOrigin()):Normalized()
+                vectorEnd = entity:GetOrigin() + direction * math.min(farthestDist, maxCastDistance)
+            end
+        
+            -- 执行施法
+            self:log(string.format("矢量施法：从 %s 到 %s (最大距离%d)", 
+                tostring(vectorStart), 
+                tostring(vectorEnd),
+                maxCastDistance))
+                
+            self:CastVectorSkillToTwoPoints(entity, abilityInfo.skill, vectorStart, vectorEnd)
+            abilityInfo.castPoint = CommonAI:calculateAdjustedCastPoint(entity, vectorStart, abilityInfo.castPoint)
+            
+            return true
+
         -- 其他情况直接对目标位置释放
         else
             entity:CastAbilityOnPosition(targetInfo.targetPos, abilityInfo.skill, 0)
@@ -1491,6 +1556,8 @@ function CommonAI:HandleEnemyPoint_InCastRange(entity,target,abilityInfo,targetI
         return true
     end
 end
+
+
 
 
 function CommonAI:calculateNextBallLightningCastTime(entity, target, ballLightningSkill, currentPosition, expectedFlightTime,castPosition)

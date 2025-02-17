@@ -23,7 +23,8 @@ function Main:Init_movie_mode(heroName, heroFacet,playerID, heroChineseName)
     --self:TestHeroCreation()
     --SpawnHeroesInFormation()
     --PreSpawnTwoGroupsHeroes()--胜负英雄展示
-    SpawnFourHeroes()--颁奖
+    --SpawnFourHeroes()--颁奖
+    CreateAxeLegion()
     --CreateHeroWithClones()
     --CreateTestHeroes()
     --PrintFirstHeroKV()
@@ -45,7 +46,39 @@ function Main:Init_movie_mode(heroName, heroFacet,playerID, heroChineseName)
     -- SetupHeroMatrix()
 end
 
-
+function CreateAxeLegion()
+    -- 创建主控斧王
+    local mainSpawnPos = Vector(0, 0, 0)  -- 设置生成位置
+    local mainPlayerId = 0  -- 设置玩家ID
+    
+    CreateHero(mainPlayerId, "npc_dota_hero_meepo", 1, mainSpawnPos, DOTA_TEAM_GOODGUYS, true, 
+        function(mainHero)
+            -- 给主斧王添加Meepo技能
+            mainHero:AddNewModifier(mainHero, nil, "modifier_item_aghanims_shard", {})
+            mainHero:AddNewModifier(mainHero, nil, "modifier_item_ultimate_scepter_consumed", {})
+            HeroMaxLevel(mainHero)
+            
+            -- 创建30个斧王分身
+            for i = 1, 30 do
+                -- 计算每个分身的位置,这里简单用圆形排列
+                local angle = (360/30) * i
+                local radius = 200
+                local spawnPos = Vector(
+                    mainSpawnPos.x + radius * math.cos(math.rad(angle)),
+                    mainSpawnPos.y + radius * math.sin(math.rad(angle)),
+                    mainSpawnPos.z
+                )
+                
+                CreateHeroHeroChaos(mainPlayerId, "npc_dota_hero_axe", 1, spawnPos, DOTA_TEAM_GOODGUYS, false, mainHero,
+                    function(cloneHero)
+                        -- 给分身添加神杖和魔晶效果
+                        cloneHero:AddNewModifier(cloneHero, nil, "modifier_item_aghanims_shard", {})
+                        cloneHero:AddNewModifier(cloneHero, nil, "modifier_item_ultimate_scepter_consumed", {})
+                        HeroMaxLevel(cloneHero)
+                    end)
+            end
+        end)
+end
 
 -- 创建10个随机英雄的函数
 function Create10RandomHeroes()

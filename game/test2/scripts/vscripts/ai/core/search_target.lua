@@ -120,7 +120,6 @@ function CommonAI:FindTarget(entity)
     return nil
 end
 
-
 function CommonAI:FindPreferredTarget(entity, preferredUnitNames)
     self:log("为实体调用 FindPreferredTarget: " .. (entity and entity:GetUnitName() or "nil"))
     if not entity then
@@ -137,11 +136,14 @@ function CommonAI:FindPreferredTarget(entity, preferredUnitNames)
                   DOTA_UNIT_TARGET_FLAG_OUT_OF_WORLD +
                   DOTA_UNIT_TARGET_FLAG_NOT_ILLUSIONS
 
-    -- 使用全局定义的索敌范围和新的标志
+    -- 根据 self.target 是否存在决定搜索范围
+    local searchRadius = GLOBAL_SEARCH_RADIUS
+
+    -- 使用确定的搜索范围
     local units = FindUnitsInRadius(entity:GetTeamNumber(), 
                                     entity:GetOrigin(), 
                                     nil, 
-                                    entity:Script_GetAttackRange() + 300, 
+                                    searchRadius, 
                                     DOTA_UNIT_TARGET_TEAM_ENEMY, 
                                     DOTA_UNIT_TARGET_ALL, 
                                     flags, 
@@ -455,13 +457,14 @@ local DOTA_ABILITY_BEHAVIOR = {
 }
 
 
-function CommonAI:FindBestAllyHeroTarget(entity, ability, requiredModifiers, minRemainingTime, sortBy, forceHero, canBeSelf)
+function CommonAI:FindBestAllyHeroTarget(entity, ability, requiredModifiers, minRemainingTime, sortBy, forceHero, canBeSelf, allowIllusions)
     -- 设置默认值
     requiredModifiers = requiredModifiers or {}
     minRemainingTime = minRemainingTime or 0
-    sortBy = sortBy or "health_percent" -- 默认按生命百分比排序
-    if forceHero == nil then forceHero = true end -- 默认强制英雄单位
-    if canBeSelf == nil then canBeSelf = true end -- 默认可以选择自己
+    sortBy = sortBy or "health_percent"
+    if forceHero == nil then forceHero = true end
+    if canBeSelf == nil then canBeSelf = true end
+    allowIllusions = allowIllusions or false  -- 新增参数默认值
 
     -- 获取技能行为和施法距离
     local behavior = self:GetAbilityBehavior(ability, 0, 0)
@@ -479,6 +482,11 @@ function CommonAI:FindBestAllyHeroTarget(entity, ability, requiredModifiers, min
 
     local targetType = forceHero and DOTA_UNIT_TARGET_HERO or DOTA_UNIT_TARGET_ALL
 
+    local flags = DOTA_UNIT_TARGET_FLAG_NOT_ILLUSIONS
+    if allowIllusions then
+        flags = flags - DOTA_UNIT_TARGET_FLAG_NOT_ILLUSIONS  -- 移除排除幻象标志
+    end
+
     local allies = FindUnitsInRadius(
         entity:GetTeamNumber(),
         entity:GetOrigin(), 
@@ -486,7 +494,7 @@ function CommonAI:FindBestAllyHeroTarget(entity, ability, requiredModifiers, min
         searchRadius,
         DOTA_UNIT_TARGET_TEAM_FRIENDLY,
         targetType,
-        DOTA_UNIT_TARGET_FLAG_NOT_ILLUSIONS,
+        flags,  -- 使用动态计算的flags
         FIND_ANY_ORDER,
         false
     )
@@ -498,6 +506,9 @@ function CommonAI:FindBestAllyHeroTarget(entity, ability, requiredModifiers, min
     
     for _, ally in pairs(allies) do
         -- 检查是否为自身且不允许选择自身
+        if ally:IsUnselectable() then
+            goto continue
+        end
         if not canBeSelf and ally == entity then
             goto continue
         end
@@ -595,11 +606,13 @@ function CommonAI:FindBestAllyHeroTarget(entity, ability, requiredModifiers, min
         local valueA, valueB = compareValues()
         
         if valueA == valueB then
-            -- 当值相等时,如果允许对自己施法,优先选择自己
+            -- 当值相等时
             if canBeSelf then
+                -- 如果可以选择自己，且其中一个是自己，优先选择自己
                 if a == entity then return true end
                 if b == entity then return false end
             end
+            -- 使用实体ID来确保排序的一致性
             return a:GetEntityIndex() < b:GetEntityIndex()
         end
         
@@ -923,7 +936,147 @@ local target = self:FindBestEnemyHeroTarget(
 )
 --]]
 
+function GetDistancePointToLine(point, segStart, segEnd)
+    local segment = segEnd - segStart
+    local vecToPoint = point - segStart
+    local t = vecToPoint:Dot(segment) / segment:Dot(segment)
+    t = math.max(0, math.min(1, t))
+    local projection = segStart + t * segment
+    return (point - projection):Length2D()
+end
 
+function CommonAI:FindClosestUnblockedEnemyHero(entity, ability, isAoeAbility, lineWidth)
+    local castRange = self:GetSkillCastRange(entity, ability)
+    print("【阻挡检测】开始搜索, 施法者: " .. entity:GetUnitName() .. ", 施法距离: " .. castRange)
+    
+    local enemyHeroes = FindUnitsInRadius(
+        entity:GetTeamNumber(),
+        entity:GetAbsOrigin(),
+        nil,
+        castRange,
+        DOTA_UNIT_TARGET_TEAM_ENEMY,
+        DOTA_UNIT_TARGET_HERO,
+        DOTA_UNIT_TARGET_FLAG_NO_INVIS + DOTA_UNIT_TARGET_FLAG_FOW_VISIBLE,
+        FIND_CLOSEST,
+        false
+    )
+    
+    print("【阻挡检测】找到敌方英雄数量: " .. #enemyHeroes)
+    for _, hero in pairs(enemyHeroes) do
+        local realHeroStr = hero:IsTempestDouble() and "(假)" or "(真)"
+        print("【阻挡检测】发现敌方英雄: " .. hero:GetUnitName() .. realHeroStr)
+    end
+    
+    if #enemyHeroes == 0 then
+        print("【阻挡检测】没有找到敌方英雄，返回nil")
+        return nil
+    end
+
+    local bestTarget = nil
+    local bestMinBlockDistance = -1
+    print("\n【阻挡检测】开始检查每个敌方英雄的阻挡情况...")
+
+    for i, enemyHero in pairs(enemyHeroes) do
+        local heroPos = entity:GetAbsOrigin()
+        local enemyPos = enemyHero:GetAbsOrigin()
+        local distanceToEnemy = (enemyPos - heroPos):Length2D()
+        
+        local realHeroStr = enemyHero:IsTempestDouble() and "(假)" or "(真)"
+        print("\n【阻挡检测】正在检查敌方英雄: " .. enemyHero:GetUnitName() .. realHeroStr)
+        print("【阻挡检测】与施法者距离: " .. math.floor(distanceToEnemy))
+
+        local allUnits = FindUnitsInRadius(
+            entity:GetTeamNumber(),
+            heroPos,
+            nil,
+            distanceToEnemy,
+            DOTA_UNIT_TARGET_TEAM_BOTH,
+            DOTA_UNIT_TARGET_BASIC + DOTA_UNIT_TARGET_HERO,
+            DOTA_UNIT_TARGET_FLAG_NONE,
+            FIND_ANY_ORDER,
+            false
+        )
+
+        print("【阻挡检测】搜索到可能的阻挡单位数量: " .. #allUnits)
+
+        local closestDistanceToLine = 99999
+        local closestBlockingUnit = nil
+
+        for _, unit in pairs(allUnits) do
+            if unit ~= entity and unit ~= enemyHero and 
+               (unit:GetTeamNumber() == entity:GetTeamNumber() or not unit:IsHero()) then
+                local distanceToLine = GetDistancePointToLine(unit:GetAbsOrigin(), heroPos, enemyPos)
+                local unitTypeStr = unit:IsHero() and "(友方英雄)" or "(小兵)"
+                
+                print("【阻挡检测】检查潜在阻挡单位: " .. unit:GetUnitName() .. unitTypeStr)
+                print("【阻挡检测】到施法路径的距离: " .. math.floor(distanceToLine))
+                
+                if isAoeAbility then
+                    local distanceToTarget = (unit:GetAbsOrigin() - enemyPos):Length2D()
+                    if distanceToTarget <= lineWidth then
+                        print("【阻挡检测】单位在AOE范围内(" .. math.floor(distanceToTarget) .. " <= " .. lineWidth .. ")，不计入阻挡")
+                        goto continue
+                    end
+                end
+
+                if distanceToLine < closestDistanceToLine then
+                    closestDistanceToLine = distanceToLine
+                    closestBlockingUnit = unit
+                    print("【阻挡检测】更新最近阻挡单位为: " .. unit:GetUnitName() .. unitTypeStr .. ", 阻挡距离: " .. math.floor(closestDistanceToLine))
+                end
+
+                ::continue::
+            end
+        end
+
+        print("\n【阻挡检测】总结检查 " .. enemyHero:GetUnitName() .. realHeroStr .. " 的阻挡情况:")
+        if closestBlockingUnit then
+            local blockingUnitTypeStr = closestBlockingUnit:IsHero() and "(友方英雄)" or "(小兵)"
+            print("【阻挡检测】最近阻挡单位: " .. closestBlockingUnit:GetUnitName() .. blockingUnitTypeStr)
+            print("【阻挡检测】阻挡距离: " .. math.floor(closestDistanceToLine))
+        else
+            closestDistanceToLine = 99999
+            print("【阻挡检测】没有找到阻挡单位")
+        end
+        print("【阻挡检测】当前记录的最佳阻挡距离: " .. math.floor(bestMinBlockDistance))
+
+        if closestDistanceToLine > bestMinBlockDistance then
+            bestMinBlockDistance = closestDistanceToLine
+            bestTarget = enemyHero
+            print("【阻挡检测】更新最佳目标为: " .. enemyHero:GetUnitName() .. realHeroStr .. 
+                  ", 新的最佳阻挡距离: " .. math.floor(bestMinBlockDistance))
+        end
+    end
+    
+    if bestMinBlockDistance < 150 then
+        local realHeroStr = bestTarget and (bestTarget:IsTempestDouble() and "(假)" or "(真)") or ""
+        print("\n【阻挡检测】最终结果: 最佳目标 " .. (bestTarget and bestTarget:GetUnitName() or "nil") .. realHeroStr .. 
+              " 的阻挡距离(" .. math.floor(bestMinBlockDistance) .. ")小于150，被阻挡，返回nil")
+        return nil
+    end
+    
+    local realHeroStr = bestTarget:IsTempestDouble() and "(假)" or "(真)"
+    print("\n【阻挡检测】最终结果: 选定目标: " .. bestTarget:GetUnitName() .. realHeroStr .. 
+          ", 最佳阻挡距离: " .. math.floor(bestMinBlockDistance))
+    return bestTarget
+end
+
+-- Helper function to calculate perpendicular distance from a point to a line
+function CommonAI:PerpendicularDistance(lineStart, lineEnd, point)
+    local line = lineEnd - lineStart
+    local pointVector = point - lineStart
+    local lineLength = line:Length2D()
+    
+    -- Avoid division by zero
+    if lineLength == 0 then
+        return (point - lineStart):Length2D()
+    end
+    
+    -- Calculate perpendicular distance
+    local t = ((pointVector.x * line.x + pointVector.y * line.y) / (lineLength * lineLength))
+    local projection = lineStart + line * t
+    return (point - projection):Length2D()
+end
 
 function CommonAI:FindAllyTarget(entity)
     -- 使用全局定义的索敌范围

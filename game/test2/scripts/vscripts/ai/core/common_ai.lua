@@ -95,6 +95,7 @@ end
 function CommonAI:Think(entity)
     self.entity = entity  -- 设置当前实体
 
+
     -- 检查实体是否存在
     if not entity or entity:IsNull() then
         self:log("[AI] 实体不存在，终止AI")
@@ -126,6 +127,8 @@ function CommonAI:Think(entity)
 
     self.shouldturn = nil
     self:ProcessPendingSpellCast()
+    self.target = nil
+    self.attackTarget = nil
 
     if self.currentState == AIStates.Channeling and 
     self:IsSpecialChannelingHero(entity) then
@@ -141,57 +144,72 @@ function CommonAI:Think(entity)
     end
 
     self:log("开始寻找目标...")
-
-    local target, enemyHeroCount = self:FindHeroTarget(entity)
-
-    -- 获取最后手段目标,保存在新变量中
-    self.lastResortTarget = self:FindNearestEnemyLastResort(entity)
     
-    self.attackTarget = self:FindPreferredTarget(entity, {
+    -- 初始化变量
+    local target, enemyHeroCount = self:FindHeroTarget(entity)
+    self.enemyHeroCount = enemyHeroCount
+    
+    -- 1. 获取最后手段目标(无敌单位)
+    self.lastResortTarget = self:FindNearestEnemyLastResort(entity)
+    if self.lastResortTarget then
+        self:log("找到无敌目标:", self.lastResortTarget:GetUnitName())
+    end
+
+    -- 2. 获取优先攻击目标
+    local preferredTargets = {
         "npc_dota_unit_tombstone",
         "npc_dota_phoenix_sun", 
         "npc_dota_pugna_nether_ward",
         "npc_dota_juggernaut_healing_ward",
-    })
-    
+    }
+    self.attackTarget = self:FindPreferredTarget(entity, preferredTargets)
+    if self.attackTarget then
+        self:log("找到优先攻击目标:", self.attackTarget:GetUnitName())
+    end
+
+    -- 3. 检查是否优先打小僵尸
     if self:containsStrategy(self.global_strategy, "优先打小僵尸") then
-        self.attackTarget, enemyHeroCount = self:FindPreferredTarget(entity, {
+        self.attackTarget = self:FindPreferredTarget(entity, {
             "npc_dota_unit_undying_zombie_torso",
             "npc_dota_unit_undying_zombie"
         })
     end
-    self.enemyHeroCount = enemyHeroCount
+
+    -- 4. 主要目标查找逻辑
     if target then
-        self:log("找到英雄目标了，敌人数量：" .. self.enemyHeroCount)
+        self:log("找到英雄目标，敌人数量：" .. self.enemyHeroCount)
     else
-        self:log("没有找到英雄目标")
-        -- 如果没有找到英雄单位，再寻找普通单位
+        self:log("未找到英雄目标，寻找普通单位")
         target = self:FindTarget(entity)
+        
         if target then
-            self:log("找到普通目标了")
-        else
-            if self:containsStrategy(self.global_strategy, "攻击无敌单位") then
-                self:log("是时候攻击无敌单位")
-                target = self.lastResortTarget
-            end
+            self:log("找到普通目标")
+        elseif self:containsStrategy(self.global_strategy, "攻击无敌单位") then
+            self:log("转为攻击无敌单位")
+            target = self.lastResortTarget
         end
     end
+
+    -- 5. 特殊情况处理：卡尔和SD
+    if not target and (entity:GetUnitName() == "npc_dota_hero_invoker" or 
+                      entity:GetUnitName() == "npc_dota_hero_shadow_demon") then
+        if self.lastResortTarget and
+           (self.lastResortTarget:HasModifier("modifier_invoker_tornado") or 
+            self.lastResortTarget:HasModifier("modifier_shadow_demon_disruption")) then
+            target = self.lastResortTarget
+            self:log("卡尔/SD特殊模式")
+        end
+    end
+
+    -- 6. 最终目标确定
     if target then
         self.target = target
-        if not self.attackTarget then
-            self.attackTarget = target
-        end
-    elseif (entity:GetUnitName() == "npc_dota_hero_invoker" or entity:GetUnitName() == "npc_dota_hero_shadow_demon") and 
-        self.lastResortTarget and
-        (self.lastResortTarget:HasModifier("modifier_invoker_tornado") or 
-         self.lastResortTarget:HasModifier("modifier_shadow_demon_disruption")) then
-        self.target = self.lastResortTarget
-        target = self.lastResortTarget
-        print("卡尔模式")
-    else
+
+    elseif not self.attackTarget then
         return self.nextThinkTime
     end
 
+    
     self.Ally = self:FindNearestNoSelfAlly(entity)
 
     -- -- 处理特定英雄的特殊逻辑 这里是火猫有魂的情况下
@@ -206,7 +224,7 @@ function CommonAI:Think(entity)
             target = self.attackTarget
         end
 
-        if target then
+        if target then 
             if target:IsInvulnerable() then
                 -- 如果目标无敌,移动到目标位置
                 local order = {
@@ -241,9 +259,10 @@ function CommonAI:Think(entity)
         end
     end
 
-
-
-    local skill, castRange, aoeRadius = self:FindBestAbilityToUse(entity,target)
+    local skill, castRange, aoeRadius
+    if target then
+        skill, castRange, aoeRadius = self:FindBestAbilityToUse(entity,target)
+    end
 
     if skill then
         skill, castRange, aoeRadius = self:HandleEarthSpiritLogic(entity, skill, castRange, aoeRadius)
@@ -259,6 +278,7 @@ function CommonAI:Think(entity)
         end
 
         self:log(string.format("准备施放技能 %s", abilityInfo.abilityName))
+        target = self.target
         if target then
             
             -- 处理特殊技能的逻辑
@@ -266,7 +286,8 @@ function CommonAI:Think(entity)
             if result ~= false then
                 target = result
             end
-            --self.target = target
+
+            
 
             local targetInfo = self:GetTargetInfo(target, entity)
             
@@ -290,12 +311,32 @@ function CommonAI:Think(entity)
             end
         else
             -- 处理没有找到目标的情况
-            self:HandleNoTargetFound(entity)
+            if self.attackTarget then
+                print("有攻击目标1")
+                return self:HandleAttack(self.attackTarget)
+            else
+                self:HandleNoTargetFound(entity)
+            end
         end
     else
-        -- 没有找到技能，执行攻击逻辑
+
+        if self.attackTarget then
+            print("有攻击目标1")
+            return self:HandleAttack(self.attackTarget)
+        end
+
+        if target then 
+            print("攻击target")
+            return self:HandleAttack(target)
+        elseif self.attackTarget then
+            print("有攻击目标2")
+            return self:HandleAttack(self.attackTarget)
+        else
+            return self.nextThinkTime
+        end
         print("没有找到技能，执行攻击逻辑")
-        return self:HandleAttack(target)
+
+        
     end
 
     return self.nextThinkTime
@@ -508,11 +549,21 @@ function CommonAI:HandlePostCastMovement(entity, target, abilityInfo)
     end
 end
 
-function CommonAI:HandleTinyTreeGrab(entity)
-    local searchRadius = 400  -- Tree Grab 的搜索范围
-    local trees = GridNav:GetAllTreesAroundPoint(entity:GetAbsOrigin(), searchRadius, true)
+function CommonAI:FindClosestTreeForAbility(entity, abilityName)
+    -- 获取对应技能的施法范围
+    local ability = entity:FindAbilityByName(abilityName)
+    local castRange = math.max(400, self:GetSkillCastRange(entity, ability))  -- 确保最小搜索范围为400
+    
+    self:log(string.format("【树木搜索】开始为技能 %s 搜索树木，原始施法范围: %d，实际搜索范围: %d", 
+        abilityName, 
+        self:GetSkillCastRange(entity, ability),
+        castRange))
+    
+    local trees = GridNav:GetAllTreesAroundPoint(entity:GetAbsOrigin(), castRange, true)
     local closestTree = nil
     local closestDistance = math.huge
+
+    self:log(string.format("【树木搜索】找到树木数量: %d", #trees))
 
     for _, tree in pairs(trees) do
         local treePos = tree:GetAbsOrigin()
@@ -520,14 +571,15 @@ function CommonAI:HandleTinyTreeGrab(entity)
         if distance < closestDistance then
             closestTree = tree
             closestDistance = distance
+            self:log(string.format("【树木搜索】更新最近的树木，距离: %.0f", closestDistance))
         end
     end
 
     if closestTree then
-        self:log("已经为小小找到了最近的树木目标")
+        self:log(string.format("【树木搜索】已为技能 %s 找到最近的树木，距离: %.0f", abilityName, closestDistance))
         self.treetarget = closestTree
     else
-        self:log("小小周围没有找到可抓取的树木")
+        self:log(string.format("【树木搜索】在技能 %s 的 %d 范围内没有找到可用的树木", abilityName, castRange))
         self.treetarget = nil
     end
     return self.target
@@ -538,7 +590,9 @@ function CommonAI:AdjustAbilityTarget(entity, abilityInfo, target)
     if abilityInfo.abilityName == "muerta_dead_shot" then
         return self:HandleMuertaDeadShot(entity,abilityInfo.skill)
     elseif abilityInfo.abilityName == "tiny_tree_grab" then
-        return self:HandleTinyTreeGrab(entity)
+        return self:FindClosestTreeForAbility(entity, "tiny_tree_grab")
+    elseif abilityInfo.abilityName == "furion_force_of_nature" then
+        return self:FindClosestTreeForAbility(entity, "furion_force_of_nature")
     elseif abilityInfo.abilityName == "shredder_timber_chain" then
         return self:HandleShredderTimberChain(entity)
     elseif abilityInfo.abilityName == "earth_spirit_geomagnetic_grip" then
@@ -1066,7 +1120,13 @@ function CommonAI:HandleUnableToCast(entity, target, abilityInfo, targetInfo)
             ExecuteOrderFromTable(order)
         end
     else
-        self:HandleAttack(target)
+        if self:containsStrategy(self.global_strategy, "不在骨法棒子里放技能") and self.attackTarget then
+            print("不在骨法棒子里放技能")
+            self:HandleAttack(self.attackTarget)
+        else
+            self:HandleAttack(target)
+        end
+        
     end
 end
 
@@ -1107,6 +1167,7 @@ end
 function CommonAI:HandleAttack(target, abilityInfo, targetInfo)
     -- 首先判断单位是否可以攻击
     if self:IsUnableToAttack(self.entity, target) then
+        self:log("目标无法攻击")
         return self.nextThinkTime
     end
 
@@ -1165,7 +1226,7 @@ function CommonAI:HandleAttack(target, abilityInfo, targetInfo)
         
         return self.nextThinkTime
 
-    elseif self.entity:HasModifier("modifier_pangolier_gyroshell") or self.entity:HasModifier("modifier_rattletrap_jetpack") or self.entity:HasModifier("modifier_mars_bulwark_active") then
+    elseif self.entity:HasModifier("modifier_pangolier_gyroshell") or self.entity:HasModifier("modifier_rattletrap_jetpack") then
         local order = {
             UnitIndex = self.entity:entindex(),
             OrderType = DOTA_UNIT_ORDER_MOVE_TO_POSITION,
@@ -1175,6 +1236,24 @@ function CommonAI:HandleAttack(target, abilityInfo, targetInfo)
         }
         ExecuteOrderFromTable(order)
         self:log("有modifier_pangolier_gyroshell修饰器，移动到目标位置")
+        return self.nextThinkTime
+    elseif self.entity:HasModifier("modifier_mars_bulwark_active") then
+        local myPos = self.entity:GetAbsOrigin()
+        local targetPos = target:GetAbsOrigin()
+        local distance = (targetPos - myPos):Length2D()
+        local myForward = self.entity:GetForwardVector()
+        local dirToTarget = (targetPos - myPos):Normalized()
+        
+        -- 计算反方向延伸150码的位置
+        local extendedPos = targetPos + (-myForward * 150)
+        
+        local order = {
+            UnitIndex = self.entity:entindex(),
+            OrderType = DOTA_UNIT_ORDER_MOVE_TO_POSITION,
+            Position = extendedPos
+        }
+        ExecuteOrderFromTable(order)
+        self:log(string.format("有modifier_mars_bulwark_active修饰器，距离%.2f，移动到延伸位置", distance))
         return self.nextThinkTime
     elseif self.entity:HasModifier("modifier_weaver_shukuchi") and not target:HasModifier("modifier_shukuchi_geminate_attack_mark") then
         local order = {
@@ -1192,16 +1271,75 @@ function CommonAI:HandleAttack(target, abilityInfo, targetInfo)
 
     if self:containsStrategy(self.global_strategy, "不要优先拆墓碑、棒子") then
         
-    elseif self:containsStrategy(self.global_strategy, "优先打小僵尸") then
+    elseif self:containsStrategy(self.global_strategy, "优先打小僵尸") and self.attackTarget then
         target = self.attackTarget
-    else 
+    elseif self.attackTarget then 
         target = self.attackTarget
     end
 
     if not target then
+        self:log("没有target")
         return self.nextThinkTime
     end
 
+
+    local function IsInAttackRange(self, target)
+        local attackRange = self.entity:Script_GetAttackRange()
+        local distance = (target:GetAbsOrigin() - self.entity:GetAbsOrigin()):Length2D()
+        return distance <= attackRange
+    end
+
+    if not IsInAttackRange(self, target) then
+        local myPos = self.entity:GetAbsOrigin()
+        local targetPos = target:GetAbsOrigin()
+        local direction = (targetPos - myPos):Normalized()
+        local attackRange = self.entity:Script_GetAttackRange()
+        local flags = DOTA_UNIT_TARGET_FLAG_MAGIC_IMMUNE_ENEMIES + 
+        DOTA_UNIT_TARGET_FLAG_INVULNERABLE + 
+        DOTA_UNIT_TARGET_FLAG_OUT_OF_WORLD +
+        DOTA_UNIT_TARGET_FLAG_NOT_ILLUSIONS
+        
+        -- 获取范围内所有单位
+        local units = FindUnitsInRadius(
+            self.entity:GetTeamNumber(),
+            myPos,
+            nil,
+            attackRange,
+            DOTA_UNIT_TARGET_TEAM_BOTH,
+            DOTA_UNIT_TARGET_ALL,
+            flags,
+            FIND_ANY_ORDER,
+            false
+        )
+        
+        local nearestCog = nil
+        local nearestDistance = attackRange
+        
+        for _, unit in pairs(units) do
+            if unit:GetUnitName() == "npc_dota_rattletrap_cog" then
+                local cogPos = unit:GetAbsOrigin()
+                local cogToSelf = (cogPos - myPos):Normalized()  -- 归一化向量
+                
+                -- 严格检查是否在正前方60度范围内（cos30≈0.866）
+                local dotProduct = direction:Dot(cogToSelf)
+                if dotProduct >= 0.7 then  -- 对应30度夹角
+                    local distance = (cogPos - myPos):Length2D()
+                    if distance < nearestDistance then
+                        nearestCog = unit
+                        nearestDistance = distance
+                    end
+                end
+            end
+        end
+        
+        if nearestCog then
+            target = nearestCog
+            self:log("找到正前方齿轮，优先攻击")
+        end
+    end
+
+
+    
     -- 检查目标是否无敌
     if not self:CanAttackTarget(self.entity, target) then
         print("对面无敌了")

@@ -104,16 +104,16 @@ function CommonAI:HandleEnemyTargetAction(entity,target,abilityInfo,targetInfo)
 
 
     elseif abilityInfo.abilityName == "pugna_decrepify" then
-        if self.enemyHeroCount >= 2 then
-            self:log("目标大于2")
-            entity:CastAbilityOnTarget(entity, abilityInfo.skill, 0)
-        else
+        if self.enemyHeroCount < 2 or self:containsStrategy(self.hero_strategy, "不虚无自己") then
             self:log("目标小于2")
             entity:CastAbilityOnTarget(self.target, abilityInfo.skill, 0)
             abilityInfo.castPoint = CommonAI:calculateAdjustedCastPoint(entity, targetInfo.targetPos, abilityInfo.castPoint)
+        else
+            self:log("目标大于2")
+            entity:CastAbilityOnTarget(entity, abilityInfo.skill, 0)
         end
 
-    elseif abilityInfo.abilityName == "tiny_tree_grab" then
+    elseif abilityInfo.abilityName == "tiny_tree_grab" or abilityInfo.abilityName == "furion_force_of_nature" then
         if self.treetarget then
             entity:CastAbilityOnTarget(self.treetarget, abilityInfo.skill, 0)
             abilityInfo.castPoint = CommonAI:calculateAdjustedCastPoint(entity, targetInfo.targetPos, abilityInfo.castPoint)
@@ -529,16 +529,16 @@ function CommonAI:HandleEnemyTargetAction(entity,target,abilityInfo,targetInfo)
         
 
 
-    elseif abilityInfo.abilityName == "oracle_fortunes_end" and (entity:IsRooted() or targetInfo.name == "npc_dota_hero_void_spirit" or targetInfo.name == "npc_dota_hero_silencer") then
+    -- elseif abilityInfo.abilityName == "oracle_fortunes_end" and (entity:IsRooted() or targetInfo.name == "npc_dota_hero_void_spirit" or targetInfo.name == "npc_dota_hero_silencer") then
 
-        -- 检查是否有 modifier_oracle_fortunes_end_purge 并且剩余时间大于 0.1 秒
-        local modifier = entity:FindModifierByName("modifier_oracle_fortunes_end_purge_repeatedly")
-        if modifier and modifier:GetRemainingTime() > 0.1 then
-            self:log("Found modifier_oracle_fortunes_end_purge with remaining time: " .. modifier:GetRemainingTime())
-            entity:CastAbilityOnTarget(self.target, abilityInfo.skill, 0)
-        else
-            entity:CastAbilityOnTarget(entity, abilityInfo.skill, 0)
-        end
+    --     -- 检查是否有 modifier_oracle_fortunes_end_purge 并且剩余时间大于 0.1 秒
+    --     local modifier = entity:FindModifierByName("modifier_oracle_fortunes_end_purge_repeatedly")
+    --     if modifier and modifier:GetRemainingTime() > 0.1 then
+    --         self:log("Found modifier_oracle_fortunes_end_purge with remaining time: " .. modifier:GetRemainingTime())
+    --         entity:CastAbilityOnTarget(self.target, abilityInfo.skill, 0)
+    --     else
+    --         entity:CastAbilityOnTarget(entity, abilityInfo.skill, 0)
+    --     end
         
        
 

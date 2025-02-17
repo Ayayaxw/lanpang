@@ -159,7 +159,12 @@ function CommonAI:GetAbilityInfo(skill, castRange, aoeRadius)
     self:log(string.format("目标类型 (GetAbilityTargetType): %s", getTargetTypeName(info.targetType)))
     self:log(string.format("目标队伍 (GetAbilityTargetTeam): %s", getTargetTeamName(info.targetTeam)))
     self:log(string.format("技能行为 (GetBehavior): %s", getBehaviorName(info.abilityBehavior)))
-
+    if self.target then
+        local realHeroStr = self.target:IsTempestDouble() and "(假)" or "(真)"
+        self:log(string.format("目标单位: %s%s", self.target:GetUnitName(), realHeroStr))
+    else
+        self:log("目标单位: 无")
+    end
     return info
 end
 
@@ -304,8 +309,11 @@ function CommonAI:GetTargetInfo(target, entity)
     -- 检查目标是否有 GetUnitName 方法
     if target.GetUnitName then
         info.name = target:GetUnitName()
+        -- 添加真假英雄的判断
+        local realHeroStr = target:IsTempestDouble() and "(假)" or "(真)"
+        info.name = info.name .. realHeroStr
     else
-        info.name = "Unknown"  -- 如果没有 GetUnitName 方法，使用 "Unknown" 作为默认名称
+        info.name = "Unknown"
     end
 
     -- 记录日志
@@ -749,6 +757,28 @@ function CommonAI:FindBestAbilityToUse(entity, target)
             end
 
             -- 处理开关类技能
+            -- 在文件开头定义技能表
+            local TOGGLE_SKILLS = {
+                -- 直接切换的技能（不需要特殊条件）
+                direct_toggle = {
+                    ["morphling_morph_str"] = true,
+                    ["morphling_morph_agi"] = true,
+                    ["medusa_split_shot"] = true,
+                    ["mars_bulwark"] = true,
+                    ["wisp_spirits_in"] = true,
+                    ["wisp_spirits_out"] = true,
+                },
+                
+                -- 需要目标在范围内才开启的技能
+                range_dependent = {
+                    ["leshrac_pulse_nova"] = 1200,  -- 值表示所需范围
+                },
+                
+                -- 默认开启的技能（其他所有toggle技能）
+                default_on = true
+            }
+
+            -- 修改原来的代码
             if bit.band(ability:GetBehavior(), DOTA_ABILITY_BEHAVIOR_TOGGLE) ~= 0 then
                 self:log(string.format("检测到开关类技能: %s", abilityName))
                 
@@ -758,17 +788,21 @@ function CommonAI:FindBestAbilityToUse(entity, target)
                     goto continue
                 end
                 
-                if abilityName == "morphling_morph_str" or abilityName == "morphling_morph_agi" or abilityName == "medusa_split_shot" or abilityName == "mars_bulwark"  then
+                -- 处理直接切换的技能
+                if TOGGLE_SKILLS.direct_toggle[abilityName] then
                     ability:ToggleAbility()
                     self:log(string.format("技能 %s 已切换状态", abilityName))
-                elseif abilityName == "leshrac_pulse_nova" then 
-                    if target and self:IsInRange(target, 1200) then
+                -- 处理需要检查范围的技能
+                elseif TOGGLE_SKILLS.range_dependent[abilityName] then
+                    local required_range = TOGGLE_SKILLS.range_dependent[abilityName]
+                    if target and self:IsInRange(target, required_range) then
                         if not ability:GetToggleState() then
                             ability:ToggleAbility()
                             self.toggleSkills[abilityName] = true
                             self:log(string.format("技能 %s 已开启", abilityName))
                         end
                     end
+                -- 处理默认开启的技能
                 else
                     if not ability:GetToggleState() then
                         ability:ToggleAbility()

@@ -605,6 +605,8 @@
       if (action === 'ModifySelfHero') {
         selfHero.heroId = heroId;
         selfHero.facetId = facetId;
+        selectedSelfHeroStrategy = { name: "默认策略", id: "default_strategy" };
+        lastSelectedSelfHeroStrategies = []; // 清空缓存选择
         updateHeroLabel($('#SelfHeroLabel'), heroId, facetId);
     
         // 显示 SelfHeroRow 及其子面板
@@ -630,6 +632,8 @@
       } else if (action === 'ModifyOpponentHero') {
         opponentHero.heroId = heroId;
         opponentHero.facetId = facetId;
+        selectedOpponentHeroStrategy = { name: "默认策略", id: "default_strategy" };
+        lastSelectedOpponentHeroStrategies = []; // 清空缓存选择
         updateHeroLabel($('#OpponentHeroLabel'), heroId, facetId);
     
         // 显示 OpponentHeroRow 及其子面板

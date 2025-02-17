@@ -6,13 +6,13 @@ function CommonAI:Ini_SkillAoeRadius()
         shredder_reactive_armor = 9999,
         ursa_enrage = 1200,
         razor_eye_of_the_storm = 9999,
-        furion_sprout = 9999,
+
         pugna_nether_ward = 1400,
         witch_doctor_voodoo_switcheroo = 650,
-
+        leshrac_defilement = 1000,
         leshrac_diabolic_edict = 2000,
         death_prophet_exorcism = 2000,
-        leshrac_greater_lightning_storm = 9999,
+        leshrac_greater_lightning_storm = 1000,
         leshrac_pulse_nova = 9999,
         void_spirit_aether_remnant = 600,
         --void_spirit_dissimilate = 800,
@@ -65,6 +65,13 @@ function CommonAI:Ini_SkillAoeRadius()
         drow_ranger_multishot = 1700,
         naga_siren_mirror_image = 2000,
         naga_siren_song_of_the_siren = 2000,
+        venomancer_plague_ward = 600,
+        lone_druid_spirit_bear = 9999,
+        lone_druid_true_form = 9999,
+        wisp_spirits_in = 9999,
+        wisp_spirits_out = 9999,
+        queenofpain_sonic_wave = 650,
+
     }
     self.itemRadius = {
         item_mjollnir = 2000,
@@ -110,9 +117,17 @@ function CommonAI:GetSkillAoeRadius(ability)
     if self:containsStrategy(self.hero_strategy, "省蓝") then
         self.specificRadius.leshrac_pulse_nova = 1300
     end
+    
+    if self:containsStrategy(self.hero_strategy, "先招小树人") then
+        self.specificRadius.furion_sprout = 9999
+        self.specificRadius.furion_force_of_nature = 9999
+    end
 
     if self:containsStrategy(self.hero_strategy, "贴脸才相位转移") then
         self.specificRadius.puck_phase_shift = 500
+    end
+    if self:containsStrategy(self.hero_strategy, "暗影之境直接开") then
+        self.specificRadius.dark_willow_shadow_realm = 2000
     end
     
     if self:containsStrategy(self.hero_strategy, "主动进攻") then
@@ -160,9 +175,7 @@ function CommonAI:GetSkillAoeRadius(ability)
     if self:containsStrategy(self.hero_strategy, "出门不放魔晶") then
         self.specificRadius.pangolier_rollup = 300
     end
-    if self:containsStrategy(self.hero_strategy, "出门放齿轮") then
-        self.specificRadius.rattletrap_power_cogs = 3000
-    end
+
     if self:containsStrategy(self.hero_strategy, "用跳赶路") then
         self.specificRadius.ursa_earthshock = 2000
     end
@@ -177,12 +190,6 @@ function CommonAI:GetSkillAoeRadius(ability)
     end
     if self:containsStrategy(self.hero_strategy, "大招弹射") then
         self.specificRadius.skywrath_mage_mystic_flare = 850
-    end
-
-    if self.entity:HasModifier("modifier_rattletrap_jetpack") then
-        self.specificRadius.rattletrap_power_cogs = 1500
-    else
-        self.specificRadius.rattletrap_power_cogs = nil
     end
 
     if self.needToDodge == true then
@@ -229,6 +236,7 @@ function CommonAI:GetSkillAoeRadius(ability)
         dark_willow_bedlam = "attack_radius",
         mars_spear = "spear_width",
         sniper_concussive_grenade = "radius",
+        visage_summon_familiars_stone_form = "stun_radius",
     }
 
 
@@ -270,7 +278,21 @@ function CommonAI:GetSkillAoeRadius(ability)
     elseif abilityName == "tidehunter_ravage" then
 
         aoeRadius = aoeRadius - 100
-
+    elseif abilityName == "rattletrap_power_cogs" then
+        if self.entity:HasModifier("modifier_rattletrap_jetpack") then
+            self.specificRadius.rattletrap_power_cogs = 1500
+        else
+            self.specificRadius.rattletrap_power_cogs = nil
+        end
+        if self:containsStrategy(self.hero_strategy, "出门放齿轮") then
+            self.specificRadius.rattletrap_power_cogs = 3000
+        end
+        if self:containsStrategy(self.hero_strategy, "用框弹人") then
+            local facetID = self.entity:GetHeroFacetID()
+            if facetID == 1 then
+                self.specificRadius.rattletrap_power_cogs = 400
+            end
+        end
 
     elseif abilityName == "ember_spirit_searing_chains" then
         local remnants = FindUnitsInRadius(

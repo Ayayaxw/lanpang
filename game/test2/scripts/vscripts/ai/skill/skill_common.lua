@@ -13,7 +13,7 @@ local DOTA_UNIT_TARGET = {
     SELF = 256
 }
 
-local DOTA_UNIT_TARGET_TEAM = {
+DOTA_UNIT_TARGET_TEAM = {
     NONE = 0,
     FRIENDLY = 1,
     ENEMY = 2,
@@ -57,46 +57,10 @@ local DOTA_ABILITY_BEHAVIOR = {
 }
 
 
-function CommonAI:GetAbilityTargetTeam(skill)
-    local abilityName = skill:GetAbilityName()
-    
-    local abilityTargetTeamOverrides = {
-        riki_tricks_of_the_trade = DOTA_UNIT_TARGET_TEAM.BOTH,
-        oracle_rain_of_destiny = DOTA_UNIT_TARGET_TEAM.BOTH,
-        oracle_fates_edict = DOTA_UNIT_TARGET_TEAM.BOTH,
-        dark_seer_surge = DOTA_UNIT_TARGET_TEAM.FRIENDLY,
-        venomancer_plague_ward = DOTA_UNIT_TARGET_TEAM.ENEMY,
-        undying_tombstone = DOTA_UNIT_TARGET_TEAM.ENEMY,
-        luna_eclipse = DOTA_UNIT_TARGET_TEAM.ENEMY,
-        centaur_double_edge = DOTA_UNIT_TARGET_TEAM.ENEMY,
-        earth_spirit_geomagnetic_grip = DOTA_UNIT_TARGET_TEAM.ENEMY,
-        earthshaker_enchant_totem = DOTA_UNIT_TARGET_TEAM.ENEMY,
-        clinkz_death_pact = DOTA_UNIT_TARGET_TEAM.FRIENDLY,
-        phoenix_supernova = DOTA_UNIT_TARGET_TEAM.FRIENDLY,
-        brewmaster_void_astral_pull = DOTA_UNIT_TARGET_TEAM.FRIENDLY,
-        invoker_alacrity = DOTA_UNIT_TARGET_TEAM.FRIENDLY,
-        slark_depth_shroud = DOTA_UNIT_TARGET_TEAM.FRIENDLY,
-        earth_spirit_petrify = DOTA_UNIT_TARGET_TEAM.FRIENDLY,
-        dark_seer_ion_shell = DOTA_UNIT_TARGET_TEAM.FRIENDLY,
-        weaver_time_lapse = DOTA_UNIT_TARGET_TEAM.FRIENDLY,
-        item_disperser = DOTA_UNIT_TARGET_TEAM.FRIENDLY,
-    }
-
-    -- 特殊处理神杖日炎
-    if abilityName == "invoker_sun_strike" then
-        if self.entity:HasScepter() then
-            abilityTargetTeamOverrides["invoker_sun_strike"] = DOTA_UNIT_TARGET_TEAM.FRIENDLY
-        end
-    end
-    
-
-    return abilityTargetTeamOverrides[abilityName] or skill:GetAbilityTargetTeam()
-end
-
 function CommonAI:GetAbilityInfo(skill, castRange, aoeRadius)
     local abilityName = skill:GetAbilityName()
     
-    local targetTeam = self:GetAbilityTargetTeam(skill)
+    local targetTeam = self:GetSkillTargetTeam(skill)
     local distance = self.target and (self.target:GetAbsOrigin() - self.entity:GetAbsOrigin()):Length2D() or 0
     local finalAbilityBehavior = self:GetAbilityBehavior(skill, distance, aoeRadius)
 
@@ -157,7 +121,7 @@ function CommonAI:GetAbilityInfo(skill, castRange, aoeRadius)
     self:log(string.format("施法距离 (GetCastRange): %.2f", info.castRange))
     self:log(string.format("作用范围 (aoeRadius): %.2f", info.aoeRadius))
     self:log(string.format("目标类型 (GetAbilityTargetType): %s", getTargetTypeName(info.targetType)))
-    self:log(string.format("目标队伍 (GetAbilityTargetTeam): %s", getTargetTeamName(info.targetTeam)))
+    self:log(string.format("目标队伍 (GetSkillTargetTeam): %s", getTargetTeamName(info.targetTeam)))
     self:log(string.format("技能行为 (GetBehavior): %s", getBehaviorName(info.abilityBehavior)))
     if self.target then
         local realHeroStr = self.target:IsTempestDouble() and "(假)" or "(真)"
@@ -437,7 +401,7 @@ function CommonAI:FindBestItemToUse(entity, target)
             end
 
             local isInRange = true
-            local targetTeam = self:GetAbilityTargetTeam(item)
+            local targetTeam = self:GetSkillTargetTeam(item)
 
 
             if bit.band(targetTeam, DOTA_UNIT_TARGET_TEAM_FRIENDLY) ~= 0 and self.Ally then
@@ -615,7 +579,7 @@ function CommonAI:FindBestAbilityToUse(entity, target)
                 -- 再次检查target是否有效
                 if IsValidEntity(self.target) then
                     -- 获取技能的目标队伍类型
-                    local targetTeam = self:GetAbilityTargetTeam(ability)
+                    local targetTeam = self:GetSkillTargetTeam(ability)
                     -- 只有敌方技能才进行非英雄单位的判断
                     if targetTeam == DOTA_UNIT_TARGET_TEAM.ENEMY then
                         if not self.target:IsHero() and bit.band(ability:GetAbilityTargetFlags(), DOTA_UNIT_TARGET_FLAG_NOT_CREEP_HERO) ~= 0 then
@@ -818,7 +782,7 @@ function CommonAI:FindBestAbilityToUse(entity, target)
 
             
             local isInRange = true
-            local targetTeam = self:GetAbilityTargetTeam(ability)
+            local targetTeam = self:GetSkillTargetTeam(ability)
 
             -- 如果是友方技能且有队友，用队友位置
             if bit.band(targetTeam, DOTA_UNIT_TARGET_TEAM_FRIENDLY) ~= 0 and self.Ally then

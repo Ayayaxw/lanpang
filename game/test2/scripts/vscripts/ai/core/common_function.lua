@@ -42,6 +42,9 @@ function CommonAI:IsSpecialChannelingHero(entity)
     if heroName == "npc_dota_hero_lion" then
         return true
     end
+    if heroName == "npc_dota_hero_warlock" then
+        return true
+    end
     if heroName == "npc_dota_hero_riki" then
         return true
     end
@@ -452,7 +455,7 @@ function CommonAI:IsUnableToAttack(entity, target)
     local UNABLE_TO_ATTACK_MODIFIERS = {
         ["modifier_meepo_megameepo"] = true,
         ["modifier_hoodwink_sharpshooter_windup"] = true,
-        ["modifier_troll_warlord_battle_trance"] = true,
+
     }
 
     local function printReason(reason)

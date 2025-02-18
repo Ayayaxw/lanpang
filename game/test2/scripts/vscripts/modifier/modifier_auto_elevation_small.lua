@@ -12,7 +12,8 @@ end
 
 modifier_auto_elevation_small.excluded_modifiers = {
     ["modifier_ursa_earthshock_move"] = true,
-    ["modifier_pangolier_shield_crash_jump"] = true
+    ["modifier_pangolier_shield_crash_jump"] = true,
+    ["modifier_phoenix_icarus_dive"] = true
 }
 
 function modifier_auto_elevation_small:OnCreated()

@@ -373,11 +373,26 @@ function CommonAI:HandleEnemyPoint_InAoeRange(entity,target,abilityInfo,targetIn
             entity:CastAbilityOnPosition(castPosition, abilityInfo.skill, 0)
             abilityInfo.castPoint = CommonAI:calculateAdjustedCastPoint(entity, castPosition, abilityInfo.castPoint)
             return true
-        else
+        elseif self:containsStrategy(self.global_strategy, "防守策略") then
             local castPosition = targetInfo.targetPos - targetInfo.targetDirection * abilityInfo.aoeRadius
             entity:CastAbilityOnPosition(castPosition, abilityInfo.skill, 0)
             abilityInfo.castPoint = CommonAI:calculateAdjustedCastPoint(entity, castPosition, abilityInfo.castPoint)
             return true
+
+        else
+            local castPosition = entity:GetOrigin() + targetInfo.targetDirection * abilityInfo.castRange
+
+            -- 打印施法信息
+            self:log(string.format("在施法距离+作用范围内，准备施放技能: %s，目标距离: %.2f，施法距离: %.2f，作用范围: %.2f", abilityInfo.abilityName, targetInfo.distance, abilityInfo.castRange, abilityInfo.aoeRadius))
+            self:log(string.format("施法位置: %s", tostring(castPosition)))
+
+            -- 计算当前单位与施法位置的距离
+            local distanceToCastPosition = (castPosition - entity:GetOrigin()):Length2D()
+            self:log(string.format("当前单位与施法位置的距离: %.2f", distanceToCastPosition))
+
+            -- 施放技能
+            entity:CastAbilityOnPosition(castPosition, abilityInfo.skill, 0)
+            abilityInfo.castPoint = CommonAI:calculateAdjustedCastPoint(entity, castPosition, abilityInfo.castPoint)
         end
 
     elseif abilityInfo.abilityName == "dark_seer_wall_of_replica" or 

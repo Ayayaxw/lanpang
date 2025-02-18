@@ -39,6 +39,7 @@ require("ai/skill/SkillInfo/GetSkill_Conditions")
 require("ai/skill/SkillInfo/GetItem_Conditions")
 require("ai/skill/SkillInfo/GetSkill_HighPrioritySkills")
 require("ai/skill/SkillInfo/GetSkill_MediumPrioritySkills")
+require("ai/skill/SkillInfo/GetSkill_TargetTeam")
 require("ai/skill/SkillInfo/GetSkill_SelfCastSkill")
 require("ai/skill/SkillInfo/Get_DodgableSkills")
 require("ai/skill/SkillInfo/Get_DodgeSkills")
@@ -66,6 +67,7 @@ function CommonAI:constructor(entity, overallStrategy, heroStrategy, thinkInterv
     self:Ini_HighPrioritySkills()
     self:Ini_SkillAoeRadius()
     self:Ini_SkillCastRange()
+    self:Ini_SkillTargetTeam()
     self:Init_DodgableSkills()
     self:Init_DodgeSkills()
     self.toggleItems = {}
@@ -221,9 +223,27 @@ function CommonAI:Think(entity)
         elseif self:containsStrategy(self.global_strategy, "优先打小僵尸") then
             target = self.attackTarget
         else 
-            target = self.attackTarget
+            -- Find nearest attackable target
+            local units = FindUnitsInRadius(
+                entity:GetTeamNumber(),
+                entity:GetAbsOrigin(),
+                nil,
+                1500, -- Search radius
+                DOTA_UNIT_TARGET_TEAM_ENEMY,
+                DOTA_UNIT_TARGET_ALL,
+                DOTA_UNIT_TARGET_FLAG_NONE,
+                FIND_CLOSEST,
+                false
+            )
+            
+            for _, unit in pairs(units) do
+                if self:CanAttackTarget(entity, unit) then
+                    target = unit
+                    break
+                end
+            end
         end
-
+    
         if target then 
             if target:IsInvulnerable() then
                 -- 如果目标无敌,移动到目标位置
@@ -1343,14 +1363,28 @@ function CommonAI:HandleAttack(target, abilityInfo, targetInfo)
     -- 检查目标是否无敌
     if not self:CanAttackTarget(self.entity, target) then
         print("对面无敌了")
-        -- 目标无敌时只移动不设置攻击状态
-        local order = {
-            UnitIndex = self.entity:entindex(),
-            OrderType = DOTA_UNIT_ORDER_MOVE_TO_POSITION,
-            TargetIndex = target:entindex(),
-            Position = targetInfo and targetInfo.targetPos or target:GetAbsOrigin()
-        }
-        ExecuteOrderFromTable(order)
+        -- 目标无敌时移动到攻击范围边缘
+        local targetPos = targetInfo and targetInfo.targetPos or target:GetAbsOrigin()
+        local myPos = self.entity:GetAbsOrigin()
+        local attackRange = self.entity:Script_GetAttackRange()
+        local currentDistance = (targetPos - myPos):Length2D()
+        
+        -- 只有当前距离大于攻击范围时才移动
+        if currentDistance > attackRange then
+            -- 计算从自己到目标的方向向量
+            local direction = (targetPos - myPos):Normalized()
+            -- 计算在攻击范围边缘的位置（目标位置向后偏移攻击距离）
+            local movePos = targetPos - direction * attackRange
+            
+            local order = {
+                UnitIndex = self.entity:entindex(),
+                OrderType = DOTA_UNIT_ORDER_MOVE_TO_POSITION,
+                TargetIndex = target:entindex(),
+                Position = movePos,
+                Queue = false
+            }
+            ExecuteOrderFromTable(order)
+        end
     else
                 -- 已在攻击状态
         if self.entity:IsAttacking() then

@@ -1,5 +1,5 @@
 function CommonAI:Ini_SkillCastRange()
-    self.specificRanges = {
+    self.skillCastRanges = {
         drow_ranger_glacier = 800,
         spirit_breaker_charge_of_darkness = 9999,
         spectre_reality = 9999,
@@ -48,8 +48,8 @@ function CommonAI:Ini_SkillCastRange()
 end
 
 function CommonAI:GetSkillCastRange(entity, ability)
-    if not self.specificRanges then
-        self:Ini_SkillCastRange()  -- 如果 specificRanges 不存在，初始化它
+    if not self.skillCastRanges then
+        self:Ini_SkillCastRange()  -- 如果 skillCastRanges 不存在，初始化它
     end
 
     local abilityName = ability:GetAbilityName()
@@ -57,7 +57,7 @@ function CommonAI:GetSkillCastRange(entity, ability)
 
     
     if Main.currentChallenge == Main.Challenges.CD0_1skill then
-        self.specificRanges.dark_willow_terrorize = 100
+        self.skillCastRanges.dark_willow_terrorize = 100
     end
     local kv = ability:GetAbilityKeyValues()
     -- 如果默认施法距离为0，则尝试从技能的特殊值中获取施法距离
@@ -213,8 +213,8 @@ function CommonAI:GetSkillCastRange(entity, ability)
         castRange = range + additionalLength
     end
     -- 检查特定技能的固定范围
-    if self.specificRanges[abilityName] then
-        castRange = self.specificRanges[abilityName]
+    if self.skillCastRanges[abilityName] then
+        castRange = self.skillCastRanges[abilityName]
     end
 
     -- 获取额外的施法距离加成

@@ -439,6 +439,24 @@ function Main:RequestStrategyData()
                 id = "1"
             },
         },
+        npc_dota_hero_warlock = {  -- 熊战士
+            {
+                name = "先给自己奶",
+                id = "1"
+            },
+        },
+        npc_dota_hero_obsidian_destroyer = {  -- 熊战士
+            {
+                name = "满血开大",
+                id = "1"
+            },
+        },
+        npc_dota_hero_witch_doctor = {  -- 熊战士
+            {
+                name = "满血开魔晶",
+                id = "1"
+            },
+        },
         npc_dota_hero_dark_willow = {  -- 熊战士
             {
                 name = "暗影之境直接开",
@@ -1220,6 +1238,10 @@ function Main:RequestStrategyData()
             {
                 name = "禁止连飞",
                 id = "1"
+            },
+            {
+                name = "飞魂期间不放无影拳",
+                id = "2"
             },
         },
         npc_dota_hero_tusk = {  -- 巨牙海民

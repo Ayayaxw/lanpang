@@ -14,7 +14,6 @@ function CommonAI:Ini_HighPrioritySkills()
         npc_dota_hero_monkey_king = {"monkey_king_tree_dance","monkey_king_primal_spring"},
         npc_dota_hero_ancient_apparition = {"ancient_apparition_ice_blast_release"},
         npc_dota_hero_tinker = {"tinker_defense_matrix"},
-        npc_dota_hero_witch_doctor = {"witch_doctor_paralyzing_cask"},
         npc_dota_hero_techies = {"techies_reactive_tazer","techies_suicide"},
         npc_dota_hero_rattletrap = {"rattletrap_hookshot"},
         npc_dota_hero_morphling = {"morphling_waveform"},

@@ -25,8 +25,13 @@ function modifier_item_bracer_stats:DeclareFunctions()
 end
 
 local function GetItemCount(unit)
+    local slots = 5
+    if unit:HasAbility("techies_spoons_stash") then
+        slots = 8
+    end
+    
     local count = 0
-    for i = 0, 8 do
+    for i = 0, slots do
         local item = unit:GetItemInSlot(i)
         if item and item:GetName() == "item_bracer_custom" then
             count = count + 1

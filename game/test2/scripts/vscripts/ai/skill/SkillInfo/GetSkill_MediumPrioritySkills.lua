@@ -26,7 +26,7 @@ function CommonAI:Ini_MediumPrioritySkills()
             npc_dota_hero_skywrath_mage = {"skywrath_mage_ancient_seal"},
             npc_dota_hero_muerta = {"muerta_pierce_the_veil","muerta_the_calling","muerta_dead_shot"},
             npc_dota_hero_phantom_assassin = {"phantom_assassin_fan_of_knives"},
-            npc_dota_hero_witch_doctor = {"witch_doctor_paralyzing_cask"},
+            npc_dota_hero_witch_doctor = {"witch_doctor_voodoo_switcheroo"},
             npc_dota_hero_jakiro = {"jakiro_ice_path","jakiro_macropyre"},
             npc_dota_hero_death_prophet = {"death_prophet_silence"},
             npc_dota_hero_leshrac = {"leshrac_pulse_nova","leshrac_defilement","leshrac_split_earth","leshrac_greater_lightning_storm"},
@@ -43,6 +43,7 @@ function CommonAI:Ini_MediumPrioritySkills()
 
             npc_dota_hero_mirana = {"mirana_starfall"},
             npc_dota_hero_dark_seer = {"dark_seer_wall_of_replica","dark_seer_surge","dark_seer_vacuum",},
+            npc_dota_hero_shadow_demon = {"shadow_demon_disruption"},
             
             npc_dota_hero_dazzle = {"dazzle_shallow_grave","dazzle_poison_touch"},
             npc_dota_hero_batrider = {"batrider_firefly","batrider_flaming_lasso"},

@@ -139,9 +139,13 @@ HeroSkillConditions = {
     ["npc_dota_hero_weaver"] = {
         ["weaver_time_lapse"] = {
             function(self, caster, log)
-
                 local ability = caster:FindAbilityByName("weaver_time_lapse")
                 if not ability then return false end
+        
+                if caster:GetHealthPercent() < 50 then
+                    self.Ally = caster
+                    return true
+                end
         
                 self.Ally = self:FindBestAllyHeroTarget(
                     caster,
@@ -154,9 +158,8 @@ HeroSkillConditions = {
                     self:log("该满血开大了")
                     return self.Ally
                 else
-                    return self.Ally and self.Ally:GetHealthPercent() < 30
+                    return self.Ally and self.Ally:GetHealthPercent() < 50
                 end
-
             end
         }
     },
@@ -468,6 +471,11 @@ HeroSkillConditions = {
                 return potentialTarget ~= nil
             end
         },
+        ["skeleton_king_reincarnation"] = {
+            function(self, caster, log)
+                return false
+            end
+        },
     },
 
 
@@ -649,6 +657,40 @@ HeroSkillConditions = {
         }
     },
 
+    ["npc_dota_hero_warlock"] = {
+        ["warlock_shadow_word"] = {
+            function(self, caster, log)
+                local ability = caster:FindAbilityByName("warlock_shadow_word")
+                if not ability then return false end
+        
+                if self:containsStrategy(self.hero_strategy, "先给自己奶") then
+                    self.skillTargetTeam["warlock_shadow_word"] = DOTA_UNIT_TARGET_TEAM.FRIENDLY
+                    self.Ally = caster
+                    return true
+                end
+        
+                self.Ally = self:FindBestAllyHeroTarget(
+                    caster,
+                    ability,
+                    nil,  -- 不需要检查buff
+                    nil,  -- 不需要检查剩余时间
+                    "health",  -- 优先给离敌人最近的友军释放
+                    true,
+                    true
+                )
+                
+                if self.Ally then
+                    self.skillTargetTeam["warlock_shadow_word"] = DOTA_UNIT_TARGET_TEAM.FRIENDLY
+                else
+                    if self.skillTargetTeam["warlock_shadow_word"] then
+                        self.skillTargetTeam["warlock_shadow_word"] = nil
+                    end
+                end
+        
+                return self.Ally ~= nil
+            end
+        },
+    },
 
     ["npc_dota_hero_shadow_shaman"] = {
         ["shadow_shaman_voodoo"] = {
@@ -849,6 +891,7 @@ HeroSkillConditions = {
     ["npc_dota_hero_lion"] = {
         ["lion_voodoo"] = {
             function(self, caster, log)
+
                 local ability = caster:FindAbilityByName("lion_voodoo")
                 if not ability then return false end
                 
@@ -869,6 +912,7 @@ HeroSkillConditions = {
         },
         ["lion_impale"] = {
             function(self, caster, log)
+
                 local ability = caster:FindAbilityByName("lion_impale")
                 if not ability then return false end
                 
@@ -3102,7 +3146,10 @@ HeroSkillConditions = {
     ["npc_dota_hero_witch_doctor"] = {
         ["witch_doctor_voodoo_switcheroo"] = {
             function(self, caster, log)
-                return caster:GetHealthPercent()<30
+                if self:containsStrategy(self.hero_strategy, "满血开魔晶") then
+                    return true
+                end
+                return caster:GetHealthPercent() < 50
             end
         }
     },
@@ -3318,7 +3365,12 @@ HeroSkillConditions = {
             function(self, caster, log)
                 local ability = caster:FindAbilityByName("naga_siren_song_of_the_siren")
                 if not ability then return false end
-    
+            
+                -- 如果有歌唱治疗buff，直接返回false
+                if caster:HasModifier("modifier_naga_siren_song_of_the_siren_healing") then
+                    return false
+                end
+            
                 local healthThreshold
                 if self:containsStrategy(self.hero_strategy, "残血唱歌") then
                     healthThreshold = 30
@@ -3327,17 +3379,17 @@ HeroSkillConditions = {
                 else
                     healthThreshold = 50
                 end
-    
+            
                 self.Ally = self:FindBestAllyHeroTarget(
                     caster,
                     ability,
-                    {"modifier_naga_siren_song_of_the_siren_aura","modifier_naga_siren_song_of_the_siren_healing"},
+                    {"modifier_naga_siren_song_of_the_siren_healing"},
                     0,
                     "health_percent",  -- 按血量百分比排序
                     true,    -- 只允许英雄单位
                     true     -- 包括自己
                 )
-    
+            
                 return self.Ally and self.Ally:GetHealthPercent() <= healthThreshold
             end
         },
@@ -4524,36 +4576,41 @@ HeroSkillConditions = {
         },
         ["shadow_demon_demonic_purge"] = {
             function(self, caster, log)
+
                 local ability = caster:FindAbilityByName("shadow_demon_demonic_purge")
-                local castRange = self:GetSkillCastRange(caster, ability)
-        
-                local enemies = FindUnitsInRadius(
-                    caster:GetTeamNumber(),
-                    caster:GetOrigin(),
-                    nil,
-                    castRange,
-                    DOTA_UNIT_TARGET_TEAM_ENEMY,
-                    DOTA_UNIT_TARGET_HERO,  -- 只对英雄使用净化
-                    0,
-                    FIND_ANY_ORDER,
-                    false
+                if not ability then return false end
+                local potentialTarget = self:FindBestEnemyHeroTarget(
+                    caster,
+                    ability,
+                    {"modifier_shadow_demon_purge_slow"},
+                    0.5,
+                    "distance"
                 )
-        
-                for _, enemy in pairs(enemies) do
-                    if not enemy:HasModifier("modifier_shadow_demon_purge_slow") then
-                        if enemy:IsHero() then
-                            if log then
-                                log("找到合适的目标: " .. enemy:GetUnitName())
-                            end
-                            return true
-                        end
-                    end
+                
+                if potentialTarget then
+                    self.target = potentialTarget
                 end
-        
-                if log then
-                    log("没有找到合适的目标")
+    
+                return potentialTarget ~= nil
+            end
+        },
+        ["shadow_demon_disseminate"] = {
+            function(self, caster, log)
+                local ability = caster:FindAbilityByName("shadow_demon_disseminate")
+                if not ability then return false end
+                local potentialTarget = self:FindBestEnemyHeroTarget(
+                    caster,
+                    ability,
+                    {"modifier_shadow_demon_disseminate"},
+                    0.5,
+                    "distance"
+                )
+                
+                if potentialTarget then
+                    self.target = potentialTarget
                 end
-                return false
+    
+                return potentialTarget ~= nil
             end
         },
         ["shadow_demon_demonic_cleanse"] = {
@@ -4566,7 +4623,8 @@ HeroSkillConditions = {
                     ability,
                     {"modifier_shadow_demon_purge_slow"},
                     0.5,
-                    "health_percent" 
+                    "health_percent" ,
+                    true
                 )
         
                 return self.Ally ~= nil
@@ -4672,6 +4730,9 @@ HeroSkillConditions = {
     ["npc_dota_hero_obsidian_destroyer"] = {
         ["obsidian_destroyer_sanity_eclipse"] = {
             function(self, caster, log)
+                if self:containsStrategy(self.hero_strategy, "满血开大") then
+                    return true
+                end
                 -- 如果血量低于25%直接返回true
                 if caster:GetHealthPercent()<25 then
                     self:log("血量低于25%，直接返回true")
@@ -4712,7 +4773,7 @@ HeroSkillConditions = {
                     return false
                 end
             end
-        }
+        },
     },
     ["npc_dota_hero_alchemist"] = {
         ["alchemist_chemical_rage"] = {
@@ -5751,7 +5812,16 @@ HeroSkillConditions = {
                     if log then self:log("检测到英雄处于Sleight of Fist状态，返回false") end
                     return false
                 end
-
+                
+                local fireRemnantAbility = caster:FindAbilityByName("ember_spirit_fire_remnant")
+                if self:containsStrategy(self.hero_strategy, "飞魂期间不放无影拳") and 
+                   caster:HasModifier("modifier_ember_spirit_fire_remnant") and
+                   fireRemnantAbility and 
+                   fireRemnantAbility:GetCurrentAbilityCharges() > 0 then
+                    if log then self:log("检测到英雄处于Fire Remnant状态且还有充能，返回false") end
+                    return false
+                end
+        
                 local forbiddenModifiers = {
                     "modifier_ember_spirit_fire_remnant",
                 }
@@ -5765,7 +5835,6 @@ HeroSkillConditions = {
                     end
                 end
                 
-                local fireRemnantAbility = caster:FindAbilityByName("ember_spirit_fire_remnant")
                 local requiredModifier = "modifier_ember_spirit_fire_remnant_timer"
                 
                 if fireRemnantAbility and fireRemnantAbility:GetCurrentAbilityCharges() == 0 then
@@ -5983,6 +6052,12 @@ HeroSkillConditions = {
                 else
                     return true
                 end
+            end
+        },
+        ["windrunner_windrun"] = {
+            function(self, caster, log)
+
+                return caster:GetHealthPercent() < 50
             end
         },
 

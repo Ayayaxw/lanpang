@@ -424,7 +424,7 @@ function Main:HeroBenefits(heroName, hero, overallStrategy, heroStrategy)
         local function createUnitAndCastSpell(unitName)
             local unit = CreateUnitByName(unitName, 
                 hero:GetAbsOrigin() + RandomVector(RandomFloat(100, 200)), 
-                true, nil, nil, DOTA_TEAM_NEUTRALS)
+                true, nil, nil, hero:GetTeamNumber())  -- 修改这里，使用英雄的队伍编号
             if unit and ability then
                 unit:SetOwner(hero)
                 unit:SetControllableByPlayer(hero:GetPlayerID(), true)
@@ -486,7 +486,7 @@ function Main:HeroBenefits(heroName, hero, overallStrategy, heroStrategy)
                     nil,
                     300,
                     DOTA_UNIT_TARGET_TEAM_FRIENDLY,
-                    DOTA_UNIT_TARGET_ALL, -- 修改这里，添加HEROES
+                    DOTA_UNIT_TARGET_ALL,
                     DOTA_UNIT_TARGET_FLAG_NONE,
                     FIND_ANY_ORDER,
                     false
@@ -499,6 +499,14 @@ function Main:HeroBenefits(heroName, hero, overallStrategy, heroStrategy)
                     print("检查单位: " .. unit:GetUnitName())
                     if string.match(unit:GetUnitName(), "npc_dota_lone_druid_bear") then
                         print("找到了熊!")
+                        -- 先清空熊的所有装备
+                        for itemSlot = 0, 8 do
+                            local bearItem = unit:GetItemInSlot(itemSlot)
+                            if bearItem then
+                                unit:RemoveItem(bearItem)
+                            end
+                        end
+                        
                         -- 复制英雄的装备给熊
                         for itemSlot = 0, 8 do
                             local item = hero:GetItemInSlot(itemSlot)
@@ -643,7 +651,7 @@ function Main:HeroBenefits(heroName, hero, overallStrategy, heroStrategy)
     end
     if heroName == "npc_dota_hero_silencer" then
         local heroLevel = hero:GetLevel()
-        local stacks = math.floor(heroLevel / 3)
+        local stacks = math.floor(heroLevel)
         -- 设置智力窃取层数
         hero:SetModifierStackCount("modifier_silencer_brain_drain", hero, stacks)
         print(string.format("沉默术士获得智力窃取层数: %d", stacks))

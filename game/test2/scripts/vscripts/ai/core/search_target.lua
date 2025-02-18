@@ -945,7 +945,7 @@ function GetDistancePointToLine(point, segStart, segEnd)
     return (point - projection):Length2D()
 end
 
-function CommonAI:FindClosestUnblockedEnemyHero(entity, ability, isAoeAbility, lineWidth)
+function CommonAI:FindClosestUnblockedEnemyHero(entity, ability, isAoeAbility, aoeWidth )
     local castRange = self:GetSkillCastRange(entity, ability)
     print("【阻挡检测】开始搜索, 施法者: " .. entity:GetUnitName() .. ", 施法距离: " .. castRange)
     
@@ -1013,8 +1013,8 @@ function CommonAI:FindClosestUnblockedEnemyHero(entity, ability, isAoeAbility, l
                 
                 if isAoeAbility then
                     local distanceToTarget = (unit:GetAbsOrigin() - enemyPos):Length2D()
-                    if distanceToTarget <= lineWidth then
-                        print("【阻挡检测】单位在AOE范围内(" .. math.floor(distanceToTarget) .. " <= " .. lineWidth .. ")，不计入阻挡")
+                    if distanceToTarget <= aoeWidth  then
+                        print("【阻挡检测】单位在AOE范围内(" .. math.floor(distanceToTarget) .. " <= " .. aoeWidth  .. ")，不计入阻挡")
                         goto continue
                     end
                 end

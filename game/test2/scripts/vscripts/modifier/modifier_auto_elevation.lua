@@ -5,7 +5,8 @@ end
 -- 定义不需要传送的modifier表
 modifier_auto_elevation.excluded_modifiers = {
     ["modifier_ursa_earthshock_move"] = true,
-    ["modifier_pangolier_shield_crash_jump"] = true
+    ["modifier_pangolier_shield_crash_jump"] = true,
+    ["modifier_phoenix_icarus_dive"] = true
 }
 
 function modifier_auto_elevation:IsHidden()

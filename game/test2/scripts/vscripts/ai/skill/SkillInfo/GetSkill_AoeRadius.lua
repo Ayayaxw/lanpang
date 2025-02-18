@@ -8,7 +8,7 @@ function CommonAI:Ini_SkillAoeRadius()
         razor_eye_of_the_storm = 9999,
 
         pugna_nether_ward = 1400,
-        witch_doctor_voodoo_switcheroo = 650,
+        witch_doctor_voodoo_switcheroo = 9999,
         leshrac_defilement = 1000,
         leshrac_diabolic_edict = 2000,
         death_prophet_exorcism = 2000,

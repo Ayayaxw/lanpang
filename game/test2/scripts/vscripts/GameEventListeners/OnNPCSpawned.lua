@@ -28,7 +28,9 @@ function Main:isExcludedUnit(unit)
         "npc_dota_looping_sound",
         "npc_dota_unit_undying_zombie_torso",
         "npc_dota_wisp_spirit",
-        "npc_dota_muerta_revenant"
+        "npc_dota_muerta_revenant",
+        "npc_dota_wraith_king_skeleton_warrior",
+
     }
     -- 检查单位名称是否在排除列表中
     for _, excludedName in ipairs(excludedUnits) do

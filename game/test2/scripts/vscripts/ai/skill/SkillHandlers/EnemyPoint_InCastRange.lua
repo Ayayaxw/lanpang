@@ -450,14 +450,14 @@ function CommonAI:HandleEnemyPoint_InCastRange(entity,target,abilityInfo,targetI
 
     
     
-    elseif abilityInfo.abilityName == "pudge_meat_hook" then
-        -- 获取角色面向的前方向量并归一化
+    -- elseif abilityInfo.abilityName == "pudge_meat_hook" then
+    --     -- 获取角色面向的前方向量并归一化
 
-        local newTargetPos = entity:GetOrigin() + targetInfo.targetDirection * 100
+    --     local newTargetPos = entity:GetOrigin() + targetInfo.targetDirection * 100
     
-        -- 施放技能到新的目标位置
-        entity:CastAbilityOnPosition(newTargetPos, abilityInfo.skill, 0)
-        return true
+    --     -- 施放技能到新的目标位置
+    --     entity:CastAbilityOnPosition(newTargetPos, abilityInfo.skill, 0)
+    --     return true
     elseif abilityInfo.abilityName == "lion_impale" then
         -- 获取角色面向的前方向量并归一化
 

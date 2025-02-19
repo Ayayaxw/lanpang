@@ -29,8 +29,9 @@ mklink /J "D:\APP\Steam\steamapps\common\dota 2 beta\content\dota_addons\test2" 
 ```dos
 mklink /J "D:\APP\Steam\steamapps\common\dota 2 beta\game\dota_addons\test2" "E:\Dep\lanpang\game\test2"  
 ```
-  
-##斗蛐蛐模式开发指南  
+
+## 斗蛐蛐模式开发指南  
+
 # 一 初始化函数  
 这里的每一个小点全都需要，一个都不能少。  
   
@@ -167,23 +168,15 @@ self:createLocalizedMessage(
 )  
   
 -- 英雄选择播报（单人模式）  
-    self:createLocalizedMessage(  
-  
-        "[LanPang_RECORD][",  
-  
-        self.currentMatchID,  
-  
-        "]",  
-  
-        "[选择绿方]",  
-  
-        {localize = true, text = heroName},  
-  
-        ",",  
-  
-        {localize = true, text = "facet", facetInfo = self:getFacetTooltip(heroName, selfFacetId)}  
-  
-    )  
+self:createLocalizedMessage(  
+    "[LanPang_RECORD][",  
+    self.currentMatchID,  
+    "]",  
+    "[选择绿方]",  
+    {localize = true, text = heroName},  
+    ",",  
+    {localize = true, text = "facet", facetInfo = self:getFacetTooltip(heroName, selfFacetId)}  
+)  
   
 -- 双人模式额外添加红方播报  
 self:createLocalizedMessage(  
@@ -291,21 +284,14 @@ end)
 -- 英雄特殊加成（所有英雄都得有）  
     Timers:CreateTimer(2, function()  
 	if self.currentTimer ~= timerId or hero_duel.EndDuel then return end  
-  
 	self:HeroPreparation(heroName, self.leftTeamHero1, selfOverallStrategy,selfHeroStrategy)  
-  
 	self:HeroPreparation(opponentHeroName, self.rightTeamHero1, opponentOverallStrategy,opponentHeroStrategy)  
-  
 end)  
 --给英雄添加小礼物所有英雄都得有）  
 Timers:CreateTimer(self.duration - 0.5, function()  
-  
 	if self.currentTimer ~= timerId or hero_duel.EndDuel then return end  
-  
 	self:HeroBenefits(heroName, self.leftTeamHero1, selfOverallStrategy,selfHeroStrategy)  
-  
 	self:HeroBenefits(opponentHeroName, self.rightTeamHero1, opponentOverallStrategy,opponentHeroStrategy)  
-  
 end)
 ```
 
@@ -318,29 +304,18 @@ Timers:CreateTimer(5, function()
     local ability_modifiers = {  
     }  
     self:UpdateAbilityModifiers(ability_modifiers)  
-  
         self:PrepareHeroForDuel(  
-  
             self.leftTeamHero1,                     -- 英雄单位  
-  
             self.smallDuelAreaLeft,      -- 左侧决斗区域坐标  
-  
             self.duration - 5,                      --   
-  
             Vector(1, 0, 0)          -- 朝向右侧  
-  
         )  
 	--准备右侧英雄（如果是多人模式）  
         self:PrepareHeroForDuel(  
-  
             self.rightTeamHero1,          
-  
             self.smallDuelAreaRight,      
-  
             self.duration - 5,            
-  
             Vector(-1, 0, 0)          
-  
         )  
 end)  
 ```  
@@ -448,32 +423,22 @@ end)
         if self.currentTimer ~= timerId or hero_duel.EndDuel then return end  
   
         hero_duel.EndDuel = true  
-  
-  
+
         self:PlayDefeatAnimation(self.leftTeamHero1)  
   
         self:createLocalizedMessage(  
-  
             "[LanPang_RECORD][",  
-  
             self.currentMatchID,  
-  
             "]",  
-  
             "[挑战失败],最终得分:" .. hero_duel.finalScore  
-  
         )  
   
         self:gradual_slow_down(self.leftTeamHero1:GetOrigin(), self.leftTeamHero1:GetOrigin())  
   
         CustomGameEventManager:Send_ServerToAllClients("update_score", {  
-  
             ["剩余时间"] = "0",  
-  
             ["当前得分"] = tostring(hero_duel.finalScore)  
-  
         })  
-  
     end)  
 ```
   
@@ -490,17 +455,12 @@ end)
         hero_duel.EndDuel = true  
   
         -- 停止计时  
-  
         CustomGameEventManager:Send_ServerToAllClients("stop_timer", {})  
-  
-    
   
         self:DisableHeroWithModifiers(self.leftTeamHero1, self.endduration)  
   
         self:DisableHeroWithModifiers(self.rightTeamHero1, self.endduration)  
-  
-    
-  
+
     end)  
 ```
 
@@ -533,36 +493,22 @@ function BattleArena:OnUnitKilled_[模式名](killedUnit, args)
   
     if not killedUnit or killedUnit:IsNull() then return end  
   
-    
-    
-  
     -- 判断是否是玩家英雄死亡  
-  
     if killedUnit:IsRealHero() and killedUnit:GetTeamNumber() == DOTA_TEAM_GOODGUYS then  
   
         -- 计算最终得分 (使用当前累积的分数，取整)  
-  
         local finalScore = math.floor(hero_duel.finalScore)  
   
         -- 发送记录消息  
-  
         self:createLocalizedMessage(  
-  
             "[LanPang_RECORD][",  
-  
             self.currentMatchID,  
-  
             "]",  
-  
             "[挑战失败],最终得分:" .. finalScore  
-  
         )  
   
         -- 发送最终结果给前端  
-  
         self:PlayDefeatAnimation(self.leftTeamHero1)  
-  
-    
   
         self.rightTeamHero1:AddNewModifier(self.rightTeamHero1, nil, "modifier_invulnerable", {})  
   
@@ -577,11 +523,8 @@ function BattleArena:OnUnitKilled_[模式名](killedUnit, args)
         local remainingTime = self.limitTime - timeSpent  
   
         local formattedTime = string.format("%02d:%02d.%02d",  
-  
             math.floor(remainingTime / 60),  
-  
             math.floor(remainingTime % 60),  
-  
             math.floor((remainingTime * 100) % 100))  
   
         CustomGameEventManager:Send_ServerToAllClients("update_score", {["剩余时间"] = formattedTime})  
@@ -589,7 +532,6 @@ function BattleArena:OnUnitKilled_[模式名](killedUnit, args)
         hero_duel.EndDuel = true  
   
         return  
-  
     end  
 end  
 ```
@@ -599,9 +541,7 @@ end
 ```lua
 function BattleArena:OnNPCSpawned_[模式名](spawnedUnit, event)  
     if not self:isExcludedUnit(spawnedUnit) then  
-  
         self:ApplyConfig(spawnedUnit, "BATTLEFIELD")  
-  
     end  
 end  
 ```

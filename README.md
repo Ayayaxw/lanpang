@@ -21,11 +21,14 @@ lanpang
 ## 快速开始  
   
 ### 环境配置  
-1. 创建符号链接（管理员权限运行）：  
-mklink /J "D:\APP\Steam\steamapps\common\dota 2 beta\content\dota_addons\test2" "E:\Dep\lanpang\content\test2"  
+1. 创建符号链接（管理员权限运行）：
+```dos
+mklink /J "D:\APP\Steam\steamapps\common\dota 2 beta\content\dota_addons\test2" "E:\Dep\lanpang\content\test2"
+```
 :: 游戏逻辑目录  
+```dos
 mklink /J "D:\APP\Steam\steamapps\common\dota 2 beta\game\dota_addons\test2" "E:\Dep\lanpang\game\test2"  
-  
+```
   
 ##斗蛐蛐模式开发指南  
 # 一 初始化函数  
@@ -35,6 +38,7 @@ mklink /J "D:\APP\Steam\steamapps\common\dota 2 beta\game\dota_addons\test2" "E:
 ## 1. 基础参数初始化  
   
 每个模式都需要以下基础参数初始化：  
+```lua
 -- 比赛ID初始化  
 self.currentMatchID = self:GenerateUniqueID()      
   
@@ -60,7 +64,8 @@ hero_duel.EndDuel = false  -- 标记战斗是否结束
   
 -- 设置摄像机位置  
 SendCameraPositionToJS(BattleArena.largeSpawnCenter, 1)  
-  
+```
+
 ### 重要说明：  
   
 - 计数类参数建议使用 `hero_duel.xxx` ，而不是 `self.xxx`  
@@ -70,10 +75,11 @@ SendCameraPositionToJS(BattleArena.largeSpawnCenter, 1)
 ## 2 英雄配置  
   
 标准的英雄配置结构：  
+```lua
     local teams = {DOTA_TEAM_GOODGUYS, DOTA_TEAM_BADGUYS} -- 或其他你需要的队伍  
   
     self:CreateTrueSightWards(teams)  
-self.HERO_CONFIG = {  
+    self.HERO_CONFIG = {  
 	ALL = {  
 		function(hero)  
 			hero:AddNewModifier(hero, nil, "modifier_kv_editor", {})  
@@ -101,12 +107,14 @@ self.HERO_CONFIG = {
 		end,  
 	}  
 }  
-  
+```
+
 ## 3. 数据获取  
   
 根据模式类型选择适当的数据获取方式：  
   
 ### 单人模式数据获取：  
+```lua
 local selfHeroId = event.selfHeroId or -1  
 local selfFacetId = event.selfFacetId or -1  
 local selfAIEnabled = (event.selfAIEnabled == 1)  
@@ -116,9 +124,10 @@ local selfHeroStrategy = self:getDefaultIfEmpty(event.selfHeroStrategies)
   
 -- 获取英雄名称  
 local heroName, heroChineseName = self:GetHeroNames(selfHeroId)  
+```
   
-  
-### 双人模式数据获取：  
+### 双人模式数据获取：
+```lua
 -- 玩家数据  
 local selfHeroId = event.selfHeroId or -1  
 local selfFacetId = event.selfFacetId or -1  
@@ -138,7 +147,7 @@ local opponentHeroStrategy = self:getDefaultIfEmpty(event.opponentHeroStrategies
 -- 获取双方英雄名称  
 local heroName, heroChineseName = self:GetHeroNames(selfHeroId)  
 local opponentHeroName, opponentChineseName = self:GetHeroNames(opponentHeroId)  
-  
+```
   
 ## 4. 播报系统  
   
@@ -147,7 +156,8 @@ local opponentHeroName, opponentChineseName = self:GetHeroNames(opponentHeroId)
 ### 4.1 裁判控制台播报  
   
 使用 `createLocalizedMessage` 方法，基本格式：  
-  
+
+```lua
 -- 基础播报  
 self:createLocalizedMessage(  
     "[LanPang_RECORD][",  
@@ -184,11 +194,14 @@ self:createLocalizedMessage(
     {localize = true, text = opponentHeroName},  
     ",",  
     {localize = true, text = "facet", facetInfo =self:getFacetTooltip(opponentHeroName, opponentFacetId)}  
-)  
+)
+```
   
 ### 4.2 观众前端播报  
   
 使用 `SendInitializationMessage` 方法，根据模式类型设置不同的显示内容：  
+
+```lua
 -- 双人对战模式示例  
 local data = {  
     ["挑战英雄"] = heroChineseName,  
@@ -208,7 +221,8 @@ local data = {
     ["当前得分"] = "0",  
 }  
 local order = {"挑战英雄", "击杀数量", "最高僵尸攻击","最高僵尸生命","剩余时间", "当前得分"}  
-SendInitializationMessage(data, order)  
+SendInitializationMessage(data, order)
+```
   
 ### 播报系统注意事项：  
   
@@ -223,7 +237,7 @@ SendInitializationMessage(data, order)
 英雄创建分为玩家英雄和对手英雄两部分：  
   
 ### 5.1 玩家英雄创建（通用）  
-  
+```lua
 CreateHero(playerID, heroName, selfFacetId, self.smallDuelAreaLeft, DOTA_TEAM_GOODGUYS, false, function(playerHero)  
     self:ConfigureHero(playerHero, true, playerID)  
     self:EquipHeroItems(playerHero, selfEquipment)  
@@ -239,8 +253,10 @@ CreateHero(playerID, heroName, selfFacetId, self.smallDuelAreaLeft, DOTA_TEAM_GO
         end)  
     end  
 end)  
-  
+```
+
 ### 5.2 对手英雄创建（双人模式）  
+```lua
 CreateHero(playerID, opponentHeroName, opponentFacetId, self.smallDuelAreaRight, DOTA_TEAM_BADGUYS, false, function(opponentHero)  
     self:ConfigureHero(opponentHero, false, playerID)  
     self:EquipHeroItems(opponentHero, opponentEquipment)  
@@ -257,12 +273,12 @@ CreateHero(playerID, opponentHeroName, opponentFacetId, self.smallDuelAreaRight,
         end)  
     end  
 end)  
-  
+```
   
 ## 6. 赛前准备阶段  
   
 ### 6.1 基础准备时间  
-  
+```lua
 --赛前自由准备时间  
 Timers:CreateTimer(2, function()  
     if self.currentTimer ~= timerId or hero_duel.EndDuel then return end  
@@ -290,9 +306,11 @@ Timers:CreateTimer(self.duration - 0.5, function()
   
 	self:HeroBenefits(opponentHeroName, self.rightTeamHero1, opponentOverallStrategy,opponentHeroStrategy)  
   
-end)  
-  
+end)
+```
+
 6.2 英雄限制和重置  
+```lua
 Timers:CreateTimer(5, function()  
     if self.currentTimer ~= timerId or hero_duel.EndDuel then return end  
       
@@ -325,13 +343,13 @@ Timers:CreateTimer(5, function()
   
         )  
 end)  
-  
+```  
   
   
 ## 7. 入场动画和比赛开始  
   
 ### 7.1 双人模式入场动画  
-  
+```lua
 Timers:CreateTimer(self.duration - 6, function()  
     if self.currentTimer ~= timerId or hero_duel.EndDuel then return end  
   
@@ -353,8 +371,10 @@ Timers:CreateTimer(self.duration - 6, function()
         SendToServerConsole("host_timescale 1")  
     end)  
 end)  
-  
-### 7.2 单人模式入场动画  
+```
+
+### 7.2 单人模式入场动画 
+```lua
 Timers:CreateTimer(self.duration - 6, function()  
     if self.currentTimer ~= timerId or hero_duel.EndDuel then return end  
   
@@ -370,16 +390,20 @@ Timers:CreateTimer(self.duration - 6, function()
         SendToServerConsole("host_timescale 1")  
     end)  
 end)  
+```
   
 # 8. 比赛开始信号  
   
-### 8.1 开始信号发送  
+### 8.1 开始信号发送 
+```lua
 Timers:CreateTimer(self.duration - 1, function()  
     if self.currentTimer ~= timerId or hero_duel.EndDuel then return end  
     CustomGameEventManager:Send_ServerToAllClients("start_fighting", {})  
 end)  
-  
+```
+
 ## 8.2 单人模式开始  
+```lua
 Timers:CreateTimer(self.duration, function()  
     if self.currentTimer ~= timerId or hero_duel.EndDuel then return end  
     hero_duel.startTime = GameRules:GetGameTime() -- 记录开始时间  
@@ -391,9 +415,11 @@ Timers:CreateTimer(self.duration, function()
         "]",  
         "[正式开始]"  
     )  
-end)  
+end)
+```
   
 ### 8.3 双人模式开始  
+```lua
 Timers:CreateTimer(self.duration, function()  
     if self.currentTimer ~= timerId or hero_duel.EndDuel then return end  
     self.startTime = GameRules:GetGameTime() -- 记录开始时间  
@@ -408,7 +434,7 @@ Timers:CreateTimer(self.duration, function()
         "[正式开始]"  
     )  
 end)  
-  
+```
   
 ## 9. 比赛结束判定  
   
@@ -416,7 +442,7 @@ end)
   
 取决于用户，用户希望倒计时结束是胜利还是失败  
 失败：  
-  
+```lua
     Timers:CreateTimer(self.limitTime + self.duration, function()  
   
         if self.currentTimer ~= timerId or hero_duel.EndDuel then return end  
@@ -449,13 +475,14 @@ end)
         })  
   
     end)  
-  
+```
   
 如果是胜利：  
-就是这个PlayVictoryEffects  
+就是这个 `PlayVictoryEffects` 
   
   
 ### 9.2 双人模式倒计时结束（血量比较）  
+```lua
     Timers:CreateTimer(self.limitTime + self.duration, function()  
   
         if self.currentTimer ~= timerId or hero_duel.EndDuel then return end  
@@ -475,11 +502,13 @@ end)
     
   
     end)  
-  
+```
+
 # 三、死亡判定函数编写指南  
 ## 1. 多人模式死亡判定  
   
 简单的多人模式可以直接使用标准判定：  
+```lua
 function BattleArena:OnUnitKilled_[模式名](killedUnit, args)  
     local killedUnit = EntIndexToHScript(args.entindex_killed)  
   
@@ -490,11 +519,12 @@ function BattleArena:OnUnitKilled_[模式名](killedUnit, args)
   
     self:ProcessHeroDeath(killedUnit)  
 end  
-  
+```
+
 ### 2. 单人模式死亡判定  
 单人模式需要更详细的判定逻辑，基本结构为：  
 一般来说玩家死亡就是失败，如果是其他单位死亡，可以有不同的逻辑，根据用户的需求来定  
-  
+```lua
 function BattleArena:OnUnitKilled_[模式名](killedUnit, args)  
   
     local killedUnit = EntIndexToHScript(args.entindex_killed)  
@@ -562,9 +592,11 @@ function BattleArena:OnUnitKilled_[模式名](killedUnit, args)
   
     end  
 end  
+```
   
 # 四：其他  
 如果有需要的话，还有一些，比如，所有英雄单位都需要给与模式的指定modifier（需要才加，不需要就不管）  
+```lua
 function BattleArena:OnNPCSpawned_[模式名](spawnedUnit, event)  
     if not self:isExcludedUnit(spawnedUnit) then  
   
@@ -572,4 +604,4 @@ function BattleArena:OnNPCSpawned_[模式名](spawnedUnit, event)
   
     end  
 end  
-  
+```

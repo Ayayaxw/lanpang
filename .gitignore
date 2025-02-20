@@ -10,3 +10,6 @@
 .vscode/tasks.json
 content/test2/maps/dota.vmap
 game/test2/tools_thumbnail_cache.bin
+
+# 忽略 VS 工作区设置
+.vs/

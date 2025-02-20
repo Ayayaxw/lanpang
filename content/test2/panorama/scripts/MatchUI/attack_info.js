@@ -8,11 +8,16 @@
     }
 
     function onLeftHeroAttack(data) {
-        // $.Msg("Received attack info:", data);
-    
         const isReversedMode = $('#CurrentGameModeLabel').text.includes('反转');
-        const attackerName = "npc_dota_hero_" + data.attacker.replace("npc_dota_hero_", "");
-        const targetName = "npc_dota_hero_" + data.target.replace("npc_dota_hero_", "");
+        
+        // 检查名字是否已经包含npc_dota前缀
+        const attackerName = data.attacker.includes('npc_dota') ? 
+            data.attacker : 
+            "npc_dota_hero_" + data.attacker;
+        
+        const targetName = data.target.includes('npc_dota') ? 
+            data.target : 
+            "npc_dota_hero_" + data.target;
         
         let message = "";
         if (data.attackType === "normal_attack") {
@@ -23,8 +28,6 @@
         }
         
         addMessage(message);
-    
-        // $.Msg("Formatted message:", message);
     }
 
     function formatNormalAttackMessage(attacker, target, damage, isReversed) {
@@ -143,11 +146,15 @@
     }
 
     function onRightHeroAttack(data) {
-        // $.Msg("Received attack info:", data);
-    
         const isReversedMode = $('#CurrentGameModeLabel').text.includes('反转');
-        const attackerName = "npc_dota_hero_" + data.attacker.replace("npc_dota_hero_", "");
-        const targetName = "npc_dota_hero_" + data.target.replace("npc_dota_hero_", "");
+        
+        const attackerName = data.attacker.includes('npc_dota') ? 
+            data.attacker : 
+            "npc_dota_hero_" + data.attacker;
+        
+        const targetName = data.target.includes('npc_dota') ? 
+            data.target : 
+            "npc_dota_hero_" + data.target;
         
         let message = "";
         if (data.attackType === "normal_attack") {
@@ -158,10 +165,8 @@
         }
         
         addMessage(message);
-    
-        // $.Msg("Formatted message:", message);
     }
-
+    
     function formatNormalAttackMessage(attacker, target, damage, isReversed) {
         const targetLocalized = $.Localize("#" + target);
         const targetFormatted = isReversed ? reverseString(targetLocalized) : targetLocalized;

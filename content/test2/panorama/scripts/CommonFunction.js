@@ -209,7 +209,6 @@ var heroData = {
 }
 
 
-
 var heroesFacets = {
     "npc_dota_hero_antimage": {
         "Facets": {
@@ -282,13 +281,27 @@ var heroesFacets = {
                 "Icon": "area_of_effect",
                 "Color": "Gray",
                 "GradientID": "1",
+                "Deprecated": "true",
                 "name": "crystal_maiden_frozen_expanse"
             },
             "2": {
                 "Icon": "mana",
                 "Color": "Blue",
                 "GradientID": "2",
+                "Deprecated": "true",
                 "name": "crystal_maiden_cold_comfort"
+            },
+            "3": {
+                "Icon": "armor",
+                "Color": "Gray",
+                "GradientID": "3",
+                "name": "crystal_maiden_glacial_guard"
+            },
+            "4": {
+                "Icon": "mana",
+                "Color": "Blue",
+                "GradientID": "2",
+                "name": "crystal_maiden_arcane_overflow"
             }
         }
     },
@@ -349,6 +362,7 @@ var heroesFacets = {
                 "Icon": "moon",
                 "Color": "Blue",
                 "GradientID": "1",
+                "Deprecated": "true",
                 "name": "mirana_moonlight",
                 "AbilityName": "mirana_invis"
             },
@@ -356,8 +370,21 @@ var heroesFacets = {
                 "Icon": "sun",
                 "Color": "Gray",
                 "GradientID": "3",
+                "Deprecated": "true",
                 "name": "mirana_sunlight",
                 "AbilityName": "mirana_solar_flare"
+            },
+            "3": {
+                "Icon": "no_vision",
+                "Color": "Blue",
+                "GradientID": "1",
+                "name": "mirana_starstruck"
+            },
+            "4": {
+                "Icon": "slow",
+                "Color": "Gray",
+                "GradientID": "3",
+                "name": "mirana_leaps_and_bounds"
             }
         }
     },
@@ -400,7 +427,8 @@ var heroesFacets = {
             "1": {
                 "Icon": "illusion",
                 "Color": "Yellow",
-                "GradientID": "1",
+                "GradientID": "0",
+                "Deprecated": "true",
                 "name": "phantom_lancer_convergence"
             },
             "2": {
@@ -408,6 +436,12 @@ var heroesFacets = {
                 "Color": "Blue",
                 "GradientID": "2",
                 "name": "phantom_lancer_divergence"
+            },
+            "3": {
+                "Icon": "phantom_lance",
+                "Color": "Yellow",
+                "GradientID": "1",
+                "name": "phantom_lancer_lancelot"
             }
         }
     },
@@ -431,15 +465,22 @@ var heroesFacets = {
         "Facets": {
             "1": {
                 "Icon": "meat",
-                "Color": "Green",
-                "GradientID": "3",
+                "Color": "Red",
+                "GradientID": "0",
                 "name": "pudge_fresh_meat"
             },
             "2": {
                 "Icon": "pudge_hook",
                 "Color": "Red",
                 "GradientID": "0",
+                "Deprecated": "true",
                 "name": "pudge_flayers_hook"
+            },
+            "3": {
+                "Icon": "fist",
+                "Color": "Green",
+                "GradientID": "3",
+                "name": "pudge_rotten_core"
             }
         }
     },
@@ -559,17 +600,31 @@ var heroesFacets = {
                 "Icon": "focus_fire",
                 "Color": "Yellow",
                 "GradientID": "2",
+                "Deprecated": "true",
                 "name": "windrunner_focusfire"
             },
             "3": {
                 "Icon": "multi_arrow",
                 "Color": "Green",
                 "GradientID": "0",
+                "Deprecated": "true",
                 "AbilityIconReplacements": {
                     "windrunner_focusfire": "windrunner_whirlwind",
                     "windrunner_focusfire_cancel": "windrunner_whirlwind_stop"
                 },
                 "name": "windrunner_whirlwind"
+            },
+            "4": {
+                "Icon": "tree",
+                "Color": "Yellow",
+                "GradientID": "2",
+                "name": "windrunner_tangled"
+            },
+            "5": {
+                "Icon": "execute",
+                "Color": "Green",
+                "GradientID": "0",
+                "name": "windrunner_killshot"
             }
         }
     },
@@ -660,9 +715,17 @@ var heroesFacets = {
                 "Icon": "chicken",
                 "Color": "Yellow",
                 "GradientID": "1",
+                "Deprecated": "true",
                 "name": "shadow_shaman_cluster_cluck"
             },
             "2": {
+                "Icon": "chicken",
+                "Color": "Yellow",
+                "GradientID": "1",
+                "name": "shadow_shaman_voodoo_hands",
+                "AbilityName": "shadow_shaman_voodoo_hands"
+            },
+            "3": {
                 "Icon": "snake",
                 "Color": "Red",
                 "GradientID": "1",
@@ -699,7 +762,6 @@ var heroesFacets = {
                 "Color": "Green",
                 "GradientID": "0",
                 "KeyValueOverrides": {
-                    "AttributeBaseStrength": "24",
                     "AttributeStrengthGain": "4.1"
                 },
                 "name": "tidehunter_sizescale",
@@ -719,6 +781,7 @@ var heroesFacets = {
                 "Icon": "nuke",
                 "Color": "Red",
                 "GradientID": "2",
+                "Deprecated": "1",
                 "name": "witch_doctor_voodoo_festeration"
             },
             "3": {
@@ -850,6 +913,7 @@ var heroesFacets = {
                 "Icon": "healing",
                 "Color": "Blue",
                 "GradientID": "0",
+                "Deprecated": "true",
                 "name": "queenofpain_lifesteal",
                 "AbilityName": "queenofpain_succubus"
             },
@@ -859,6 +923,13 @@ var heroesFacets = {
                 "GradientID": "0",
                 "name": "queenofpain_selfdmg",
                 "AbilityName": "queenofpain_masochist"
+            },
+            "3": {
+                "Icon": "twin_hearts",
+                "Color": "Blue",
+                "GradientID": "0",
+                "name": "queenofpain_facet_bondage",
+                "AbilityName": "queenofpain_bondage"
             }
         }
     },
@@ -927,6 +998,7 @@ var heroesFacets = {
                 "Icon": "slow",
                 "Color": "Purple",
                 "GradientID": "2",
+                "Deprecated": "true",
                 "name": "death_prophet_suppress"
             },
             "2": {
@@ -951,13 +1023,20 @@ var heroesFacets = {
                 "Icon": "mana",
                 "Color": "Blue",
                 "GradientID": "3",
+                "Deprecated": "1",
                 "name": "phantom_assassin_veiled_one"
             },
             "2": {
-                "Icon": "damage",
+                "Icon": "skull",
                 "Color": "Gray",
                 "GradientID": "0",
                 "name": "phantom_assassin_methodical"
+            },
+            "3": {
+                "Icon": "phantom_ass_dagger",
+                "Color": "Red",
+                "GradientID": "0",
+                "name": "phantom_assassin_sweet_release"
             }
         }
     },
@@ -990,6 +1069,12 @@ var heroesFacets = {
                 "Color": "Purple",
                 "GradientID": "0",
                 "name": "templar_assassin_refractor"
+            },
+            "3": {
+                "Icon": "range",
+                "Color": "Blue",
+                "GradientID": "1",
+                "name": "templar_assassin_hidden_reach"
             }
         }
     },
@@ -1134,6 +1219,7 @@ var heroesFacets = {
                 "Icon": "lifestealer_rage",
                 "Color": "Yellow",
                 "GradientID": "3",
+                "Deprecated": "true",
                 "name": "life_stealer_rage",
                 "AbilityName": "life_stealer_rage"
             },
@@ -1141,8 +1227,21 @@ var heroesFacets = {
                 "Icon": "broken_chain",
                 "Color": "Red",
                 "GradientID": "0",
+                "Deprecated": "true",
                 "name": "life_stealer_rage_dispell",
                 "AbilityName": "life_stealer_unfettered"
+            },
+            "4": {
+                "Icon": "full_heart",
+                "Color": "Gray",
+                "GradientID": "0",
+                "name": "life_stealer_fleshfeast"
+            },
+            "5": {
+                "Icon": "area_of_effect",
+                "Color": "Red",
+                "GradientID": "0",
+                "name": "life_stealer_gorestorm"
             }
         }
     },
@@ -1222,15 +1321,23 @@ var heroesFacets = {
                 "Icon": "area_of_effect",
                 "Color": "Red",
                 "GradientID": "0",
+                "Deprecated": "1",
                 "name": "huskar_bloodbath"
             },
             "2": {
                 "Icon": "healing",
                 "Color": "Blue",
                 "GradientID": "2",
+                "Deprecated": "1",
                 "name": "huskar_nothl_transfusion"
             },
             "3": {
+                "Icon": "broken_chain",
+                "Color": "Red",
+                "GradientID": "0",
+                "name": "huskar_cauterize"
+            },
+            "4": {
                 "Icon": "damage",
                 "Color": "Yellow",
                 "GradientID": "0",
@@ -1244,6 +1351,7 @@ var heroesFacets = {
                 "Icon": "no_vision",
                 "Color": "Blue",
                 "GradientID": "0",
+                "Deprecated": "True",
                 "name": "night_stalker_blinding_void"
             },
             "2": {
@@ -1252,13 +1360,20 @@ var heroesFacets = {
                 "GradientID": "0",
                 "name": "night_stalker_dayswap",
                 "AbilityName": "night_stalker_night_reign"
+            },
+            "3": {
+                "Icon": "area_of_effect",
+                "Color": "Blue",
+                "GradientID": "0",
+                "MaxHeroAttributeLevel": "6",
+                "name": "night_stalker_voidbringer"
             }
         }
     },
     "npc_dota_hero_broodmother": {
         "Facets": {
             "1": {
-                "Icon": "debuff",
+                "Icon": "web",
                 "Color": "Gray",
                 "GradientID": "0",
                 "name": "broodmother_necrotic_webs"
@@ -1310,6 +1425,7 @@ var heroesFacets = {
                 "Icon": "nuke",
                 "Color": "Red",
                 "GradientID": "0",
+                "Deprecated": "true",
                 "name": "jakiro_fire",
                 "AbilityName": "jakiro_liquid_fire"
             },
@@ -1317,8 +1433,22 @@ var heroesFacets = {
                 "Icon": "snowflake",
                 "Color": "Blue",
                 "GradientID": "1",
+                "Deprecated": "true",
                 "name": "jakiro_ice",
                 "AbilityName": "jakiro_liquid_ice"
+            },
+            "3": {
+                "Icon": "damage",
+                "Color": "Red",
+                "GradientID": "0",
+                "name": "jakiro_twin_terror"
+            },
+            "4": {
+                "Icon": "snowflake",
+                "Color": "Blue",
+                "GradientID": "1",
+                "name": "jakiro_ice_breaker",
+                "AbilityName": "jakiro_ice_path_detonate"
             }
         }
     },
@@ -1343,7 +1473,7 @@ var heroesFacets = {
         "Facets": {
             "1": {
                 "Icon": "area_of_effect",
-                "Color": "Blue",
+                "Color": "Yellow",
                 "GradientID": "3",
                 "AbilityIconReplacements": {
                     "chen_summon_convert": "chen_summon_convert_centaur"
@@ -1354,6 +1484,7 @@ var heroesFacets = {
                 "Icon": "damage",
                 "Color": "Yellow",
                 "GradientID": "2",
+                "Deprecated": "true",
                 "AbilityIconReplacements": {
                     "chen_summon_convert": "chen_summon_convert_wolf"
                 },
@@ -1385,6 +1516,15 @@ var heroesFacets = {
                     "chen_summon_convert": "chen_summon_convert_satyr"
                 },
                 "name": "chen_satyr_convert"
+            },
+            "6": {
+                "Icon": "bubbles",
+                "Color": "Blue",
+                "GradientID": "3",
+                "AbilityIconReplacements": {
+                    "chen_summon_convert": "chen_summon_convert_frog"
+                },
+                "name": "chen_frog_convert"
             }
         }
     },
@@ -1472,7 +1612,14 @@ var heroesFacets = {
                 "Icon": "movement",
                 "Color": "Blue",
                 "GradientID": "2",
+                "Deprecated": "true",
                 "name": "spirit_breaker_imbalanced"
+            },
+            "3": {
+                "Icon": "rng",
+                "Color": "Blue",
+                "GradientID": "2",
+                "name": "spirit_breaker_bulls_hit"
             }
         }
     },
@@ -1505,6 +1652,12 @@ var heroesFacets = {
                 "Color": "Purple",
                 "GradientID": "2",
                 "name": "alchemist_mixologist"
+            },
+            "3": {
+                "Icon": "aghs",
+                "Color": "Green",
+                "GradientID": "2",
+                "name": "alchemist_dividends"
             }
         }
     },
@@ -1514,13 +1667,33 @@ var heroesFacets = {
                 "Icon": "invoker_passive",
                 "Color": "Purple",
                 "GradientID": "0",
+                "Deprecated": "true",
                 "name": "invoker_agnostic"
             },
             "2": {
                 "Icon": "invoker_active",
                 "Color": "Gray",
                 "GradientID": "0",
+                "Deprecated": "true",
                 "name": "invoker_elitist"
+            },
+            "3": {
+                "Icon": "invoker_quas",
+                "Color": "Blue",
+                "GradientID": "0",
+                "name": "invoker_quas_focus"
+            },
+            "4": {
+                "Icon": "invoker_wex",
+                "Color": "Purple",
+                "GradientID": "0",
+                "name": "invoker_wex_focus"
+            },
+            "5": {
+                "Icon": "invoker_exort",
+                "Color": "Yellow",
+                "GradientID": "0",
+                "name": "invoker_exort_focus"
             }
         }
     },
@@ -1627,6 +1800,7 @@ var heroesFacets = {
                 "Icon": "overshadow",
                 "Color": "Yellow",
                 "GradientID": "1",
+                "Deprecated": "1",
                 "name": "lone_druid_unbearable"
             },
             "3": {
@@ -1644,6 +1818,7 @@ var heroesFacets = {
                 "Icon": "illusion",
                 "Color": "Red",
                 "GradientID": "1",
+                "Deprecated": "1",
                 "name": "chaos_knight_strong_illusions",
                 "AbilityName": "chaos_knight_phantasmagoria"
             },
@@ -1652,6 +1827,19 @@ var heroesFacets = {
                 "Color": "Gray",
                 "GradientID": "0",
                 "name": "chaos_knight_irrationality"
+            },
+            "3": {
+                "Icon": "item",
+                "Color": "Yellow",
+                "GradientID": "1",
+                "name": "chaos_knight_facet_fundamental_forging",
+                "AbilityName": "chaos_knight_fundamental_forging"
+            },
+            "4": {
+                "Icon": "ricochet",
+                "Color": "Red",
+                "GradientID": "0",
+                "name": "chaos_knight_cloven_chaos"
             }
         }
     },
@@ -1661,12 +1849,20 @@ var heroesFacets = {
                 "Icon": "summons",
                 "Color": "Blue",
                 "GradientID": "2",
+                "MaxHeroAttributeLevel": "6",
                 "name": "meepo_more_meepo"
             },
             "2": {
+                "Icon": "illusion",
+                "Color": "Yellow",
+                "GradientID": "1",
+                "name": "meepo_codependent"
+            },
+            "3": {
                 "Icon": "item",
                 "Color": "Yellow",
                 "GradientID": "1",
+                "Deprecated": "1",
                 "name": "meepo_pack_rat",
                 "AbilityName": "meepo_pack_rat"
             }
@@ -1759,8 +1955,7 @@ var heroesFacets = {
                 "Icon": "nuke",
                 "Color": "Blue",
                 "GradientID": "3",
-                "name": "nyx_assassin_burn_mana",
-                "AbilityName": "nyx_assassin_innate_mana_burn"
+                "name": "nyx_assassin_burn_mana"
             },
             "2": {
                 "Icon": "speed",
@@ -1881,6 +2076,13 @@ var heroesFacets = {
                 "GradientID": "2",
                 "name": "medusa_slow_attacks",
                 "AbilityName": "medusa_venomed_volley"
+            },
+            "4": {
+                "Icon": "speed",
+                "Color": "Red",
+                "GradientID": "0",
+                "name": "medusa_undulation",
+                "AbilityName": "medusa_undulation"
             }
         }
     },
@@ -1930,12 +2132,27 @@ var heroesFacets = {
                 "Icon": "vortex_in",
                 "Color": "Gray",
                 "GradientID": "3",
+                "Deprecated": "true",
                 "name": "magnataur_reverse_polarity"
             },
             "3": {
+                "Icon": "empower",
+                "Color": "Gray",
+                "GradientID": "1",
+                "name": "magnataur_eternal_empowerment"
+            },
+            "4": {
+                "Icon": "ricochet",
+                "Color": "Blue",
+                "GradientID": "2",
+                "MaxHeroAttributeLevel": "6",
+                "name": "magnataur_diminishing_return"
+            },
+            "5": {
                 "Icon": "vortex_out",
                 "Color": "Gray",
                 "GradientID": "0",
+                "Deprecated": "true",
                 "AbilityIconReplacements": {
                     "magnataur_reverse_polarity": "magnataur_reversed_reverse_polarity"
                 },
@@ -1966,6 +2183,7 @@ var heroesFacets = {
                 "Icon": "damage",
                 "Color": "Yellow",
                 "GradientID": "0",
+                "Deprecated": "true",
                 "name": "bristleback_berserk"
             },
             "2": {
@@ -2187,6 +2405,7 @@ var heroesFacets = {
                 "Icon": "mana",
                 "Color": "Blue",
                 "GradientID": "0",
+                "Deprecated": "True",
                 "name": "winter_wyvern_heal_mana",
                 "AbilityName": "winter_wyvern_essence_of_the_blueheart"
             },
@@ -2194,8 +2413,21 @@ var heroesFacets = {
                 "Icon": "damage",
                 "Color": "Gray",
                 "GradientID": "3",
+                "Deprecated": "True",
                 "name": "winter_wyvern_atk_range",
                 "AbilityName": "winter_wyvern_dragon_sight"
+            },
+            "3": {
+                "Icon": "tower",
+                "Color": "Blue",
+                "GradientID": "2",
+                "name": "winter_wyvern_winterproof"
+            },
+            "4": {
+                "Icon": "ricochet",
+                "Color": "Blue",
+                "GradientID": "0",
+                "name": "winter_wyvern_recursive"
             }
         }
     },
@@ -2205,13 +2437,27 @@ var heroesFacets = {
                 "Icon": "arc_warden",
                 "Color": "Gray",
                 "GradientID": "3",
+                "Deprecated": "true",
                 "name": "arc_warden_order"
             },
             "2": {
                 "Icon": "arc_warden_alt",
                 "Color": "Gray",
                 "GradientID": "0",
+                "Deprecated": "true",
                 "name": "arc_warden_disorder"
+            },
+            "3": {
+                "Icon": "arc_warden_alt",
+                "Color": "Blue",
+                "GradientID": "1",
+                "name": "arc_warden_runed_replica"
+            },
+            "4": {
+                "Icon": "rune",
+                "Color": "Yellow",
+                "GradientID": "1",
+                "name": "arc_warden_power_capture"
             }
         }
     },
@@ -2244,6 +2490,7 @@ var heroesFacets = {
                 "Icon": "tree",
                 "Color": "Green",
                 "GradientID": "4",
+                "MaxHeroAttributeLevel": "6",
                 "name": "monkey_king_simian_stride"
             }
         }
@@ -2276,7 +2523,14 @@ var heroesFacets = {
                 "Icon": "area_of_effect",
                 "Color": "Green",
                 "GradientID": "4",
+                "Deprecated": "true",
                 "name": "dark_willow_thorny_thicket"
+            },
+            "3": {
+                "Icon": "barrier",
+                "Color": "Green",
+                "GradientID": "4",
+                "name": "dark_willow_shattering_crown"
             }
         }
     },
@@ -2364,7 +2618,14 @@ var heroesFacets = {
                 "Icon": "tree",
                 "Color": "Green",
                 "GradientID": "0",
+                "Deprecated": "true",
                 "name": "hoodwink_treebounce_trickshot"
+            },
+            "3": {
+                "Icon": "cooldown",
+                "Color": "Green",
+                "GradientID": "0",
+                "name": "hoodwink_hipshot"
             }
         }
     },
@@ -2380,7 +2641,20 @@ var heroesFacets = {
                 "Icon": "dawnbreaker_hammer",
                 "Color": "Yellow",
                 "GradientID": "1",
+                "Deprecated": "true",
                 "name": "dawnbreaker_gleaming_hammer"
+            },
+            "3": {
+                "Icon": "fist",
+                "Color": "Red",
+                "GradientID": "1",
+                "name": "dawnbreaker_blaze"
+            },
+            "4": {
+                "Icon": "Speed",
+                "Color": "Yellow",
+                "GradientID": "1",
+                "name": "dawnbreaker_hearthfire"
             }
         }
     },
@@ -2390,6 +2664,7 @@ var heroesFacets = {
                 "Icon": "healing",
                 "Color": "Gray",
                 "GradientID": "3",
+                "Deprecated": "true",
                 "name": "marci_sidekick",
                 "AbilityName": "marci_guardian"
             },
@@ -2397,8 +2672,27 @@ var heroesFacets = {
                 "Icon": "ricochet",
                 "Color": "Blue",
                 "GradientID": "1",
+                "Deprecated": "true",
                 "name": "marci_bodyguard",
                 "AbilityName": "marci_bodyguard"
+            },
+            "3": {
+                "Icon": "twin_hearts",
+                "Color": "Blue",
+                "GradientID": "1",
+                "name": "marci_buddy_system"
+            },
+            "4": {
+                "Icon": "ricochet",
+                "Color": "Purple",
+                "GradientID": "0",
+                "name": "marci_pickmeup"
+            },
+            "5": {
+                "Icon": "fist",
+                "Color": "Yellow",
+                "GradientID": "0",
+                "name": "marci_fleeting_fury"
             }
         }
     },
@@ -2408,9 +2702,16 @@ var heroesFacets = {
                 "Icon": "speed",
                 "Color": "Red",
                 "GradientID": "0",
+                "Deprecated": "true",
                 "name": "primal_beast_romp_n_stomp"
             },
             "2": {
+                "Icon": "broken_chain",
+                "Color": "Red",
+                "GradientID": "0",
+                "name": "primal_beast_provoke_the_beast"
+            },
+            "3": {
                 "Icon": "area_of_effect",
                 "Color": "Yellow",
                 "GradientID": "3",
@@ -2441,21 +2742,43 @@ var heroesFacets = {
                 "Icon": "item",
                 "Color": "Gray",
                 "GradientID": "3",
+                "Deprecated": "true",
                 "name": "ringmaster_default"
+            },
+            "2": {
+                "Icon": "whoopee_cushion",
+                "Color": "Yellow",
+                "GradientID": "1",
+                "name": "ringmaster_carny_classics",
+                "AbilityName": "ringmaster_funhouse_mirror"
+            },
+            "3": {
+                "Icon": "pie",
+                "Color": "Red",
+                "GradientID": "0",
+                "name": "ringmaster_sideshow_secrets",
+                "AbilityName": "ringmaster_crystal_ball"
             }
         }
     },
     "npc_dota_hero_kez": {
         "Facets": {
             "1": {
-                "Icon": "kez",
+                "Icon": "kez_flutter",
+                "Color": "Yellow",
+                "GradientID": "1",
+                "name": "kez_flutter"
+            },
+            "2": {
+                "Icon": "kez_shadowhawk",
                 "Color": "Blue",
                 "GradientID": "3",
-                "name": "kez_default"
+                "name": "kez_shadowhawk"
             }
         }
     }
 };
+
 function printHeroFacetsNames() {
     let pythonDict = {};
     

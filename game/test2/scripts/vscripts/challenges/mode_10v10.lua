@@ -14,7 +14,7 @@ function Main:Init_mode_10v10(event, playerID)
     hero_duel.EndDuel = false
     
     -- 设置摄像机位置
-    SendCameraPositionToJS(Main.largeSpawnCenter + Vector(0, 200, 0), 1)
+    self:SendCameraPositionToJS(Main.largeSpawnCenter + Vector(0, 200, 0), 1)
 
     -- 击杀计数初始化
     hero_duel.killCount = 0

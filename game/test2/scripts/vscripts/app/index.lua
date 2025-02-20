@@ -20,20 +20,7 @@ function Main:GetNextSequenceNumber()
 end
 AIs = {}
 
-Main.northWest = Vector(-1850, 1450, 128)
-Main.northEast = Vector(1850, 1450, 128)
-Main.southWest = Vector(-1850, -750, 128)
-Main.southEast = Vector(1850, -750, 128)
-Main.SnipeCenter = Vector(8575, -10270, 128)
-Main.largeSpawnCenter = Vector(150, 150, 128)
-Main.largeSpawnArea = Vector(100, 500, 128)
-Main.smallDuelArea = Vector(150, -2800, 128)
-Main.smallDuelCenter = Vector(150, -3000, 128)
-Main.smallDuelAreaLeft = Vector(-800, -3000, 128)
-Main.smallDuelAreaRight = Vector(1000, -3000, 128)
-Main.Save_Mor = Vector(2403, 5441, 128)
-Main.Work_Work = Vector(-134, -7500, 128)
-Main.Work_Work_Camera = Vector(-130, -7500, 128)
+
 Main.heroesUsedAbility = {} --给拉比克判断敌方是否施法过的
 
 Main.heroListKV = LoadKeyValues('scripts/npc/npc_heroes.txt')
@@ -95,7 +82,7 @@ function SendInitializationMessage(data, order)
     CustomGameEventManager:Send_ServerToAllClients("ini_scoreboard", message)
 end
 
-function SendCameraPositionToJS(position, duration)
+function Main:SendCameraPositionToJS(position, duration)
     -- 创建一个包含位置和持续时间的表
     local cameraData = {
         x = position.x,
@@ -203,30 +190,21 @@ function Main:InitGameMode()
 
     --ListenToGameEvent("entity_hurt", Dynamic_Wrap(self, "OnEntityHurt"), self)
 	--CreateUnitByName("npc_dota_hero_legion_commander", Vector(0,0,500), true, nil, nil, DOTA_TEAM_BADGUYS)
-	self.caipan = CreateUnitByName("caipan", Vector(144.5, 1600, 0), true, nil, nil, DOTA_TEAM_BADGUYS)
+
 
     -- 在服务器端（Lua）
     CustomNetTables:SetTableValue("edit_kv", "test_key", { value = "test_value" })
 
 
-
-    Timers:CreateTimer(2, function()
-        self.caipan:SetControllableByPlayer(0, true)
-    end)
-
     Timers:CreateTimer(5, function()
         CustomGameEventManager:Send_ServerToAllClients("Init_ToolsMode", { isToolsMode = IsInToolsMode() })
     end)
 
-
-    self.caipan:AddNewModifier(self.caipan, nil, "modifier_global_ability_listener", {})
-    self.caipan:AddNewModifier(self.caipan, nil, "modifier_caipan", {})
-    self.caipan:AddNewModifier(self.caipan, nil, "modifier_wearable", {})
-    self.caipan:AddNewModifier(self.caipan, nil, "modifier_phased", {})
+    self.caipan = self:CreateReferee(Main.largeSpawnArea_Caipan)
+    self.caipan_waterfall = self:CreateReferee(Main.waterFall_Caipan)
     
-
 	-- Setting the forward direction to face towards a specific point, e.g., facing downwards on the map
-	self.caipan:SetForwardVector(Vector(0, -1, 0))
+	
 	-- self.caipan:AddItemByName("item_gem")
     -- --unit:AddItemByName("item_roshans_banner")
     -- self.caipan:AddItemByName("item_sphere")
@@ -274,6 +252,17 @@ function Main:InitGameMode()
 
 end
 
+
+function Main:CreateReferee(position)
+    local referee = CreateUnitByName("caipan", position, true, nil, nil, DOTA_TEAM_BADGUYS)
+    referee:AddNewModifier(referee, nil, "modifier_global_ability_listener", {})
+    referee:AddNewModifier(referee, nil, "modifier_caipan", {})
+    referee:AddNewModifier(referee, nil, "modifier_wearable", {})
+    referee:AddNewModifier(referee, nil, "modifier_phased", {})
+    referee:SetForwardVector(Vector(0, -1, 0))
+    referee:StartGesture(ACT_DOTA_VICTORY)
+    return referee
+end
 ----------------------------------
 function Main:KamiBlessing(targetUnit)
     if not targetUnit or not targetUnit:IsAlive() then return end
@@ -1521,21 +1510,34 @@ function Main:OnRequestUnitInfo(event)
     local unitEntIndex = event.unit_ent_index
     local unit = EntIndexToHScript(unitEntIndex)
     if unit and IsValidEntity(unit) then
-        -- 打印束缚状态
-        if unit:IsLeashed() then
-            print(string.format("【单位状态】%s 处于束缚状态", unit:GetUnitName()))
-        else
-            print(string.format("【单位状态】%s 未处于束缚状态", unit:GetUnitName()))
+        -- 打印单位身上的所有物品
+        print(string.format("【单位物品】%s 当前携带的物品：", unit:GetUnitName()))
+        for i = 0, 16 do
+            local item = unit:GetItemInSlot(i)
+            if item then
+                print(string.format("    槽位 %d: %s", i, item:GetName()))
+            end
         end
 
-        -- 打印激活的技能
-        print(string.format("【单位技能】%s 当前激活的技能：", unit:GetUnitName()))
+        -- 打印所有技能
+        print(string.format("【单位技能】%s 的所有技能：", unit:GetUnitName()))
+        for i = 0, unit:GetAbilityCount() - 1 do
+            local ability = unit:GetAbilityByIndex(i)
+            if ability then
+                local activeStatus = ability:GetToggleState() and "[已激活]" or ""
+                print(string.format("    - %s %s", ability:GetAbilityName(), activeStatus))
+            end
+        end
+
+        -- 单独列出激活的技能
+        print(string.format("【激活技能】%s 当前激活的技能：", unit:GetUnitName()))
         for i = 0, unit:GetAbilityCount() - 1 do
             local ability = unit:GetAbilityByIndex(i)
             if ability and ability:GetToggleState() then
                 print(string.format("    - %s", ability:GetAbilityName()))
             end
         end
+
 
         -- 查找最近的单位
         local nearbyUnits = FindUnitsInRadius(

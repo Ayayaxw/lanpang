@@ -5,9 +5,20 @@ function CommonAI:log(...)
     if DEBUG_MODE then
         local currentTime = GameRules:GetGameTime()
         local stateName = CommonAI:GetStateName(self.currentState)
-        local entityName = self.entity and self.entity:GetName() or "未知实体"
+        local entityName = "未知实体"
+        local nameSource = ""
         
-        print(string.format("[%.2f] AI [%s] [%s] [%s]: ", currentTime, self.id, entityName, stateName), ...)
+        if self.entity then
+            if self.entity.GetUnitName then
+                entityName = self.entity:GetUnitName()
+                nameSource = "UnitName"
+            else
+                entityName = self.entity:GetName()
+                nameSource = "Name"
+            end
+        end
+        
+        print(string.format("[%.2f] AI [%s] [%s(%s)] [%s]: ", currentTime, self.id, entityName, nameSource, stateName), ...)
     end
 end
 
@@ -424,7 +435,7 @@ function CommonAI:IsUnableToCastAbility(entity, skill)
         ["modifier_terrorblade_fear"] = "恐怖利刃恐惧",
         ["modifier_winter_wyvern_winters_curse"] = "寒冬飞龙冬天诅咒",
         ["modifier_void_spirit_aether_remnant_pull"] = "虚空之灵以太残影拉扯",
-        ["modifier_brewmaster_primal_split_delay"] = "酒仙醉拳",
+        ["modifier_brewmaster_primal_split_delay"] = "酒仙合体",
         ["modifier_meepo_megameepo"] = "米波合体",
         ["modifier_witch_doctor_voodoo_switcheroo"] = "巫医变形",
         ["modifier_dawnbreaker_solar_guardian_disable"] = "破晓晨星大招"

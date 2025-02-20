@@ -28,6 +28,7 @@ LinkLuaModifier("modifier_caipan", "modifier/modifier_caipan.lua", LUA_MODIFIER_
 LinkLuaModifier("modifier_auto_elevation", "modifier/modifier_auto_elevation.lua", LUA_MODIFIER_MOTION_NONE)
 LinkLuaModifier("modifier_auto_elevation_large", "modifier/modifier_auto_elevation_large.lua", LUA_MODIFIER_MOTION_NONE)
 LinkLuaModifier("modifier_auto_elevation_small", "modifier/modifier_auto_elevation_small.lua", LUA_MODIFIER_MOTION_NONE)
+LinkLuaModifier("modifier_auto_elevation_waterfall", "modifier/modifier_auto_elevation_waterfall.lua", LUA_MODIFIER_MOTION_NONE)
 LinkLuaModifier("modifier_sniper_kill_bonus", "modifier/modifier_sniper_kill_bonus.lua", LUA_MODIFIER_MOTION_NONE)
 LinkLuaModifier("modifier_wearable", "modifier/modifier_wearable.lua", LUA_MODIFIER_MOTION_NONE)
 LinkLuaModifier("modifier_truesight_vision", "modifier/modifier_truesight_vision.lua", LUA_MODIFIER_MOTION_NONE)
@@ -38,3 +39,4 @@ LinkLuaModifier("modifier_zero_speed", "modifier/modifier_zero_speed.lua", LUA_M
 LinkLuaModifier("modifier_custom_out_of_game", "modifier/modifier_custom_out_of_game.lua", LUA_MODIFIER_MOTION_NONE)
 LinkLuaModifier("modifier_auto_bullwhip", "modifier/modifier_auto_bullwhip.lua", LUA_MODIFIER_MOTION_NONE)
 LinkLuaModifier("modifier_reduced_ability_cost", "modifier/modifier_reduced_ability_cost.lua", LUA_MODIFIER_MOTION_NONE)
+LinkLuaModifier("modifier_custom_unicycle", "modifier/modifier_custom_unicycle.lua", LUA_MODIFIER_MOTION_NONE)

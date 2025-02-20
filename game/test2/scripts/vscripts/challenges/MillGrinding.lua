@@ -19,7 +19,7 @@ function Main:Init_MillGrinding(event, playerID)
     hero_duel.EndDuel = false  -- 标记战斗是否结束
 
     -- 设置摄像机位置
-    SendCameraPositionToJS(Main.largeSpawnCenter + Vector(0, -200, 0), 1)
+    self:SendCameraPositionToJS(Main.largeSpawnCenter + Vector(0, -200, 0), 1)
 
     -- 计数初始化
     hero_duel.totalRotation = 0

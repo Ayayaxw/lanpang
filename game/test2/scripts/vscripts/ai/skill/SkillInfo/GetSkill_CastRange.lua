@@ -43,6 +43,7 @@ function CommonAI:Ini_SkillCastRange()
         dark_willow_bedlam = 0,
         treant_living_armor = 9999,
         rattletrap_rocket_flare = 9999,
+        ogre_bruiser_ogre_smash = 100,
 
     }
 end

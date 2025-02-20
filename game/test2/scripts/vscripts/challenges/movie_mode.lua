@@ -24,7 +24,7 @@ function Main:Init_movie_mode(heroName, heroFacet,playerID, heroChineseName)
     --SpawnHeroesInFormation()
     --PreSpawnTwoGroupsHeroes()--胜负英雄展示
     --SpawnFourHeroes()--颁奖
-    CreateAxeLegion()
+    --self:CreateHeroLegion()
     --CreateHeroWithClones()
     --CreateTestHeroes()
     --PrintFirstHeroKV()
@@ -44,42 +44,276 @@ function Main:Init_movie_mode(heroName, heroFacet,playerID, heroChineseName)
     --SetupBristlebackAndLinaScene()
     --SetupRingmasterScene()
     -- SetupHeroMatrix()
+    --CreateAxeWithAbility()
+    SpawnAllCreepsAndHeroes()
 end
 
-function CreateAxeLegion()
-    -- 创建主控斧王
+
+function SpawnAllCreepsAndHeroes()
+    hero_duel.EndDuel = false
+
+    -- 创建我方蓝胖
+    CreateHero(
+        0, -- playerId
+        "npc_dota_hero_ogre_magi",
+        1, -- FacetID
+        Main.largeSpawnCenter, -- 在中心点创建
+        DOTA_TEAM_GOODGUYS,
+        true, -- isControllableByPlayer
+        function(hero)
+            if hero then
+                print("食人魔魔法师创建成功")
+                hero:AddNewModifier(hero, nil, "modifier_item_aghanims_shard", {})
+                hero:AddNewModifier(hero, nil, "modifier_item_ultimate_scepter_consumed", {})
+                HeroMaxLevel(hero)
+            end
+        end
+    )
+
+    local total_creeps = #neutral_units
+    local radius = 800
+    local delay_per_spawn = 2.0 / total_creeps
+    local angle_per_unit = 360 / total_creeps
+    local first_unit_created = false
+
+    for i = 1, total_creeps do
+        if neutral_units[i] then
+            local angle = math.rad(angle_per_unit * (i-1))
+            local x = Main.largeSpawnCenter.x + radius * math.cos(angle)
+            local y = Main.largeSpawnCenter.y + radius * math.sin(angle)
+            
+            Timers:CreateTimer(delay_per_spawn * (i-1), function()
+                print("正在生成: " .. neutral_units[i])
+                local unit = CreateUnitByName(
+                    neutral_units[i],
+                    Vector(x, y, 128),
+                    true,
+                    nil,
+                    nil,
+                    DOTA_TEAM_BADGUYS  -- 改为敌方
+                )
+                
+                unit:SetControllableByPlayer(0, true)
+                
+                -- 计算朝向圆心的向量
+                local direction = Vector(Main.largeSpawnCenter.x - x, Main.largeSpawnCenter.y - y, 0)
+                direction = direction:Normalized()
+                unit:SetForwardVector(direction)
+                
+                -- 仅为第一个单位添加并升级stack_units技能
+                if i == 1 then
+                    unit:AddAbility("stack_units")
+                    local ability = unit:FindAbilityByName("stack_units")
+                    if ability then
+                        ability:SetLevel(1)
+                    end
+                end
+                
+                -- 升级所有技能到4级
+                Timers:CreateTimer(0.1, function()
+                    for abilityIndex = 0, 15 do
+                        local ability = unit:GetAbilityByIndex(abilityIndex)
+                        if ability and ability:GetName() ~= "stack_units" then
+                            ability:SetLevel(4)
+                        end
+                    end
+                end)
+            end)
+        end
+    end
+end
+
+
+
+
+
+function SpawnAllNeutralCreeps1()
+    local neutral_units = {
+        [1] = "npc_dota_neutral_kobold",
+        [2] = "npc_dota_neutral_kobold_tunneler",
+        [3] = "npc_dota_neutral_kobold_taskmaster",
+        [4] = "npc_dota_neutral_centaur_outrunner",
+        [5] = "npc_dota_neutral_centaur_khan",
+        [6] = "npc_dota_neutral_fel_beast",
+        [7] = "npc_dota_neutral_polar_furbolg_champion",
+        [8] = "npc_dota_neutral_polar_furbolg_ursa_warrior",
+        [9] = "npc_dota_neutral_warpine_raider",
+        [10] = "npc_dota_neutral_mud_golem",
+        [11] = "npc_dota_neutral_mud_golem_split",
+        [13] = "npc_dota_neutral_ogre_mauler",
+        [14] = "npc_dota_neutral_ogre_magi",
+        [15] = "npc_dota_neutral_giant_wolf",
+        [16] = "npc_dota_neutral_alpha_wolf",
+        [17] = "npc_dota_neutral_wildkin",
+        [18] = "npc_dota_neutral_enraged_wildkin",
+        [19] = "npc_dota_neutral_satyr_soulstealer",
+        [20] = "npc_dota_neutral_satyr_hellcaller",
+
+        [23] = "npc_dota_neutral_prowler_acolyte",
+        [24] = "npc_dota_neutral_prowler_shaman",
+        [25] = "npc_dota_neutral_rock_golem",
+        [26] = "npc_dota_neutral_granite_golem",
+        [27] = "npc_dota_neutral_ice_shaman",
+        [28] = "npc_dota_neutral_frostbitten_golem",
+        [29] = "npc_dota_neutral_big_thunder_lizard",
+        [30] = "npc_dota_neutral_small_thunder_lizard",
+        [31] = "npc_dota_neutral_gnoll_assassin",
+        [32] = "npc_dota_neutral_ghost",
+        [33] = "npc_dota_neutral_dark_troll",
+        [34] = "npc_dota_neutral_dark_troll_warlord",
+        [35] = "npc_dota_neutral_satyr_trickster",
+        [36] = "npc_dota_neutral_forest_troll_berserker",
+        [37] = "npc_dota_neutral_forest_troll_high_priest",
+        [38] = "npc_dota_neutral_harpy_scout",
+        [39] = "npc_dota_neutral_harpy_storm",
+        [40] = "npc_dota_neutral_black_drake",
+        [41] = "npc_dota_neutral_black_dragon",
+        [42] = "npc_dota_neutral_tadpole",
+        [43] = "npc_dota_neutral_froglet",
+        [44] = "npc_dota_neutral_grown_frog",
+        [45] = "npc_dota_neutral_ancient_frog",
+        [46] = "npc_dota_neutral_froglet_mage",
+        [47] = "npc_dota_neutral_grown_frog_mage",
+        [48] = "npc_dota_neutral_ancient_frog_mage",
+    }
+    
+    local total_creeps = #neutral_units
+    local side_length = math.ceil(math.sqrt(total_creeps))
+    local delay_per_spawn = 2.0 / total_creeps
+    
+    -- 修改起始位置到左上角
+    local start_x = -(side_length * 128) / 2
+    local start_y = (side_length * 128) / 2
+    
+    for i = 1, total_creeps do
+        local row = math.floor((i-1) / side_length)
+        local col = (i-1) % side_length
+        local x = start_x + (col * 128)
+        local y = start_y - (row * 128) -- 向下为负
+        
+        Timers:CreateTimer(delay_per_spawn * (i-1), function()
+            print("正在生成: " .. neutral_units[i])
+            local unit = CreateUnitByName(
+                neutral_units[i],
+                Vector(x, y, 128),
+                true,
+                nil,
+                nil,
+                DOTA_TEAM_NEUTRALS
+            )
+            
+            local angle = math.atan2(y, x)
+            unit:SetForwardVector(Vector(-math.cos(angle), -math.sin(angle), 0))
+        end)
+    end
+end
+
+
+function CreateAxeWithAbility()
+    print("开始创建斧王...")  -- 检查函数是否被调用
+    
+    local playerId = 0
+    local spawnPos = Vector(0, 0, 128)
+    
+    CreateHero(
+        playerId,
+        "npc_dota_hero_witch_doctor",
+        2,
+        spawnPos,
+        DOTA_TEAM_GOODGUYS,
+        true,
+        function(hero)
+            print("英雄创建回调被触发")  -- 检查回调是否被触发
+            
+            if hero then
+                print("英雄对象存在")  -- 检查英雄是否成功创建
+            else
+                print("错误：英雄对象为空")
+                return
+            end
+            hero:AddNewModifier(hero, nil, "modifier_custom_unicycle", {})
+            -- 添加技能并立即检查
+            hero:AddAbility("ringmaster_summon_unicycle")
+            print("尝试添加技能")
+            
+            local ability = hero:FindAbilityByName("ringmaster_summon_unicycle")
+            if ability then
+                ability:SetLevel(1)
+                print("成功添加技能 ringmaster_summon_unicycle")
+            else
+                print("警告：未能找到技能 ringmaster_summon_unicycle")
+            end
+            
+            -- 延迟检查
+            Timers:CreateTimer(0.03, function()
+                print("执行延迟检查")
+                local checkAbility = hero:FindAbilityByName("ringmaster_summon_unicycle")
+                if checkAbility then
+                    print("确认：技能添加成功，当前等级：" .. checkAbility:GetLevel())
+                else
+                    print("错误：技能添加失败，未在英雄身上找到该技能")
+                end
+            end)
+        end
+    )
+end
+
+
+
+function Main:CreateHeroLegion()
+    hero_duel.EndDuel = false
+    -- 创建主控英雄
     local mainSpawnPos = Vector(0, 0, 0)  -- 设置生成位置
     local mainPlayerId = 0  -- 设置玩家ID
     
     CreateHero(mainPlayerId, "npc_dota_hero_meepo", 1, mainSpawnPos, DOTA_TEAM_GOODGUYS, true, 
-        function(mainHero)
-            -- 给主斧王添加Meepo技能
-            mainHero:AddNewModifier(mainHero, nil, "modifier_item_aghanims_shard", {})
-            mainHero:AddNewModifier(mainHero, nil, "modifier_item_ultimate_scepter_consumed", {})
-            HeroMaxLevel(mainHero)
+    function(mainHero)
+        mainHero:AddNewModifier(mainHero, nil, "modifier_item_aghanims_shard", {})
+        mainHero:AddNewModifier(mainHero, nil, "modifier_item_ultimate_scepter_consumed", {})
+        local ultimate = mainHero:GetAbilityByIndex(5)
+        if ultimate then
+            mainHero:RemoveAbility(ultimate:GetName())
+        end
+        -- 添加stack_heroes技能并升级
+        mainHero:AddAbility("stack_heroes")
+        local stackAbility = mainHero:FindAbilityByName("stack_heroes")
+        if stackAbility then
+            stackAbility:SetLevel(1)
+        end
+        HeroMaxLevel(mainHero)
+        
+        for i = 1, 10 do
+            local angle = (360/10) * i
+            local radius = 200
+            local spawnPos = Vector(
+                mainSpawnPos.x + radius * math.cos(math.rad(angle)),
+                mainSpawnPos.y + radius * math.sin(math.rad(angle)),
+                mainSpawnPos.z
+            )
             
-            -- 创建30个斧王分身
-            for i = 1, 30 do
-                -- 计算每个分身的位置,这里简单用圆形排列
-                local angle = (360/30) * i
-                local radius = 200
-                local spawnPos = Vector(
-                    mainSpawnPos.x + radius * math.cos(math.rad(angle)),
-                    mainSpawnPos.y + radius * math.sin(math.rad(angle)),
-                    mainSpawnPos.z
-                )
-                
-                CreateHeroHeroChaos(mainPlayerId, "npc_dota_hero_axe", 1, spawnPos, DOTA_TEAM_GOODGUYS, false, mainHero,
-                    function(cloneHero)
-                        -- 给分身添加神杖和魔晶效果
-                        cloneHero:AddNewModifier(cloneHero, nil, "modifier_item_aghanims_shard", {})
-                        cloneHero:AddNewModifier(cloneHero, nil, "modifier_item_ultimate_scepter_consumed", {})
-                        HeroMaxLevel(cloneHero)
+            CreateHeroHeroChaos(mainPlayerId, heroes_precache[i].name, 1, spawnPos, DOTA_TEAM_GOODGUYS, false, mainHero,
+                function(cloneHero)
+                    cloneHero:AddNewModifier(cloneHero, nil, "modifier_item_aghanims_shard", {})
+                    cloneHero:AddNewModifier(cloneHero, nil, "modifier_item_ultimate_scepter_consumed", {})
+                    HeroMaxLevel(cloneHero)
+                    
+                    Timers:CreateTimer(2.0, function()
+                        if cloneHero:HasModifier("modifier_meepo_megameepo") then
+                            -- 给拥有megameepo modifier的单位添加魔法免疫和debuff免疫
+                            cloneHero:AddNewModifier(cloneHero, nil, "modifier_magic_immune", {})
+                            cloneHero:AddNewModifier(cloneHero, nil, "modifier_debuff_immune", {})
+                        end
+                        CreateAIForHero(cloneHero, {"超大米波模式"}, nil, "cloneHero" .. i)
                     end)
-            end
-        end)
-end
+                end)
+        end
 
+        local dummySpawnPos = Vector(0, 400, 0)
+        axe = CreateUnitByName("npc_dota_hero_axe", dummySpawnPos, true, nil, nil, DOTA_TEAM_BADGUYS)
+        axe:AddNewModifier(axe, nil, "modifier_damage_reduction_100", {})
+        HeroMaxLevel(axe)
+    end)
+end
 -- 创建10个随机英雄的函数
 function Create10RandomHeroes()
     local heroList = {

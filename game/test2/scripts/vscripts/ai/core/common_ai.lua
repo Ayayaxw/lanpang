@@ -100,30 +100,34 @@ function CommonAI:Think(entity)
 
     -- 检查实体是否存在
     if not entity or entity:IsNull() then
-        self:log("[AI] 实体不存在，终止AI")
+        self:log("[AI] 实体不存在，终止AI - Entity: " .. (entity and entity:GetName() or "nil"))
         return nil  -- 彻底停止AI循环
     end
 
     if self.shouldStop == true then
+        self:log("[AI] shouldStop为true，当前状态: " .. tostring(self.currentState))
         if self.currentState ~= AIStates.Idle then
             -- 设置状态为Idle
             self.currentState = AIStates.Idle
             self.pendingSpellCast = nil
             -- 记录日志
             entity:Stop()
+            self:log("[AI] 执行停止命令，英雄: " .. entity:GetName())
             self:log("[STORM_TEST]收到停止指令，切换到Idle状态")
             
             -- 重置shouldStop标志
             self.shouldStop = false
         end
     end
-    
+
     if hero_duel.EndDuel then
+        self:log("[AI] 决斗结束，终止AI - 英雄: " .. entity:GetName())
         return nil
     end
 
     -- 英雄死亡继续循环，但不执行后续AI逻辑
     if not entity:IsAlive() then
+        self:log("[AI] 英雄已死亡，等待复活 - 英雄: " .. entity:GetName())
         return 1  -- 1秒后继续检查
     end
 

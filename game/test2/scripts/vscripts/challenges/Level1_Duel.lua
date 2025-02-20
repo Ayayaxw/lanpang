@@ -218,7 +218,7 @@ function Main:Init_Level1_Duel(event, playerID)
     end)
 
     -- 发送摄像机位置给前端
-    SendCameraPositionToJS(Main.smallDuelArea, 1)
+    self:SendCameraPositionToJS(Main.smallDuelArea, 1)
 
     -- 重置计时器并发送信息
     CustomGameEventManager:Send_ServerToAllClients("reset_timer", {remaining = self.limitTime - self.duration, heroChineseName = heroChineseName, challengedHeroChineseName = opponentChineseName})

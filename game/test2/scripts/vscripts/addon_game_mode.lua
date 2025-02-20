@@ -42,6 +42,9 @@ function Precache(context)
     PrecacheResource("particle", "particles/generic_gameplay/lasthit_coins.vpcf", context)
     PrecacheResource("particle", "particles/econ/items/alchemist/alchemist_midas_knuckles/alch_knuckles_lasthit_coins.vpcf", context)
     PrecacheResource("soundfile", "General.Coins", context)
+    PrecacheResource("soundfile", "BodyImpact_Common.Heavy", context)
+    PrecacheResource("soundfile", "BodyImpact_Common.Medium", context)
+
     PrecacheResource("soundfile", "endAegis.Timer", context)
     PrecacheResource("soundfile", "General.LevelUp", context)
     PrecacheResource("soundfile", "ui.ready_check.yes", context)
@@ -52,6 +55,7 @@ function Precache(context)
     PrecacheResource("particle", "particles/econ/events/spring_2021/hero_levelup_spring_2021_godray.vpcf", context)
     PrecacheResource("particle", "particles/units/heroes/hero_undying/undying_zombie_death_dirt01.vpcf", context)
 
+    PrecacheResource("particle", "particles/units/heroes/hero_slardar/slardar_crush_entity_splash.vpcf", context)
     PrecacheResource("particle", "models/heroes/ringmaster/debut/particles/ringmaster_box_loadout_spawn_ground_debut.vpcf", context)
     PrecacheResource("particle", "particles/units/heroes/hero_ringmaster/ringmaster_spotlight_lightshaft_motes.vpcf", context)
     PrecacheResource("particle", "particles/econ/taunts/ursa/ursa_unicycle/ursa_unicycle_taunt_spotlight.vpcf", context)
@@ -62,7 +66,7 @@ function Precache(context)
     PrecacheResource("particle", "particles/purple/teleport_start_ti9_lvl2.vpcf", context)
     PrecacheResource("particle", "particles/red/teleport_start_ti6_lvl2.vpcf", context)
     PrecacheResource("particle", "particles/econ/items/omniknight/hammer_ti6_immortal/omniknight_purification_ti6_immortal.vpcf", context)
-
+    PrecacheResource("particle", "particles/units/heroes/hero_ringmaster/ringmaster_unicycle_spawn.vpcf", context)
     -- 预加载一些基础英雄模型
     PrecacheResource("model", "models/heroes/axe/axe.vmdl", context)
     PrecacheResource("model", "models/heroes/crystal_maiden/crystal_maiden.vmdl", context)
@@ -70,6 +74,7 @@ function Precache(context)
     PrecacheResource("model", "models/heroes/huskar/huskar.vmdl", context)
     PrecacheResource("model", "models/heroes/ogre_magi/ogre_magi.vmdl", context)
     PrecacheResource("model", "models/heroes/undying/undying.vmdl", context)
+    PrecacheResource("model", "models/heroes/ringmaster/ringmaster_unicycle.vmdl", context)
     
     -- 预加载音效
 end

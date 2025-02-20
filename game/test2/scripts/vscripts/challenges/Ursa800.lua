@@ -171,7 +171,7 @@ function Main:Init_Ursa800(event, playerID)
     end)
 
     -- 发送摄像机位置给前端
-    SendCameraPositionToJS(Main.smallDuelArea, 1)
+    self:SendCameraPositionToJS(Main.smallDuelArea, 1)
 
     -- 监视战斗状态并开始计时
 --[[     Timers:CreateTimer(self.duration - 6, function()

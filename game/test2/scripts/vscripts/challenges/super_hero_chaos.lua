@@ -16,7 +16,7 @@ function Main:Init_super_hero_chaos(event, playerID)
 
     local teams = {DOTA_TEAM_GOODGUYS, DOTA_TEAM_BADGUYS,DOTA_TEAM_CUSTOM_1,DOTA_TEAM_CUSTOM_2,DOTA_TEAM_CUSTOM_3,DOTA_TEAM_CUSTOM_4} -- 或其他你需要的队伍
     self:CreateTrueSightWards(teams)
-    SendCameraPositionToJS(Main.largeSpawnCenter, 1)
+    self:SendCameraPositionToJS(Main.largeSpawnCenter, 1)
 
     -- 定义不同的队伍类型配置
     local TEAM_CONFIGS = {

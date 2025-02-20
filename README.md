@@ -59,7 +59,7 @@ self.limitTime = 60        -- 比赛时间
 hero_duel.EndDuel = false  -- 标记战斗是否结束  
   
 -- 设置摄像机位置  
-SendCameraPositionToJS(BattleArena.largeSpawnCenter, 1)  
+self:SendCameraPositionToJS(Main.largeSpawnCenter, 1)  
   
 ### 重要说明：  
   
@@ -480,7 +480,7 @@ end)
 ## 1. 多人模式死亡判定  
   
 简单的多人模式可以直接使用标准判定：  
-function BattleArena:OnUnitKilled_[模式名](killedUnit, args)  
+function Main:OnUnitKilled_[模式名](killedUnit, args)  
     local killedUnit = EntIndexToHScript(args.entindex_killed)  
   
     if hero_duel.EndDuel or not killedUnit:IsRealHero() then  
@@ -495,7 +495,7 @@ end
 单人模式需要更详细的判定逻辑，基本结构为：  
 一般来说玩家死亡就是失败，如果是其他单位死亡，可以有不同的逻辑，根据用户的需求来定  
   
-function BattleArena:OnUnitKilled_[模式名](killedUnit, args)  
+function Main:OnUnitKilled_[模式名](killedUnit, args)  
   
     local killedUnit = EntIndexToHScript(args.entindex_killed)  
   
@@ -565,7 +565,7 @@ end
   
 # 四：其他  
 如果有需要的话，还有一些，比如，所有英雄单位都需要给与模式的指定modifier（需要才加，不需要就不管）  
-function BattleArena:OnNPCSpawned_[模式名](spawnedUnit, event)  
+function Main:OnNPCSpawned_[模式名](spawnedUnit, event)  
     if not self:isExcludedUnit(spawnedUnit) then  
   
         self:ApplyConfig(spawnedUnit, "BATTLEFIELD")  

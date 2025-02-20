@@ -6166,6 +6166,156 @@ HeroSkillConditions = {
         },
         
     },
+    ["npc_dota_neutral_ogre_magi"] = {
+        ["ogre_magi_frost_armor"] = {
+            function(self, caster, log)
+                local ability = caster:FindAbilityByName("ogre_magi_frost_armor")
+                if not ability then return false end
+        
+                self.Ally = self:FindBestAllyHeroTarget(
+                    caster,
+                    ability,
+                    {"modifier_ogre_magi_frost_armor"},  -- 不需要检查buff
+                    0.5,  -- 不需要检查剩余时间
+                    "nearest_to_enemy",  -- 优先给离敌人最近的友军释放
+                    false,
+                    true
+                )
+                
+                return self.Ally ~= nil
+            end
+        }
+    },
+    ["npc_dota_neutral_big_thunder_lizard"] = {
+        ["big_thunder_lizard_frenzy"] = {
+            function(self, caster, log)
+                local ability = caster:FindAbilityByName("big_thunder_lizard_frenzy")
+                if not ability then return false end
+        
+                self.Ally = self:FindBestAllyHeroTarget(
+                    caster,
+                    ability,
+                    {"modifier_big_thunder_lizard_frenzy"},  -- 不需要检查buff
+                    0.5,  -- 不需要检查剩余时间
+                    "attack",  -- 优先给离敌人最近的友军释放
+                    false,
+                    true
+                )
+                
+                return self.Ally ~= nil
+            end
+        }
+    },
+    ["npc_dota_neutral_forest_troll_high_priest"] = {
+        ["forest_troll_high_priest_heal"] = {
+            function(self, caster, log)
+                local ability = caster:FindAbilityByName("forest_troll_high_priest_heal")
+                if not ability then return false end
+        
+                self.Ally = self:FindBestAllyHeroTarget(
+                    caster,
+                    ability,
+                    nil,  -- 不需要检查buff
+                    nil,  -- 不需要检查剩余时间
+                    "health_percent",  -- 优先给离敌人最近的友军释放
+                    false,
+                    true
+                )
+                
+                return self.Ally ~= nil
+            end
+        }
+    },
+    ["npc_dota_neutral_froglet_mage"] = {
+        ["frogmen_water_bubble_small"] = {
+            function(self, caster, log)
+                local ability = caster:FindAbilityByName("frogmen_water_bubble_small")
+                if not ability then return false end
+        
+                self.Ally = self:FindBestAllyHeroTarget(
+                    caster,
+                    ability,
+                    {"modifier_frogmen_water_bubble"},  -- 不需要检查buff
+                    0.5,  -- 不需要检查剩余时间
+                    "health_percent",  -- 优先给离敌人最近的友军释放
+                    false,
+                    true
+                )
+                
+                return self.Ally ~= nil
+            end
+        }
+    },
+    ["npc_dota_neutral_froglet_mage"] = {
+        ["frogmen_water_bubble_small"] = {
+            function(self, caster, log)
+                local ability = caster:FindAbilityByName("frogmen_water_bubble_small")
+                if not ability then return false end
+        
+                self.Ally = self:FindBestAllyHeroTarget(
+                    caster,
+                    ability,
+                    {"modifier_frogmen_water_bubble"},  -- 不需要检查buff
+                    0.5,  -- 不需要检查剩余时间
+                    "health_percent",  -- 优先给离敌人最近的友军释放
+                    false,
+                    true
+                )
+                
+                return self.Ally ~= nil
+            end
+        }
+    },
+    ["npc_dota_neutral_grown_frog_mage"] = {
+        ["frogmen_water_bubble_medium"] = {
+            function(self, caster, log)
+                local ability = caster:FindAbilityByName("frogmen_water_bubble_medium")
+                if not ability then return false end
+        
+                self.Ally = self:FindBestAllyHeroTarget(
+                    caster,
+                    ability,
+                    {"modifier_frogmen_water_bubble"},  -- 不需要检查buff
+                    0.5,  -- 不需要检查剩余时间
+                    "health_percent",  -- 优先给离敌人最近的友军释放
+                    false,
+                    true
+                )
+                
+                return self.Ally ~= nil
+            end
+        }
+    },
+    ["npc_dota_neutral_ancient_frog_mage"] = {
+        ["frogmen_water_bubble_large"] = {
+            function(self, caster, log)
+                local ability = caster:FindAbilityByName("frogmen_water_bubble_large")
+                if not ability then return false end
+        
+                self.Ally = self:FindBestAllyHeroTarget(
+                    caster,
+                    ability,
+                    {"modifier_frogmen_water_bubble"},  -- 不需要检查buff
+                    0.5,  -- 不需要检查剩余时间
+                    "health_percent",  -- 优先给离敌人最近的友军释放
+                    false,
+                    true
+                )
+                
+                return self.Ally ~= nil
+            end
+        }
+    },
+    ["npc_dota_neutral_harpy_scout"] = {
+        ["harpy_scout_take_off"] = {
+            function(self, caster, log)
+                return false
+            end
+        }
+    },
+
+
+
     ["npc_dota_visage_familiar"] = {
         ["visage_summon_familiars_stone_form"] = {
             function(self, caster, log)
@@ -6611,27 +6761,27 @@ function CommonAI:CheckSkillConditions(entity, heroName)
 
     for _, ability in ipairs(abilities) do
         local abilityName = ability:GetAbilityName()
-        self:log(string.format("检查英雄 %s 的技能 %s", heroName, abilityName))
+        --self:log(string.format("检查英雄 %s 的技能 %s", heroName, abilityName))
         if ability:GetAbilityType() == ABILITY_TYPE_ULTIMATE then
-            self:log(string.format("检查英雄 %s 的大招 %s", heroName, abilityName))
+            --self:log(string.format("检查英雄 %s 的大招 %s", heroName, abilityName))
             
             local ultimateCheck = self:CheckUltimateConditions(ability, entity)
             if not ultimateCheck then
                 -- 未通过检查的日志
                 local currentHp = entity:GetHealthPercent()
-                self:log(string.format("英雄 %s 的大招 %s 未通过检查，当前血量 %.1f%%", 
-                    heroName, abilityName, currentHp))
+                --self:log(string.format("英雄 %s 的大招 %s 未通过检查，当前血量 %.1f%%", 
+                    --heroName, abilityName, currentHp))
                 
                 if not self:tableContains(self.disabledSkills[heroName], abilityName) then
                     table.insert(self.disabledSkills[heroName], abilityName)
-                    self:log(string.format("已将大招 %s 添加到 %s 的禁用列表中", abilityName, heroName))
+                    --self:log(string.format("已将大招 %s 添加到 %s 的禁用列表中", abilityName, heroName))
                 else
-                    self:log(string.format("大招 %s 已在 %s 的禁用列表中", abilityName, heroName))
+                    --self:log(string.format("大招 %s 已在 %s 的禁用列表中", abilityName, heroName))
                 end
                 goto continue
             else
                 -- 通过检查的日志
-                self:log(string.format("英雄 %s 的大招 %s 通过检查", heroName, abilityName))
+                --self:log(string.format("英雄 %s 的大招 %s 通过检查", heroName, abilityName))
                 
                 -- 检查是否在禁用列表中
                 local found = false
@@ -6640,16 +6790,16 @@ function CommonAI:CheckSkillConditions(entity, heroName)
                         found = true
                         local abilityIndex = ability and ability:GetAbilityIndex() or -1
                         table.remove(self.disabledSkills[heroName], i)
-                        self:log(string.format("大招 %s 通过检查,已从禁用列表中移除，技能索引为: %d", abilityName, abilityIndex))
+                        --self:log(string.format("大招 %s 通过检查,已从禁用列表中移除，技能索引为: %d", abilityName, abilityIndex))
                         break
                     end
                 end
                 if not found then
-                    self:log(string.format("大招 %s 不在禁用列表中，无需移除", abilityName))
+                    --self:log(string.format("大招 %s 不在禁用列表中，无需移除", abilityName))
                 end
             end
         else
-            self:log(string.format("技能 %s 不是大招，跳过检查", abilityName))
+            --self:log(string.format("技能 %s 不是大招，跳过检查", abilityName))
         end
         
         local conditions = isSpecialHero and self:FindConditionsForAbility(abilityName) or heroConditions[abilityName]

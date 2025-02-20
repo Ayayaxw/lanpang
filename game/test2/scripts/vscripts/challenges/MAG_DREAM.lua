@@ -154,7 +154,7 @@ function Main:Init_MAG_DREAM(event, playerID)
     end)
 
     -- 发送摄像机位置给前端
-    SendCameraPositionToJS(Main.largeSpawnCenter, 1)
+    self:SendCameraPositionToJS(Main.largeSpawnCenter, 1)
 
     -- 比赛即将开始
     Timers:CreateTimer(self.duration - 6, function()

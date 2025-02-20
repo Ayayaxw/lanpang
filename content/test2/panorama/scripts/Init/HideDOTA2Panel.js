@@ -41,7 +41,9 @@
                 "player_performance_container",
                 "combat_events", // 左侧的死亡信息显示
                 "SpectatorToastManager",//右侧的技能升级提醒
-                "stackable_side_panels"
+                "stackable_side_panels",
+                "inventory_neutral_craft_holder",
+                "inventory_tpscroll_container"
             ];
     
             for (var panel of panelsToHide) {

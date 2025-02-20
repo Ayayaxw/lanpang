@@ -4,6 +4,7 @@
 		"caipan" "裁判"
 		"luosi" "螺丝"
 		"double_on_death_mega" "超级僵尸"
+		"npc_dota_neutral_king" "狗头人之王"
 		"attribute_stack_modifier" "工件计数"
 		"DOTA_Tooltip_ability_item_iron_branch_custom"        "升级树枝"
 		"DOTA_Tooltip_ability_item_iron_branch_custom_Description" "提供额外的一级全属性加成"

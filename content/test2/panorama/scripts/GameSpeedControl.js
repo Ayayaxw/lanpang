@@ -24,6 +24,9 @@ function OnPrintMousePosPressed() {
     var worldPos = GameUI.GetScreenWorldPosition(cursorPos);
 
     if (worldPos) {
+        // 打印Vector格式
+        $.Msg("Vector(" + Math.round(worldPos[0]) + ", " + Math.round(worldPos[1]) + ", " + Math.round(worldPos[2]) + ")");
+        // 打印原来的详细格式
         $.Msg("游戏世界坐标：X: " + worldPos[0].toFixed(2) + ", Y: " + worldPos[1].toFixed(2) + ", Z: " + worldPos[2].toFixed(2));
     } else {
         $.Msg("无法获取当前光标位置的游戏世界坐标。");

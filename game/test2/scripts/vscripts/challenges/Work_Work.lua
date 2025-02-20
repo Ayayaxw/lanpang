@@ -86,7 +86,7 @@ function Main:Init_Work_Work(event, playerID)
     self.limitTime = 60        -- 限定时间为准备时间结束后的一分钟
     hero_duel.EndDuel = false  -- 标记战斗是否结束
 
-    SendCameraPositionToJS(Main.Work_Work_Camera, 2)
+    self:SendCameraPositionToJS(Main.Work_Work_Camera, 2)
 
     self:createLocalizedMessage(
         "[LanPang_RECORD][",

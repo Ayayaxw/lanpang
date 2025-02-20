@@ -134,13 +134,6 @@ function Main:Init_TestMode(event, playerID)
         self:ConfigureHero(playerHero, true, playerID)
         self:EquipHeroItems(playerHero, selfEquipment)
         
-        -- 打印所有槽位的物品(包括普通槽位和中立槽位)
-        for i=0,16 do
-            local item = playerHero:GetItemInSlot(i)
-            if item then
-                print("槽位", i, "物品:", item:GetName())
-            end
-        end
 
         self.leftTeamHero1 = playerHero
         self.currentArenaHeroes[1] = playerHero
@@ -212,7 +205,7 @@ function Main:Init_TestMode(event, playerID)
     end)
 
     -- 发送摄像机位置给前端
-    SendCameraPositionToJS(Main.smallDuelArea, 1)
+    self:SendCameraPositionToJS(Main.smallDuelArea, 1)
 
     -- 重置计时器并发送信息
     CustomGameEventManager:Send_ServerToAllClients("reset_timer", {remaining = self.limitTime - self.duration, heroChineseName = heroChineseName, challengedHeroChineseName = opponentChineseName})

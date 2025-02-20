@@ -30,7 +30,8 @@ require("challenges/SuperCreepChallenge90CD")
 require("challenges/mode_5v5")  
 require("challenges/mode_5v5_2")  
 require("challenges/mode_10v10")  
-
+require("challenges/MeepoChaos")  
+require("challenges/CreepChaos")  
 
 Main.Challenges = {
     --测试用的模式0开头
@@ -62,7 +63,8 @@ Main.Challenges = {
     Illusion_3X = 2009,
     Duel_1VS30 = 2010,
     mode_5v5 = 2011,
-    mode_5v5_2 = 2022,
+    mode_5v5_2 = 2012,
+    MeepoChaos = 2013,
     
 
     --单人模式3开头
@@ -77,6 +79,7 @@ Main.Challenges = {
     MAG_DREAM = 3009,
     SnipeHunt = 3010,
     MillGrinding = 3011,
+    CreepChaos = 3012,
     
 }
 
@@ -108,6 +111,8 @@ Main.ModeConfig = {
     [Main.Challenges.mode_5v5] = {"SelfHeroRow", "OpponentHeroRow"},
     [Main.Challenges.mode_5v5_2] = {"SelfHeroRow", "OpponentHeroRow"},
     [Main.Challenges.mode_10v10] = {"SelfHeroRow", "OpponentHeroRow"},
+    [Main.Challenges.MeepoChaos] = {"SelfHeroRow", "OpponentHeroRow"},
+    [Main.Challenges.CreepChaos] = {"SelfHeroRow"},
 }
 
 
@@ -116,6 +121,8 @@ Main.currentChallenge = nil
 function Main:SendGameModesData()
     -- 定义游戏模式
     local gameModes = {
+        {code = Main.Challenges.CreepChaos, name = "超级野怪合体"},
+        {code = Main.Challenges.MeepoChaos, name = "超级米波大乱斗"},
         {code = Main.Challenges.mode_10v10, name = "10v10对决"},
         {code = Main.Challenges.mode_5v5, name = "5v5对决-三倍属性版"},
         {code = Main.Challenges.mode_5v5_2, name = "5v5对决"},
@@ -270,6 +277,10 @@ function Main:RequestStrategyData()
         {
             name = "不在骨法棒子里放技能",
             id = "8"
+        },
+        {
+            name = "超大米波模式",
+            id = "9"
         },
     }
 

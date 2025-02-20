@@ -20,7 +20,7 @@ function Main:Init_SnipeHunt(event, playerID)
     hero_duel.killCount = 0    -- 击杀计数
     hero_duel.currentScore = 0 -- 当前得分
 
-    SendCameraPositionToJS(Main.SnipeCenter, 1)
+    self:SendCameraPositionToJS(Main.SnipeCenter, 1)
 
     -- 英雄配置
     local teams = {DOTA_TEAM_GOODGUYS, DOTA_TEAM_BADGUYS} -- 或其他你需要的队伍

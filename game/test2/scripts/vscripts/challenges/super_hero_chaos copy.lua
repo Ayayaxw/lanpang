@@ -15,7 +15,7 @@ function Main:Init_super_hero_chaos(event, playerID)
     self.SPAWN_POINT_FAR = Vector(-12686, 15127, 128)
     self.ARENA_CENTER = Vector(150, 150, 128)
     self.SPAWN_DISTANCE = 500
-    SendCameraPositionToJS(Main.largeSpawnCenter, 1)
+    self:SendCameraPositionToJS(Main.largeSpawnCenter, 1)
 
     self.isTestMode = false
 

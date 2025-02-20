@@ -1,6 +1,6 @@
 
 require("challenge_mode_setup")
-require("createhero")
+require("createhero")           --创建命石英雄的函数
 require("GameEventListeners/ProcessHeroChangeRequest") --监听输入
 require("GameEventListeners/OnPlayerChat") --监听输入
 require("GameEventListeners/OnAbilityUsed") --监听英雄血量
@@ -9,8 +9,9 @@ require("GameEventListeners/OnAttack") --监听英雄血量
 require("GameEventListeners/OnUnitKilled") --监听英雄血量
 require("GameEventListeners/OnNPCSpawned") --监听单位出生
 
-require("battle/HeroBenefits")
+require("battle/HeroBenefits")          --这里放的
 require("battle/game_end_animations")
+require("battle/coordinates")           --放置重要的地图坐标
 
 require("ai/core/ai_core")
 require("ai/core/AIstrategies")
@@ -61,6 +62,7 @@ LinkLuaModifier("modifier_caipan", "modifier/modifier_caipan.lua", LUA_MODIFIER_
 LinkLuaModifier("modifier_auto_elevation", "modifier/modifier_auto_elevation.lua", LUA_MODIFIER_MOTION_NONE)
 LinkLuaModifier("modifier_auto_elevation_large", "modifier/modifier_auto_elevation_large.lua", LUA_MODIFIER_MOTION_NONE)
 LinkLuaModifier("modifier_auto_elevation_small", "modifier/modifier_auto_elevation_small.lua", LUA_MODIFIER_MOTION_NONE)
+LinkLuaModifier("modifier_auto_elevation_waterfall", "modifier/modifier_auto_elevation_waterfall.lua", LUA_MODIFIER_MOTION_NONE)
 LinkLuaModifier("modifier_sniper_kill_bonus", "modifier/modifier_sniper_kill_bonus.lua", LUA_MODIFIER_MOTION_NONE)
 LinkLuaModifier("modifier_maximum_attack", "modifier/modifier_maximum_attack.lua", LUA_MODIFIER_MOTION_NONE)
 LinkLuaModifier("modifier_wearable", "modifier/modifier_wearable.lua", LUA_MODIFIER_MOTION_NONE)
@@ -72,3 +74,4 @@ LinkLuaModifier("modifier_zero_speed", "modifier/modifier_zero_speed.lua", LUA_M
 LinkLuaModifier("modifier_custom_out_of_game", "modifier/modifier_custom_out_of_game.lua", LUA_MODIFIER_MOTION_NONE)
 LinkLuaModifier("modifier_auto_bullwhip", "modifier/modifier_auto_bullwhip.lua", LUA_MODIFIER_MOTION_NONE)
 LinkLuaModifier("modifier_reduced_ability_cost", "modifier/modifier_reduced_ability_cost.lua", LUA_MODIFIER_MOTION_NONE)
+LinkLuaModifier("modifier_custom_unicycle", "modifier/modifier_custom_unicycle.lua", LUA_MODIFIER_MOTION_NONE)

@@ -182,7 +182,7 @@ function Main:Init_Work_Work_2(heroName, heroFacet,playerID, heroChineseName)
 
 
 
-    SendCameraPositionToJS(Main.smallDuelArea, 1)
+    self:SendCameraPositionToJS(Main.smallDuelArea, 1)
 
 
     local challengedHeroChineseName = self:GetHeroChineseName(Main.AIheroName);

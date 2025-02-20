@@ -52,7 +52,7 @@ function Main:Init_Save_Mor(heroName, heroFacet,playerID, heroChineseName)
 
 
 
-    SendCameraPositionToJS(Main.Save_Mor, 1)
+    self:SendCameraPositionToJS(Main.Save_Mor, 1)
 
 
 

@@ -14,7 +14,7 @@ function Main:Init_SuperCreepChallenge90CD(event, playerID)
     hero_duel.killCount = 0    
     
     -- 设置摄像机位置
-    SendCameraPositionToJS(Main.largeSpawnCenter, 1)
+    self:SendCameraPositionToJS(Main.largeSpawnCenter, 1)
 
     -- local teams = {DOTA_TEAM_GOODGUYS, DOTA_TEAM_BADGUYS} -- 或其他你需要的队伍
     -- self:CreateTrueSightWards(teams)

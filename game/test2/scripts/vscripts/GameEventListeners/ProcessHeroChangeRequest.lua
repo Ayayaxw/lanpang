@@ -113,7 +113,7 @@ function Main:DeleteCurrentArenaHeroes()
                     UTIL_Remove(hero)
                     DisconnectClient(playerID, true)
                 else
-                    RemoveHero(hero)
+                    UTIL_Remove(hero)
                 end
             end)
         else

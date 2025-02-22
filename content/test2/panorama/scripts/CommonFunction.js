@@ -175,7 +175,7 @@ var heroData = {
     117: { name: "unknown",        englishName: "Unknown",          codeName: "unknown",          facingRight: true,  heightAdjust: 0,  heroAttribute: 0, avatarAdjust: 0,  avatarFacingRight: true  },
     118: { name: "unknown",        englishName: "Unknown",          codeName: "unknown",          facingRight: true,  heightAdjust: 0,  heroAttribute: 0, avatarAdjust: 0,  avatarFacingRight: true  },
     119: { name: "邪影芳灵",       englishName: "Dark Willow",      codeName: "dark_willow",      facingRight: true,  heightAdjust: 5,  heroAttribute: 8, avatarAdjust: 0,  avatarFacingRight: true  },
-    120: { name: "石鳞剑士",       englishName: "Pangolier",        codeName: "Pangolier",        facingRight: false, heightAdjust: 0,  heroAttribute: 8, avatarAdjust: 0,  avatarFacingRight: true  },
+    120: { name: "石鳞剑士",       englishName: "Pangolier",        codeName: "pangolier",        facingRight: false, heightAdjust: 0,  heroAttribute: 8, avatarAdjust: 0,  avatarFacingRight: true  },
     121: { name: "天涯墨客",       englishName: "Grimstroke",       codeName: "grimstroke",       facingRight: true,  heightAdjust: 5,  heroAttribute: 4, avatarAdjust: 0,  avatarFacingRight: true  },
     122: { name: "unknown",        englishName: "Unknown",          codeName: "unknown",          facingRight: true,  heightAdjust: 0,  heroAttribute: 0, avatarAdjust: 0,  avatarFacingRight: true  },
     123: { name: "森海飞霞",       englishName: "Hoodwink",         codeName: "hoodwink",         facingRight: true,  heightAdjust: 0,  heroAttribute: 2, avatarAdjust: 0,  avatarFacingRight: true  },
@@ -2750,14 +2750,14 @@ var heroesFacets = {
                 "Color": "Yellow",
                 "GradientID": "1",
                 "name": "ringmaster_carny_classics",
-                "AbilityName": "ringmaster_funhouse_mirror"
+
             },
             "3": {
                 "Icon": "pie",
                 "Color": "Red",
                 "GradientID": "0",
                 "name": "ringmaster_sideshow_secrets",
-                "AbilityName": "ringmaster_crystal_ball"
+
             }
         }
     },

@@ -1,0 +1,80 @@
+.AbilityDisplayRoot {
+    width: 100%;
+    height: 100%;
+    background-color: #FFFFFF;
+    flow-children: down;
+    padding: 20px;
+}
+
+.AbilityContainer {
+    flow-children: down;
+    width: 800px;
+    height: fit-children;
+    horizontal-align: center;
+    vertical-align: center;
+    background-color: #FFFFFF;
+    box-shadow: #00000033 0px 0px 8px 0px;
+    padding: 20px;
+}
+
+.AbilityRow {
+    flow-children: right;
+    width: 100%;
+    margin-bottom: 20px;
+    horizontal-align: center;
+}
+
+.AbilitySlot, .UpgradeSlot {
+    width: 64px;
+    height: 64px;
+    margin: 5px;
+    background-color: #00000005;
+    border: 1px solid #00000015;
+    transition: all 0.2s ease-in-out;
+}
+
+.AbilitySlot:hover, .UpgradeSlot:hover {
+    brightness: 1.2;
+    box-shadow: #00000033 0px 0px 8px 0px;
+}
+
+.TalentIconContainer {
+    width: 64px;
+    height: 64px;
+    margin: 10px;
+    horizontal-align: center;
+}
+
+.TalentIcon {
+    width: 100%;
+    height: 100%;
+    transition: all 0.2s ease-in-out;
+}
+
+.TalentIcon:hover {
+    brightness: 1.2;
+}
+
+#UpgradeAbilities {
+    margin-top: 20px;
+}
+
+.TooltipContainer {
+    max-width: 300px;
+    background-color: #000000ee;
+    padding: 8px;
+    border: 2px solid #ffffff22;
+    flow-children: down;
+}
+
+.TooltipTitle {
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.TooltipDescription {
+    color: #cccccc;
+    font-size: 14px;
+}

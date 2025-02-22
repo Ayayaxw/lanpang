@@ -28,11 +28,13 @@
     <include src="file://{resources}/styles/hero_chaos_score.css" />
     <include src="file://{resources}/styles/hero_chaos_killboard.css" />
     <include src="file://{resources}/styles/floating_text.css" />
+    <!-- <include src="file://{resources}/styles/custom_ability_display.css" /> -->
 
 
 
-<!-- 
-    <include src="file://{resources}/styles/Dota/ui_hero_facet_picker.css" />
+    <!-- <include src="file://{resources}/styles/Dota/ui_hero_facet_picker.css" />
+    <include src="file://{resources}/styles/Dota/ability_details.css" />
+    <include src="file://{resources}/styles/Dota/tooltip_base.css" />
     <include src="file://{resources}/styles/Dota/dashboard_page_hero_new_v2.css" /> -->
     
   
@@ -47,6 +49,7 @@
     <include src="file://{resources}/scripts/hero_chaos_score.js" />
     <include src="file://{resources}/scripts/hero_chaos_killboard.js" />
     <include src="file://{resources}/scripts/Init/HideDOTA2Panel.js" />
+    <!-- <include src="file://{resources}/scripts/custom_ability_display.js" /> -->
 
 
     <!--按钮功能-->
@@ -71,7 +74,7 @@
 
 
   <Panel class="MainPanel" hittest="false" > 
-
+  <!-- <Panel class="AbilityDisplayRoot" /> -->
 
 
 <!--   <DOTAScenePanel class="Greenpanel_1" 
@@ -87,6 +90,7 @@
   />
   
   <Panel id="Greenpanel" class = "Greenpanel"/> -->
+    <Panel id="WhiteboardRoot" hittest="false" />
 
   <Panel id="CustomHeroStatsRoot" class="CustomHeroStatsRoot hidden">
       <Panel id="LeftHeroStatsContainer" class="HeroStatsContainer" />

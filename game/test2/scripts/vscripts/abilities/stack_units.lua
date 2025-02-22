@@ -148,15 +148,15 @@ function modifier_stack_bonus:OnCreated(kv)
 end
 
 function modifier_stack_bonus:GetModifierManaBonus()
-    return self.total_mana / 5
+    return self.total_mana / 10
 end
 
 function modifier_stack_bonus:GetModifierBaseAttack_BonusDamage()
-    return self.total_damage / 5
+    return self.total_damage / 10
 end
 
 function modifier_stack_bonus:GetModifierExtraHealthBonus()
-    return self.total_health / 5
+    return self.total_health / 10
 end
 
 function modifier_stack_bonus:OnIntervalThink()
@@ -263,8 +263,12 @@ function modifier_stack_units:IsPurgable() return false end
 
 function modifier_stack_units:OnCreated(kv)
     if IsServer() then
-        self.height = kv.height
         self.parent_unit = EntIndexToHScript(kv.parent_unit)
+        
+        -- 记录相对高度差（当前单位高度 - 父单位初始高度）
+        local initial_parent_z = self.parent_unit:GetAbsOrigin().z
+        self.height = self:GetParent():GetAbsOrigin().z - initial_parent_z
+        
         
         self.ground_z = GetGroundHeight(self:GetParent():GetAbsOrigin(), self:GetParent())
         
@@ -281,11 +285,14 @@ function modifier_stack_units:OnIntervalThink()
         local parent = self:GetParent()
         local parent_pos = self.parent_unit:GetAbsOrigin()
         
-        -- Update position
+        -- 实时获取父单位当前高度
+        local current_parent_z = self.parent_unit:GetAbsOrigin().z
+        
+        -- 更新位置（使用父单位实时高度 + 相对高度差）
         local new_pos = Vector(
             parent_pos.x,
             parent_pos.y,
-            self.ground_z + self.height
+            current_parent_z + self.height  -- 这里保持相对高度差
         )
         parent:SetAbsOrigin(new_pos)
         
@@ -380,7 +387,6 @@ function stack_units:OnSpellStart()
             local damage_b = (b:GetBaseDamageMin() + b:GetBaseDamageMax()) / 2
             
             if damage_a == damage_b then
-                -- 如果血量和攻击力都相同，使用实体索引确保唯一排序
                 return a:entindex() > b:entindex()
             end
             
@@ -392,14 +398,14 @@ function stack_units:OnSpellStart()
     
     local total_health = 0
     local total_damage = 0
-    local total_mana = 0  -- 新增魔法值统计
+    local total_mana = 0
     local unit_count = #units
     local max_health = units[1] and units[1]:GetBaseMaxHealth() or 0
     
     for _, unit in ipairs(units) do
         total_health = total_health + unit:GetBaseMaxHealth()
         total_damage = total_damage + (unit:GetBaseDamageMin() + unit:GetBaseDamageMax()) / 2
-        total_mana = total_mana + unit:GetMaxMana()  -- 累加魔法值
+        total_mana = total_mana + unit:GetMaxMana()
     end
     
     local stack_bonus = caster:AddNewModifier(
@@ -409,50 +415,92 @@ function stack_units:OnSpellStart()
         {
             total_health = total_health,
             total_damage = total_damage,
-            total_mana = total_mana,  -- 传递魔法值参数
+            total_mana = total_mana,
             unit_count = unit_count
         }
     )
-    local min_gap = 5 -- 最小间隔保证
+
+    local min_gap = 5
     local accumulated_height = 0
+    local animation_duration = 1.0  -- 动画持续时间（秒）
+    local update_interval = 0.03    -- 更新间隔（秒）
+
+    -- 计算每个单位的目标位置
+    local target_positions = {}
     for i, unit in ipairs(units) do
-        -- 根据单位血量计算高度偏移
         local health_ratio = unit:GetBaseMaxHealth() / max_health
         local vertical_offset = min_vertical_offset + (max_vertical_offset - min_vertical_offset) * health_ratio
         
-        -- 确保每个单位至少有最小间隔
         if i > 1 then
             accumulated_height = accumulated_height + math.max(vertical_offset, min_gap)
         else
             accumulated_height = vertical_offset
         end
         
-        local new_pos = Vector(
+        local target_pos = Vector(
             caster_pos.x,
             caster_pos.y,
             caster_pos.z + accumulated_height
         )
-        
-        FindClearSpaceForUnit(unit, new_pos, true)
-        unit:SetAbsOrigin(new_pos)
-        
+        target_positions[i] = {
+            unit = unit,
+            start_pos = unit:GetAbsOrigin(),
+            target_pos = target_pos,
+            height = accumulated_height
+        }
+
+        -- 立即添加修饰器
         unit:AddNewModifier(unit, nil, "modifier_invulnerable", {})
         unit:AddNewModifier(unit, nil, "modifier_phased", {})
-        
-        -- 在创建 modifier_stack_units 时传递绝对高度差
-        unit:AddNewModifier(
-            caster,
-            self,
-            "modifier_stack_units",
-            {
-                duration = -1,
-                height = accumulated_height,  -- 这里应该是相对于地面的绝对高度差
-                parent_unit = caster:entindex()
-            }
-        )
-        
-        stack_bonus:AddStackedUnit(unit)
     end
+
+    -- 创建动画计时器
+    local elapsed_time = 0
+    Timers:CreateTimer(function()
+        elapsed_time = elapsed_time + update_interval
+        local progress = math.min(elapsed_time / animation_duration, 1)
+        
+        -- 使用缓动函数使动画更平滑
+        local smoothed_progress = math.sin(progress * math.pi * 0.5)
+        
+        -- 更新每个单位的位置
+        for i, data in ipairs(target_positions) do
+            local unit = data.unit
+            local start_pos = data.start_pos
+            local target_pos = data.target_pos
+            
+            -- 计算当前位置
+            local current_pos = Vector(
+                start_pos.x + (target_pos.x - start_pos.x) * smoothed_progress,
+                start_pos.y + (target_pos.y - start_pos.y) * smoothed_progress,
+                start_pos.z + (target_pos.z - start_pos.z) * smoothed_progress
+            )
+            
+            unit:SetAbsOrigin(current_pos)
+            
+            -- 在动画结束时添加堆叠修饰器
+            if progress >= 1 and not unit.stack_modifier_added then
+                unit.stack_modifier_added = true
+                unit:AddNewModifier(
+                    caster,
+                    self,
+                    "modifier_stack_units",
+                    {
+                        duration = -1,
+                        height = data.height,
+                        parent_unit = caster:entindex()
+                    }
+                )
+                stack_bonus:AddStackedUnit(unit)
+            end
+        end
+        
+        -- 如果动画未完成，继续计时器
+        if progress < 1 then
+            return update_interval
+        end
+        return nil
+    end)
     
     caster:AddNewModifier(caster, nil, "modifier_phased", {})
 end

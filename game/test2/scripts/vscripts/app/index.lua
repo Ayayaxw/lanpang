@@ -259,8 +259,9 @@ function Main:CreateReferee(position)
     referee:AddNewModifier(referee, nil, "modifier_caipan", {})
     referee:AddNewModifier(referee, nil, "modifier_wearable", {})
     referee:AddNewModifier(referee, nil, "modifier_phased", {})
+    referee:AddNewModifier(referee, nil, "modifier_disarmed", {})  -- 添加缴械效果
     referee:SetForwardVector(Vector(0, -1, 0))
-    referee:StartGesture(ACT_DOTA_VICTORY)
+
     return referee
 end
 ----------------------------------
@@ -727,11 +728,15 @@ function Main:ClearAllUnitsExcept()
                 unit:RemoveAllModifiers(0, true, true, true)  -- 移除所有(0)修饰器，立即移除，永久移除，不是死亡导致的移除
                 if unit:GetUnitName() == "npc_dota_hero_medusa" then
                     unit:SetAbsOrigin(Vector(10000, 10000, 128))
-                    unit:RemoveModifierByName("modifier_invulnerable")
+                    if unit:HasModifier("modifier_invulnerable") then
+                        unit:RemoveModifierByName("modifier_invulnerable")
+                    end
                     Timers:CreateTimer(0.1, function()
-                        local playerID = unit:GetPlayerID()
-                        UTIL_Remove(unit)
-                        DisconnectClient(playerID, true)
+                        if IsValidEntity(unit) then  -- 添加有效性检查
+                            local playerID = unit:GetPlayerID()
+                            UTIL_Remove(unit)
+                            DisconnectClient(playerID, true)
+                        end
                     end)
                 else
                     -- 移除无敌状态
@@ -741,18 +746,19 @@ function Main:ClearAllUnitsExcept()
                     DisconnectClient(playerID, true)
                 end
             else
-                -- 非英雄单位的处理
-                unit:RemoveAllModifiers(0, true, true, true)  -- 移除所有(0)修饰器，立即移除，永久移除，不是死亡导致的移除
-
-                -- 移除无敌状态
-                unit:RemoveModifierByName("modifier_invulnerable")
-
-                -- 强制杀死单位
-                unit:ForceKill(false)
-
-                -- 如果单位还存在，尝试直接移除
+                -- 非英雄单位处理逻辑优化
                 if IsValidEntity(unit) then
-                    UTIL_Remove(unit)
+                    -- 先强制杀死单位
+                    unit:ForceKill(false)
+                    
+                    -- 再次检查有效性后处理修饰器
+                    if IsValidEntity(unit) then
+                        unit:RemoveAllModifiers(0, true, true, true)
+                        if unit:HasModifier("modifier_invulnerable") then
+                            unit:RemoveModifierByName("modifier_invulnerable")
+                        end
+                        UTIL_Remove(unit)
+                    end
                 end
             end
 
@@ -1509,6 +1515,20 @@ function Main:OnRequestUnitInfo(event)
     local playerID = event.PlayerID
     local unitEntIndex = event.unit_ent_index
     local unit = EntIndexToHScript(unitEntIndex)
+    
+    -- 检查并设置 Neutral Upgrade 层数到30
+    if unit then
+        local modifier = unit:FindModifierByName("modifier_neutral_upgrade")
+        if modifier then
+            modifier:SetStackCount(30)
+        else
+            -- 如果没有这个modifier，就添加一个并设置层数
+            modifier = unit:AddNewModifier(unit, nil, "modifier_neutral_upgrade", {})
+            if modifier then
+                modifier:SetStackCount(30)
+            end
+        end
+    end
     if unit and IsValidEntity(unit) then
         -- 打印单位身上的所有物品
         print(string.format("【单位物品】%s 当前携带的物品：", unit:GetUnitName()))

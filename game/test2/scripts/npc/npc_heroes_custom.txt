@@ -12,8 +12,8 @@
 	"npc_dota_hero_witch_doctor"
 	{
 
-		"Ability5"		"ringmaster_summon_unicycle"
-        "Ability6"		"ringmaster_empty_souvenir"
+		"Ability5"		""
+
 
 }
 }

@@ -55,17 +55,33 @@ function SpawnAllCreepsAndHeroes()
     -- 创建我方蓝胖
     CreateHero(
         0, -- playerId
-        "npc_dota_hero_ogre_magi",
+        "npc_dota_hero_meepo",
         1, -- FacetID
-        Main.largeSpawnCenter, -- 在中心点创建
-        DOTA_TEAM_GOODGUYS,
+        Main.waterFall_Center, -- 在中心点创建
+        DOTA_TEAM_GOODGUYS,  
         true, -- isControllableByPlayer
         function(hero)
             if hero then
                 print("食人魔魔法师创建成功")
                 hero:AddNewModifier(hero, nil, "modifier_item_aghanims_shard", {})
                 hero:AddNewModifier(hero, nil, "modifier_item_ultimate_scepter_consumed", {})
+                --hero:AddNewModifier(hero, nil, "modifier_invulnerable", {}) -- 添加无敌状态
+
+                hero:SetForwardVector(Vector(0, -1, 0)) -- 朝南
                 HeroMaxLevel(hero)
+                
+                -- 在蓝胖旁边创建中立王
+                local kingPos = Vector(Main.waterFall_Center.x + 200, Main.waterFall_Center.y, 128)
+                local king = CreateUnitByName(
+                    "npc_dota_neutral_king",
+                    kingPos,
+                    true,
+                    nil,
+                    nil,
+                    DOTA_TEAM_GOODGUYS
+                )
+                king:SetForwardVector(Vector(0, -1, 0)) -- 朝南
+                king:SetControllableByPlayer(0, true) -- 玩家可控制
             end
         end
     )
@@ -79,8 +95,8 @@ function SpawnAllCreepsAndHeroes()
     for i = 1, total_creeps do
         if neutral_units[i] then
             local angle = math.rad(angle_per_unit * (i-1))
-            local x = Main.largeSpawnCenter.x + radius * math.cos(angle)
-            local y = Main.largeSpawnCenter.y + radius * math.sin(angle)
+            local x = Main.waterFall_Center.x + radius * math.cos(angle)
+            local y = Main.waterFall_Center.y + radius * math.sin(angle)
             
             Timers:CreateTimer(delay_per_spawn * (i-1), function()
                 print("正在生成: " .. neutral_units[i])
@@ -90,31 +106,27 @@ function SpawnAllCreepsAndHeroes()
                     true,
                     nil,
                     nil,
-                    DOTA_TEAM_BADGUYS  -- 改为敌方
+                    DOTA_TEAM_GOODGUYS
                 )
                 
                 unit:SetControllableByPlayer(0, true)
                 
                 -- 计算朝向圆心的向量
-                local direction = Vector(Main.largeSpawnCenter.x - x, Main.largeSpawnCenter.y - y, 0)
+                local direction = Vector(Main.waterFall_Center.x - x, Main.waterFall_Center.y - y, 0)
                 direction = direction:Normalized()
                 unit:SetForwardVector(direction)
-                
-                -- 仅为第一个单位添加并升级stack_units技能
-                if i == 1 then
-                    unit:AddAbility("stack_units")
-                    local ability = unit:FindAbilityByName("stack_units")
-                    if ability then
-                        ability:SetLevel(1)
-                    end
-                end
-                
+            
                 -- 升级所有技能到4级
-                Timers:CreateTimer(0.1, function()
+                local currentUnit = unit  -- 显式保存当前单位的引用
+                Timers:CreateTimer(0.5, function()
                     for abilityIndex = 0, 15 do
                         local ability = unit:GetAbilityByIndex(abilityIndex)
-                        if ability and ability:GetName() ~= "stack_units" then
-                            ability:SetLevel(4)
+                        if ability then
+                            if ability:GetName() == "neutral_upgrade" then
+                                currentUnit:RemoveAbility("neutral_upgrade")
+                            elseif ability:GetName() ~= "stack_units" then
+                                ability:SetLevel(4)
+                            end
                         end
                     end
                 end)
@@ -2544,12 +2556,12 @@ end
 
 function SpawnFourHeroes()
     local heroData = {
-        {name = "npc_dota_hero_spectre", position = Vector(767.79, 6149.44, 384.00)},
+        {name = "npc_dota_hero_sand_king", position = Vector(767.79, 6149.44, 384.00)},
         --{name = "npc_dota_hero_earthshaker", position = Vector(767.79, 6149.44, 384.00)},
-        {name = "npc_dota_hero_slark", position = Vector(1028.40, 6142.33, 256.00)},
-        {name = "npc_dota_hero_ursa", position = Vector(505.00, 6144.75, 128.00)},
+        {name = "npc_dota_hero_witch_doctor", position = Vector(1028.40, 6142.33, 256.00)},
+        {name = "npc_dota_hero_leshrac", position = Vector(505.00, 6144.75, 128.00)},
         --{name = "npc_dota_hero_ember_spirit", position = Vector(505.00, 6144.75, 128.00)},
-        {name = "npc_dota_hero_juggernaut", position = Vector(1335.26, 6084.06, 0.00)}
+        {name = "npc_dota_hero_sven", position = Vector(1335.26, 6084.06, 0.00)}
     }
 
     local function SetupHero(newHero, isFirst)

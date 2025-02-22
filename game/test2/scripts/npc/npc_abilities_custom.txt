@@ -62,43 +62,6 @@
 			}
 		}
 	}
-		"ringmaster_summon_unicycle"
-	{
-		// General
-		//-------------------------------------------------------------------------------------------------------------
-		"MaxLevel"                      "1"
-
-		"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_NO_TARGET"
-		"AbilityCastAnimation"          "ACT_DOTA_CAST_ABILITY_3"
-		"AbilityCastGestureSlot"		"DEFAULT"
-
-		// Stats
-		//-------------------------------------------------------------------------------------------------------------
-		"AbilityCooldown"				"3.0"
-		"AbilitySharedCooldown"			"dark_carnival_souvenir"
-		"AbilityCastPoint"				"0.5"
-
-		"AbilityCharges"				"99"
-		"AbilityChargeRestoreTime"		"0"
-		"InitialAbilityCharges"			"1"
-
-		// Special
-		//-------------------------------------------------------------------------------------------------------------
-		"AbilityValues"
-		{
-			"mount_cast_point"			"0.5"
-			"mount_duration"			"10.0"
-			"tree_impact_speed_divisor" "4.0"
-			"max_speed"					"750"
-			"acceleration"				"350"
-			"turn_rate_min"				"90"
-			"turn_rate_max"				"130"
-			"impact_radius"				"75"
-			"knockback_distance"		"50"
-		}
-	}
-
-	
 	"custom_blink"
 	{
 

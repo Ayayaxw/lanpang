@@ -72,6 +72,15 @@ function Main:Init_CreepChaos(event, playerID)
         "]",
         "[新挑战]"
     )
+    self:createLocalizedMessage(
+        "[LanPang_RECORD][",
+        self.currentMatchID,
+        "]",
+        "[选择绿方]",
+        {localize = true, text = heroName},
+        ",",
+        {localize = true, text = "facet", facetInfo = self:getFacetTooltip(heroName, selfFacetId)}
+    )
 
     CreateHero(playerID, heroName, selfFacetId, self.waterFall_Left, DOTA_TEAM_GOODGUYS, true, function(playerHero)
         self:ConfigureHero(playerHero, true, playerID)
@@ -100,9 +109,24 @@ function Main:Init_CreepChaos(event, playerID)
     -- 创建每种类型的野怪
     for _, unitName in ipairs(neutral_units) do
         local creepUnit = CreateUnitByName(unitName, self.waterFall_Right, true, nil, nil, DOTA_TEAM_BADGUYS)
-        creepUnit:SetControllableByPlayer(0, true)
+        creepUnit:SetControllableByPlayer(1, true)
         table.insert(self.rightTeam, creepUnit)
         hero_duel.totalEnemyUnits = hero_duel.totalEnemyUnits + 1
+        
+        -- 升级当前单位的所有技能到4级
+        local currentUnit = creepUnit  -- 显式保存当前单位的引用
+        Timers:CreateTimer(0.1, function()
+            for abilityIndex = 0, 15 do
+                local ability = currentUnit:GetAbilityByIndex(abilityIndex)
+                if ability then
+                    if ability:GetName() == "neutral_upgrade" then
+                        currentUnit:RemoveAbility("neutral_upgrade")
+                    elseif ability:GetName() ~= "stack_units" then
+                        ability:SetLevel(4)
+                    end
+                end
+            end
+        end)
     end
 
     -- 为所有敌方单位启用AI的定时器
@@ -121,7 +145,7 @@ function Main:Init_CreepChaos(event, playerID)
         return nil
     end)
     
-    Timers:CreateTimer(5, function()
+    Timers:CreateTimer(4, function()
         if self.currentTimer ~= timerId or hero_duel.EndDuel then return end
         -- 让右边的米波释放技能
         if self.rightTeamHero1 and IsValidEntity(self.rightTeamHero1) then
@@ -130,7 +154,10 @@ function Main:Init_CreepChaos(event, playerID)
                 stackAbility:OnSpellStart()
             end
         end
-
+    end)
+    
+    Timers:CreateTimer(5, function()
+        if self.currentTimer ~= timerId or hero_duel.EndDuel then return end
         -- 准备一个英雄进入左侧决斗区域
         self:PrepareHeroForDuel(
             self.leftTeamHero1,                     -- 英雄单位
@@ -210,8 +237,7 @@ function Main:Init_CreepChaos(event, playerID)
         if self.currentTimer ~= timerId or hero_duel.EndDuel then return end
         hero_duel.EndDuel = true
         
-        -- 时间到时，最终得分就是击杀数
-        hero_duel.finalScore = hero_duel.killCount
+
         
         -- 更新前端显示
         CustomGameEventManager:Send_ServerToAllClients("update_score", {
@@ -225,7 +251,7 @@ function Main:Init_CreepChaos(event, playerID)
             "]",
             "[挑战失败],最终得分:" .. hero_duel.finalScore
         )
-        
+        self:PlayDefeatAnimation(self.leftTeamHero1)
 
 
         self:DisableHeroWithModifiers(self.leftTeamHero1, self.endduration)
@@ -260,7 +286,7 @@ function Main:OnUnitKilled_CreepChaos(killedUnit, args)
         -- 停止所有定时器
         CustomGameEventManager:Send_ServerToAllClients("update_score", {
             ["击杀数量"] = tostring(hero_duel.killCount),
-            ["当前得分"] = tostring(hero_duel.killCount)
+            ["当前得分"] = tostring(hero_duel.finalScore)
         })
         
         -- 播放失败动画
@@ -272,7 +298,6 @@ function Main:OnUnitKilled_CreepChaos(killedUnit, args)
             self.currentMatchID,
             "]",
             "[挑战失败],最终得分:" .. hero_duel.finalScore
-
         )
 
         -- 禁用所有英雄
@@ -281,10 +306,12 @@ function Main:OnUnitKilled_CreepChaos(killedUnit, args)
 
     -- 检查红方单位死亡情况
     elseif killedUnit:GetTeamNumber() == DOTA_TEAM_BADGUYS and table.contains(self.rightTeam, killedUnit) then
+        -- 判断是否击杀的是king
+        local pointsToAdd = (killedUnit == self.rightTeamHero1) and 15 or 1
         -- 增加击杀计数
         hero_duel.killCount = hero_duel.killCount + 1
-        -- 基础得分等于击杀数
-        hero_duel.finalScore = hero_duel.killCount
+        -- 基础得分等于击杀数加上额外的king分数
+        hero_duel.finalScore = hero_duel.finalScore + pointsToAdd
 
         -- 更新前端显示
         CustomGameEventManager:Send_ServerToAllClients("update_score", {
@@ -310,8 +337,8 @@ function Main:OnUnitKilled_CreepChaos(killedUnit, args)
                 math.floor(remainingTime % 60),
                 math.floor((remainingTime * 100) % 100))
             
-            -- 全部击杀完成后，最终得分 = 击杀数 + 剩余时间
-            hero_duel.finalScore = hero_duel.killCount + math.floor(remainingTime)
+            -- 全部击杀完成后，加上剩余时间分数
+            hero_duel.finalScore = hero_duel.finalScore + math.floor(remainingTime)
             
             -- 更新前端显示
             CustomGameEventManager:Send_ServerToAllClients("update_score", {

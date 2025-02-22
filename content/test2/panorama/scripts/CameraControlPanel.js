@@ -494,16 +494,17 @@ function OnMoveCameraPosition(data) {
         setupHeightOffsetControl() {
             const heightSlider = $('#CameraHeightOffset');
             const heightValue = $('#CameraHeightOffsetValue');
+            const MAX_OFFSET = 5000; // 只需修改这个常量即可调整范围
             
             if (heightSlider && heightValue) {
                 // 初始化高度偏移值
                 const currentOffset = GameUI.GetCameraLookAtPositionHeightOffset();
                 this.currentValues.heightOffset = currentOffset;
                 heightValue.text = Math.round(currentOffset);
-                heightSlider.value = (currentOffset + 1000) / 2000; // 转换为0-1范围，除以2000是因为总范围是2000
+                heightSlider.value = (currentOffset + MAX_OFFSET) / (MAX_OFFSET * 2);
         
                 heightSlider.SetPanelEvent('onvaluechanged', () => {
-                    const offset = (heightSlider.value * 2000) - 1000; // -1000到1000的范围
+                    const offset = (heightSlider.value * MAX_OFFSET * 2) - MAX_OFFSET;
                     GameUI.SetCameraLookAtPositionHeightOffset(offset);
                     heightValue.text = Math.round(offset);
                     this.currentValues.heightOffset = offset;
@@ -512,8 +513,8 @@ function OnMoveCameraPosition(data) {
                 heightValue.SetPanelEvent('ontextsubmitted', () => {
                     const value = Number(heightValue.text);
                     if (!isNaN(value)) {
-                        const clampedOffset = Math.max(-1000, Math.min(1000, value));
-                        heightSlider.value = (clampedOffset + 1000) / 2000;
+                        const clampedOffset = Math.max(-MAX_OFFSET, Math.min(MAX_OFFSET, value));
+                        heightSlider.value = (clampedOffset + MAX_OFFSET) / (MAX_OFFSET * 2);
                         GameUI.SetCameraLookAtPositionHeightOffset(clampedOffset);
                         this.currentValues.heightOffset = clampedOffset;
                         heightValue.text = Math.round(clampedOffset);

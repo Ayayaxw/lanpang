@@ -101,6 +101,7 @@ function Main:Init_CreepChaos(event, playerID)
     for _, unitName in ipairs(neutral_units) do
         local creepUnit = CreateUnitByName(unitName, self.waterFall_Right, true, nil, nil, DOTA_TEAM_BADGUYS)
         creepUnit:SetControllableByPlayer(0, true)
+        creepUnit:RemoveAbility("neutral_upgrade")
         table.insert(self.rightTeam, creepUnit)
         hero_duel.totalEnemyUnits = hero_duel.totalEnemyUnits + 1
     end

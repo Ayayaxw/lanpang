@@ -79,7 +79,7 @@ function Main:Init_Save_Mor(heroName, heroFacet,playerID, heroChineseName)
     
     local function MaxOutAbilities(hero)
         print("升级 " .. hero:GetUnitName() .. " 的技能:")
-        for i = 0, 23 do
+        for i = 0, hero:GetAbilityCount() - 1 do
             local ability = hero:GetAbilityByIndex(i)
             if ability then
                 local abilityName = ability:GetAbilityName()

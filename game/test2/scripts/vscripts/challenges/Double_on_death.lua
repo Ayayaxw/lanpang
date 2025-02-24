@@ -198,8 +198,6 @@ function Main:Init_Double_on_death(event, playerID)
         )
     end)
 
-
-    -- 比赛开始后才开始传送拍拍熊
     Timers:CreateTimer(self.duration, function()
         if self.currentTimer ~= timerId or hero_duel.EndDuel then return end
         self:StartmegaDeployment()

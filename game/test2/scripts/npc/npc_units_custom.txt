@@ -265,7 +265,7 @@
 			}
 		}
 	}
-
+	
 	"npc_dota_neutral_king"
 	{										
 		// General
@@ -342,9 +342,110 @@
 		"StatusMana"				"0"			// Base mana.
 		"StatusManaRegen"			"0"			// Mana regeneration rate.
 	}
+	"npc_dota_hero_wisp_wearable_dummy"
+	{
+		"BaseClass"             "npc_dota_creature"
+		"Model"                 "models/heroes/wisp	/wisp.vmdl"  // 使用英雄的模型
+		"ModelScale"            "1.0"
+		"VisibilityStart"       "0"
+		"VisibilityEnd"         "0"
+		"Creature"
+		{
+			"AttachWearables"
+			{
 
+				"Wearable1"
+				{
+					"ItemDef"     "9235"
+				}
 
+			}
+		}
+	}
 
+	"wisp"
+	{
+		"BaseClass"                    "npc_dota_hero"
+		"Model"                        "models/heroes/wisp/wisp.vmdl"
+		"SoundSet"                    "Hero_Wisp"
+		"ModelScale"                "0.930000"
+		"Level"                        "1"
+		
+		// Armor
+		"ArmorPhysical"                "1"
+		"MagicalResistance"            "25"
+
+		// Attack
+		"AttackCapabilities"        "DOTA_UNIT_CAP_RANGED_ATTACK"
+		"AttackDamageMin"        "21"
+		"AttackDamageMax"        "27"
+		"AttackDamageType"            "DAMAGE_TYPE_ArmorPhysical"
+		"AttackRate"        "1.700000"
+		"AttackAnimationPoint"        "0.30000"
+		"AttackAcquisitionRange"    "800"
+		"AttackRange"                "500"
+		"ProjectileModel"        "particles/units/heroes/hero_wisp/wisp_base_attack.vpcf"
+		"ProjectileSpeed"        "1200"
+		"BaseAttackSpeed"  "100"
+		"particle_folder"        "particles/units/heroes/hero_wisp"
+		"GameSoundsFile"        "soundevents/game_sounds_heroes/game_sounds_wisp.vsndevts"
+		"VoiceFile"        "soundevents/voscripts/game_sounds_vo_wisp.vsndevts"
+
+		// Attributes
+		"AttributePrimary"        "DOTA_ATTRIBUTE_ALL"
+		"AttributeBaseStrength"        "17"
+		"AttributeStrengthGain"        "3.0"
+		"AttributeBaseIntelligence"    "23"
+		"AttributeIntelligenceGain"    "1.7"
+		"AttributeBaseAgility"        "14"
+		"AttributeAgilityGain"        "1.6"
+
+		// Abilities remain the same as they match
+		"Ability1"        "wisp_tether"
+		"Ability2"        "wisp_spirits"        
+		"Ability3"        "wisp_overcharge"
+		"Ability4"        "wisp_spirits_in"
+		"Ability5"        "wisp_spirits_out"
+		"Ability6"        "wisp_relocate"
+		"Ability7"        "wisp_tether_break"
+		"Ability8"        "wisp_sight_seer"
+		"Ability10"        "special_bonus_unique_wisp_overcharge_duration"
+		"Ability11"        "special_bonus_unique_wisp_8"
+		"Ability12"        "special_bonus_unique_wisp_3"
+		"Ability13"        "special_bonus_unique_wisp"
+		"Ability14"        "special_bonus_unique_wisp_10"
+		"Ability15"        "special_bonus_unique_wisp_6"
+		"Ability16"        "special_bonus_unique_wisp_9"
+		"Ability17"        "special_bonus_unique_wisp_4"
+
+		// Bounty
+		"BountyXP"                    "25"
+		"BountyGoldMin"                "20"
+		"BountyGoldMax"                "26"
+
+		// Bounds
+		"BoundsHullName"            "DOTA_HULL_SIZE_REGULAR"
+		"RingRadius"                "45"
+		"HealthBarOffset"            "150"
+
+		// Movement
+		"MovementCapabilities"        "DOTA_UNIT_CAP_MOVE_GROUND"
+		"MovementSpeed"                "320"
+		"MovementTurnRate"            "0.700000"
+
+		// Status
+		"StatusHealth"                "120"
+		"StatusHealthRegen"            "0"
+		"StatusMana"                "10"
+		"StatusManaRegen"            "0"
+
+		// Team
+		"TeamName"                    "DOTA_TEAM_BADGUYS"
+		
+		// Vision
+		"VisionDaytimeRange"        "750"
+		"VisionNighttimeRange"        "750"
+	}
 
 	"sniper"
 	{

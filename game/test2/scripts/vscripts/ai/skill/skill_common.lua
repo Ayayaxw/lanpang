@@ -504,36 +504,39 @@ function CommonAI:FindBestAbilityToUse(entity, target)
     self:UpdateSkillPriorityBasedOnStrategy()
 
 
-    -- 辅助函数：根据技能名称查找技能索引
-    function FindAbilityIndex(entity, skillName)
-        for i = 0, 8 do
-            local ability = entity:GetAbilityByIndex(i)
-            if ability and ability:GetAbilityName() == skillName then
-                return i
-            end
-        end
-        return nil
-    end
+
 
     if target then
-        entityPosition = entity:GetAbsOrigin()  -- 获取实体的位置
-        targetPosition = target:GetAbsOrigin()  -- 获取目标的位置
+        entityPosition = entity:GetAbsOrigin()
+        targetPosition = target:GetAbsOrigin()
         
-        -- 添加高优先级技能
+        -- 使用原生API获取技能索引
         if self.highPrioritySkills[heroName] then
             for index, skillName in ipairs(self.highPrioritySkills[heroName]) do
                 local adjustedPriority = 1 + (index - 1) * 0.1
-                local abilityIndex = FindAbilityIndex(entity, skillName)
-                table.insert(allSkills, {name = skillName, priority = adjustedPriority, index = abilityIndex})
+                local ability = entity:FindAbilityByName(skillName)
+                if ability then
+                    table.insert(allSkills, {
+                        name = skillName, 
+                        priority = adjustedPriority, 
+                        index = ability:GetAbilityIndex()  -- 使用GetAbilityIndex原生方法
+                    })
+                end
             end
         end
     
-        -- 添加中等优先级技能
+        -- 添加中等优先级技能（使用相同方法）
         if self.mediumPrioritySkills[heroName] then
             for index, skillName in ipairs(self.mediumPrioritySkills[heroName]) do
                 local adjustedPriority = 2 + (index - 1) * 0.1
-                local abilityIndex = FindAbilityIndex(entity, skillName)
-                table.insert(allSkills, {name = skillName, priority = adjustedPriority, index = abilityIndex})
+                local ability = entity:FindAbilityByName(skillName)
+                if ability then
+                    table.insert(allSkills, {
+                        name = skillName,
+                        priority = adjustedPriority,
+                        index = ability:GetAbilityIndex()  -- 使用原生方法获取索引
+                    })
+                end
             end
         end
     end
@@ -546,12 +549,17 @@ function CommonAI:FindBestAbilityToUse(entity, target)
     end
     
     -- 添加普通技能
-    for i = 0, 8 do
-        local ability = entity:GetAbilityByIndex(i)
+    for i = 0, entity:GetAbilityCount() - 1 do
+        local ability = entity:GetAbilityByIndex(i)  -- 使用GetAbilityByIndex原生方法
         if ability then
             local abilityName = ability:GetAbilityName()
-            if not self:shouldRemoveAbility(i) and not self:IsInPriorityLists(abilityName, heroName) then  -- 传入 heroName
-                table.insert(allSkills, {name = abilityName, priority = 3, index = i})
+            if not self:shouldRemoveAbility(ability:GetAbilityIndex()) and  -- 使用GetAbilityIndex
+               not self:IsInPriorityLists(abilityName, heroName) then
+                table.insert(allSkills, {
+                    name = abilityName, 
+                    priority = 3, 
+                    index = ability:GetAbilityIndex()  -- 直接获取技能索引
+                })
             end
         end
     end

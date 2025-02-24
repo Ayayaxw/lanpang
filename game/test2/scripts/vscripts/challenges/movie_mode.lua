@@ -45,9 +45,405 @@ function Main:Init_movie_mode(heroName, heroFacet,playerID, heroChineseName)
     --SetupRingmasterScene()
     -- SetupHeroMatrix()
     --CreateAxeWithAbility()
-    SpawnAllCreepsAndHeroes()
+    --SpawnAllCreepsAndHeroes()
+    --CreateTuskAndCastAbility()
+    --CreateFakeClientHero()
+    --TestGetFakePlayer()
+    --CreateBeastmasterAndBot()
+    Create100Bots()
+end
+function Create100Bots()
+    -- 创建100个机器人的函数
+    local heroList = {
+        "npc_dota_hero_axe",
+        "npc_dota_hero_crystal_maiden",
+        "npc_dota_hero_lina",
+        "npc_dota_hero_lion",
+        "npc_dota_hero_shadow_shaman"
+        -- 可以添加更多英雄
+    }
+    
+    local botCount = 0
+    local maxBots = 100
+    
+    -- 创建定时器每0.1秒创建一个机器人
+    Timers:CreateTimer(function()
+        if botCount >= maxBots then
+            print("所有机器人创建完成!")
+            return nil
+        end
+        
+        -- 随机选择一个英雄
+        local randomHero = heroList[RandomInt(1, #heroList)]
+        local botName = string.format("Bot_%d", botCount + 1)
+        
+        -- 创建机器人
+        local bot_hero = GameRules:AddBotPlayerWithEntityScript(
+            randomHero,
+            botName,
+            botCount % 2 == 0 and DOTA_TEAM_GOODGUYS or DOTA_TEAM_BADGUYS, -- 平均分配到天辉夜魇
+            "",
+            true
+        )
+        
+        if bot_hero then
+            botCount = botCount + 1
+            print(string.format("成功创建机器人 %d/100: %s", botCount, botName))
+            
+            -- 获取机器人的PlayerID并设置等级
+            Timers:CreateTimer(0.5, function()
+                for i=0, DOTA_MAX_PLAYERS-1 do
+                    if PlayerResource:IsFakeClient(i) then
+                        local bot_hero = PlayerResource:GetSelectedHeroEntity(i)
+                        if bot_hero then
+                            -- 设置最高等级
+                            HeroMaxLevel(bot_hero)
+                            -- 可以在这里添加其他设置，比如给物品等
+                            break
+                        end
+                    end
+                end
+            end)
+        else
+            print(string.format("机器人创建失败: %s", botName))
+        end
+        
+        return 1 -- 0.1秒后继续创建下一个机器人
+    end)
 end
 
+function CreateBeastmasterAndTusk()
+    -- 创建兽王单位
+    local spawnPos = Vector(0,0,0)
+    local beastmaster = nil
+    
+    -- 使用CreateHero创建兽王
+    CreateHero(0, "npc_dota_hero_beastmaster", 1, spawnPos, DOTA_TEAM_GOODGUYS, true, 
+        function(hero)
+            beastmaster = hero
+            print("兽王创建完成")
+            Timers:CreateTimer(2.0, function()
+            -- 使用CreateHeroHeroChaos创建海民,传入兽王作为父级
+            CreateHeroHeroChaos(0, "npc_dota_hero_beastmaster", 1, spawnPos + Vector(100,0,0), 
+                    DOTA_TEAM_GOODGUYS, true, beastmaster,
+                    function(tusk)
+                        print("海民创建完成")
+                        
+                        -- 通过兽王获取player 
+                        local playerId = beastmaster:GetPlayerOwnerID()
+                        local player = PlayerResource:GetPlayer(playerId)
+                        
+                        if playerId ~= -1 then
+                            -- 删除兽王
+                            beastmaster:RemoveSelf()
+                            print("已删除兽王")
+                            
+                            -- 分配海民给玩家
+                            print("分配海民给玩家")
+                            player:SetAssignedHeroEntity(tusk)
+                            tusk:SetControllableByPlayer(playerId, true)
+                            
+                            -- 给海民添加神杖和魔晶并升级
+                            tusk:AddNewModifier(tusk, nil, "modifier_item_aghanims_shard", {})
+                            tusk:AddNewModifier(tusk, nil, "modifier_item_ultimate_scepter_consumed", {})
+                            HeroMaxLevel(tusk)
+                            print("海民已添加神杖、魔晶并升级")
+                            
+                            -- 2秒后断开连接
+                            Timers:CreateTimer(2.0, function()
+                                print("开始断开玩家连接...")
+                                DisconnectClient(playerId, true)
+                                print(string.format("已断开玩家连接(ID: %d)", playerId))
+                            end)
+                        end
+                    end
+                )
+            end)
+        end
+    )
+end
+
+function CreateBeastmasterAndBot()
+    -- 创建兽王单位
+    local spawnPos = Vector(0,0,0)
+    local beastmaster = nil
+    
+    -- 使用CreateHero创建兽王
+    CreateHero(0, "npc_dota_hero_beastmaster", 1, spawnPos, DOTA_TEAM_GOODGUYS, true, 
+        function(hero)
+            beastmaster = hero
+            print("兽王创建完成")
+            
+            -- 创建海民
+            CreateHeroHeroChaos(0, "npc_dota_hero_tusk", 1, spawnPos + Vector(100,0,0), 
+                DOTA_TEAM_GOODGUYS, true, beastmaster,
+                function(tusk)
+                    print("海民创建完成")
+                    
+                    -- 通过兽王获取player并断开连接
+                    Timers:CreateTimer(1.0, function()
+                        local playerId = beastmaster:GetPlayerOwnerID()
+                        if playerId ~= -1 then
+                            print("开始断开兽王连接...")
+                            DisconnectClient(playerId, true)
+                            print(string.format("已断开兽王连接(ID: %d)", playerId))
+                        end
+                    end)
+                    
+                    -- 创建机器人
+                    Timers:CreateTimer(2.0, function()
+                        print("开始创建机器人...")
+                        local bot_hero = GameRules:AddBotPlayerWithEntityScript(
+                            "npc_dota_hero_axe",
+                            "蓝胖超人",
+                            DOTA_TEAM_GOODGUYS,
+                            "",
+                            true
+                        )
+                        
+                        if bot_hero then
+                            print("机器人创建成功!")
+                            
+                            -- 等待2秒后处理机器人英雄
+                            Timers:CreateTimer(2.0, function()
+                                for i=0, DOTA_MAX_PLAYERS-1 do
+                                    if PlayerResource:IsFakeClient(i) then
+                                        local bot_player = PlayerResource:GetPlayer(i)
+                                        if bot_player then
+                                            -- 移除斧王
+                                            local old_hero = PlayerResource:GetSelectedHeroEntity(i)
+                                            if old_hero then
+                                                old_hero:RemoveSelf()
+                                                print("移除机器人的斧王")
+                                            end
+                                            
+                                            -- 分配海民给机器人
+                                            print("分配海民给机器人")
+                                            bot_player:SetAssignedHeroEntity(tusk)
+                                            tusk:SetControllableByPlayer(i, true)
+                                            
+                                            -- 给海民添加神杖和魔晶并升级
+                                            tusk:AddNewModifier(tusk, nil, "modifier_item_aghanims_shard", {})
+                                            tusk:AddNewModifier(tusk, nil, "modifier_item_ultimate_scepter_consumed", {})
+                                            HeroMaxLevel(tusk)
+                                            print("海民已添加神杖、魔晶并升级")
+                                            
+                                            -- 2秒后通过海民获取player并断开连接
+                                            Timers:CreateTimer(2.0, function()
+                                                local tuskPlayerId = tusk:GetPlayerOwnerID()
+                                                if tuskPlayerId ~= -1 then
+                                                    print("开始断开海民连接...")
+                                                    DisconnectClient(tuskPlayerId, true)
+                                                    print(string.format("已断开海民连接(ID: %d)", tuskPlayerId))
+                                                end
+                                            end)
+                                        end
+                                        break
+                                    end
+                                end
+                            end)
+                        else
+                            print("机器人创建失败!")
+                        end
+                    end)
+                end
+            )
+        end
+    )
+end
+
+function TestGetFakePlayer()
+    Timers:CreateTimer(function()
+        print("\n当前所有玩家状态:")
+        for i = 0, DOTA_MAX_TEAM_PLAYERS-1 do
+            local hPlayer = PlayerResource:GetPlayer(i)
+            if hPlayer then
+                print("\nPlayer ID:", i)
+                print("是否假人:", PlayerResource:IsFakeClient(i))
+                local heroEntity = hPlayer:GetAssignedHero()
+                if heroEntity then
+                    print("拥有英雄:", heroEntity:GetUnitName())
+                else
+                    print("当前没有英雄")
+                end
+            end
+        end
+        return 1.0  -- 每1秒重复一次
+    end)
+end
+
+function CreateChenAndBeastmasterSequence()
+    local playerId = 0  -- 假设使用玩家0，根据实际情况修改
+    local chenHeroName = "npc_dota_hero_chen"
+    local beastmasterName = "npc_dota_hero_tusk"
+    local spawnPos = Vector(0, 0, 0)  -- 设置合适的出生坐标
+    local team = DOTA_TEAM_GOODGUYS  -- 根据实际队伍值修改
+
+    -- 第一步：创建陈
+    CreateHero(playerId, chenHeroName, 1, spawnPos, team, true,
+        function(chen)
+            -- 第二步：2秒后创建兽王
+            Timers:CreateTimer(DoUniqueString("delay"), {
+                endTime = 2,
+                callback = function()
+                    CreateHeroHeroChaos(
+                        playerId,
+                        beastmasterName,
+                        0,
+                        spawnPos,
+                        team,
+                        true,  -- 先设置为不可控制
+                        chen,
+                        function(beastmaster)
+                            -- 重新获取玩家实例并赋予控制权
+                            local hPlayer = PlayerResource:GetPlayer(playerId)
+                            if hPlayer then
+                                hPlayer:SetAssignedHeroEntity(beastmaster)
+                                beastmaster:AddNewModifier(hero, nil, "modifier_item_aghanims_shard", {})
+                                beastmaster:AddNewModifier(hero, nil, "modifier_item_ultimate_scepter_consumed", {})
+                                HeroMaxLevel(beastmaster)
+                                
+                                -- 打印兽王的PlayerID
+                                print("兽王创建后的信息:")
+                                local beastmasterPlayer = beastmaster:GetPlayerOwner()
+                                if beastmasterPlayer then
+                                    print("兽王的PlayerID:", beastmasterPlayer:GetPlayerID())
+                                else
+                                    print("兽王没有关联的Player")
+                                end
+                                print("兽王当前的控制者ID:", beastmaster:GetPlayerOwnerID())
+                                
+                                -- 第三步：2秒后断开陈的玩家
+                                Timers:CreateTimer(DoUniqueString("disconnectChen"), {
+                                    endTime = 2,
+                                    callback = function()
+                                        local chenPlayer = chen:GetPlayerOwner()
+                                        if chenPlayer then
+                                            local chenPlayerId = chenPlayer:GetPlayerID()
+                                            print("准备断开陈的玩家，PlayerID:", chenPlayerId)
+                                            DisconnectClient(chenPlayerId, false)
+                                        end
+                                    end
+                                })
+                            end
+                        end
+                    )
+                end
+            })
+        end)
+end
+
+function CreateFakeClientHero()
+    -- 记录已有假客户端
+    local existingFakes = {}
+    for i = 0, DOTA_MAX_TEAM_PLAYERS-1 do
+        if PlayerResource:IsFakeClient(i) then
+            table.insert(existingFakes, i)
+        end
+    end
+
+    -- 打印当前状态
+    print("创建假人前状态:")
+    print("总玩家数:", PlayerResource:GetPlayerCount())
+    print("假玩家数:", #existingFakes)
+    
+    -- 打印现有假人ID
+    print("现有假人ID列表:")
+    for _, id in ipairs(existingFakes) do
+        print("假人ID:", id)
+    end
+
+    -- 直接为假人1创建兽王
+    local hero = CreateUnitByName("npc_dota_hero_beastmaster", Vector(0, 0, 0), true, nil, nil, DOTA_TEAM_GOODGUYS)
+    hero:SetControllableByPlayer(1, true)
+    PlayerResource:ReplaceHeroWith(1, "npc_dota_hero_beastmaster", 0, 0)
+    print("已为假人1创建兽王英雄")
+
+    SendToServerConsole("dota_create_fake_clients 1")
+
+    -- 延迟处理
+    Timers:CreateTimer(2.0, function()
+        local newFakeID
+        -- 倒序查找最新创建的
+        for i = DOTA_MAX_TEAM_PLAYERS-1, 0, -1 do
+            if PlayerResource:IsFakeClient(i) and not table.contains(existingFakes, i) then
+                newFakeID = i
+                break
+            end
+        end
+
+        -- 重新获取并打印所有假人
+        print("\n创建假人后状态:")
+        print("总玩家数:", PlayerResource:GetPlayerCount())
+        
+        local currentFakes = {}
+        for i = 0, DOTA_MAX_TEAM_PLAYERS-1 do
+            if PlayerResource:IsFakeClient(i) then
+                table.insert(currentFakes, i)
+            end
+        end
+        
+        print("假玩家数:", #currentFakes)
+        print("所有假人ID列表:")
+        for _, id in ipairs(currentFakes) do
+            print("假人ID:", id)
+        end
+        
+        if newFakeID then
+            print("\n新创建的假人ID:", newFakeID)
+            print("该假人的连接状态:", PlayerResource:GetConnectionState(newFakeID))
+        else
+            print("\n假客户端创建失败，可能原因：")
+            print("1. 未开启 sv_cheats 1")
+            print("2. 服务器已满（当前玩家数："..PlayerResource:GetPlayerCount()..")")
+            print("3. 引擎限制（需要 -override_vpk 启动参数）")
+        end
+    end)
+end
+
+function CreateTuskAndCastAbility()
+    local spawnPosition = Vector(0, 0, 0)
+    
+    -- 发送控制台命令创建假客户端（需要作弊模式）
+    SendToServerConsole("dota_create_fake_clients 1")
+    
+    -- 延迟处理确保客户端创建完成
+    Timers:CreateTimer(0.5, function()
+        -- 查找新创建的假客户端（通常从高ID开始）
+        local fakePlayerID = nil
+        for i = DOTA_MAX_TEAM_PLAYERS-1, 0, -1 do
+            if PlayerResource:IsFakeClient(i) then
+                fakePlayerID = i
+                break
+            end
+        end
+        
+        if not fakePlayerID then
+            print("错误：未找到可用的假客户端")
+            return
+        end
+
+        -- 创建兽王单位
+        local beastmaster = CreateUnitByName(
+            "npc_dota_hero_beastmaster",
+            spawnPosition,
+            true,
+            nil,
+            nil,
+            DOTA_TEAM_GOODGUYS
+        )
+        
+        if beastmaster then
+            -- 绑定单位到假客户端
+            beastmaster:SetControllableByPlayer(fakePlayerID, true)
+            PlayerResource:ReplaceHeroWith(fakePlayerID, "npc_dota_hero_beastmaster", 0, 0)
+        
+            
+            -- 设置朝向
+            beastmaster:SetForwardVector(Vector(0, -1, 0))
+        end
+    end)
+end
 
 function SpawnAllCreepsAndHeroes()
     hero_duel.EndDuel = false
@@ -119,7 +515,7 @@ function SpawnAllCreepsAndHeroes()
                 -- 升级所有技能到4级
                 local currentUnit = unit  -- 显式保存当前单位的引用
                 Timers:CreateTimer(0.5, function()
-                    for abilityIndex = 0, 15 do
+                    for i = 0, unit:GetAbilityCount() - 1 do
                         local ability = unit:GetAbilityByIndex(abilityIndex)
                         if ability then
                             if ability:GetName() == "neutral_upgrade" then
@@ -1561,7 +1957,7 @@ function SpawnHeroesInFormation()
             )
 
             -- 移除所有技能
-            for i = 0, 15 do
+            for i = 0, hero:GetAbilityCount() - 1 do
                 local ability = hero:GetAbilityByIndex(i)
                 if ability then
                     hero:RemoveAbility(ability:GetAbilityName())
@@ -1738,7 +2134,7 @@ function PreSpawnTwoGroupsHeroes()
                         hero:SetControllableByPlayer(0, true)
                         
                         -- 移除所有技能
-                        for i = 0, 15 do
+                        for i = 0, hero:GetAbilityCount() - 1 do
                             local ability = hero:GetAbilityByIndex(i)
                             if ability then
                                 hero:RemoveAbility(ability:GetAbilityName())

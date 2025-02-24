@@ -9,9 +9,13 @@ require("GameEventListeners/OnAttack") --监听英雄血量
 require("GameEventListeners/OnUnitKilled") --监听英雄血量
 require("GameEventListeners/OnNPCSpawned") --监听单位出生
 
-require("battle/HeroBenefits")          --这里放的
+require("battle/hero_benefits")          --这里放的
 require("battle/game_end_animations")
 require("battle/coordinates")           --放置重要的地图坐标
+require("battle/hero_kv_overrides")           --处理英雄kv覆盖
+require("battle/api_extensions")           --自己实现的一些API没有的功能
+require("battle/ui_event_manager")           --前端信息展示的一些功能
+
 
 require("ai/core/ai_core")
 require("ai/core/AIstrategies")
@@ -75,3 +79,4 @@ LinkLuaModifier("modifier_custom_out_of_game", "modifier/modifier_custom_out_of_
 LinkLuaModifier("modifier_auto_bullwhip", "modifier/modifier_auto_bullwhip.lua", LUA_MODIFIER_MOTION_NONE)
 LinkLuaModifier("modifier_reduced_ability_cost", "modifier/modifier_reduced_ability_cost.lua", LUA_MODIFIER_MOTION_NONE)
 LinkLuaModifier("modifier_custom_unicycle", "modifier/modifier_custom_unicycle.lua", LUA_MODIFIER_MOTION_NONE)
+LinkLuaModifier("modifier_aoe_bonus_percentage", "modifier/modifier_aoe_bonus_percentage.lua", LUA_MODIFIER_MOTION_NONE)

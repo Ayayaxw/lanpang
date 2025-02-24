@@ -73,3 +73,41 @@ function CreateHeroHeroChaos(playerId, heroName, FacetID, spawnPosition, team, i
         callback(hero)
     end
 end
+
+
+
+function CreateAIForHero(heroEntity, overallStrategy, heroStrategy, aiName, thinkInterval)
+    -- print("为英雄创建AI: " .. heroEntity:GetUnitName())
+    -- print("整体策略: " .. (type(overallStrategy) == "table" and table.concat(overallStrategy, ", ") or tostring(overallStrategy or "默认策略")))
+    -- print("英雄策略: " .. (type(heroStrategy) == "table" and table.concat(heroStrategy, ", ") or tostring(heroStrategy or "默认策略")))
+    
+    local heroAI = HeroAI.CreateAIForHero(heroEntity, overallStrategy or {"默认策略"}, heroStrategy or {"默认策略"}, thinkInterval)
+    
+    if heroAI then
+        --print("成功创建AI实例: " .. heroEntity:GetUnitName())
+        
+        AIs[heroEntity] = {
+            ai = heroAI,
+            name = aiName or heroEntity:GetUnitName()
+        }
+
+        heroEntity:SetContextThink("AIThink", function() 
+            if AIs[heroEntity] then
+                return AIs[heroEntity].ai:Think(heroEntity) 
+            else
+                --print("AI实例为空: " .. heroEntity:GetUnitName())
+                return 1.0  -- 1秒后重试
+            end
+        end, 0)
+    else
+        --print("创建AI实例失败: " .. heroEntity:GetUnitName())
+        return
+    end
+end
+
+
+
+-- Evaluate the state of the game
+-- function Main:OnThink()
+--     --return xiaowanyi:OnThink()
+-- end

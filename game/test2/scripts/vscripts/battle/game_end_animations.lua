@@ -92,6 +92,7 @@ function Main:PrepareHeroForDuel(unit, position, duration, forwardDirection)
     FindClearSpaceForUnit(unit, position, true)
 end
 
+
 -- PrepareHeroForDuel 函数用于准备一个英雄进入决斗状态。该函数会:
 
 -- 参数说明:
@@ -105,3 +106,22 @@ end
 -- 重置英雄所有技能的冷却时间和充能数量
 -- 设置英雄的朝向
 -- 将英雄传送到指定位置
+
+
+
+
+
+
+function Main:gradual_slow_down(loserPos, winnerPos)--游戏结束时的慢动作聚焦
+    SendToServerConsole("host_timescale 0.1")
+    
+    Timers:CreateTimer(0.1,function()
+    CustomGameEventManager:Send_ServerToAllClients("stop_timer", {winnerPos})
+    end)
+
+    Timers:CreateTimer(0.2,function()
+        SendToServerConsole("host_timescale 1")
+    end)
+
+end
+

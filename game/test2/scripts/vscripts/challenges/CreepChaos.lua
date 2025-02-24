@@ -116,7 +116,7 @@ function Main:Init_CreepChaos(event, playerID)
         -- 升级当前单位的所有技能到4级
         local currentUnit = creepUnit  -- 显式保存当前单位的引用
         Timers:CreateTimer(0.1, function()
-            for abilityIndex = 0, 15 do
+            for i = 0, currentUnit:GetAbilityCount() - 1 do
                 local ability = currentUnit:GetAbilityByIndex(abilityIndex)
                 if ability then
                     if ability:GetName() == "neutral_upgrade" then

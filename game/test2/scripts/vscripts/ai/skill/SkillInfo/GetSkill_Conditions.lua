@@ -6586,14 +6586,17 @@ end
 
 function CommonAI:checkAbilities(caster, excludeAbilities)
     self:log("开始检查技能 - 英雄:", caster:GetUnitName())
-
-    for i = 0, 16 do
+    
+    -- 获取英雄实际的技能数量
+    local maxAbilities = caster:GetAbilityCount() - 1
+    
+    for i = 0, maxAbilities do
         local ability = caster:GetAbilityByIndex(i)
         if ability then
             local abilityName = ability:GetAbilityName()
             local heroName = caster:GetUnitName()
 
-            if not self:shouldSkipAbility(ability, abilityName, heroName,excludeAbilities,i) then
+            if not self:shouldSkipAbility(ability, abilityName, heroName, excludeAbilities, i) then
                 self:log("找到可用技能:", abilityName)
                 return false
             end
@@ -6711,12 +6714,13 @@ function CommonAI:getMinCooldownOfValidSkills(caster, excludeAbilities)
         return false
     end
 
-    for i = 0, 7 do
+
+    for i = 0, caster:GetAbilityCount() - 1 do
         local ability = caster:GetAbilityByIndex(i)
         if ability then
             local abilityName = ability:GetAbilityName()
             local heroName = caster:GetUnitName()
-
+    
             if isValidSkill(ability, abilityName, heroName) then
                 local cooldown = ability:GetCooldownTimeRemaining()
                 if cooldown < minCooldown then

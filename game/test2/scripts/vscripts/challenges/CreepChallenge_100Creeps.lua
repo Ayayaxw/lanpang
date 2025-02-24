@@ -155,7 +155,7 @@ function Main:Init_CreepChallenge_100Creeps(event, playerID)
     -- 限定时间结束后执行的操作
     Timers:CreateTimer(self.duration + limitTime, function()
         if self.currentTimer ~= timerId or hero_duel.EndDuel then return end
-        Main:ClearAllUnitByName("npc_dota_creep_goodguys_ranged")
+
 
         
         -- 停止计时并精确设置前端计时器的时间

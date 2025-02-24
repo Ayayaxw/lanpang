@@ -32,6 +32,7 @@ require("challenges/mode_5v5_2")
 require("challenges/mode_10v10")  
 require("challenges/MeepoChaos")  
 require("challenges/CreepChaos")  
+require("challenges/Aoe_10X")  
 
 Main.Challenges = {
     --测试用的模式0开头
@@ -80,6 +81,7 @@ Main.Challenges = {
     SnipeHunt = 3010,
     MillGrinding = 3011,
     CreepChaos = 3012,
+    Aoe_10X = 3013,
     
 }
 
@@ -105,6 +107,7 @@ Main.ModeConfig = {
     [Main.Challenges.Courier800] = {"SelfHeroRow"},
     [Main.Challenges.Magnataur5] = {"SelfHeroRow"},
     [Main.Challenges.MAG_DREAM] = {"SelfHeroRow"},
+    [Main.Challenges.Aoe_10X] = {"SelfHeroRow"},
     [Main.Challenges.SnipeHunt] = {"SelfHeroRow"},
     [Main.Challenges.MillGrinding] = {"SelfHeroRow"},
     [Main.Challenges.SuperCreepChallenge90CD] = {"SelfHeroRow"},
@@ -121,6 +124,8 @@ Main.currentChallenge = nil
 function Main:SendGameModesData()
     -- 定义游戏模式
     local gameModes = {
+        {code = Main.Challenges.Aoe_10X, name = "10倍技能范围"},
+        {code = Main.Challenges.movie_mode, name = "电影模式"},
         {code = Main.Challenges.CreepChaos, name = "超级野怪合体"},
         {code = Main.Challenges.MeepoChaos, name = "超级米波大乱斗"},
         {code = Main.Challenges.mode_10v10, name = "10v10对决"},
@@ -148,7 +153,6 @@ function Main:SendGameModesData()
         {code = Main.Challenges.Save_Mor, name = "拯救水人"},
         {code = Main.Challenges.HeroChaos, name = "大乱斗"},
         {code = Main.Challenges.TestMode, name = "单挑"},
-        {code = Main.Challenges.movie_mode, name = "电影模式"},
         {code = Main.Challenges.CreepChallenge_100Creeps, name = "100远程兵挑战"},
         {code = Main.Challenges.HeroChallenge_illusion, name = "幻象对决"},
         {code = Main.Challenges.CD0_1skill, name = "一技能无CD"},

@@ -5,17 +5,17 @@ end
 function Main:Init_TestMode(event, playerID)
     -- 技能修改器
     self.currentMatchID = self:GenerateUniqueID()    --比赛ID
-    -- local ability_modifiers = {
-    --     npc_dota_hero_pangolier = {
-    --     },
-    --     npc_dota_hero_kunkka = {
+    local ability_modifiers = {
+        npc_dota_hero_pangolier = {
+        },
+        npc_dota_hero_kunkka = {
 
-    --     },
-    --     npc_dota_hero_night_stalker = {
+        },
+        npc_dota_hero_night_stalker = {
 
-    --     },
+        },
 
-    -- }
+    }
     -- 设置英雄配置
     local teams = {DOTA_TEAM_GOODGUYS, DOTA_TEAM_BADGUYS} -- 或其他你需要的队伍
     self:CreateTrueSightWards(teams)
@@ -33,6 +33,7 @@ function Main:Init_TestMode(event, playerID)
         FRIENDLY = {
             function(hero)
                 hero:SetForwardVector(Vector(1, 0, 0))
+                
                 -- 可以在这里添加更多友方英雄特定的操作
             end,
         },
@@ -71,8 +72,8 @@ function Main:Init_TestMode(event, playerID)
     -- 设置AI英雄信息
     self.AIheroName = opponentHeroName
     self.FacetId = opponentFacetId
-
-    -- self:UpdateAbilityModifiers(ability_modifiers)
+    
+    
 
     -- 设置游戏速度
     SendToServerConsole("host_timescale 1")
@@ -126,6 +127,8 @@ function Main:Init_TestMode(event, playerID)
     local order = {"挑战英雄", "对手英雄", "剩余时间"}
     SendInitializationMessage(data, order)
 
+    
+    --self:UpdateAbilityModifiers(ability_modifiers)
 
 
 
@@ -185,6 +188,7 @@ function Main:Init_TestMode(event, playerID)
         if self.currentTimer ~= timerId or hero_duel.EndDuel then return end
         self:HeroBenefits(heroName, self.leftTeamHero1, selfOverallStrategy,selfHeroStrategy)
         self:HeroBenefits(opponentHeroName, self.rightTeamHero1, opponentOverallStrategy,opponentHeroStrategy)
+        self:AmplifyAbilityAOE(10)
     end)
 
 
@@ -192,6 +196,7 @@ function Main:Init_TestMode(event, playerID)
     -- 赛前限制
     Timers:CreateTimer(5, function()
         if self.currentTimer ~= timerId or hero_duel.EndDuel then return end
+
         -- 给双方英雄添加禁用效果
         local modifiers = {"modifier_disarmed", "modifier_silence", "modifier_rooted", "modifier_break"}
         for _, modifier in ipairs(modifiers) do

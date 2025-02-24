@@ -1,7 +1,3 @@
-function Main:Cleanup_Magnataur5()
-
-end
-
 function Main:Init_Magnataur5(event, playerID)
     -- 技能修改器
     self.courierPool = {}
@@ -25,10 +21,10 @@ function Main:Init_Magnataur5(event, playerID)
     self.HERO_CONFIG = {
         ALL = {
             function(hero)
+                hero:AddNewModifier(hero, nil, "modifier_kv_editor", {})
                 hero:AddNewModifier(hero, nil, "modifier_item_aghanims_shard", {})
                 hero:AddNewModifier(hero, nil, "modifier_item_ultimate_scepter_consumed", {})
                 HeroMaxLevel(hero)
-                hero:AddNewModifier(hero, nil, "modifier_truesight_vision", {})
             end,
         },
         FRIENDLY = {
@@ -325,7 +321,7 @@ function Main:PreSpawnMagnatars()
             DOTA_TEAM_BADGUYS
         )
         
-        if magnus then
+        if magnus then 
             -- 设置基本属性
             magnus:AddNewModifier(magnus, nil, "modifier_kv_editor", {})
             magnus:AddNewModifier(magnus, nil, "modifier_item_aghanims_shard", {})

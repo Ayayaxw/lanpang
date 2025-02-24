@@ -1,17 +1,10 @@
 function Main:ProcessHeroChangeRequest(event)
-    print("开始处理英雄更改请求")
-    
-    -- 先摧毁全图树木
-    print("【树木处理】开始摧毁全图树木")
+
     local mapCenter = Vector(0, 0, 0)
-    local mapRadius = 8000  -- 地图半径，确保覆盖整个地图
+    local mapRadius = 99999  -- 地图半径，确保覆盖整个地图
+
     GridNav:DestroyTreesAroundPoint(mapCenter, mapRadius, false)
-    print("【树木处理】树木摧毁完成")
-    
-    -- 重新生成树木
-    print("【树木处理】开始重新生成树木")
     GridNav:RegrowAllTrees()
-    print("【树木处理】树木重新生成完成")
 
     local playerID = 0  -- 假设是玩家0，如果需要可以修改
     local player = PlayerResource:GetPlayer(playerID)
@@ -21,13 +14,13 @@ function Main:ProcessHeroChangeRequest(event)
         return
     end
 
+    self:RestoreOriginalValues() --恢复修改过的技能KV
+
     self.currentChallenge = event.challengeType
 
     self:ExecuteCleanupFunction(self.currentChallenge)
     print("更新当前挑战为:", self.currentChallenge)
 
-    -- 设置新英雄，传入 event 和 playerID
-    print("设置新英雄")
     self:SetupNewHero(event, playerID)
 
     print("英雄更改请求处理完成")
@@ -234,4 +227,96 @@ function Main:EquipHeroItems(hero, equipment)
     else
         print("警告: 无效的装备列表")
     end
+end
+
+
+
+function Main:ClearAllUnitsExcept()
+    local exceptName = "caipan"
+    print("开始清理全图所有单位和物品，除了名字为 '" .. exceptName .. "' 的单位")
+
+    local allFlags = DOTA_UNIT_TARGET_FLAG_NONE + 
+                     DOTA_UNIT_TARGET_FLAG_DEAD +
+                     DOTA_UNIT_TARGET_FLAG_MAGIC_IMMUNE_ENEMIES + 
+                     DOTA_UNIT_TARGET_FLAG_INVULNERABLE +
+                     DOTA_UNIT_TARGET_FLAG_OUT_OF_WORLD
+
+    local removedCount = 0
+    local removedItemCount = 0
+
+    -- 清理地上的物品
+    local items = Entities:FindAllByClassname("dota_item_drop")
+    for _, item in pairs(items) do
+        if item and IsValidEntity(item) then
+            UTIL_Remove(item)
+            removedItemCount = removedItemCount + 1
+        end
+    end
+
+    -- 查找所有单位，包括无敌和特殊状态的单位
+    local allUnits = FindUnitsInRadius(
+        DOTA_TEAM_NOTEAM,
+        Vector(0, 0, 0),
+        nil,
+        FIND_UNITS_EVERYWHERE,
+        DOTA_UNIT_TARGET_TEAM_BOTH,
+        DOTA_UNIT_TARGET_ALL,
+        allFlags,
+        FIND_ANY_ORDER,
+        false
+    )
+
+    for _, unit in pairs(allUnits) do
+        if unit and IsValidEntity(unit) and unit:GetUnitName() ~= exceptName then
+            print("正在移除单位: " .. unit:GetUnitName())
+            
+            if unit:IsHero() then
+                -- 如果是英雄且已死亡，先复活
+                if not unit:IsAlive() then
+                    unit:RespawnHero(false, false)
+                end
+
+                -- 移除所有修饰器
+                unit:RemoveAllModifiers(0, true, true, true)  -- 移除所有(0)修饰器，立即移除，永久移除，不是死亡导致的移除
+                if unit:GetUnitName() == "npc_dota_hero_medusa" then
+                    unit:SetAbsOrigin(Vector(10000, 10000, 128))
+                    if unit:HasModifier("modifier_invulnerable") then
+                        unit:RemoveModifierByName("modifier_invulnerable")
+                    end
+                    Timers:CreateTimer(0.1, function()
+                        if IsValidEntity(unit) then  -- 添加有效性检查
+                            local playerID = unit:GetPlayerID()
+                            UTIL_Remove(unit)
+                            DisconnectClient(playerID, true)
+                        end
+                    end)
+                else
+                    -- 移除无敌状态
+                    unit:RemoveModifierByName("modifier_invulnerable")
+                    local playerID = unit:GetPlayerID()
+                    UTIL_Remove(unit)
+                    DisconnectClient(playerID, true)
+                end
+            else
+                -- 非英雄单位处理逻辑优化
+                if IsValidEntity(unit) then
+                    -- 先强制杀死单位
+                    unit:ForceKill(false)
+                    
+                    -- 再次检查有效性后处理修饰器
+                    if IsValidEntity(unit) then
+                        unit:RemoveAllModifiers(0, true, true, true)
+                        if unit:HasModifier("modifier_invulnerable") then
+                            unit:RemoveModifierByName("modifier_invulnerable")
+                        end
+                        UTIL_Remove(unit)
+                    end
+                end
+            end
+
+            removedCount = removedCount + 1
+        end
+    end
+
+    print("清理完成，共移除 " .. removedCount .. " 个单位，" .. removedItemCount .. " 个物品")
 end

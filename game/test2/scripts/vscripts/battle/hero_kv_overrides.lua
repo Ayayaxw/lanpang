@@ -124,7 +124,6 @@ function Main:UpdateAbilityModifiers(ability_modifiers)
     for hero_name, hero_abilities in pairs(ability_modifiers) do
         for ability_name, ability_data in pairs(hero_abilities) do
             local key = hero_name .. "_" .. ability_name
-            -- 如果这个键还没有记录过原始值
             if not self.original_values[key] then
                 local original_data = self:GetOriginalAbilityValue(hero_name, ability_name)
                 if original_data then
@@ -143,7 +142,8 @@ function Main:UpdateAbilityModifiers(ability_modifiers)
                 local data = CustomNetTables:GetTableValue("edit_kv", key)
                 if data then
                     found_data = true
-
+                    print(string.format("找到数据 %s:", key))
+                    DeepPrintTable(data)
                 end
             end
         end
@@ -158,61 +158,13 @@ function Main:UpdateAbilityModifiers(ability_modifiers)
         for ability_name, ability_data in pairs(hero_abilities) do
             local ability_index = hero_name .. "_" .. ability_name
             
-            -- 新建一个平坦的表，用于存储特殊值
-            local flat_data = {}
-            
-            local function flattenAbilityData(data)
-                -- Ensure 'data' is a table
-                if type(data) ~= 'table' then
-                    return
-                end
-                
-                -- 处理 AbilityValues
-                if data['AbilityValues'] and type(data['AbilityValues']) == 'table' then
-                    for special_name, special_data in pairs(data['AbilityValues']) do
-                        if type(special_data) == 'table' then
-                            if special_data['value'] then
-                                flat_data[special_name] = special_data['value']
-                            end
-                            -- If there are nested tables inside special_data, recursively process them
-                            flattenAbilityData(special_data)
-                        else
-                            -- Handle the case where special_data is not a table
-                            -- Uncomment for debugging
-                            -- print("Warning: Expected 'special_data' to be a table, got " .. type(special_data))
-                        end
-                    end
-                end
-                
-                -- 处理直接在 data 下的数值和数值字符串
-                for k, v in pairs(data) do
-                    if k ~= 'AbilityValues' then
-                        if type(v) == 'number' then
-                            flat_data[k] = v
-                        elseif type(v) == 'string' then
-                            if v:match("^%d+%.?%d*[%s%d%.]*$") then  -- 如果是数值字符串
-                                flat_data[k] = v
-                            end
-                        elseif type(v) == 'table' then
-                            -- 递归处理嵌套表
-                            flattenAbilityData(v)
-                        else
-                            -- Handle unexpected types
-                            -- Uncomment for debugging
-                            -- print("Warning: Unexpected type for key '" .. k .. "': " .. type(v))
-                        end
-                    end
-                end
-            end
-            
-            flattenAbilityData(ability_data)
-            
-            -- 只有在有数据时才设置
-            if next(flat_data) then
-                CustomNetTables:SetTableValue("edit_kv", ability_index, flat_data)
+            if ability_data['AbilityValues'] then
+                print(string.format("更新技能: %s_%s", hero_name, ability_name))
+                print("设置数据:")
+                DeepPrintTable(ability_data['AbilityValues'])
+                CustomNetTables:SetTableValue("edit_kv", ability_index, ability_data['AbilityValues'])
             else
-                -- Uncomment for debugging
-                -- print("Warning: No valid data for " .. ability_index)
+                print(string.format("警告: %s_%s 没有 AbilityValues 数据", hero_name, ability_name))
             end
         end
     end
@@ -222,47 +174,72 @@ function Main:UpdateAbilityModifiers(ability_modifiers)
 end
 
 function Main:AmplifyAbilityAOE(multiplier)
-
     multiplier = multiplier or 10  -- 默认10倍
+    local all_updates = {} -- 收集所有更新
 
-    local function processAbilityValues(ability_data)
+    local function processAbilityValues(ability_name, ability_data)
         if not ability_data or type(ability_data) ~= 'table' then 
-
             return 
         end
         
-        -- 创建一个新的扁平结构来存储修改后的值
         local modified_values = {
             AbilityValues = {}
         }
+    
+        -- 打印dragon_tail所有原始数据
+        if ability_name == "queenofpain_shadow_strike" then
+            print("\n=== queenofpain_shadow_strike修改前的所有数据 ===")
+            for field, value in pairs(ability_data.AbilityValues) do
+                print(string.format("\n字段: %s", field))
+                if type(value) == "table" then
+                    DeepPrintTable(value)
+                else
+                    print(tostring(value))
+                end
+            end
+            print("================================")
+        end
 
-        -- 处理AbilityValues中的AOE值
         if ability_data.AbilityValues then
             for k, v in pairs(ability_data.AbilityValues) do
                 if type(v) == 'table' and v.affected_by_aoe_increase then
                     if v.affected_by_aoe_increase == 1 or v.affected_by_aoe_increase == "1" then
-                        print(string.format("\n找到 AOE 标记字段: %s", k))
+                        print(string.format("\n处理AOE字段: %s", k))
                         
-                        -- 复制原始数据结构
                         modified_values.AbilityValues[k] = table.deepcopy(v)
                         
-                        -- 修改value值
-                        if v.value then
-                            local old_value = v.value
-                            if type(old_value) == 'string' then
-                                local numbers = {}
-                                for num in old_value:gmatch("%d+") do
-                                    table.insert(numbers, tonumber(num) * multiplier)
+                        for field, field_value in pairs(v) do
+                            if field ~= "affected_by_aoe_increase" then
+                                print(string.format("正在处理: %s = %s (%s)", 
+                                    field, tostring(field_value), type(field_value)))
+                                
+                                if type(field_value) == "string" then
+                                    if field_value:sub(1,1) == "=" then
+                                        local num = tonumber(field_value:sub(2))
+                                        if num then
+                                            modified_values.AbilityValues[k][field] = "=" .. (num * multiplier)
+                                            print(string.format("修改后: %s", modified_values.AbilityValues[k][field]))
+                                        end
+                                    elseif field_value:find("%s") then
+                                        local numbers = {}
+                                        for num in field_value:gmatch("-?%d+") do
+                                            table.insert(numbers, tonumber(num) * multiplier)
+                                        end
+                                        if #numbers > 0 then
+                                            modified_values.AbilityValues[k][field] = table.concat(numbers, " ")
+                                            print(string.format("修改后: %s", modified_values.AbilityValues[k][field]))
+                                        end
+                                    else
+                                        local num = tonumber(field_value)
+                                        if num then
+                                            modified_values.AbilityValues[k][field] = num * multiplier
+                                            print(string.format("修改后: %s", tostring(modified_values.AbilityValues[k][field])))
+                                        end
+                                    end
+                                elseif type(field_value) == "number" then
+                                    modified_values.AbilityValues[k][field] = field_value * multiplier
+                                    print(string.format("修改后: %s", tostring(modified_values.AbilityValues[k][field])))
                                 end
-                                if #numbers > 0 then
-                                    modified_values.AbilityValues[k].value = table.concat(numbers, " ")
-                                    print(string.format("数值修改：%s[value] %s -> %s", 
-                                        k, old_value, modified_values.AbilityValues[k].value))
-                                end
-                            elseif type(old_value) == 'number' then
-                                modified_values.AbilityValues[k].value = old_value * multiplier
-                                print(string.format("数值修改：%s[value] %s -> %s", 
-                                    k, old_value, modified_values.AbilityValues[k].value))
                             end
                         end
                     end
@@ -270,33 +247,41 @@ function Main:AmplifyAbilityAOE(multiplier)
             end
         end
 
+        -- 打印dragon_tail最终修改后的所有数据
+        if ability_name == "queenofpain_shadow_strike" then
+            print("\n=== queenofpain_shadow_strike修改后的所有数据 ===")
+            if modified_values and modified_values.AbilityValues then
+                for field, value in pairs(modified_values.AbilityValues) do
+                    print(string.format("\n字段: %s", field))
+                    if type(value) == "table" then
+                        DeepPrintTable(value)
+                    else
+                        print(tostring(value))
+                    end
+                end
+            else
+                print("没有生成修改后的数据")
+            end
+            print("================================")
+        end
+    
         return modified_values
     end
 
     for hero_name, hero_abilities in pairs(Main.heroAbilities) do
-        print(string.format("\n====================="))
-        print(string.format("正在处理英雄：%s", hero_name))
-        print(string.format("====================="))
-        
-        local updates = {}
-        updates[hero_name] = {}
+        all_updates[hero_name] = {}
         
         for ability_name, ability_data in pairs(hero_abilities) do
             if type(ability_data) == 'table' then
-                print(string.format("\n处理技能：%s", ability_name))
-                
-                local modified_values = processAbilityValues(ability_data)
+                local modified_values = processAbilityValues(ability_name, ability_data)
                 if modified_values and next(modified_values.AbilityValues) then
-                    updates[hero_name][ability_name] = modified_values
+                    all_updates[hero_name][ability_name] = modified_values
                 end
             end
         end
-        
-        -- 只有当有修改时才调用UpdateAbilityModifiers
-        if next(updates[hero_name]) then
-            self:UpdateAbilityModifiers(updates)
-        end
     end
     
-    print("\nAmplifyAbilityAOE 函数执行完成")
+    if next(all_updates) then
+        self:UpdateAbilityModifiers(all_updates)
+    end
 end

@@ -63,20 +63,20 @@ function IsHeroTrulyDead(killedUnit, callback)
                     if checkIllusion() then
                         return 0.03  -- 继续检查
                     else
-                        print(unitName .. " 确认死亡")
+                        -- print(unitName .. " 确认死亡")
                         callback(true)
                         return nil  -- 停止定时器
                     end
                 end)
             else
                 -- 如果没有立即找到幻象，英雄已经死亡
-                print(unitName .. " 确认死亡")
+                -- print(unitName .. " 确认死亡")
                 callback(true)
             end
         end)
     else
         -- 对于其他所有英雄，直接返回 true
-        print(unitName .. " 确认死亡")
+        -- print(unitName .. " 确认死亡")
         callback(true)
     end
 end

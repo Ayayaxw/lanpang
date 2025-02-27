@@ -23,7 +23,7 @@ function Main:Init_movie_mode(heroName, heroFacet,playerID, heroChineseName)
     --self:TestHeroCreation()
     --SpawnHeroesInFormation()
     --PreSpawnTwoGroupsHeroes()--胜负英雄展示
-    --SpawnFourHeroes()--颁奖
+    SpawnFourHeroes()--颁奖
     --self:CreateHeroLegion()
     --CreateHeroWithClones()
     --CreateTestHeroes()
@@ -50,7 +50,7 @@ function Main:Init_movie_mode(heroName, heroFacet,playerID, heroChineseName)
     --CreateFakeClientHero()
     --TestGetFakePlayer()
     --CreateBeastmasterAndBot()
-    Create100Bots()
+    --Create100Bots()
 end
 function Create100Bots()
     -- 创建100个机器人的函数
@@ -2952,12 +2952,12 @@ end
 
 function SpawnFourHeroes()
     local heroData = {
-        {name = "npc_dota_hero_sand_king", position = Vector(767.79, 6149.44, 384.00)},
+        {name = "npc_dota_hero_nevermore", position = Vector(767.79, 6149.44, 384.00)},
         --{name = "npc_dota_hero_earthshaker", position = Vector(767.79, 6149.44, 384.00)},
-        {name = "npc_dota_hero_witch_doctor", position = Vector(1028.40, 6142.33, 256.00)},
-        {name = "npc_dota_hero_leshrac", position = Vector(505.00, 6144.75, 128.00)},
+        {name = "npc_dota_hero_necrolyte", position = Vector(1028.40, 6142.33, 256.00)},
+        {name = "npc_dota_hero_lina", position = Vector(505.00, 6144.75, 128.00)},
         --{name = "npc_dota_hero_ember_spirit", position = Vector(505.00, 6144.75, 128.00)},
-        {name = "npc_dota_hero_sven", position = Vector(1335.26, 6084.06, 0.00)}
+        {name = "npc_dota_hero_lion", position = Vector(1335.26, 6084.06, 0.00)}
     }
 
     local function SetupHero(newHero, isFirst)

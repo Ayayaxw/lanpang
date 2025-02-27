@@ -93,14 +93,14 @@ function Main:OnNPCSpawned(event)
 
         Timers:CreateTimer(0.03, function()
             if not spawnedUnit or spawnedUnit:IsNull() then
-                DebugPrint("警告：单位已经不存在")
+                --DebugPrint("警告：单位已经不存在")
                 return
             end
         
             local unitName = spawnedUnit:GetUnitName()
             print(unitName)
             if not unitName then
-                DebugPrint("警告：无法获取单位名称")
+                --DebugPrint("警告：无法获取单位名称")
                 return
             end
         
@@ -114,7 +114,7 @@ function Main:OnNPCSpawned(event)
             end
             if not isIllusion and spawnedUnit:IsInvulnerable() then
                 if unitName and unitName ~= "" then
-                    DebugPrint("忽略非幻象的无敌单位: " .. unitName)
+                    --DebugPrint("忽略非幻象的无敌单位: " .. unitName)
                 end
                 return
             end

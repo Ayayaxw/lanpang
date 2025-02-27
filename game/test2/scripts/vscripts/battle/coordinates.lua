@@ -3,6 +3,10 @@
 Main.largeSpawnCenter = Vector(150, 150, 128)
 Main.largeSpawnArea = Vector(100, 500, 128)
 Main.largeSpawnArea_Caipan = Vector(144.5, 1600, 0)
+Main.largeSpawnArea_northWest = Vector(-1587, 1300, 128)
+Main.largeSpawnArea_northEast = Vector(1850, 1300, 128)
+Main.largeSpawnArea_southWest = Vector(1850, -800, 128)
+Main.largeSpawnArea_southEast = Vector(-1587, -800, 128)
 
 --小角斗场
 Main.smallDuelArea = Vector(150, -2800, 128)

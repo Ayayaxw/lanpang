@@ -10,13 +10,23 @@ function Main:Init_Aoe_10X(event, playerID)
     -- 设置英雄配置
     local teams = {DOTA_TEAM_GOODGUYS, DOTA_TEAM_BADGUYS} -- 或其他你需要的队伍
     self:CreateTrueSightWards(teams)
+    Main:AmplifyAbilityAOE(10)
     self.HERO_CONFIG = {
         ALL = {
             function(hero)
-                hero:AddNewModifier(hero, nil, "modifier_item_aghanims_shard", {})
+                local heroName = hero:GetUnitName()
+                if heroName ~= "npc_dota_hero_invoker" then
+                    hero:AddNewModifier(hero, nil, "modifier_item_aghanims_shard", {})
+                end
+                
                 hero:AddNewModifier(hero, nil, "modifier_item_ultimate_scepter_consumed", {})
                 HeroMaxLevel(hero)
                 hero:AddNewModifier(hero, nil, "modifier_kv_editor", {})
+                hero:AddNewModifier(hero, nil, "modifier_full_restore", {}) -- 给英雄添加修饰器
+                local item = hero:AddItemByName("item_gungir")
+                if not item then return end
+
+                hero:RemoveItem(item)
             end,
         },
         FRIENDLY = {
@@ -34,6 +44,7 @@ function Main:Init_Aoe_10X(event, playerID)
         BATTLEFIELD = {
             function(hero)
                 hero:AddNewModifier(hero, nil, "modifier_auto_elevation_large", {})
+
             end,
         }
     }
@@ -114,19 +125,6 @@ function Main:Init_Aoe_10X(event, playerID)
         end
     end)
 
-    -- 赛前准备
-    Timers:CreateTimer(2, function()
-        if self.currentTimer ~= timerId or hero_duel.EndDuel then return end
-        self.leftTeam = {self.leftTeamHero1}
-        self.rightTeam = {self.rightTeamHero1}
-        if self.leftTeamHero1 and not self.leftTeamHero1:IsNull() then
-            self.leftTeamHero1:AddNewModifier(self.leftTeamHero1, nil, "modifier_no_cooldown_all", { duration = 2 })
-            self.leftTeamHero1:AddNewModifier(self.leftTeamHero1, nil, "modifier_disarmed", { duration = 3 })
-            self.leftTeamHero1:AddNewModifier(self.leftTeamHero1, nil, "modifier_silence", { duration = 3 })
-            self.leftTeamHero1:AddNewModifier(self.leftTeamHero1, nil, "modifier_rooted", { duration = 3 })
-            self.leftTeamHero1:AddNewModifier(self.leftTeamHero1, nil, "modifier_break", { duration = 3 })
-        end
-    end)
 
     -- 给英雄添加小礼物
     Timers:CreateTimer(2, function()
@@ -139,7 +137,23 @@ function Main:Init_Aoe_10X(event, playerID)
         if self.currentTimer ~= timerId or hero_duel.EndDuel then return end
         self:HeroBenefits(heroName, self.leftTeamHero1, selfOverallStrategy,selfHeroStrategy)
         self:HeroBenefits(opponentHeroName, self.rightTeamHero1, opponentOverallStrategy,opponentHeroStrategy)
-        self:AmplifyAbilityAOE(10)
+
+
+        -- 直接设置到 CustomNetTables，保持完整的数据结构
+
+        
+        --Main:UpdateAbilityModifiers(ability_modifiers)
+
+
+        -- CustomNetTables:SetTableValue("edit_kv", "npc_dota_hero_dragon_knight_dragon_tail", {
+        --     dragon_aoe = {
+        --         value = "0",
+        --         special_bonus_unique_dragon_knight_8 = "+1600",
+        --         affected_by_aoe_increase = "1"
+        --     }
+        -- })
+        
+        
     end)
 
     -- 赛前限制
@@ -169,6 +183,7 @@ function Main:Init_Aoe_10X(event, playerID)
     -- 比赛开始
     Timers:CreateTimer(self.duration, function()
         if self.currentTimer ~= timerId or hero_duel.EndDuel then return end
+        self.leftTeamHero1:CalculateStatBonus(true)
         self.startTime = GameRules:GetGameTime() -- 记录开始时间
         CustomGameEventManager:Send_ServerToAllClients("start_timer", {})
 
@@ -182,7 +197,7 @@ function Main:Init_Aoe_10X(event, playerID)
 
     Timers:CreateTimer(2, function()
         if self.currentTimer ~= timerId or hero_duel.EndDuel then return end
-        self:PreSpawnMagnatars()
+        self:PreSpawnSniper()
     end)
 
 
@@ -241,57 +256,119 @@ function Main:Init_Aoe_10X(event, playerID)
     
         -- 播放胜利效果
         if self.leftTeamHero1 and not self.leftTeamHero1:IsNull() then
-            self:PlayDefeatAnimation(self.leftTeamHero1)
+            self:PlayVictoryEffects(self.leftTeamHero1)
         end
     end)
 end
 
-function Main:PreSpawnMagnatars()
-    local centerPoint = Vector(self.largeSpawnCenter.x, self.largeSpawnCenter.y, self.largeSpawnCenter.z)  -- 向北移动500码
-    local radius = 800  -- 五边形的半径
-    local magnusPool = {}
+function Main:PreSpawnSniper()
+    -- 获取矩形四个角的坐标
+    local left = self.largeSpawnArea_northWest.x
+    local right = self.largeSpawnArea_northEast.x
+    local top = self.largeSpawnArea_northWest.y
+    local bottom = self.largeSpawnArea_southWest.y
+    local sniperPool = {}
 
-    -- 生成五个马格纳斯在五边形的顶点上
-    for i = 1, 10 do
-        -- 计算十边形顶点的角度和位置
-        local angle = (i - 1) * 36  -- 360/10 = 36度
-        local radian = math.rad(angle)
-        local spawnX = centerPoint.x + radius * math.cos(radian)
-        local spawnY = centerPoint.y + radius * math.sin(radian)
-        local spawnPos = Vector(spawnX, spawnY, centerPoint.z)
+    -- 计算区域宽度和高度
+    local width = right - left
+    local height = top - bottom
+    
+    -- 要生成的总单位数
+    local totalSnipers = 100
+    
+    -- 计算理想的行列数
+    local aspectRatio = width / height
+    
+    -- 尝试不同的行列组合，找到最均匀的分布
+    local bestRows, bestCols = 1, totalSnipers
+    local bestRemainder = totalSnipers
+    
+    for r = 1, totalSnipers do
+        local c = math.ceil(totalSnipers / r)
+        local remainder = (r * c) - totalSnipers
         
-        -- 创建马格纳斯
-        local magnus = CreateUnitByName(
-            "npc_dota_hero_wisp",
-            spawnPos,
-            true,
-            nil,
-            nil,
-            DOTA_TEAM_BADGUYS
-        )
-        
-        if magnus then 
-            -- 设置基本属性
-            magnus:AddNewModifier(magnus, nil, "modifier_kv_editor", {})
-            magnus:AddNewModifier(magnus, nil, "modifier_disarmed", {})
-            HeroMaxLevel(magnus)
-            
-            -- 添加6个能量之球物品
-            for j = 1, 6 do
-                magnus:AddItemByName("item_energy_booster")
+        -- 优先选择填满或接近填满的组合
+        if remainder >= 0 and remainder <= bestRemainder then
+            -- 检查这个组合的宽高比是否接近矩形的宽高比
+            local gridRatio = c / r
+            if math.abs(gridRatio - aspectRatio) < math.abs(bestCols / bestRows - aspectRatio) or bestRemainder > remainder then
+                bestRows = r
+                bestCols = c
+                bestRemainder = remainder
             end
-            
-            -- 设置朝向中心点
-            local direction = (centerPoint - spawnPos):Normalized()
-            magnus:SetForwardVector(direction)
-            
-            table.insert(magnusPool, magnus)
         end
     end
     
-    self.magnusPool = magnusPool
-end
+    local rows = bestRows
+    local cols = bestCols
+    
+    print("使用网格: " .. rows .. " 行 x " .. cols .. " 列 (总共: " .. rows*cols .. " 个位置，需要放置: " .. totalSnipers .. " 个单位)")
+    
+    -- 计算精确步长，确保覆盖整个区域
+    local xStep = width / (cols - 1)
+    local yStep = height / (rows - 1)
+    
+    -- 特殊情况处理
+    if cols == 1 then xStep = 0 end
+    if rows == 1 then yStep = 0 end
+    
+    -- 创建所有单位
+    local count = 0
+    for i = 0, rows - 1 do
+        for j = 0, cols - 1 do
+            -- 确保不超过所需的单位数量
+            if count >= totalSnipers then
+                break
+            end
+            
+            -- 计算均匀分布的位置
+            local xPercent = (cols == 1) and 0.5 or (j / (cols - 1))
+            local yPercent = (rows == 1) and 0.5 or (i / (rows - 1))
+            
+            local spawnX = left + (width * xPercent)
+            local spawnY = bottom + (height * yPercent)
+            local spawnPos = Vector(spawnX, spawnY, self.largeSpawnArea_northWest.z)
+            
+            -- 创建狙击手单位
+            local sniper = CreateUnitByName(
+                "sniper",
+                spawnPos,
+                true,
+                nil,
+                nil,
+                DOTA_TEAM_BADGUYS
+            )
+            
+            if sniper then
+                -- 删除所有技能
+                for i = 0, 3 do
+                    local ability = sniper:GetAbilityByIndex(i)
+                    if ability then
+                        sniper:RemoveAbility(ability:GetAbilityName())
+                    end
+                end
 
+                sniper:AddNewModifier(self.leftTeamHero1, nil, "modifier_rooted", {})
+                sniper:AddNewModifier(self.leftTeamHero1, nil, "modifier_disarmed", {})
+                sniper:AddNewModifier(sniper, nil, "modifier_invulnerable", {duration = 8.0})
+
+
+
+                HeroMaxLevel(sniper)
+                -- 面向中心点
+                local centerPoint = Vector((left + right) / 2, (top + bottom) / 2, self.largeSpawnArea_northWest.z)
+                local direction = (centerPoint - spawnPos):Normalized()
+                sniper:SetForwardVector(direction)
+                
+                table.insert(sniperPool, sniper)
+                count = count + 1
+            end
+        end
+    end
+    
+    print("实际生成单位数量: " .. count)
+    self.sniperPool = sniperPool
+end
 
 function Main:OnUnitKilled_Aoe_10X(killedUnit, args)
     local killedUnit = EntIndexToHScript(args.entindex_killed)
@@ -306,94 +383,57 @@ function Main:OnUnitKilled_Aoe_10X(killedUnit, args)
     end
 
     -- 如果不是英雄死亡，检查是否是马格纳斯死亡
-    if killedUnit:GetUnitName() == "npc_dota_hero_wisp" then
+    if killedUnit:GetUnitName() == "sniper" then
         self:ProcessHeroDeath_Aoe_10X(killedUnit, killer)
     end
 end
-
 function Main:ProcessHeroDeath_Aoe_10X(killedUnit, killer)
     local function CalculateCurrentScore()
         return hero_duel.killCount * 10
     end
 
-    local function CalculateFinalScore()
-        local score = hero_duel.killCount * 10  -- 基础击杀得分
-        if hero_duel.killCount >= 10 or (not killedUnit == self.leftTeamHero1) then
-            -- 加入剩余时间得分
-            local currentTime = GameRules:GetGameTime() - self.startTime
-            local remainingTime = math.max(0, self.limitTime - currentTime)
-            score = score + math.floor(remainingTime)
+    -- print("ProcessHeroDeath_Aoe_10X called for unit: ", killedUnit:GetUnitName())
+    
+    if killedUnit:GetUnitName() == "sniper" then
+        -- 播放击杀特效
+        if killer then
+            local particle = ParticleManager:CreateParticle(
+                "particles/generic_gameplay/lasthit_coins_local.vpcf", 
+                PATTACH_ABSORIGIN, 
+                killedUnit
+            )
+            ParticleManager:SetParticleControl(particle, 1, killedUnit:GetAbsOrigin())
+            ParticleManager:ReleaseParticleIndex(particle)
+            EmitSoundOn("General.Coins", killer)
         end
-        
-        return math.floor(score)
+
+        -- 更新击杀数和得分
+        hero_duel.killCount = hero_duel.killCount + 1
+        local currentScore = CalculateCurrentScore() -- 只计算击杀得分
+        local data = {
+            ["击杀数量"] = hero_duel.killCount,
+            ["当前总分"] = currentScore
+        }
+        CustomGameEventManager:Send_ServerToAllClients("update_score", data)
+
+        -- 保存死亡位置
+        local spawnPosition = killedUnit:GetAbsOrigin()
+
+        -- 一秒后重生英雄
+        Timers:CreateTimer(1.0, function()
+            if not killedUnit:IsNull() then
+                killedUnit:RespawnHero(false, false)
+                FindClearSpaceForUnit(killedUnit, spawnPosition, true)
+                
+                -- 设置为玩家0控制
+                killedUnit:SetControllableByPlayer(0, true)
+                killedUnit:RemoveModifierByName("modifier_fountain_invulnerability")
+                -- 添加禁锢和缴械效果
+                killedUnit:AddNewModifier(self.leftTeamHero1, nil, "modifier_rooted", {})
+                killedUnit:AddNewModifier(self.leftTeamHero1, nil, "modifier_disarmed", {})
+            end
+        end)
     end
-    
-    print("ProcessHeroDeath_Aoe_10X called for unit: ", killedUnit:GetUnitName())
-    
-        if killedUnit:GetUnitName() == "npc_dota_hero_wisp" then
-            -- 播放击杀特效
-            if killer then
-                local particle = ParticleManager:CreateParticle(
-                    "particles/generic_gameplay/lasthit_coins_local.vpcf", 
-                    PATTACH_ABSORIGIN, 
-                    killedUnit
-                )
-                ParticleManager:SetParticleControl(particle, 1, killedUnit:GetAbsOrigin())
-                ParticleManager:ReleaseParticleIndex(particle)
-                EmitSoundOn("General.Coins", killer)
-            end
-
-            -- 更新击杀数和得分
-            hero_duel.killCount = hero_duel.killCount + 1
-            local currentScore = CalculateCurrentScore() -- 只计算击杀得分
-            local data = {
-                ["击杀数量"] = hero_duel.killCount,
-                ["当前总分"] = currentScore
-            }
-            CustomGameEventManager:Send_ServerToAllClients("update_score", data)
-
-            -- 检查是否完成全部击杀
-            if hero_duel.killCount >= 10 and not hero_duel.EndDuel then
-                hero_duel.EndDuel = true
-                CustomGameEventManager:Send_ServerToAllClients("stop_timer", {})
-
-                -- 计算最终得分
-                local currentTime = GameRules:GetGameTime() - self.startTime
-                local remainingTime = math.max(0, self.limitTime - currentTime)
-                local formattedTime = string.format("%02d:%02d.%02d", 
-                    math.floor(remainingTime / 60),
-                    math.floor(remainingTime % 60),
-                    math.floor((remainingTime * 100) % 100))
-
-                local finalScore = CalculateFinalScore()
-
-                -- 记录结果
-                self:createLocalizedMessage(
-                    "[LanPang_RECORD][",
-                    self.currentMatchID,
-                    "]",
-                    "[挑战成功]剩余时间:" .. formattedTime .. ",最终得分:" .. finalScore
-                )
-                local data = {
-                    ["击杀数量"] = hero_duel.killCount,
-                    ["当前总分"] = finalScore
-                }
-                CustomGameEventManager:Send_ServerToAllClients("update_score", data)
-                -- 发送胜利消息
-                CustomGameEventManager:Send_ServerToAllClients("update_final_score", {
-                    result = "victory",
-                    survivalTime = formattedTime,
-                    killCount = hero_duel.killCount,
-                    finalScore = finalScore
-                })
-
-                -- 播放胜利效果
-                if self.leftTeamHero1 and not self.leftTeamHero1:IsNull() then
-                    self:PlayVictoryEffects(self.leftTeamHero1)
-
-                end
-            end
-        end
 end
 
 function Main:OnNPCSpawned_Aoe_10X(spawnedUnit, event)

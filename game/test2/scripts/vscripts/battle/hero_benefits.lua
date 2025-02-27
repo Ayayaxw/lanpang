@@ -45,6 +45,7 @@ function Main:HeroBenefits(heroName, hero, overallStrategy, heroStrategy)
         heroName == "npc_dota_hero_muerta" or 
         heroName == "npc_dota_hero_hoodwink" or 
         heroName == "npc_dota_hero_shredder" or
+        heroName == "npc_dota_hero_monkey_king" or
         heroName == "npc_dota_hero_windrunner"  then
         
         print("正在生成树木环绕阵型")

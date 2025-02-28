@@ -1,5 +1,5 @@
 
-function Main:Init_TestMode(event, playerID)
+function Main:Init_Level7Dazzle(event, playerID)
     -- 技能修改器
 
     local teams = {DOTA_TEAM_GOODGUYS, DOTA_TEAM_BADGUYS} -- 或其他你需要的队伍
@@ -9,33 +9,57 @@ function Main:Init_TestMode(event, playerID)
             function(hero)
                 hero:AddNewModifier(hero, nil, "modifier_kv_editor", {})
                 hero:AddNewModifier(hero, nil, "modifier_rooted", {duration = 5})
-                hero:AddNewModifier(hero, nil, "modifier_item_aghanims_shard", {})
-                hero:AddNewModifier(hero, nil, "modifier_item_ultimate_scepter_consumed", {})
-                HeroMaxLevel(hero)
+                -- 升到7级
+                for i = 1, 6 do
+                    hero:HeroLevelUp(true)
+                end
+        
+                -- 如果是戴泽才进行技能加点
+                if hero:GetUnitName() == "npc_dota_hero_dazzle" then
+                    -- 获取技能
+                    local ability1 = hero:GetAbilityByIndex(0)
+                    local ability2 = hero:GetAbilityByIndex(1) 
+                    local ability3 = hero:GetAbilityByIndex(2)
+                    local ability4 = hero:GetAbilityByIndex(5)
                 
-                -- -- 添加投影技能
-                -- hero:AddAbility("dazzle_nothl_projection")
-                -- -- 获取技能引用
-                -- local ability = hero:FindAbilityByName("dazzle_nothl_projection")
-                -- -- 升级到3级
-                -- ability:SetLevel(3)
-            
-                -- -- 创建定时器每秒释放技能
-                -- Timers:CreateTimer(function()
-                --     if not hero:IsAlive() then return nil end
-                    
-                --     -- 获取英雄朝向的前方500码位置
-                --     local forward = hero:GetForwardVector()
-                --     local target_pos = hero:GetAbsOrigin() + forward * 500
-                    
-                --     -- 设置施法位置并释放技能
-                --     hero:SetCursorPosition(target_pos)
-                --     ability:OnSpellStart()
-                    
-                --     return 1.0 -- 1秒后重复
-                -- end)
+                    -- 清空所有技能点
+                    hero:SetAbilityPoints(7)
+                
+                    if CommonAI:containsStrategy(self:getDefaultIfEmpty(event.opponentHeroStrategies), "主学治疗波") then
+                        -- 主学3技能的情况
+                        -- 三技能升4级
+                        for i = 1, 4 do
+                            hero:UpgradeAbility(ability3)
+                        end
+                        -- 一技能升1级
+                        hero:UpgradeAbility(ability1)
+                        -- 如果不是不学薄葬，二技能升1级，否则主技能多加1级
+                        if not CommonAI:containsStrategy(self:getDefaultIfEmpty(event.opponentHeroStrategies), "不学薄葬") then
+                            hero:UpgradeAbility(ability2)
+                        else
+                            hero:UpgradeAbility(ability3)
+                        end
+                    else
+                        -- 默认主学1技能的情况
+                        -- 一技能升4级
+                        for i = 1, 4 do
+                            hero:UpgradeAbility(ability1)
+                        end
+                        -- 三技能升1级
+                        hero:UpgradeAbility(ability3)
+                        -- 如果不是不学薄葬，二技能升1级，否则主技能多加1级
+                        if not CommonAI:containsStrategy(self:getDefaultIfEmpty(event.opponentHeroStrategies), "不学薄葬") then
+                            hero:UpgradeAbility(ability2)
+                        else
+                            hero:UpgradeAbility(ability1)
+                        end
+                    end
+                
+                    -- 大招升1级
+                    hero:UpgradeAbility(ability4)
+                end
             end,
-        },
+        },  
         FRIENDLY = {
             function(hero)
                 hero:SetForwardVector(Vector(1, 0, 0))
@@ -179,7 +203,55 @@ function Main:Init_TestMode(event, playerID)
         if self.currentTimer ~= timerId or hero_duel.EndDuel then return end
         self:HeroBenefits(heroName, self.leftTeamHero1, selfOverallStrategy,selfHeroStrategy)
         self:HeroBenefits(opponentHeroName, self.rightTeamHero1, opponentOverallStrategy,opponentHeroStrategy)
+        -- 设置小兵的AI和仇恨机制
+        local function SetCreepAI(creep)
+            creep:SetAcquisitionRange(1600)
+        end
         
+        -- 天辉小兵
+        local leftPos = self.smallDuelAreaLeft
+        local rightOffset = Vector(500, 0, 0)
+        local meleeSpacing = Vector(0, 100, 0)  -- Y轴间距
+        
+        -- 基础位置(往右500码)
+        local basePos = leftPos + rightOffset
+        
+        -- 计算近战兵中心位置(向上偏移150码,向下偏移150码,总共300码)
+        local centerPos = basePos + Vector(0, -100, 0)
+        
+        -- 生成4个天辉近战兵(竖着一排,居中)
+        for i = 1, 3 do
+            local position = centerPos + meleeSpacing * (i-1)
+            local creep = CreateUnitByName("npc_dota_creep_goodguys_melee", position, true, nil, nil, DOTA_TEAM_GOODGUYS)
+            SetCreepAI(creep)
+        end
+        
+        -- 生成1个天辉远程兵(在近战兵左侧)
+        local rangedPos = basePos + Vector(-300, 0, 0)  -- 在近战兵左边300码
+        local rangedCreep = CreateUnitByName("npc_dota_creep_goodguys_ranged", rangedPos, true, nil, nil, DOTA_TEAM_GOODGUYS)
+        SetCreepAI(rangedCreep)
+        
+        -- 夜魇小兵
+        local rightPos = self.smallDuelAreaRight
+        local leftOffset = Vector(-500, 0, 0)
+        
+        -- 基础位置(往左500码)
+        basePos = rightPos + leftOffset
+        
+        -- 计算近战兵中心位置
+        centerPos = basePos + Vector(0, -100, 0)
+        
+        -- 生成4个夜魇近战兵(竖着一排,居中)
+        for i = 1, 3 do
+            local position = centerPos + meleeSpacing * (i-1)
+            local creep = CreateUnitByName("npc_dota_creep_badguys_melee", position, true, nil, nil, DOTA_TEAM_BADGUYS)
+            SetCreepAI(creep)
+        end
+        
+        -- 生成1个夜魇远程兵(在近战兵右侧)
+        rangedPos = basePos + Vector(300, 0, 0)  -- 在近战兵右边300码
+        local rangedCreep = CreateUnitByName("npc_dota_creep_badguys_ranged", rangedPos, true, nil, nil, DOTA_TEAM_BADGUYS)
+        SetCreepAI(rangedCreep)
     end)
 
     -- 赛前限制
@@ -187,15 +259,20 @@ function Main:Init_TestMode(event, playerID)
         if self.currentTimer ~= timerId or hero_duel.EndDuel then return end
 
         -- 给双方英雄添加禁用效果
-        local modifiers = {"modifier_disarmed", "modifier_silence", "modifier_rooted", "modifier_break"}
-        for _, modifier in ipairs(modifiers) do
-            if self.leftTeamHero1 and not self.leftTeamHero1:IsNull() then
-                self.leftTeamHero1:AddNewModifier(self.leftTeamHero1, nil, modifier, { duration = self.duration - 5 })
-            end
-            if self.rightTeamHero1 and not self.rightTeamHero1:IsNull() then
-                self.rightTeamHero1:AddNewModifier(self.rightTeamHero1, nil, modifier, { duration = self.duration - 5 })
-            end
-        end
+        self:PrepareHeroForDuel(
+            self.leftTeamHero1,                     -- 英雄单位
+            self.smallDuelAreaLeft,      -- 左侧决斗区域坐标
+            self.duration - 5,                      -- 限制效果持续20秒
+            Vector(1, 0, 0)          -- 朝向右侧
+        )
+
+        self:PrepareHeroForDuel(
+            self.rightTeamHero1,        
+            self.smallDuelAreaRight,     
+            self.duration - 5,           
+            Vector(-1, 0, 0)         
+        )
+
     end)
 
     -- 发送摄像机位置给前端
@@ -206,9 +283,9 @@ function Main:Init_TestMode(event, playerID)
     Timers:CreateTimer(self.duration - 6, function()
         if self.currentTimer ~= timerId or hero_duel.EndDuel then return end
 
-        Timers:CreateTimer(0.1, function()
-            if self.currentTimer ~= timerId or hero_duel.EndDuel then return end
+        Timers:CreateTimer(0.01, function()
             self:MonitorUnitsStatus()
+            if self.currentTimer ~= timerId or hero_duel.EndDuel then return end
             return 0.01
         end)
 
@@ -235,6 +312,8 @@ function Main:Init_TestMode(event, playerID)
         self.startTime = GameRules:GetGameTime() -- 记录开始时间
         CustomGameEventManager:Send_ServerToAllClients("start_timer", {})
         self:MonitorUnitsStatus()
+        self:StartAbilitiesMonitor(self.rightTeamHero1)
+        self:StartAbilitiesMonitor(self.leftTeamHero1)
         self:createLocalizedMessage(
             "[LanPang_RECORD][",
             self.currentMatchID,
@@ -265,19 +344,62 @@ function Main:Init_TestMode(event, playerID)
 end
 
 
-function Main:OnUnitKilled_TestMode(killedUnit, args)
+function Main:OnUnitKilled_Level7Dazzle(killedUnit, args)
     local killedUnit = EntIndexToHScript(args.entindex_killed)
+    local killer = EntIndexToHScript(args.entindex_attacker)
 
     if hero_duel.EndDuel or not killedUnit:IsRealHero() then
-        print("Unit killed: " .. killedUnit:GetUnitName() .. " (not processed)")
         return
     end
 
-    self:ProcessHeroDeath(killedUnit)
+    -- 检查是否有人阵亡
+    local leftTeamAlive = false
+    local rightTeamAlive = false
+
+    -- 检查左方英雄
+    if not self.leftTeamHero1:IsNull() and self.leftTeamHero1:IsAlive() then
+        leftTeamAlive = true
+    end
+
+    -- 检查右方英雄
+    if not self.rightTeamHero1:IsNull() and self.rightTeamHero1:IsAlive() then
+        rightTeamAlive = true
+    end
+
+    -- 判断胜负
+    if not leftTeamAlive or not rightTeamAlive then
+        hero_duel.EndDuel = true
+        
+        -- 获取获胜方和最后一击英雄
+        local winningTeam = leftTeamAlive and "成功" or "失败"
+        local killerName = killer:GetUnitName()
+        
+        -- 记录比赛结果
+        self:createLocalizedMessage(
+            "[LanPang_RECORD][",
+            self.currentMatchID,
+            "]",
+            "[比赛结束]挑战".. winningTeam
+        )
+
+        -- 对获胜的英雄播放胜利特效
+        local winningHero = leftTeamAlive and self.leftTeamHero1 or self.rightTeamHero1
+        if not winningHero:IsNull() and winningHero:IsAlive() then
+            self:PlayVictoryEffects(winningHero)
+        end
+
+        -- 禁用幸存的英雄
+        if not self.leftTeamHero1:IsNull() and self.leftTeamHero1:IsAlive() then
+            self:DisableHeroWithModifiers(self.leftTeamHero1, self.endduration)
+        end
+        if not self.rightTeamHero1:IsNull() and self.rightTeamHero1:IsAlive() then
+            self:DisableHeroWithModifiers(self.rightTeamHero1, self.endduration)
+        end
+    end
 end
 
 
-function Main:OnNPCSpawned_TestMode(spawnedUnit, event)
+function Main:OnNPCSpawned_Level7Dazzle(spawnedUnit, event)
     if not self:isExcludedUnit(spawnedUnit) then
         self:ApplyConfig(spawnedUnit, "BATTLEFIELD")
     end

@@ -120,7 +120,9 @@ function Main:RestoreOriginalValues()
     end
 end
 
-function Main:UpdateAbilityModifiers(ability_modifiers)
+function Main:UpdateAbilityModifiers(ability_modifiers, debug_print)
+    debug_print = debug_print or false
+
     for hero_name, hero_abilities in pairs(ability_modifiers) do
         for ability_name, ability_data in pairs(hero_abilities) do
             local key = hero_name .. "_" .. ability_name
@@ -142,13 +144,15 @@ function Main:UpdateAbilityModifiers(ability_modifiers)
                 local data = CustomNetTables:GetTableValue("edit_kv", key)
                 if data then
                     found_data = true
-                    print(string.format("找到数据 %s:", key))
-                    DeepPrintTable(data)
+                    if debug_print then
+                        print(string.format("找到数据 %s:", key))
+                        DeepPrintTable(data)
+                    end
                 end
             end
         end
         
-        if not found_data then
+        if not found_data and debug_print then
             print("edit_kv 表是空的或没有找到任何数据")
         end
     end
@@ -159,11 +163,13 @@ function Main:UpdateAbilityModifiers(ability_modifiers)
             local ability_index = hero_name .. "_" .. ability_name
             
             if ability_data['AbilityValues'] then
-                print(string.format("更新技能: %s_%s", hero_name, ability_name))
-                print("设置数据:")
-                DeepPrintTable(ability_data['AbilityValues'])
+                if debug_print then
+                    print(string.format("更新技能: %s_%s", hero_name, ability_name))
+                    print("设置数据:")
+                    DeepPrintTable(ability_data['AbilityValues'])
+                end
                 CustomNetTables:SetTableValue("edit_kv", ability_index, ability_data['AbilityValues'])
-            else
+            elseif debug_print then
                 print(string.format("警告: %s_%s 没有 AbilityValues 数据", hero_name, ability_name))
             end
         end

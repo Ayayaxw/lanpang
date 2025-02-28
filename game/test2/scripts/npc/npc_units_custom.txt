@@ -703,15 +703,15 @@
 
 
 
-	"npc_dota_creep_goodguys_ranged"
-	{
-		"StatusHealth"				"300"		// 基础生命值。
-		"AttackDamageMin"			"21"		// 最小攻击力。
-		"AttackDamageMax"			"26"		// 最大攻击力。
+	// "npc_dota_creep_goodguys_ranged"
+	// {
+	// 	"StatusHealth"				"300"		// 基础生命值。
+	// 	"AttackDamageMin"			"21"		// 最小攻击力。
+	// 	"AttackDamageMax"			"26"		// 最大攻击力。
 
-		"AttackAcquisitionRange"	"9999"		// 可获取目标的范围。
-		"AttackRange"				"9999"		// Range within a target can be attacked.
-	}
+	// 	"AttackAcquisitionRange"	"9999"		// 可获取目标的范围。
+	// 	"AttackRange"				"9999"		// Range within a target can be attacked.
+	// }
 
 
 	"npc_dota_neutral_kobold"
@@ -755,10 +755,6 @@
 		"CollisionSize"         "1"                       // 具体的碰撞大小
 	}
 
-		"npc_dota_creep_badguys_melee"	
-	{
-		"AttackCapabilities"		"DOTA_UNIT_CAP_NO_ATTACK"
-	}
 
 
 	"luosipi"

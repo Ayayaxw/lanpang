@@ -71,6 +71,7 @@ function CommonAI:Ini_SkillAoeRadius()
         wisp_spirits_in = 9999,
         wisp_spirits_out = 9999,
         queenofpain_sonic_wave = 650,
+        dazzle_nothl_projection = 9999,
 
     }
     self.itemRadius = {

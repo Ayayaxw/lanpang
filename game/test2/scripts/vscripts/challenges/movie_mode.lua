@@ -23,7 +23,7 @@ function Main:Init_movie_mode(heroName, heroFacet,playerID, heroChineseName)
     --self:TestHeroCreation()
     --SpawnHeroesInFormation()
     --PreSpawnTwoGroupsHeroes()--胜负英雄展示
-    SpawnFourHeroes()--颁奖
+    --SpawnFourHeroes()--颁奖
     --self:CreateHeroLegion()
     --CreateHeroWithClones()
     --CreateTestHeroes()
@@ -51,7 +51,27 @@ function Main:Init_movie_mode(heroName, heroFacet,playerID, heroChineseName)
     --TestGetFakePlayer()
     --CreateBeastmasterAndBot()
     --Create100Bots()
+    SpawnTestCreeps()
 end
+
+
+function SpawnTestCreeps()
+    local position = Vector(0, 0, 0)  -- 坐标原点
+    
+    -- 创建天辉小兵
+    local goodCreep = CreateUnitByName("npc_dota_creep_goodguys_melee", position, true, nil, nil, DOTA_TEAM_GOODGUYS)
+    goodCreep:SetOwner(PlayerResource:GetPlayer(0))
+    goodCreep:SetControllableByPlayer(0, true)
+    
+    -- 创建夜魇小兵  
+    local badCreep = CreateUnitByName("npc_dota_creep_badguys_melee", position, true, nil, nil, DOTA_TEAM_BADGUYS)
+    badCreep:SetOwner(PlayerResource:GetPlayer(0))
+    badCreep:SetControllableByPlayer(0, true)
+end
+
+
+
+
 function Create100Bots()
     -- 创建100个机器人的函数
     local heroList = {

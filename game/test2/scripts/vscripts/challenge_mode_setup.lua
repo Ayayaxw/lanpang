@@ -33,170 +33,301 @@ require("challenges/mode_10v10")
 require("challenges/MeepoChaos")  
 require("challenges/CreepChaos")  
 require("challenges/Aoe_10X")  
+require("challenges/Level7Dazzle")  
 
-Main.Challenges = {
-    --测试用的模式0开头
-    HeroChaos = 0000,
-    HeroDisplay = 0001,
-    
-    movie_mode = 0003,
-    Save_Mor = 0004,
-    Level1_Duel = 0005,
-    Work_Work_2 = 0006,
-    DeathRandom = 0007,
-    super_hero_chaos = 0008,
-    mode_10v10 = 0009,
 
-    --超级兵刷兵大赛1开头
-    CreepChallenge_500MegaCreeps = 1000,
-    CreepChallenge_100Creeps = 1001,
-    SuperCreepChallenge90CD = 1002,
 
-    --双人模式2开头
-    CD0_1skill = 2001,
-    CD0_1skill_online = 2002,
-    Fall_Flat = 2003,
-    Five_Times_Attribute = 2004,
-    TestMode = 2005,
-    Upside_Down = 2006,
-    Upside_Down_attribute = 2007,
-    CD0_2skill = 2008,
-    Illusion_3X = 2009,
-    Duel_1VS30 = 2010,
-    mode_5v5 = 2011,
-    mode_5v5_2 = 2012,
-    MeepoChaos = 2013,
-    
+Main.Challenges = {}
+Main.ModeConfig = {}
+Main.GameModes = {
+    -- Test modes (0000-0999)
+    {
+        id = "HeroChaos",
+        code = 0000,
+        name = "大乱斗",
+        menuConfig = {},
+        category = "test"
+    },
+    {
+        id = "HeroDisplay", 
+        code = 0001,
+        name = "英雄展示",
+        menuConfig = {},
+        category = "test"
+    },
+    {
+        id = "movie_mode",
+        code = 0003,
+        name = "电影模式",
+        menuConfig = {},
+        category = "test"
+    },
+    {
+        id = "Save_Mor",
+        code = 0004,
+        name = "拯救水人",
+        menuConfig = {"SelfHeroRow"},
+        category = "test"
+    },
+    {
+        id = "Level1_Duel",
+        code = 0005,
+        name = "一级单挑",
+        menuConfig = {"SelfHeroRow", "OpponentHeroRow"},
+        category = "test"
+    },
+    {
+        id = "Work_Work_2",
+        code = 0006,
+        name = "打螺丝之殇2",
+        menuConfig = {"SelfHeroRow"},
+        category = "test"
+    },
+    {
+        id = "DeathRandom",
+        code = 0007,
+        name = "死亡随机",
+        menuConfig = {},
+        category = "test"
+    },
+    {
+        id = "super_hero_chaos",
+        code = 0008,
+        name = "超级大乱斗",
+        menuConfig = {},
+        category = "test"
+    },
+    {
+        id = "mode_10v10",
+        code = 0009,
+        name = "10v10对决",
+        menuConfig = {"SelfHeroRow", "OpponentHeroRow"},
+        category = "test"
+    },
 
-    --单人模式3开头
-    MonkeyKing = 3001,
-    HeroChallenge_ShadowShaman = 3002,
-    HeroChallenge_illusion = 3003,
-    Work_Work = 3004,
-    Ursa800 = 3005,
-    Courier800 = 3006,
-    Magnataur5 = 3007,
-    Double_on_death = 3008,
-    MAG_DREAM = 3009,
-    SnipeHunt = 3010,
-    MillGrinding = 3011,
-    CreepChaos = 3012,
-    Aoe_10X = 3013,
-    
+    -- Creep Challenge modes (1000-1999)
+    {
+        id = "CreepChallenge_100Creeps",
+        code = 1001,
+        name = "100远程兵挑战",
+        menuConfig = {"SelfHeroRow"},
+        category = "creep"
+    },
+    {
+        id = "SuperCreepChallenge90CD",
+        code = 1002,
+        name = "90%减CD击杀大赛",
+        menuConfig = {"SelfHeroRow"},
+        category = "creep"
+    },
+
+    -- Multiplayer modes (2000-2999)
+    {
+        id = "CD0_1skill",
+        code = 2001,
+        name = "一技能无CD",
+        menuConfig = {"SelfHeroRow", "OpponentHeroRow"},
+        category = "multiplayer"
+    },
+    {
+        id = "Fall_Flat",
+        code = 2003,
+        name = "斗蛆蛆",
+        menuConfig = {"SelfHeroRow", "OpponentHeroRow"},
+        category = "multiplayer"
+    },
+    {
+        id = "Five_Times_Attribute",
+        code = 2004,
+        name = "五倍属性",
+        menuConfig = {"SelfHeroRow", "OpponentHeroRow"},
+        category = "multiplayer"
+    },
+    {
+        id = "TestMode",
+        code = 2005,
+        name = "单挑",
+        menuConfig = {"SelfHeroRow", "OpponentHeroRow"},
+        category = "multiplayer"
+    },
+    {
+        id = "Upside_Down",
+        code = 2006,
+        name = "反转了",
+        menuConfig = {"SelfHeroRow", "OpponentHeroRow"},
+        category = "multiplayer"
+    },
+    {
+        id = "Upside_Down_attribute",
+        code = 2007,
+        name = "属性反转",
+        menuConfig = {"SelfHeroRow", "OpponentHeroRow"},
+        category = "multiplayer"
+    },
+    {
+        id = "CD0_2skill",
+        code = 2008,
+        name = "二技能无CD",
+        menuConfig = {"SelfHeroRow", "OpponentHeroRow"},
+        category = "multiplayer"
+    },
+    {
+        id = "Illusion_3X",
+        code = 2009,
+        name = "三倍镜像",
+        menuConfig = {"SelfHeroRow", "OpponentHeroRow"},
+        category = "multiplayer"
+    },
+    {
+        id = "Duel_1VS30",
+        code = 2010,
+        name = "1级还是30级?",
+        menuConfig = {"SelfHeroRow", "OpponentHeroRow"},
+        category = "multiplayer"
+    },
+    {
+        id = "mode_5v5",
+        code = 2011,
+        name = "5v5对决-三倍属性版",
+        menuConfig = {"SelfHeroRow", "OpponentHeroRow"},
+        category = "multiplayer"
+    },
+    {
+        id = "mode_5v5_2",
+        code = 2012,
+        name = "5v5对决",
+        menuConfig = {"SelfHeroRow", "OpponentHeroRow"},
+        category = "multiplayer"
+    },
+    {
+        id = "MeepoChaos",
+        code = 2013,
+        name = "超级米波大乱斗",
+        menuConfig = {"SelfHeroRow", "OpponentHeroRow"},
+        category = "multiplayer"
+    },
+    {
+        id = "Level7Dazzle",
+        code = 2014,
+        name = "对战7级戴泽",
+        menuConfig = {"SelfHeroRow", "OpponentHeroRow"},
+        category = "multiplayer"
+    },
+
+    -- Single player modes (3000-3999)
+    {
+        id = "HeroChallenge_illusion",
+        code = 3003,
+        name = "幻象对决",
+        menuConfig = {"SelfHeroRow"},
+        category = "single"
+    },
+    {
+        id = "Work_Work",
+        code = 3004,
+        name = "打螺丝之殇",
+        menuConfig = {"SelfHeroRow"},
+        category = "single"
+    },
+    {
+        id = "Ursa800",
+        code = 3005,
+        name = "300拍拍",
+        menuConfig = {"SelfHeroRow"},
+        category = "single"
+    },
+    {
+        id = "Courier800",
+        code = 3006,
+        name = "抓小鸡",
+        menuConfig = {"SelfHeroRow"},
+        category = "single"
+    },
+    {
+        id = "Magnataur5",
+        code = 3007,
+        name = "猛犸冲锋",
+        menuConfig = {"SelfHeroRow"},
+        category = "single"
+    },
+    {
+        id = "Double_on_death",
+        code = 3008,
+        name = "死亡翻倍",
+        menuConfig = {"SelfHeroRow"},
+        category = "single"
+    },
+    {
+        id = "MAG_DREAM",
+        code = 3009,
+        name = "猛犸梦想",
+        menuConfig = {"SelfHeroRow"},
+        category = "single"
+    },
+    {
+        id = "SnipeHunt",
+        code = 3010,
+        name = "狙击猎杀",
+        menuConfig = {"SelfHeroRow"},
+        category = "single"
+    },
+    {
+        id = "MillGrinding",
+        code = 3011,
+        name = "人马拉磨",
+        menuConfig = {"SelfHeroRow"},
+        category = "single"
+    },
+    {
+        id = "CreepChaos",
+        code = 3012,
+        name = "超级野怪合体",
+        menuConfig = {"SelfHeroRow"},
+        category = "single"
+    },
+    {
+        id = "Aoe_10X",
+        code = 3013,
+        name = "10倍技能范围",
+        menuConfig = {"SelfHeroRow"},
+        category = "single"
+    }
 }
 
-Main.ModeConfig = {
-    [Main.Challenges.Duel_1VS30] = {"SelfHeroRow", "OpponentHeroRow"},
-    [Main.Challenges.Level1_Duel] = {"SelfHeroRow", "OpponentHeroRow"},
-    [Main.Challenges.Five_Times_Attribute] = {"SelfHeroRow", "OpponentHeroRow"},
-    [Main.Challenges.Upside_Down_attribute] = {"SelfHeroRow", "OpponentHeroRow"},
-    [Main.Challenges.Upside_Down] = {"SelfHeroRow", "OpponentHeroRow"},
-    [Main.Challenges.HeroChaos] = {},
-    [Main.Challenges.Save_Mor] = {"SelfHeroRow"},
-    [Main.Challenges.Work_Work] = {"SelfHeroRow"},
-    [Main.Challenges.Work_Work_2] = {"SelfHeroRow"},
-    [Main.Challenges.CD0_2skill] = {"SelfHeroRow", "OpponentHeroRow"},
-    [Main.Challenges.Illusion_3X] = {"SelfHeroRow", "OpponentHeroRow"},
-    [Main.Challenges.CD0_1skill] = {"SelfHeroRow", "OpponentHeroRow"},
-    [Main.Challenges.TestMode] = {"SelfHeroRow", "OpponentHeroRow"},
-    [Main.Challenges.Fall_Flat] = {"SelfHeroRow", "OpponentHeroRow"},
-    [Main.Challenges.CreepChallenge_100Creeps] = {"SelfHeroRow"},
-    [Main.Challenges.HeroChallenge_illusion] = {"SelfHeroRow"},
-    [Main.Challenges.Ursa800] = {"SelfHeroRow"},
-    [Main.Challenges.Double_on_death] = {"SelfHeroRow"},
-    [Main.Challenges.Courier800] = {"SelfHeroRow"},
-    [Main.Challenges.Magnataur5] = {"SelfHeroRow"},
-    [Main.Challenges.MAG_DREAM] = {"SelfHeroRow"},
-    [Main.Challenges.Aoe_10X] = {"SelfHeroRow"},
-    [Main.Challenges.SnipeHunt] = {"SelfHeroRow"},
-    [Main.Challenges.MillGrinding] = {"SelfHeroRow"},
-    [Main.Challenges.SuperCreepChallenge90CD] = {"SelfHeroRow"},
-    [Main.Challenges.mode_5v5] = {"SelfHeroRow", "OpponentHeroRow"},
-    [Main.Challenges.mode_5v5_2] = {"SelfHeroRow", "OpponentHeroRow"},
-    [Main.Challenges.mode_10v10] = {"SelfHeroRow", "OpponentHeroRow"},
-    [Main.Challenges.MeepoChaos] = {"SelfHeroRow", "OpponentHeroRow"},
-    [Main.Challenges.CreepChaos] = {"SelfHeroRow"},
-}
-
+-- 自动生成 Challenges 和 ModeConfig
+for _, mode in ipairs(Main.GameModes) do
+    Main.Challenges[mode.id] = mode.code
+    Main.ModeConfig[mode.code] = mode.menuConfig
+end
 
 Main.currentChallenge = nil
 
 function Main:SendGameModesData()
-    -- 定义游戏模式
-    local gameModes = {
-        {code = Main.Challenges.Aoe_10X, name = "10倍技能范围"},
-        {code = Main.Challenges.movie_mode, name = "电影模式"},
-        {code = Main.Challenges.CreepChaos, name = "超级野怪合体"},
-        {code = Main.Challenges.MeepoChaos, name = "超级米波大乱斗"},
-        {code = Main.Challenges.mode_10v10, name = "10v10对决"},
-        {code = Main.Challenges.mode_5v5, name = "5v5对决-三倍属性版"},
-        {code = Main.Challenges.mode_5v5_2, name = "5v5对决"},
-        {code = Main.Challenges.SuperCreepChallenge90CD, name = "90%减CD击杀大赛"},
-        {code = Main.Challenges.MillGrinding, name = "人马拉磨"},
-        {code = Main.Challenges.Duel_1VS30, name = "1级还是30级?"},
-        {code = Main.Challenges.SnipeHunt, name = "狙击猎杀"},
-        {code = Main.Challenges.MAG_DREAM, name = "猛犸梦想"},
-        {code = Main.Challenges.super_hero_chaos, name = "超级大乱斗"},
-        {code = Main.Challenges.Double_on_death, name = "死亡翻倍"},
-        {code = Main.Challenges.Five_Times_Attribute, name = "五倍属性"},
-        {code = Main.Challenges.DeathRandom, name = "死亡随机"},
-        {code = Main.Challenges.Ursa800, name = "300拍拍"},
-        {code = Main.Challenges.Courier800, name = "抓小鸡"},
-        {code = Main.Challenges.Magnataur5, name = "猛犸冲锋"},
-        {code = Main.Challenges.CD0_2skill, name = "二技能无CD"},
-        {code = Main.Challenges.Illusion_3X, name = "三倍镜像"},
-        {code = Main.Challenges.Level1_Duel, name = "一级单挑"},
-        {code = Main.Challenges.Upside_Down_attribute, name = "属性反转"},
-        {code = Main.Challenges.Upside_Down, name = "反转了"},
-        {code = Main.Challenges.Work_Work, name = "打螺丝之殇"},
-        {code = Main.Challenges.Work_Work, name = "打螺丝之殇2"},
-        {code = Main.Challenges.Save_Mor, name = "拯救水人"},
-        {code = Main.Challenges.HeroChaos, name = "大乱斗"},
-        {code = Main.Challenges.TestMode, name = "单挑"},
-        {code = Main.Challenges.CreepChallenge_100Creeps, name = "100远程兵挑战"},
-        {code = Main.Challenges.HeroChallenge_illusion, name = "幻象对决"},
-        {code = Main.Challenges.CD0_1skill, name = "一技能无CD"},
-        {code = Main.Challenges.Fall_Flat, name = "斗蛆蛆"},
-        {code = Main.Challenges.HeroDisplay, name = "英雄展示"},
-    }
-
-    -- 为每个游戏模式添加UI配置
-    for _, mode in ipairs(gameModes) do
-        local config = Main.ModeConfig[mode.code]
-        if config then
-            -- 将配置转换为简单数组
-            local menuConfigArray = {}
-            for _, value in ipairs(config) do
-                table.insert(menuConfigArray, value)
-            end
-            mode.menuConfig = menuConfigArray
-        else
-            mode.menuConfig = {}
+    local gameModes = {}
+    
+    for _, mode in ipairs(Main.GameModes) do
+        -- 非工具模式下过滤测试类模式
+        if not IsInToolsMode() and mode.category == "test" then
+            goto continue
         end
-        -- 添加类型标记
-        mode.menuConfigType = "array"
-    end
 
-    -- 过滤非工具模式下的游戏模式
-    if not IsInToolsMode() then
-        local filteredModes = {}
-        for _, mode in ipairs(gameModes) do
-            if mode.code >= 1000 then
-                table.insert(filteredModes, mode)
-            end
-        end
-        gameModes = filteredModes
-        --print("工具模式：过滤后的游戏模式数量:", #gameModes)
-    else
-        --print("工具模式：显示所有游戏模式")
-    end
+        local modeData = {
+            code = mode.code,
+            name = mode.name,
+            menuConfig = mode.menuConfig,
+            menuConfigType = "array"
+        }
 
-    --print("Sending game modes data:")
-    --DeepPrintTable(gameModes)
+        table.insert(gameModes, modeData)
+
+        ::continue::
+    end
 
     CustomGameEventManager:Send_ServerToAllClients("initialize_game_modes", gameModes)
-    --print("游戏模式和菜单配置数据已发送到前端")
 end
+
+
+
 
 
 function Main:RequestStrategyData()
@@ -219,24 +350,23 @@ function Main:RequestStrategyData()
         },
         {
             name = "不允许对非英雄释放控制",
-            id = "1"
+            id = "no_control_non_hero"
         },
         {
             name = "辅助模式",
-            id = "2"
+            id = "support_mode"
         },
         {
             name = "禁用普攻",
-            id = "3"
-
+            id = "disable_normal_attack"
         },
         {
             name = "满血开撒旦",
-            id = "4"
+            id = "full_hp_satanic"
         },
         {
             name = "贴脸放电锤",
-            id = "5"
+            id = "close_range_mjollnir"
         },
         {
             name = "不要优先拆墓碑、棒子",
@@ -272,19 +402,23 @@ function Main:RequestStrategyData()
         },
         {
             name = "不到半血绝不放大",
-            id = "6"
+            id = "half_hp_ultimate_lock"
         },
         {
             name = "不到80%血绝不放大",
-            id = "7"
+            id = "hp_80_ultimate_lock"
         },
         {
             name = "不在骨法棒子里放技能",
-            id = "8"
+            id = "no_skill_in_death_ward"
         },
         {
             name = "超大米波模式",
-            id = "9"
+            id = "super_meepo_mode"
+        },
+        {
+            name = "留控打断",
+            id = "1"
         },
     }
 
@@ -293,7 +427,7 @@ function Main:RequestStrategyData()
         npc_dota_hero_dawnbreaker = {  -- 天怒法师
         {
             name = "满血开大",
-            id = "1"
+            id = "full_hp_ultimate"
         },
 
     },
@@ -314,11 +448,11 @@ function Main:RequestStrategyData()
         npc_dota_hero_puck = {  -- 帕克
             {
                 name = "沉默赶路",
-                id = "1"
+                id = "silence_move"
             },
             {
                 name = "相位转移打伤害",
-                id = "2"
+                id = "phase_shift_damage"
             },
             {
                 name = "优先放大",
@@ -330,7 +464,7 @@ function Main:RequestStrategyData()
             },
             {
                 name = "贴脸才相位转移",
-                id = "3"
+                id = "close_range_phase_shift"
             },
         },
         npc_dota_hero_monkey_king = {  -- 齐天大圣 
@@ -340,13 +474,13 @@ function Main:RequestStrategyData()
             },
             {
                 name = "先开大",
-                id = "1"
+                id = "prioritize_ultimate"
             },
         },
         npc_dota_hero_oracle = {  -- 齐天大圣 
         {
             name = "满血开大",
-            id = "1"
+            id = "full_hp_ultimate"
         },
     },
         npc_dota_hero_mirana = {  -- 米拉娜
@@ -360,7 +494,7 @@ function Main:RequestStrategyData()
             },
             {
                 name = "有人贴脸就跳",
-                id = "1"
+                id = "close_range_leap"
             },
 
         },
@@ -386,26 +520,54 @@ function Main:RequestStrategyData()
                 id = "infinite_grave"
             },
             {
-                name = "满血薄葬",
+                name = "半血薄葬",
+                id = "3"
+            },
+            {
+                name = "20%血薄葬",
                 id = "1"
+            },
+            {
+                name = "10%血薄葬",
+                id = "2"
+            },
+            {
+                name = "不学薄葬",
+                id = "4"
+            },
+            {
+                name = "主学治疗波",
+                id = "5"
+            },
+            {
+                name = "满血治疗波",
+                id = "6"
+            },
+            {
+                name = "治疗波打伤害",
+                id = "7"
+            },
+            {
+                name = "满血薄葬",
+                id = "full_hp_grave"
             },
         },
         npc_dota_hero_kez = {  -- 凯
             {
                 name = "禁用隐身大招",
-                id = "1"
+                id = "disable_invisible_ultimate"
             },
             {
                 name = "禁用回音重斩",
-                id = "2"
+                id = "disable_echo_slash"
             },
             {
                 name = "禁用沉默",
-                id = "3"
+                id = "disable_silence"
             },
             {
                 name = "天隼冲击优先",
-                id = "4"
+                id = "prioritize_falcon_strike"
             },
             {
                 name = "半血开大",
@@ -441,51 +603,51 @@ function Main:RequestStrategyData()
             },
             {
                 name = "驱散禁锢",
-                id = "5"
+                id = "dispel_root"
             },
             {
                 name = "优先盾反",
-                id = "6"
+                id = "prioritize_shield_counter"
             },
         },
         npc_dota_hero_terrorblade = {  -- 熊战士
             {
                 name = "满血开恐惧",
-                id = "1"
+                id = "full_hp_terror"
             },
         },
         npc_dota_hero_warlock = {  -- 熊战士
             {
                 name = "先给自己奶",
-                id = "1"
+                id = "self_heal_first"
             },
         },
         npc_dota_hero_obsidian_destroyer = {  -- 熊战士
             {
                 name = "满血开大",
-                id = "1"
+                id = "full_hp_ultimate"
             },
         },
         npc_dota_hero_witch_doctor = {  -- 熊战士
             {
                 name = "满血开魔晶",
-                id = "1"
+                id = "full_hp_shard"
             },
         },
         npc_dota_hero_dark_willow = {  -- 熊战士
             {
                 name = "暗影之境直接开",
-                id = "1"
+                id = "instant_shadow_realm"
             },
             {
                 name = "主动靠近作祟",
-                id = "2"
+                id = "active_terrorize"
             },
         },
         npc_dota_hero_furion = {  -- 熊战士
             {
                 name = "先招小树人",
-                id = "1"
+                id = "prioritize_treants"
             },
         },
         npc_dota_hero_ursa = {  -- 熊战士
@@ -1149,6 +1311,7 @@ function Main:RequestStrategyData()
                 name = "常驻雷球",
                 id = "11"
             },
+
             {
                 name = "禁用极速冷却",
                 id = "disable_cold_snap"

@@ -48,11 +48,10 @@ function Main:isExcludedUnit(unit)
 
     return false
 end
-
 function Main:OnNPCSpawned(event)
     local spawnedUnit = EntIndexToHScript(event.entindex)
     if not spawnedUnit then
-        DebugPrint("警告：生成的单位为空")
+        DebugPrint("函数结束：生成的单位为空")
         return
     end
 
@@ -69,23 +68,18 @@ function Main:OnNPCSpawned(event)
                     spawnedUnit:RemoveSelf()
                     DebugPrint("术士魔童已移除")
                 end
+                DebugPrint("函数结束：移除术士魔童的Timer结束")
                 return nil
             end)
         end
     else
-
         if unitName and unitName ~= "" then
             --DebugPrint("检查单位1：" .. unitName)
         end
 
-
-
-
         local aiUnitKeywords = {
             "npc_dota_lone_druid_bear"
         }
-
-
 
         if unitName and unitName ~= "" then
             --DebugPrint("检查单位2：" .. unitName)
@@ -93,18 +87,19 @@ function Main:OnNPCSpawned(event)
 
         Timers:CreateTimer(0.03, function()
             if not spawnedUnit or spawnedUnit:IsNull() then
-                --DebugPrint("警告：单位已经不存在")
+                DebugPrint("函数结束：单位已不存在或无效")
                 return
             end
         
             local unitName = spawnedUnit:GetUnitName()
             print(unitName)
             if not unitName then
-                --DebugPrint("警告：无法获取单位名称")
+                DebugPrint("函数结束：无法获取单位名称")
                 return
             end
         
             if self:isExcludedUnit(spawnedUnit) then
+                DebugPrint("函数结束：单位在排除列表中")
                 return
             end
 
@@ -112,17 +107,15 @@ function Main:OnNPCSpawned(event)
             if spawnedUnit:IsIllusion() then
                 spawnedUnit:AddNewModifier(spawnedUnit, nil, "modifier_kv_editor", {})
             end
-            if not isIllusion and spawnedUnit:IsInvulnerable() then
+            if not isIllusion and spawnedUnit:IsInvulnerable() and not spawnedUnit:HasModifier("modifier_dazzle_nothl_projection_soul_debuff") then
                 if unitName and unitName ~= "" then
-                    --DebugPrint("忽略非幻象的无敌单位: " .. unitName)
+                    DebugPrint("函数结束：忽略非幻象的无敌单位: " .. unitName)
                 end
                 return
             end
 
-            -- 检查是否需要添加AI
-            local shouldAddAI = not spawnedUnit:IsRealHero() or spawnedUnit:IsIllusion() or spawnedUnit:HasModifier("modifier_arc_warden_tempest_double")
+            local shouldAddAI = not spawnedUnit:IsRealHero() or spawnedUnit:IsIllusion() or spawnedUnit:HasModifier("modifier_arc_warden_tempest_double") or spawnedUnit:HasModifier("modifier_dazzle_nothl_projection_soul_debuff")
             
-            -- 检查单位名称是否包含关键词
             for _, keyword in ipairs(aiUnitKeywords) do
                 if string.find(unitName, keyword) then
                     shouldAddAI = true
@@ -131,6 +124,7 @@ function Main:OnNPCSpawned(event)
             end
 
             if shouldAddAI then
+                print("需要添加AI")
                 local teamNumber = spawnedUnit:GetTeamNumber()
                 local foundAI = false
                 for unit, aiInfo in pairs(AIs) do
@@ -153,8 +147,6 @@ function Main:OnNPCSpawned(event)
                             foundAI = true
                             break
                         end
-                    else
-                        --DebugPrint("警告：AI中的单位无效，已跳过")
                     end
                 end
                 
@@ -169,6 +161,7 @@ function Main:OnNPCSpawned(event)
                 end
             end
             
+            DebugPrint("函数结束：AI处理Timer完成")
             return nil
         end)
     end
@@ -188,9 +181,9 @@ function Main:OnNPCSpawned(event)
         if self[challengeFunctionName] then
             self[challengeFunctionName](self, spawnedUnit, event)
         else
-            --DebugPrint("没有找到对应挑战模式的处理函数: " .. challengeName)
+            DebugPrint("函数结束：没有找到对应挑战模式的处理函数: " .. challengeName)
         end
     else
-        DebugPrint("未知的挑战模式ID: " .. tostring(challengeId))
+        DebugPrint("函数结束：未知的挑战模式ID: " .. tostring(challengeId))
     end
 end

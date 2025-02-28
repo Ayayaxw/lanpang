@@ -45,7 +45,7 @@ function CommonAI:Ini_MediumPrioritySkills()
             npc_dota_hero_dark_seer = {"dark_seer_wall_of_replica","dark_seer_surge","dark_seer_vacuum",},
             npc_dota_hero_shadow_demon = {"shadow_demon_disruption"},
             
-            npc_dota_hero_dazzle = {"dazzle_shallow_grave","dazzle_poison_touch"},
+            npc_dota_hero_dazzle = {"dazzle_nothl_projection","dazzle_shallow_grave","dazzle_shadow_wave"},
             npc_dota_hero_batrider = {"batrider_firefly","batrider_flaming_lasso"},
             npc_dota_hero_venomancer = {"venomancer_noxious_plague","venomancer_plague_ward"},
             npc_dota_hero_rattletrap = {"rattletrap_battery_assault","rattletrap_jetpack","rattletrap_power_cogs"},

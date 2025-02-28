@@ -438,7 +438,8 @@ function CommonAI:IsUnableToCastAbility(entity, skill)
         ["modifier_brewmaster_primal_split_delay"] = "酒仙合体",
         ["modifier_meepo_megameepo"] = "米波合体",
         ["modifier_witch_doctor_voodoo_switcheroo"] = "巫医变形",
-        ["modifier_dawnbreaker_solar_guardian_disable"] = "破晓晨星大招"
+        ["modifier_dawnbreaker_solar_guardian_disable"] = "破晓晨星大招",
+        ["modifier_dazzle_nothl_projection_physical_body_debuff"] = "戴泽灵魂状态"
     }
 
     for modifierName, description in pairs(negativeModifiers) do

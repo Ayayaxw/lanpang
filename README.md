@@ -40,29 +40,16 @@ mklink /J "D:\APP\Steam\steamapps\common\dota 2 beta\game\dota_addons\test2" "E:
   
 每个模式都需要以下基础参数初始化：  
 ```lua
--- 比赛ID初始化  
-self.currentMatchID = self:GenerateUniqueID()      
-  
--- 游戏速度初始化  
-SendToServerConsole("host_timescale 1")  
-  
--- 计时器ID初始化  
-self.currentTimer = (self.currentTimer or 0) + 1   
+
 local timerId = self.currentTimer  
-  
--- 设置初始金钱  
-PlayerResource:SetGold(playerID, 0, false)  
   
 --根据有几个队伍设置几个队伍的视野  
 local teams = {DOTA_TEAM_GOODGUYS, DOTA_TEAM_BADGUYS} -- 或其他你需要的队伍  
 self:CreateTrueSightWards(teams)  
-  
 -- 定义时间参数  
 self.duration = 10         -- 赛前准备时间  
 self.endduration = 10      -- 赛后庆祝时间  
 self.limitTime = 60        -- 比赛时间  
-hero_duel.EndDuel = false  -- 标记战斗是否结束  
-  
 -- 设置摄像机位置  
 self:SendCameraPositionToJS(Main.largeSpawnCenter, 1)  
 ```

@@ -64,6 +64,19 @@ function Main:SetupNewHero(event, playerID)
         local challengeId = self.currentChallenge
         local challengeName = self:GetChallengeNameById(challengeId)
 
+
+        SendToServerConsole("host_timescale 1")
+        self.currentTimer = (self.currentTimer or 0) + 1
+        self.PlayerChineseName = heroChineseName
+        self.currentMatchID = self:GenerateUniqueID()    --比赛ID
+        hero_duel.EndDuel = false  -- 标记战斗是否结束
+
+
+
+
+
+
+
         if challengeName then
             -- 构建初始化函数的名称
             local initFunctionName = "Init_" .. challengeName

@@ -5141,13 +5141,6 @@ HeroSkillConditions = {
             function(self, caster, log)
                 local ability = caster:FindAbilityByName("dazzle_shallow_grave")
                 if not ability then return false end
-
-                if self:containsStrategy(self.hero_strategy, "满血薄葬") then
-                    self.Ally = caster
-                    return true
-                end
-
-
         
                 local checkTime = 0.5
                 if self:containsStrategy(self.hero_strategy, "剩1秒续薄葬") then
@@ -5177,7 +5170,18 @@ HeroSkillConditions = {
                    self:containsStrategy(self.hero_strategy, "剩4秒续薄葬") then
                     return self.Ally ~= nil
                 else
-                    return self.Ally and self.Ally:GetHealthPercent() < 50
+                    local healthThreshold = 30
+                    if self:containsStrategy(self.hero_strategy, "20%血薄葬") then
+                        healthThreshold = 20
+                    elseif self:containsStrategy(self.hero_strategy, "10%血薄葬") then
+                        healthThreshold = 10
+                    elseif self:containsStrategy(self.hero_strategy, "半血薄葬") then
+                        healthThreshold = 50
+                    elseif self:containsStrategy(self.hero_strategy, "满血薄葬") then
+                        healthThreshold = 100
+                        self.Ally = caster
+                    end
+                    return self.Ally and self.Ally:GetHealthPercent() < healthThreshold
                 end
             end
         },
@@ -5187,6 +5191,66 @@ HeroSkillConditions = {
                     ["dazzle_bad_juju"] = true
                 }
                 return self:checkAbilities(caster, excludeAbilities)
+            end
+        },
+        ["dazzle_nothl_projection_end"] = {
+            function(self, caster, log)
+                return false
+            end
+        },
+        ["dazzle_shadow_wave"] = {
+            function(self, caster, log)
+                local healthThreshold = 80
+                if self:containsStrategy(self.hero_strategy, "满血治疗波") then
+                    healthThreshold = 100
+                end
+
+
+                if caster:HasScepter() then
+                    return true
+                else
+                    local ability = caster:FindAbilityByName("dazzle_shadow_wave")
+                    if not ability then return false end
+                    self.Ally = self:FindBestAllyHeroTarget(
+                        caster,
+                        ability,
+                        nil,
+                        nil,
+                        "health_percent"
+                    )
+                    if self.Ally and self.Ally:GetHealthPercent() <= healthThreshold then
+                        return true
+                    end
+                    return false
+                end
+            end
+        },
+        ["dazzle_poison_touch"] = {
+            function(self, caster, log)
+                if self:containsStrategy(self.global_strategy, "留控打断") then
+                    local ability = caster:FindAbilityByName("dazzle_poison_touch")
+                    if not ability then return false end
+                    local potentialTarget = self:FindBestEnemyHeroTarget(
+                        caster,
+                        ability,
+                        {},
+                        0,
+                        "channeling", 
+                        true
+                    )
+                
+                    -- 如果找到目标且正在持续施法
+                    if potentialTarget and potentialTarget:IsChanneling() then
+                        self.target = potentialTarget
+                        log(string.format("[PANDA_TEST] 找到正在持续施法的目标: %s", self.target:GetUnitName()))
+                        return true
+                    else
+                        return false
+                    end
+                    
+                else
+                    return true
+                end
             end
         },
     },

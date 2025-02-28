@@ -922,21 +922,40 @@ function Main:HeroPreparation(heroName, hero, overallStrategy, heroStrategy)
     
     if heroName == "npc_dota_hero_invoker" then
         local wex = hero:FindAbilityByName("invoker_wex")
-        local quas = hero:FindAbilityByName("invoker_quas") 
+        local quas = hero:FindAbilityByName("invoker_quas")
+        local exort = hero:FindAbilityByName("invoker_exort")
         local invoke = hero:FindAbilityByName("invoker_invoke")
+        local facet = hero:GetHeroFacetID()
+        
+        if wex and quas and exort and invoke then
+            if facet == 4 then
+                -- 原有的facet 4逻辑
+                print("释放3次wex和1次invoke")
+                wex:OnSpellStart()
+                wex:OnSpellStart() 
+                wex:OnSpellStart()
+                invoke:OnSpellStart()
 
-        if wex and quas and invoke then
-            print("释放3次wex和1次invoke")
-            wex:OnSpellStart()
-            wex:OnSpellStart() 
-            wex:OnSpellStart()
-            invoke:OnSpellStart()
-
-            print("释放2次wex,1次quas和1次invoke")
-            wex:OnSpellStart()
-            wex:OnSpellStart()
-            quas:OnSpellStart()
-            invoke:OnSpellStart()
+                print("释放2次wex,1次quas和1次invoke")
+                wex:OnSpellStart()
+                wex:OnSpellStart()
+                quas:OnSpellStart()
+                invoke:OnSpellStart()
+                
+            elseif facet == 5 then
+                -- 新增的facet 5逻辑
+                print("释放3次exort和1次invoke")
+                exort:OnSpellStart()
+                exort:OnSpellStart()
+                exort:OnSpellStart()
+                invoke:OnSpellStart()
+                
+                print("释放2次exort,1次quas和1次invoke")
+                exort:OnSpellStart()
+                exort:OnSpellStart()
+                wex:OnSpellStart()
+                invoke:OnSpellStart()
+            end
         end
     end
 end

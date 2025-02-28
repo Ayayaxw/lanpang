@@ -1,7 +1,6 @@
 function Main:Init_Aoe_10X(event, playerID)
     -- 技能修改器
     self.courierPool = {}
-    self.currentcourierIndex = 1
     self.currentMatchID = self:GenerateUniqueID()    --比赛ID
     hero_duel.killCount = 0    -- 初始化击杀计数器
     print("[DEBUG] Kill count reset to:", hero_duel.killCount) -- 添加调试打印

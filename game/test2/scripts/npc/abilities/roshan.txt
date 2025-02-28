@@ -1,0 +1,38 @@
+"DOTAAbilities"
+{
+	"Version"	"1"
+
+	"roshan_revengeroar"
+	{
+		"AbilityValues"
+		{
+			"radius"			"600"
+			"damage"			"50"
+			"damage_pct"		"25"
+			"duration"			"8"
+			"damage_growth"		"0"
+			"disarm_duration"	"2"
+		}
+		"AbilityCastAnimation"		"ACT_DOTA_CAST_ABILITY_1"
+	}
+	"roshan_grab_and_throw"
+	{
+		"AbilityValues"
+		{
+			"damage_growth_curr_hp_pct"
+			{
+				"value"		"0"
+			}
+		}
+	}
+	"roshan_slam"
+	{
+		"AbilityValues"
+		{
+			"damage_growth"
+			{
+				"value" "0"
+			}
+		}
+	}
+}

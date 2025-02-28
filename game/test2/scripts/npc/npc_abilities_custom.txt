@@ -1,4 +1,7 @@
 // Dota Heroes File
+
+#base "abilities/roshan.txt"
+
 "DOTAAbilities"
 {
 	"Version"		"1"

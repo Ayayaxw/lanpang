@@ -76,7 +76,7 @@ function Main:InitGameMode()
     SetTeamCustomHealthbarColor(DOTA_TEAM_CUSTOM_4, 65, 255, 255)     -- 青色
     GameRules:LockCustomGameSetupTeamAssignment(true)
 
-
+    Convars:SetFloat("dota_roshan_upgrade_rate", 10000000)
 
 	-- GameRules:GetGameModeEntity():SetThink( "OnThink", self, "GlobalThink", 2 )
 	GameRules:GetGameModeEntity():SetFogOfWarDisabled(true)

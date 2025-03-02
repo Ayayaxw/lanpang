@@ -412,101 +412,6 @@ function Main:GenerateUniqueID()
 end
 
 
-function Main:GetRealOwner(unit)
-    local function FindOwner(checkUnit, level)
-        if not checkUnit or not IsValidEntity(checkUnit) then return nil end
-
-        -- 特殊处理德鲁伊熊
-        local unitName = checkUnit:GetUnitName()
-        if unitName and unitName:find("npc_dota_lone_druid_bear") then
-            local playerID = checkUnit:GetPlayerOwnerID()
-            if playerID and playerID >= 0 then
-                local druid = PlayerResource:GetSelectedHeroEntity(playerID)
-                if druid then
-                    return druid
-                end
-            end
-        end
-
-        -- 如果是幻象，通过playerID获取原始单位
-        if checkUnit.IsIllusion and checkUnit:IsIllusion() then
-            local playerID = checkUnit:GetPlayerOwnerID()
-            if playerID and playerID >= 0 then
-                local originalHero = PlayerResource:GetSelectedHeroEntity(playerID)
-                if originalHero then
-                    return originalHero
-                end
-            end
-        end
-
-        -- 如果是真实英雄（非幻象），直接返回
-        if checkUnit.IsRealHero and checkUnit:IsRealHero() and not checkUnit:IsIllusion() and not checkUnit:IsClone() then
-            return checkUnit
-        end
-
-        -- 如果是技能召唤物（比如雷云、地狱火等）
-        if checkUnit.IsRealHero and not checkUnit:IsRealHero() then
-            local owner = checkUnit:GetOwnerEntity()
-            if owner then
-                if owner.IsRealHero and owner:IsRealHero() then
-                    return owner
-                end
-                -- 如果owner是技能，尝试获取施法者
-                if type(owner.GetCaster) == "function" then
-                    local caster = owner:GetCaster()
-                    if caster then
-                        return caster
-                    end
-                end
-            end
-        end
-        
-        -- 处理米波克隆体情况
-        if unitName == "npc_dota_hero_meepo" then
-            local playerID = checkUnit:GetPlayerOwnerID()
-            if playerID and playerID >= 0 then
-                local mainMeepo = PlayerResource:GetSelectedHeroEntity(playerID)
-                if mainMeepo then
-                    return mainMeepo
-                end
-            end
-        end
-
-        -- 检查召唤物属性
-        local ownerEntity = checkUnit:GetOwnerEntity()
-        if ownerEntity and ownerEntity ~= checkUnit and type(ownerEntity.IsValidEntity) == "function" and ownerEntity:IsValidEntity() then
-            if ownerEntity.IsRealHero and ownerEntity:IsRealHero() then
-                return ownerEntity
-            end
-            return FindOwner(ownerEntity, level + 1)
-        end
-        
-        -- 检查直接所有者
-        local owner = checkUnit:GetOwner()
-        if not owner then 
-            -- 尝试通过playerID查找
-            local playerID = checkUnit:GetPlayerOwnerID()
-            if playerID and playerID >= 0 then
-                local heroOwner = PlayerResource:GetSelectedHeroEntity(playerID)
-                if heroOwner then
-                    return heroOwner
-                end
-            end
-            return nil 
-        end
-        
-        if owner and owner ~= checkUnit and type(owner.IsValidEntity) == "function" and owner:IsValidEntity() then
-            return FindOwner(owner, level + 1)
-        end
-        
-        return nil
-    end
-
-    if not unit or not IsValidEntity(unit) then return nil end
-    return FindOwner(unit, 1)
-end
-
-
 
 function Main:PrintKV(name, kvTable, kvType)
     if kvTable and kvTable[name] then
@@ -708,8 +613,10 @@ function Main:OnRequestUnitInfo(event)
     local playerID = event.PlayerID
     local unitEntIndex = event.unit_ent_index
     local unit = EntIndexToHScript(unitEntIndex)
-    
+    onwer = unit:GetRealOwner()
+    if onwer then print("主人是，",onwer:GetUnitName())
 
+    end
     if unit and IsValidEntity(unit) then
         -- 打印单位身上的所有物品
         print(string.format("【单位物品】%s 当前携带的物品：", unit:GetUnitName()))
@@ -920,4 +827,25 @@ function Main:GetHeroChineseName(heroName)
         end
     end
     return "未知英雄"
+end
+
+
+
+function table.shuffle(tbl)
+    local size = #tbl
+    local shuffled = {}
+    for i, v in ipairs(tbl) do
+        shuffled[i] = v
+    end
+    -- 加入一个随机偏移，避免在同一帧内的调用产生相似结果
+    local offset = RandomInt(1, 100)
+    for i = size, 2, -1 do
+        local j = RandomInt(1, i)
+        -- 使用偏移量来影响随机选择
+        if offset % 2 == 0 then
+            j = (j % i) + 1
+        end
+        shuffled[i], shuffled[j] = shuffled[j], shuffled[i]
+    end
+    return shuffled
 end

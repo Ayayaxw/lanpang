@@ -51,7 +51,94 @@ function Main:Init_movie_mode(heroName, heroFacet,playerID, heroChineseName)
     --TestGetFakePlayer()
     --CreateBeastmasterAndBot()
     --Create100Bots()
-    SpawnTestCreeps()
+    --SpawnTestCreeps()
+    CreateHeroSequence()
+end
+
+
+function CreateHeroSequence()
+    local initialSpawnPos = Vector(0, 0, 0)  -- 我方出生点
+    local enemySpawnPos = Vector(1000, 1000, 0)  -- 敌方出生点
+    local darkSeerHero = nil
+    local beastHero = nil
+    
+    -- 随机敌方英雄池
+    local enemyHeroes = {
+        "npc_dota_hero_pudge",
+        "npc_dota_hero_crystal_maiden", 
+        "npc_dota_hero_axe",
+        "npc_dota_hero_lina",
+        "npc_dota_hero_sniper",
+        "npc_dota_hero_invoker",
+        "npc_dota_hero_shadow_fiend",
+        "npc_dota_hero_luna",
+        "npc_dota_hero_bloodseeker",
+        "npc_dota_hero_lion"
+    }
+    
+    -- 创建单个敌方英雄的函数
+    local function CreateEnemyHeroWithTemp(heroName, position, motherHero, callback)
+        -- 先创建临时英雄作为母体
+        CreateHeroHeroChaos(-1, "npc_dota_hero_meepo", 1, position, DOTA_TEAM_BADGUYS, false, motherHero,
+            function(tempHero)
+                -- 0.5秒后用母体创建目标英雄
+                Timers:CreateTimer(0.5, function()
+                    CreateHeroHeroChaos(-1, heroName, 1, position, DOTA_TEAM_BADGUYS, false, tempHero,
+                        function(targetHero)
+                            -- 0.5秒后删除母体
+                            Timers:CreateTimer(0.5, function()
+                                UTIL_Remove(tempHero)
+                                if callback then
+                                    callback(targetHero)
+                                end
+                            end)
+                        end)
+                end)
+            end)
+    end
+    
+    -- 先创建黑暗贤者
+    CreateHero(0, "npc_dota_hero_dark_seer", 2, initialSpawnPos, DOTA_TEAM_GOODGUYS, true, 
+        function(hero)
+            darkSeerHero = hero
+            
+            -- 2秒后创建兽王
+            Timers:CreateTimer(2.0, function()
+                CreateHeroHeroChaos(0, "npc_dota_hero_beastmaster", 1, initialSpawnPos, DOTA_TEAM_GOODGUYS, true, darkSeerHero,
+                    function(hero)
+                        beastHero = hero
+                        
+                        -- 2秒后断开黑暗贤者连接
+                        Timers:CreateTimer(2.0, function()
+                            local playerId = darkSeerHero:GetPlayerOwnerID()
+                            DisconnectClient(playerId, true)
+                            
+                            -- 2秒后用兽王作为母体创建新的黑暗贤者
+                            Timers:CreateTimer(2.0, function()
+                                CreateHeroHeroChaos(0, "npc_dota_hero_arc_warden", 2, initialSpawnPos, DOTA_TEAM_GOODGUYS, true, beastHero,
+                                    function(newDarkSeer)
+                                        HeroMaxLevel(newDarkSeer)
+                                        -- 创建完我方英雄后,开始创建10个不同的敌方英雄
+                                        for i = 1, 10 do
+                                            Timers:CreateTimer(i * 1.5, function() -- 间隔改为1.5秒以适应新的创建流程
+                                                local offset = Vector(
+                                                    math.random(-300, 300),
+                                                    math.random(-300, 300),
+                                                    0
+                                                )
+                                                local heroPosition = enemySpawnPos + offset
+                                                CreateEnemyHeroWithTemp(enemyHeroes[i], heroPosition, newDarkSeer,
+                                                    function(enemyHero)
+                                                        FindClearSpaceForUnit(enemyHero, heroPosition, true)
+                                                    end)
+                                            end)
+                                        end
+                                    end)
+                            end)
+                        end)
+                    end)
+            end)
+        end)
 end
 
 
@@ -421,49 +508,6 @@ function CreateFakeClientHero()
     end)
 end
 
-function CreateTuskAndCastAbility()
-    local spawnPosition = Vector(0, 0, 0)
-    
-    -- 发送控制台命令创建假客户端（需要作弊模式）
-    SendToServerConsole("dota_create_fake_clients 1")
-    
-    -- 延迟处理确保客户端创建完成
-    Timers:CreateTimer(0.5, function()
-        -- 查找新创建的假客户端（通常从高ID开始）
-        local fakePlayerID = nil
-        for i = DOTA_MAX_TEAM_PLAYERS-1, 0, -1 do
-            if PlayerResource:IsFakeClient(i) then
-                fakePlayerID = i
-                break
-            end
-        end
-        
-        if not fakePlayerID then
-            print("错误：未找到可用的假客户端")
-            return
-        end
-
-        -- 创建兽王单位
-        local beastmaster = CreateUnitByName(
-            "npc_dota_hero_beastmaster",
-            spawnPosition,
-            true,
-            nil,
-            nil,
-            DOTA_TEAM_GOODGUYS
-        )
-        
-        if beastmaster then
-            -- 绑定单位到假客户端
-            beastmaster:SetControllableByPlayer(fakePlayerID, true)
-            PlayerResource:ReplaceHeroWith(fakePlayerID, "npc_dota_hero_beastmaster", 0, 0)
-        
-            
-            -- 设置朝向
-            beastmaster:SetForwardVector(Vector(0, -1, 0))
-        end
-    end)
-end
 
 function SpawnAllCreepsAndHeroes()
     hero_duel.EndDuel = false

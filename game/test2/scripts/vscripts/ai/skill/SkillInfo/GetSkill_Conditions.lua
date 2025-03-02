@@ -5163,6 +5163,11 @@ HeroSkillConditions = {
                     "health_percent"
                 )
         
+                -- 检查是否有死亡镰刀
+                if self.Ally and self.Ally:HasModifier("modifier_necrolyte_reapers_scythe") then
+                    return true
+                end
+        
                 if self:containsStrategy(self.hero_strategy, "无限薄葬") or
                    self:containsStrategy(self.hero_strategy, "剩1秒续薄葬") or
                    self:containsStrategy(self.hero_strategy, "剩2秒续薄葬") or
@@ -5214,8 +5219,8 @@ HeroSkillConditions = {
                     self.Ally = self:FindBestAllyHeroTarget(
                         caster,
                         ability,
-                        nil,
-                        nil,
+                        {"modifier_dazzle_shallow_grave"},
+                        0.5,
                         "health_percent"
                     )
                     if self.Ally and self.Ally:GetHealthPercent() <= healthThreshold then
@@ -5227,7 +5232,7 @@ HeroSkillConditions = {
         },
         ["dazzle_poison_touch"] = {
             function(self, caster, log)
-                if self:containsStrategy(self.global_strategy, "留控打断") then
+                if self:containsStrategy(self.global_strategy, "留控打断") and caster:HasModifier("modifier_dazzle_nothl_projection_soul_debuff")   then
                     local ability = caster:FindAbilityByName("dazzle_poison_touch")
                     if not ability then return false end
                     local potentialTarget = self:FindBestEnemyHeroTarget(

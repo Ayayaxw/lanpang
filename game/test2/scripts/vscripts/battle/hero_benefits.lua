@@ -471,6 +471,16 @@ function Main:HeroBenefits(heroName, hero, overallStrategy, heroStrategy)
         end
     end
 
+    if heroName == "npc_dota_hero_venomancer" then
+        local ability = hero:FindAbilityByName("venomancer_plague_ward")
+        if ability and hero:GetHeroFacetID() == 2 then
+            hero:SetCursorCastTarget(hero)
+            ability:OnSpellStart()
+            ability:OnSpellStart()
+            ability:OnSpellStart()
+        end
+    end
+
     if heroName == "npc_dota_hero_lone_druid" then
         local ability = hero:FindAbilityByName("lone_druid_spirit_bear")
         if ability then

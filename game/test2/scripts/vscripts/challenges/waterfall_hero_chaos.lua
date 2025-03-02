@@ -1,8 +1,8 @@
 
 
-function Main:Init_super_hero_chaos(event, playerID)
+function Main:Init_waterfall_hero_chaos(event, playerID)
     -- 初始化全局变量
-    self.showTeamPanel = true
+    self.showTeamPanel = true  
     self.isTestMode = false
     self.heroesPerTeam = 3  -- 每个队伍初始传送的英雄数量，作为独立参数
     self.preCreatePerTeam = 7  -- 每个队伍初始创建的英雄数量，作为独立参数
@@ -11,12 +11,12 @@ function Main:Init_super_hero_chaos(event, playerID)
     self.currentTimer = (self.currentTimer or 0) + 1
     self.currentMatchID = self:GenerateUniqueID() 
     self.SPAWN_POINT_FAR = Vector(-12686, 15127, 128)
-    self.ARENA_CENTER = Vector(150, 150, 128)
+    self.ARENA_CENTER = Main.waterFall_Center
     self.SPAWN_DISTANCE = 500
 
     local teams = {DOTA_TEAM_GOODGUYS, DOTA_TEAM_BADGUYS,DOTA_TEAM_CUSTOM_1,DOTA_TEAM_CUSTOM_2,DOTA_TEAM_CUSTOM_3,DOTA_TEAM_CUSTOM_4} -- 或其他你需要的队伍
     self:CreateTrueSightWards(teams)
-    self:SendCameraPositionToJS(Main.largeSpawnCenter, 1)
+    self:SendCameraPositionToJS(Main.waterFall_Center, 1)
 
     -- 定义不同的队伍类型配置
     local TEAM_CONFIGS = {
@@ -35,7 +35,7 @@ function Main:Init_super_hero_chaos(event, playerID)
     }
 
     -- 设置当前使用的队伍配置类型
-    self.teamConfig = "TOURNAMENT"  -- 可以是 "ATTRIBUTE" 或 "TOURNAMENT" 或其他配置
+    self.teamConfig = "ATTRIBUTE"  -- 可以是 "ATTRIBUTE" 或 "TOURNAMENT" 或其他配置
     
     -- 设置实际使用的队伍类型
     self.teamTypes = TEAM_CONFIGS[self.teamConfig]
@@ -124,14 +124,14 @@ function Main:Init_super_hero_chaos(event, playerID)
         }, -- 智力英雄
         [8] = {{name = "npc_dota_hero_vengefulspirit", chinese = "复仇之魂"}},  -- 全才英雄
     }
-    self:InitializeHeroSequence()--初始化英雄序列
+    self:InitializeWaterfallHeroSequence()--初始化英雄序列
 
     self:InitialPreCreateHeroes()--预创建英雄
     Timers:CreateTimer(10, function()
-        self:Initialize_Hero_Chaos_UI()
-        self:Initial_Hero_Chaos_DeployHeroes()
+        self:Initialize_waterfall_hero_chaos_UI()
+        self:Initial_waterfall_hero_chaos_DeployHeroes()
         self:UpdateTeamPanelData()
-        self:Start_Hero_Chaos_ScoreBoardMonitor()
+        self:Start_waterfall_hero_chaos_ScoreBoardMonitor()
         --self:CreateAllTeamHeroes()
         end)
 end
@@ -267,7 +267,7 @@ function Main:SetupCombatBuffs(hero)
     HeroMaxLevel(hero)
     hero:AddNewModifier(hero, nil, "modifier_item_aghanims_shard", {})
     hero:AddNewModifier(hero, nil, "modifier_item_ultimate_scepter_consumed", {})
-    hero:AddNewModifier(hero, nil, "modifier_auto_elevation_large", {})
+    hero:AddNewModifier(hero, nil, "modifier_auto_elevation_waterfall", {})
 
     -- 给所有英雄添加 item_titan_sliver
     hero:AddItemByName("item_titan_sliver")
@@ -308,7 +308,7 @@ function Main:SetupInitialBuffs(hero)
 end
 
 
-function Main:Initial_Hero_Chaos_DeployHeroes()
+function Main:Initial_waterfall_hero_chaos_DeployHeroes()
     local heroTypes = {}
     -- 从teamTypes中获取所有type
     for type, _ in pairs(self.teamTypes) do
@@ -420,7 +420,7 @@ function Main:CheckForVictory(winnerType)
     return true
 end
 
-function Main:OnUnitKilled_super_hero_chaos(killedUnit, args)
+function Main:OnUnitKilled_waterfall_hero_chaos(killedUnit, args)
     if not killedUnit or not killedUnit:IsRealHero() then return end
 
     -- 获取被击杀英雄的类型和相关信息
@@ -605,7 +605,7 @@ function Main:OnUnitKilled_super_hero_chaos(killedUnit, args)
     -- end)
 end
 -- 在初始化时
-function Main:InitializeHeroSequence()
+function Main:InitializeWaterfallHeroSequence()
     local heroesGroup1 = {
         "npc_dota_hero_night_stalker", "npc_dota_hero_night_stalker", "npc_dota_hero_night_stalker",
         "npc_dota_hero_tidehunter", "npc_dota_hero_tidehunter", "npc_dota_hero_tidehunter",
@@ -851,7 +851,7 @@ function Main:InitializeHeroSequence()
 end
 
 
-function Main:OnAttack_super_hero_chaos(keys)
+function Main:OnAttack_waterfall_hero_chaos(keys)
     local attacker = EntIndexToHScript(keys.entindex_attacker)
     local victim = EntIndexToHScript(keys.entindex_killed)
     local damage = keys.damage
@@ -1135,7 +1135,7 @@ function Main:DeployHero(heroType, isInitialSpawn)
     Timers:CreateTimer(waitForHero)
 end
 
-function Main:Initialize_Hero_Chaos_UI()
+function Main:Initialize_waterfall_hero_chaos_UI()
     print("[Arena] Starting UI initialization...")
     
     -- 分数面板始终显示
@@ -1143,7 +1143,7 @@ function Main:Initialize_Hero_Chaos_UI()
     
     -- 只有在showTeamPanel为true时才显示队伍面板
     if self.showTeamPanel then
-        print("[Arena] Sending show_hero_chaos_container event")
+        print("[Arena] Sending show_waterfall_hero_chaos_container event")
         CustomGameEventManager:Send_ServerToAllClients("show_hero_chaos_container", {})
         
         -- 设置需要的面板
@@ -1152,7 +1152,7 @@ function Main:Initialize_Hero_Chaos_UI()
             table.insert(activeTypes, typeInfo.type)
         end
         
-        print("[Arena] Sending setup_hero_chaos_panels event with types:", table.concat(activeTypes, ", "))
+        print("[Arena] Sending setup_waterfall_hero_chaos_panels event with types:", table.concat(activeTypes, ", "))
         CustomGameEventManager:Send_ServerToAllClients("setup_hero_chaos_panels", {
             types = activeTypes
         })
@@ -1360,7 +1360,7 @@ end
 
 
 
-function Main:Start_Hero_Chaos_ScoreBoardMonitor()
+function Main:Start_waterfall_hero_chaos_ScoreBoardMonitor()
     if self.scoreMonitorTimer then
         Timers:RemoveTimer(self.scoreMonitorTimer)
     end

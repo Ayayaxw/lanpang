@@ -34,6 +34,7 @@ require("challenges/MeepoChaos")
 require("challenges/CreepChaos")  
 require("challenges/Aoe_10X")  
 require("challenges/Level7Dazzle")  
+require("challenges/waterfall_hero_chaos")  
 
 
 
@@ -102,6 +103,13 @@ Main.GameModes = {
         code = 0009,
         name = "10v10对决",
         menuConfig = {"SelfHeroRow", "OpponentHeroRow"},
+        category = "test"
+    },
+    {
+        id = "waterfall_hero_chaos",
+        code = 0010,
+        name = "瀑布大乱斗",
+        menuConfig = {},
         category = "test"
     },
 

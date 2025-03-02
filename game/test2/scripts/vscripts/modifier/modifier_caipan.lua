@@ -75,12 +75,12 @@ function modifier_caipan:OnIntervalThink()
         local caipan = self:GetParent()
         local caipanPos = caipan:GetAbsOrigin()
         
-        -- 寻找附近200范围内的所有单位
+        -- 寻找附近300范围内的所有单位
         local units = FindUnitsInRadius(
             caipan:GetTeamNumber(),
             caipanPos,
             nil,
-            200,
+            300,
             DOTA_UNIT_TARGET_TEAM_BOTH,
             DOTA_UNIT_TARGET_ALL,
             DOTA_UNIT_TARGET_FLAG_NONE,

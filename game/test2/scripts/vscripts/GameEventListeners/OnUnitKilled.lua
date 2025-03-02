@@ -4,7 +4,7 @@ function Main:OnUnitKilled(args)
     
     -- 如果是米波克隆体，找到本体
     if killedUnit:GetUnitName() == "npc_dota_hero_meepo" and killedUnit:IsClone() then
-        local mainMeepo = self:GetRealOwner(killedUnit)
+        local mainMeepo = killedUnit:GetRealOwner()
         if mainMeepo then
             local playerID = killedUnit:GetPlayerOwnerID()
             -- 使用playerID作为key来存储每个玩家的米波死亡时间

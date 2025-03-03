@@ -2,50 +2,99 @@
     flow-children: right;
     horizontal-align: left;
     vertical-align: top;
-    margin-top: 10px;
+    margin-top: 15px;
     margin-left: 100px;
-    transition-property: opacity, visibility;
+    transition-property: opacity, transform;
     transition-duration: 0.3s;
     opacity: 1;
     z-index: 100;
-    
-}
-
-.MainButtonContainer.hidden {
+  }
+  
+  .MainButtonContainer.hidden {
     opacity: 0.001;
-
-}
-
-.MainButtonContainer.hidden:hover {
+    transform: translateY(-10px);
+  }
+  
+  .MainButtonContainer.hidden:hover {
     opacity: 1;
-
-}
-.ScoreButton {
-    width: 100px;
+    transform: translateY(0px);
+  }
+  
+  .ScoreButton {
+    width: 120px;
     height: 40px;
-    margin-right: 10px;
-    background-color: gradient( linear, 0% 0%, 0% 100%, from( #5aa15a ), to( #2d662d ) );
-    border: 1px solid #ffffff40;
+    margin-right: 12px;
+    background-color: gradient( linear, 0% 0%, 0% 100%, from( #2a2a35 ), to( #1a1a25 ) );
+    border: 1px solid #444450;
     border-radius: 4px;
-    box-shadow: fill #00000066 -2px 5px 2px 2px;
-    
-}
-
-
-
-.ScoreButton Label {
-    font-size: 16px;
-    color: white;
+    box-shadow: 0px 0px 8px #00000066;
+    transition-property: background-color, brightness, border;
+    transition-duration: 0.2s;
+  }
+  
+  .ScoreButton:hover {
+    background-color: gradient( linear, 0% 0%, 0% 100%, from( #3a3a45 ), to( #2a2a35 ) );
+    border-color: #ccaa66;
+    brightness: 1.2;
+  }
+  
+  .ScoreButton:active {
+    brightness: 1.5;
+    sound: "ui_generic_button_click";
+  }
+  
+  .ScoreButton Label {
+    font-size: 14px;
+    color: #d5d5d5;
+    text-transform: uppercase;
+    letter-spacing: 1px;
     vertical-align: center;
     horizontal-align: center;
-    text-transform: uppercase;
-}
-
-.ScoreButton:hover {
-    background-color: gradient( linear, 0% 0%, 0% 100%, from( #6ab76a ), to( #3c7f3c ) );
-
-}
-
-.ScoreButton:active {
-    background-color: gradient( linear, 0% 0%, 0% 100%, from( #4c8b4c ), to( #254f25 ) );
-}
+    text-shadow: 1px 1px 2px #000000;
+    width: 100%;
+    text-align: center;
+  }
+  
+  /* 特殊按钮样式 */
+  #ModeMenuButton {
+    background-color: gradient( linear, 0% 0%, 0% 100%, from( #2d4b73 ), to( #1a365c ) );
+  }
+  
+  #ModeMenuButton:hover {
+    background-color: gradient( linear, 0% 0%, 0% 100%, from( #385d8c ), to( #234775 ) );
+    border-color: #ccaa66;
+    brightness: 1.2;
+  }
+  
+  #ModeMenuButton Label {
+    color: #ccaa66;
+    font-weight: bold;
+  }
+  
+  /* 开关状态按钮样式 */
+  .ScoreButton.active {
+    background-color: gradient( linear, 0% 0%, 0% 100%, from( #2d4b73 ), to( #1a365c ) );
+    border-color: #5b92cc;
+  }
+  
+  .ScoreButton.active:hover {
+    background-color: gradient( linear, 0% 0%, 0% 100%, from( #385d8c ), to( #234775 ) );
+    border-color: #ccaa66;
+  }
+  
+  .ScoreButton.active Label {
+    color: #d5d5d5;
+  }
+  
+  /* 禁用按钮样式 */
+  .ScoreButton:disabled {
+    background-color: gradient( linear, 0% 0%, 0% 100%, from( #2a2a35 ), to( #1a1a25 ) );
+    saturation: 0.3;
+    wash-color: #222222;
+    border-color: #333340;
+  }
+  
+  .ScoreButton:disabled Label {
+    color: #888888;
+  }
+  

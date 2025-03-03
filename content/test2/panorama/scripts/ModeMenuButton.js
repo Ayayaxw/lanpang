@@ -206,6 +206,21 @@
 
     let currentHeroType = ''; // 用于记录当前是为哪个英雄添加物品
 
+
+    function closeAllPanels() {
+      // 关闭游戏模式选择面板
+      $('#GameModeSelectionPanel').SetHasClass('Visible', false);
+      
+      // 关闭物品选择对话框
+      $('#ItemSelectionDialog').style.visibility = 'collapse';
+      
+      // 关闭策略选择面板
+      $('#StrategySelectionPanel').AddClass('GameSetupPanelhidden');
+      
+      // 最小化英雄选择面板
+      $('#FcHeroPickPanel').AddClass('minimized');
+  }
+
     function clearAllItems() {
       $.Msg("清除所有物品");
       const grids = ['NormalItemsGrid', 'NeutralItemsGrid', 'CustomItemsGrid', 'SpecialItemsGrid'];
@@ -268,14 +283,14 @@
     
 
     function openItemSelectionDialog(heroType) {
-        $.Msg("Opening item selection dialog for hero type:", heroType);
-        currentHeroType = heroType;
-    
-        const dialogPanel = $('#ItemSelectionDialog');
-        if (!dialogPanel) {
-            $.Msg("Error: ItemSelectionDialog not found");
-            return;
-        }
+      currentHeroType = heroType;
+      closeAllPanels();
+      
+      const dialogPanel = $('#ItemSelectionDialog');
+      if (!dialogPanel) {
+          $.Msg("Error: ItemSelectionDialog not found");
+          return;
+      }
     
         const equipment = heroType === 'Self' ? selfHero.equipment : opponentHero.equipment;
     
@@ -589,13 +604,16 @@
   
     // 切换英雄选择面板
     function toggleFcHeroPickPanel(action) {
+      const fcHeroPickPanel = $('#FcHeroPickPanel');
+      
       if (fcHeroPickPanel.BHasClass('minimized')) {
-        fcHeroPickPanel.RemoveClass('minimized');
-        GameEvents.GameSetup.currentAction = action;
+          closeAllPanels();
+          fcHeroPickPanel.RemoveClass('minimized');
+          GameEvents.GameSetup.currentAction = action;
       } else {
-        fcHeroPickPanel.AddClass('minimized');
+          fcHeroPickPanel.AddClass('minimized');
       }
-    }
+  }
   
     function onHeroSelected(heroId, facetId) {
       // $.Msg("接收到的英雄 ID：", heroId);
@@ -777,8 +795,10 @@
   function toggleStrategySelectionPanel(strategies, onStrategySelected, currentStrategy, lastSelectedStrategiesRef) {
     const strategyPanel = $('#StrategySelectionPanel');
     
+    // 修改点：强制关闭所有其他面板
+    closeAllPanels();
+    
     if (strategyPanel.BHasClass('GameSetupPanelhidden')) {
-        strategyPanel.RemoveClass('GameSetupPanelhidden');
         const strategyList = $('#StrategyList');
         strategyList.RemoveAndDeleteChildren();
 
@@ -797,12 +817,14 @@
             const selectedStrategies = strategies.filter((_, index) => 
                 strategyList.GetChild(index).checked
             );
-            // 更新对应的 lastSelectedStrategiesRef
             lastSelectedStrategiesRef.length = 0;
-            Array.prototype.push.apply(lastSelectedStrategiesRef, selectedStrategies.map(s => s.id)); // 保存选择状态
+            Array.prototype.push.apply(lastSelectedStrategiesRef, selectedStrategies.map(s => s.id));
             onStrategySelected(selectedStrategies.length === 1 ? selectedStrategies[0] : selectedStrategies);
             strategyPanel.AddClass('GameSetupPanelhidden');
         });
+        
+        // 修改点：始终先关闭再打开
+        strategyPanel.RemoveClass('GameSetupPanelhidden');
     } else {
         strategyPanel.AddClass('GameSetupPanelhidden');
     }
@@ -1076,10 +1098,16 @@
   
     // 切换游戏模式选择面板的可见性
     function toggleGameModeSelection() {
+      const selectionPanel = $('#GameModeSelectionPanel');
       const isVisible = selectionPanel.BHasClass('Visible');
-      selectionPanel.SetHasClass('Visible', !isVisible);
-      $.Msg(isVisible ? "游戏模式选择面板已关闭" : "游戏模式选择面板已打开");
-    }
+      
+      if (!isVisible) {
+          closeAllPanels();
+          selectionPanel.SetHasClass('Visible', true);
+      } else {
+          selectionPanel.SetHasClass('Visible', false);
+      }
+  }
   
     // 从选择面板中选择游戏模式
     function selectGameMode(code, name) {

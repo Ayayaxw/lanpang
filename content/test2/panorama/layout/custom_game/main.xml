@@ -354,8 +354,6 @@
           <Button id="CameraControlButton" class="ScoreButton">
               <Label text="相机控制" />
           </Button>
-
-
       </Panel>
 
 

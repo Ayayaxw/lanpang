@@ -10,10 +10,11 @@
   height: 80%;
   horizontal-align: center;
   vertical-align: center;
-  background-color: #1e1e1e;
-  border: 2px solid #ffffff;
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #0a0a0e99 ), to( #1a1a2599 ) );
+  border: 2px solid #333340;
+  box-shadow: 0px 0px 12px #00000099;
   flow-children: down;
-  overflow: noclip;  /* 防止出现滚动条 */
+  overflow: noclip;
 }
 
 /* 内容容器 */
@@ -21,22 +22,29 @@
   width: 100%;
   height: 100%;
   flow-children: down;
-  overflow: noclip;  /* 防止出现滚动条 */
+  overflow: noclip;
+  padding: 16px;
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #0a0a0e ), to( #1a1a25 ) );
 }
 
-/* 标题样式 */
+/* 标题样式 */  
 .ItemSelectionTitle {
   font-size: 24px;
-  color: #ffffff;
-  margin-top: 10px;
-  margin-bottom: 10px;
-  text-align: center;
+  color: #ccaa66;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow: 0px 0px 6px #ccaa6633;
+  horizontal-align: center;
 }
 
+
 .ItemGridContainer {
-  width: 99%;
-  height: 80%;
-  overflow: noclip;  /* 防止出现滚动条 */
+  width: 99.3%;
+  height: 74%;
+
+  padding: 10px;
+  overflow: noclip;
 }
 
 /* 物品网格样式 */
@@ -44,15 +52,16 @@
   width: 100%;
   height: 100%;
   flow-children: right-wrap;
-  overflow: squish scroll;  /* 只允许垂直滚动 */
-  margin: 10px;
+  overflow: squish scroll;
+  padding: 5px;
 }
 
 .ItemCost {
-  color: gold;
+  color: #ccaa66;
   font-size: 14px;
   horizontal-align: center;
   text-align: center;
+  margin-top: 2px;
 }
 
 /* 物品项样式 */
@@ -60,10 +69,24 @@
   width: 100px;
   height: 140px;
   margin: 5px;
-  background-color: #2e2e2e;
-  border: 1px solid #4b4b4b;
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #2a2a35 ), to( #1a1a25 ) );
+  border: 1px solid #444450;
+  border-radius: 3px;
   flow-children: down;
   padding: 5px;
+  transition-property: border, brightness;
+  transition-duration: 0.2s;
+}
+
+.ItemEntry:hover {
+  border-color: #ccaa66;
+  brightness: 1.2;
+}
+
+.ItemEntry:selected {
+  border-color: #ccaa66;
+  border-width: 2px;
+  box-shadow: 0px 0px 8px #ccaa6640;
 }
 
 /* 物品图标样式 */
@@ -79,7 +102,7 @@
   width: 90px;
   height: 20px;
   font-size: 14px;
-  color: #ffffff;
+  color: #d5d5d5;
   text-align: center;
   margin-top: 5px;
   text-overflow: ellipsis;
@@ -88,130 +111,154 @@
   horizontal-align: center;
 }
 
-
 /* 数量输入框样式 */
 .ItemQuantityEntry {
   width: 80px;
   height: 30px;
   horizontal-align: center;
-  background-color: #1e1e1e;
-  border: 1px solid #4b4b4b;
-  color: #ffffff;
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #1a1a25 ), to( #222230 ) );
+  border: 1px solid #444450;
+  border-radius: 3px;
+  color: #d5d5d5;
   text-align: center;
-  margin-top: 2px;
+
 }
 
 .ItemButtonContainer {
   flow-children: right;
   horizontal-align: center;
+  margin-top: 50px;
 }
 
 /* 确认按钮样式 */
 .ItemConfirmButton {
   width: 120px;
   height: 40px;
-  background-color: gradient( linear, 0% 0%, 0% 100%, from( #4a76a8 ), to( #365980 ) );
-  border: 1px solid #5b92cc;
-  align: center center;
-  
-  margin-top: 16px;
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #2a2a35 ), to( #1a1a25 ) );
+  border: 1px solid #444450;
+  border-radius: 4px;
   margin-right: 10px;
-  box-shadow: fill #00000066 -2px 5px 2px 2px;
+  transition-property: background-color, brightness, border;
+  transition-duration: 0.2s;
 }
 
 .ItemConfirmButton:hover {
-  background-color: gradient( linear, 0% 0%, 0% 100%, from( #5b92cc ), to( #4a76a8 ) );
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #3a3a45 ), to( #2a2a35 ) );
+  border-color: #ccaa66;
+  brightness: 1.2;
+}
+
+.ItemConfirmButton:active {
+  brightness: 1.5;
+  sound: "ui_generic_button_click";
 }
 
 .ItemConfirmButton Label {
-  color: #FFFFFF;
-  font-size: 18px;
+  color: #ccaa66;
+  font-size: 16px;
   font-weight: bold;
   text-transform: uppercase;
-  align: center center;
+  letter-spacing: 1px;
+  vertical-align: center;
+  horizontal-align: center;
+  text-shadow: 1px 1px 2px #000000;
 }
 
 /* 取消按钮样式 */
 .ItemCancelButton {
   width: 120px;
   height: 40px;
-  background-color: gradient( linear, 0% 0%, 0% 100%, from( #a85a5a ), to( #804040 ) );
-  border: 1px solid #cc7171;
-  align: center center;
-  margin-top: 16px;
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #2a2a35 ), to( #1a1a25 ) );
+  border: 1px solid #444450;
+  border-radius: 4px;
   margin-right: 10px;
-  box-shadow: fill #00000066 -2px 5px 2px 2px;
+  transition-property: background-color, brightness, border;
+  transition-duration: 0.2s;
 }
 
 .ItemCancelButton:hover {
-  background-color: gradient( linear, 0% 0%, 0% 100%, from( #cc7171 ), to( #a85a5a ) );
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #3a3a45 ), to( #2a2a35 ) );
+  border-color: #ccaa66;
+  brightness: 1.2;
+}
+
+.ItemCancelButton:active {
+  brightness: 1.5;
+  sound: "ui_generic_button_click";
 }
 
 .ItemCancelButton Label {
-  color: #FFFFFF;
-  font-size: 18px;
+  color: #d5d5d5;
+  font-size: 16px;
   font-weight: bold;
   text-transform: uppercase;
-  align: center center;
+  vertical-align: center;
+  horizontal-align: center;
+  text-shadow: 1px 1px 2px #000000;
 }
-
 
 /* 清除按钮样式 */
 .ItemClearButton {
   width: 120px;
   height: 40px;
-  background-color: gradient( linear, 0% 0%, 0% 100%, from( #a83c3c ), to( #802828 ) );
-  border: 1px solid #cc4444;
-  align: center center;
-  margin-top: 16px;
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #3a2830 ), to( #2a1820 ) );
+  border: 1px solid #444450;
+  border-radius: 4px;
   margin-right: 10px;
-  box-shadow: fill #00000066 -2px 5px 2px 2px;
+  transition-property: background-color, brightness, border;
+  transition-duration: 0.2s;
 }
 
 .ItemClearButton:hover {
-  background-color: gradient( linear, 0% 0%, 0% 100%, from( #cc4444 ), to( #a83c3c ) );
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #4a3840 ), to( #3a2830 ) );
+  border-color: #ccaa66;
+  brightness: 1.2;
+}
+
+.ItemClearButton:active {
+  brightness: 1.5;
+  sound: "ui_generic_button_click";
 }
 
 .ItemClearButton Label {
-  color: #FFFFFF;
-  font-size: 18px;
+  color: #d5d5d5;
+  font-size: 16px;
   font-weight: bold;
   text-transform: uppercase;
-  align: center center;
+  vertical-align: center;
+  horizontal-align: center;
+  text-shadow: 1px 1px 2px #000000;
+}
+
+/* 游戏设置面板相关样式 */
+.GameSetupPanel {
+  flow-children: down;
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #0a0a0e99 ), to( #1a1a2599 ) );
+  border: 2px solid #333340;
+  box-shadow: 0px 0px 12px #00000099;
+  padding: 16px;
+  width: 550px;
+  margin-top: 60px;
+  margin-left: 180px;
+}
+
+.GameSetupPanelTopRow {
+  width: 100%;
+  margin-bottom: 16px;
+  padding: 5px;
+  border-bottom: 1px solid #444450;
 }
 
 
-  .GameSetupPanel {
-    flow-children: down;
-    background-color: gradient( linear, 0% 0%, 0% 100%, from( #25282aee ), to( #181a1bee ) );
-    border: 2px solid #4b4b4b;
-    box-shadow: fill #00000066 -2px 5px 2px 2px;
-    padding: 16px;
-    width: 400px;
-    margin-top: 60px;
-    margin-left: 180px;
-  }
-  
-  .GameSetupPanelTopRow {
-    width: 100%;
-    margin-bottom: 16px;
-    padding: 5px;
-    border-bottom: 2px solid #ffffff;
-  }
-  
-  .GameSetupPanelTitleLabel {
-    font-size: 32px;
-    font-weight: bold;
-    color: #E0E0E0;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    text-align: center;
-    
-  }
-  
-
-
-
+.GameSetupPanelTitleLabel {
+  font-size: 28px;
+  color: #ccaa66;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-align: center;
+  text-shadow: 0px 0px 6px #ccaa6633;
+  width: 100%;
+}
 
 
 
@@ -257,20 +304,20 @@
 .StartGameButton:hover {
   background-color: gradient( linear, 0% 0%, 0% 100%, from( #6fb76f ), to( #5aa15a ) );
 }
-.GameSetupPanelSettingsRow {
-    
-  flow-children: right;
-  width: 100%;
-  margin-bottom: 12px;
-}
 
-  .GameSetupPanelSettingLabel {
-    
-    font-size: 20px;
-    color: #E0E0E0;
-    width: 40%;
-    vertical-align: center;
-  }
+
+.GameSetupPanelSettingLabel {
+  font-size: 20px;
+  color: #ccaa66;
+  width: 40%;
+  vertical-align: center;
+}
+.GameSetupPanelSettingLabel1 {
+  font-size: 20px;
+  color: #E0E0E0;
+  width: 40%;
+  vertical-align: top;
+}
 
 .StartGameButton Label {
   color: #FFFFFF;
@@ -284,23 +331,38 @@
 .ModifyButton {
   width: 80px;
   height: 30px;
-  background-color: gradient( linear, 0% 0%, 0% 100%, from( #4a76a8 ), to( #3a5a80 ) );
-  border: 1px solid #5b92cc;
-  align: center center;
-  box-shadow: fill #00000066 -2px 5px 2px 2px;
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #2a2a35 ), to( #1a1a25 ) );
+  border: 1px solid #444450;
+  border-radius: 4px;
+  margin-left: 10px;
+  transition-property: background-color, brightness, border;
+  transition-duration: 0.2s;
 }
 
 .ModifyButton:hover {
-  background-color: gradient( linear, 0% 0%, 0% 100%, from( #5b92cc ), to( #4a76a8 ) );
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #3a3a45 ), to( #2a2a35 ) );
+  border-color: #ccaa66;
+  brightness: 1.2;
+}
+
+.ModifyButton:active {
+  brightness: 1.5;
+  sound: "ui_generic_button_click";
 }
 
 .ModifyButton Label {
-  color: #FFFFFF;
-  font-size: 16px;
+  color: #d5d5d5;
+  font-size: 14px;
   font-weight: bold;
   text-transform: uppercase;
-  align: center center;
+  horizontal-align: center;
+  vertical-align: center;
 }
+
+
+
+
+
 .ButtonRow {
   width: 100%;
   flow-children: right;
@@ -313,73 +375,106 @@
 .CancelButton {
   width: 120px;
   height: 40px;
-  background-color: gradient( linear, 0% 0%, 0% 100%, from( #a85a5a ), to( #804040 ) );
-  border: 1px solid #cc7171;
-  align: center center;
-  margin-top: 16px;
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #2a2a35 ), to( #1a1a25 ) );
+  border: 1px solid #444450;
+  border-radius: 4px;
   margin-right: 10px;
-  box-shadow: fill #00000066 -2px 5px 2px 2px;
+  transition-property: background-color, brightness, border;
+  transition-duration: 0.2s;
 }
 
 .CancelButton:hover {
-  background-color: gradient( linear, 0% 0%, 0% 100%, from( #cc7171 ), to( #a85a5a ) );
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #3a3a45 ), to( #2a2a35 ) );
+  border-color: #ccaa66;
+  brightness: 1.2;
 }
 
 .CancelButton Label {
-  color: #FFFFFF;
+  color: #d5d5d5;
+  font-size: 16px;
+  font-weight: bold;
+  text-transform: uppercase;
+  vertical-align: center;
+  horizontal-align: center;
+  text-shadow: 1px 1px 2px #000000;
+}
+
+.CancelButton:active {
+  brightness: 1.5;
+  sound: "ui_generic_button_click";
+}
+
+/* 更换英雄/开始游戏按钮样式 - 增强版 */
+.ChangeHeroButton {
+  width: 160px;
+  height: 40px;
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #2d4b73 ), to( #1a365c ) );
+  border: 1px solid #5b92cc;
+  border-radius: 4px;
+  margin-left: 100px;
+  transition-property: background-color, brightness, border, box-shadow;
+  transition-duration: 0.2s;
+  box-shadow: 0px 0px 8px #4b7dbc40;
+}
+
+.ChangeHeroButton:hover {
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #385d8c ), to( #234775 ) );
+  border-color: #ccaa66;
+  brightness: 1.3;
+  box-shadow: 0px 0px 12px #4b7dbc80;
+}
+
+.ChangeHeroButton:active {
+  brightness: 1.5;
+  sound: "ui_generic_button_click";
+  transform: translateY(1px);
+}
+
+.ChangeHeroButton Label {
+  color: #ffffff;
   font-size: 18px;
   font-weight: bold;
   text-transform: uppercase;
-  align: center center;
+  letter-spacing: 1px;
+  vertical-align: center;
+  horizontal-align: center;
+  text-shadow: 1px 1px 3px #000000;
 }
 
+/* 禁用状态样式 - 更明显的区分 */
 .ChangeHeroButton:disabled {
-  background-color: #424242;
-  border: 1px solid #2e2e2e;
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #1f1f24 ), to( #17171c ) );
+  border: 1px solid #333340;
+  box-shadow: none;
+  saturation: 0.2;
+}
+
+.ChangeHeroButton:disabled Label {
+  color: #777777;
+  text-shadow: 1px 1px 1px #00000088;
 }
 
 .ChangeHeroButton:disabled:hover {
   tooltip-position: bottom;
   tooltip-body-position: 50% 50%;
+  brightness: 1.0;
+  border-color: #444450;
 }
 
-/* 更换英雄按钮样式 */
-.ChangeHeroButton {
 
-  width: 160px;
-  height: 40px;
-  background-color: gradient( linear, 0% 0%, 0% 100%, from( #5aa15a ), to( #407240 ) );
-  border: 1px solid #6fb76f;
-  align: center center;
-  margin-top: 16px;
-  box-shadow: fill #00000066 -2px 5px 2px 2px;
-
-}
-
-.ChangeHeroButton:hover {
-  brightness: 1.5;
-  transition-property: brightness;
-  transition-duration: 0.2s;
-}
-
-.ChangeHeroButton Label {
-  color: #FFFFFF;
-  font-size: 18px;
-  font-weight: bold;
-  text-transform: uppercase;
-  align: center center;
+.ChangeHeroButton:disabled Label {
+  background-image: none;
 }
 
 /* 英雄标签样式 */
 
-.GameModeLabel
-{
-  color: #FFFFFF;
+.GameModeLabel {
+  color: #d5d5d5;
   font-size: 18px;
-  font-weight: normal;
   margin-right: 10px;
   vertical-align: center;
 }
+
 
 .GameSetupPanelHidden {
   visibility: collapse;

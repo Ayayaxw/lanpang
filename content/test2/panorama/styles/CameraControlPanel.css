@@ -1,13 +1,13 @@
 .CameraControlPanel {
     width: 600px;
     height: 950px;
-    background-color: gradient( linear, 0% 0%, 0% 100%, from( #000000cc ), to( #000000cc ) );
-    border: 2px solid #444444;
-    border-radius: 8px;
+    background-color: gradient( linear, 0% 0%, 0% 100%, from( #0a0a0e99 ), to( #1a1a2599 ) );
+    border: 2px solid #333340;
+    box-shadow: 0px 0px 12px #00000099;
     x: 100px;
     y: 100px;
     flow-children: down;
-    padding: 10px;
+    padding: 16px;
 }
 
 .CameraControlPanel.hidden {
@@ -18,7 +18,21 @@
     width: 100%;
     height: 40px;
     flow-children: right;
+    border-bottom: 1px solid #444450;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
 }
+
+.CameraControlHeader Label {
+    color: #ccaa66;
+    font-size: 24px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-shadow: 0px 0px 6px #ccaa6633;
+}
+
+
 
 
 .DotaCamSettings_ConfirmButton {
@@ -26,14 +40,17 @@
     height: 30px;
     margin-left: 10px;
     margin-right: 10px;
-    horizontal-align: center;
-    background-color: gradient( linear, 0% 0%, 0% 100%, from( #444444 ), to( #444444 ) );
+    vertical-align: center;
+    background-color: gradient( linear, 0% 0%, 0% 100%, from( #2a2a35 ), to( #1a1a25 ) );
+    border: 1px solid #444450;
     border-radius: 4px;
-    transition-property: brightness;
+    transition-property: background-color, brightness, border;
     transition-duration: 0.2s;
 }
 
 .DotaCamSettings_ConfirmButton:hover {
+    background-color: gradient( linear, 0% 0%, 0% 100%, from( #3a3a45 ), to( #2a2a35 ) );
+    border-color: #ccaa66;
     brightness: 1.2;
 }
 
@@ -41,6 +58,7 @@
     brightness: 1.5;
     sound: "ui_generic_button_click";
 }
+
 
 .FogToggle Label
 {
@@ -52,8 +70,7 @@
 }
 
 .DotaCamSettings_ConfirmButton Label {
-
-    color: #ffffff;
+    color: #d5d5d5;
     font-size: 14px;
     text-align: center;
     horizontal-align: center;
@@ -64,17 +81,19 @@
 .BasicSettingsControls {
     width: 100%;
     flow-children: down;
-    margin-top: 10px;
-    padding: 5px;
+    margin-top: 8px;
+    padding: 4px;
 }
+
 
 .DefaultDistanceRow,
 .FogControlRow {
     width: 100%;
     height: 40px;
     flow-children: right;
-
+    margin-bottom: 8px;
 }
+
 .DefaultDistanceRow {
     width: 100%;
     height: 40px;
@@ -99,8 +118,8 @@
 
 .DefaultDistanceRow Label,
 .FogControlRow Label {
-    width: 80px;
-    color: #ffffff;
+    width: 90px;
+    color: #d5d5d5;
     font-size: 14px;
     vertical-align: center;
 }
@@ -108,62 +127,75 @@
 .RangeHintLabel {
     width: 100px;
     color: #999999;
-    font-size: 14px;
+    font-size: 12px;
     vertical-align: center;
     margin-left: 10px;
 }
 
+
 #DefaultDistanceValue {
     width: 80px;
     height: 30px;
-    background-color: gradient( linear, 0% 0%, 0% 100%, from( #222222 ), to( #222222 ) );
-    border: 1px solid #444444;
-    border-radius: 2px;
-    color: #ffffff;
-    text-align: center;
     vertical-align: center;
 }
 
 #FogToggle {
     width: 80px;
     height: 30px;
-    background-color: gradient( linear, 0% 0%, 0% 100%, from( #444444 ), to( #444444 ) );
+    background-color: gradient( linear, 0% 0%, 0% 100%, from( #2a2a35 ), to( #1a1a25 ) );
+    border: 1px solid #444450;
     border-radius: 4px;
+    transition-property: background-color, brightness, border;
+    transition-duration: 0.2s;
 }
+
 
 #FogToggle:hover {
+    background-color: gradient( linear, 0% 0%, 0% 100%, from( #3a3a45 ), to( #2a2a35 ) );
+    border-color: #ccaa66;
     brightness: 1.2;
-}
-
-#FogToggle:active {
-    brightness: 1.5;
-}
-
-#FogToggle Label {
-    width: 100%;
-    color: #ffffff;
-    font-size: 14px;
-    text-align: center;
-    horizontal-align: center;
-    vertical-align: center;
 }
 
 #FogToggle:selected {
     background-color: gradient( linear, 0% 0%, 0% 100%, from( #2d4b73 ), to( #1a365c ) );
 }
 
-
-.CameraControlHeader Label {
-    color: #ffffff;
-    font-size: 20px;
+#FogToggle Label {
+    color: #d5d5d5;
+    font-size: 14px;
+    text-align: center;
+    horizontal-align: center;
+    vertical-align: center;
 }
+
+
+#FogToggle:selected {
+    background-color: gradient( linear, 0% 0%, 0% 100%, from( #2d4b73 ), to( #1a365c ) );
+}
+
+
+
 
 .CloseButton {
     width: 30px;
     height: 30px;
-    background-color: gradient( linear, 0% 0%, 0% 100%, from( #444444 ), to( #444444 ) );
+    background-color: gradient( linear, 0% 0%, 0% 100%, from( #2a2a35 ), to( #1a1a25 ) );
+    border: 1px solid #444450;
     border-radius: 4px;
     horizontal-align: right;
+    transition-property: background-color, brightness;
+    transition-duration: 0.2s;
+}
+
+.CloseButton:hover {
+    background-color: gradient( linear, 0% 0%, 0% 100%, from( #3a3a45 ), to( #2a2a35 ) );
+    border-color: #ccaa66;
+    brightness: 1.2;
+}
+
+.CloseButton:active {
+    brightness: 1.5;
+    sound: "ui_generic_button_click";
 }
 
 .CloseButton Label {
@@ -177,38 +209,50 @@
     width: 100%;
     flow-children: down;
     margin-top: 10px;
+    overflow: squish scroll;
 }
 
 .ControlSection {
-
     flow-children: down;
     width: 100%;
+    background-color: #14141e44;
+    padding: 12px;
+    border: 1px solid #333340;
+    margin-bottom: 16px;
 }
 
-.ControlSection Label {
-    color: #ffffff;
-    font-size: 16px;
+.ControlSection > Label {
+    color: #ccaa66;
+    font-size: 18px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+    border-bottom: 1px solid #444450;
+    padding-bottom: 4px;
+    text-shadow: 0px 0px 6px #ccaa6633;
 }
+
 
 .PositionControls {
     width: 100%;
     flow-children: down;
-    margin-top: 10px;
+    margin-top: 8px;
 }
 
 .CoordControl {
     width: 100%;
-    height: 30px;
+    height: 34px;
     flow-children: right;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 
 .CoordControl Label {
     width: 30px;
-    color: #ffffff;
+    color: #d5d5d5;
     font-size: 14px;
     vertical-align: center;
 }
+
 
 .ControlSection TextEntry {
     width: 80px;
@@ -226,7 +270,7 @@
 
 .PresetButtons {
     flow-children: right;
-    margin-top: 10px;
+    margin-top: 8px;
     horizontal-align: center;
     width: 100%;
 }
@@ -234,20 +278,32 @@
 .PresetButton {
     width: 100px;
     height: 40px;
-    background-color: gradient( linear, 0% 0%, 0% 100%, from( #444444 ), to( #444444 ) );
+    background-color: gradient( linear, 0% 0%, 0% 100%, from( #2a2a35 ), to( #1a1a25 ) );
+    border: 1px solid #444450;
     border-radius: 4px;
-    margin-left: 5px;
-    margin-right: 5px;
+    margin: 0px 10px;
+    transition-property: background-color, brightness, border;
+    transition-duration: 0.2s;
+}
+
+.PresetButton:hover {
+    background-color: gradient( linear, 0% 0%, 0% 100%, from( #3a3a45 ), to( #2a2a35 ) );
+    border-color: #ccaa66;
+    brightness: 1.2;
+}
+
+.PresetButton:active {
+    brightness: 1.5;
+    sound: "ui_generic_button_click";
 }
 
 .PresetButton Label {
-    color: #ffffff;
+    color: #d5d5d5;
     font-size: 14px;
     horizontal-align: center;
     vertical-align: center;
+    text-shadow: 1px 1px 2px #000000;
 }
-
-
 
 
 .AngleControls {
@@ -256,55 +312,58 @@
     margin-top: 5px;
 }
 
-
 .ArrowButtons {
     flow-children: right;
     height: 100%;
 }
 
 .ArrowButton {
-    width: 24px;
-    height: 24px;
-    background-color: gradient( linear, 0% 0%, 0% 100%, from( #444444 ), to( #333333 ) );
-    border-radius: 2px;
-    margin-left: 2px;
+    width: 28px;
+    height: 28px;
+    background-color: gradient( linear, 0% 0%, 0% 100%, from( #2a2a35 ), to( #1a1a25 ) );
+    border: 1px solid #444450;
+    border-radius: 3px;
+    margin-left: 3px;
     vertical-align: center;
+    transition-property: background-color, brightness, border;
+    transition-duration: 0.2s;
 }
 
 .ArrowButton:hover {
-    background-color: gradient( linear, 0% 0%, 0% 100%, from( #555555 ), to( #444444 ) );
+    background-color: gradient( linear, 0% 0%, 0% 100%, from( #3a3a45 ), to( #2a2a35 ) );
+    border-color: #ccaa66;
+    brightness: 1.2;
 }
 
 .ArrowButton:active {
-    background-color: gradient( linear, 0% 0%, 0% 100%, from( #333333 ), to( #222222 ) );
+    brightness: 1.5;
+    sound: "ui_generic_button_click";
 }
 
 .ArrowButton Label {
-    width: 100%;
-    color: #ffffff;
+    color: #d5d5d5;
     font-size: 12px;
     text-align: center;
     horizontal-align: center;
     vertical-align: center;
 }
 
+
 .SliderRow {
     width: 100%;
     flow-children: right;
     horizontal-align: center;
-    padding: 0px 20px;
+    padding: 0px 10px;
 }
-
 
 .SliderContainer {
-    width: 100px;  /* 固定宽度 */
+    width: 100px;
     flow-children: down;
-
+    margin: 0px 8px;
 }
 
-
 .SliderContainer Label {
-    color: #ffffff;
+    color: #d5d5d5;
     font-size: 14px;
     margin-bottom: 5px;
     horizontal-align: center;
@@ -320,10 +379,10 @@
 .SliderContainer TextEntry {
     width: 80px;
     height: 30px;
-    background-color: gradient( linear, 0% 0%, 0% 100%, from( #222222 ), to( #222222 ) );
-    border: 1px solid #444444;
-    border-radius: 2px;
-    color: #ffffff;
+    background-color: gradient( linear, 0% 0%, 0% 100%, from( #1a1a25 ), to( #222230 ) );
+    border: 1px solid #444450;
+    border-radius: 3px;
+    color: #d5d5d5;
     text-align: center;
     horizontal-align: center;
 }
@@ -373,33 +432,53 @@
 .CameraActionControls {
     width: 100%;
     flow-children: down;
-    margin-top: 10px;
+    margin-top: 8px;
+}
+
+.ActionGroup {
+    flow-children: down;
+    width: 100%;
 }
 
 .ActionInputRow {
     width: 100%;
     height: 40px;
     flow-children: right;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     horizontal-align: center;
 }
-.ActionGroup {
-    flow-children: down;
-    width: 100%;
+
+.ActionInputRow Label {
+    color: #d5d5d5;
+    font-size: 14px;
+    vertical-align: center;
+    margin: 0px 5px;
 }
 
+
+#DefaultDistanceValue,
+#CameraXValue, 
+#CameraYValue, 
+#CameraZValue,
+#CameraPitchValue, 
+#CameraYawValue, 
+#CameraDistanceValue, 
+#CameraHeightOffsetValue,
+.TimeInput {
+    background-color: gradient( linear, 0% 0%, 0% 100%, from( #1a1a25 ), to( #222230 ) );
+    border: 1px solid #444450;
+    border-radius: 3px;
+    color: #d5d5d5;
+    text-align: center;
+    padding: 4px;
+}
 
 .TimeInput {
     width: 60px;
     height: 30px;
-    background-color: gradient( linear, 0% 0%, 0% 100%, from( #222222 ), to( #222222 ) );
-    border: 1px solid #444444;
-    border-radius: 2px;
-    color: #ffffff;
-    text-align: center;
-    margin-right: 10px;
     vertical-align: center;
 }
+
 
 .ActionButtonsRow {
     flow-children: right;
@@ -409,32 +488,47 @@
 
 .ActionButton {
     width: 110px;
-    height: 30px;
-    background-color: gradient( linear, 0% 0%, 0% 100%, from( #444444 ), to( #444444 ) );
+    height: 32px;
+    background-color: gradient( linear, 0% 0%, 0% 100%, from( #2a2a35 ), to( #1a1a25 ) );
+    border: 1px solid #444450;
     border-radius: 4px;
     margin: 0px 5px;
-    transition-property: background-color;
+    transition-property: background-color, brightness, border;
     transition-duration: 0.2s;
 }
 
-/* 已记录位置的按钮样式 */
+
+.ActionButton:hover {
+    background-color: gradient( linear, 0% 0%, 0% 100%, from( #3a3a45 ), to( #2a2a35 ) );
+    border-color: #ccaa66;
+    brightness: 1.2;
+}
+
+.ActionButton:active {
+    brightness: 1.5;
+    sound: "ui_generic_button_click";
+}
+
+
+
+
 .ActionButton.Recorded {
     background-color: gradient( linear, 0% 0%, 0% 100%, from( #2d4b73 ), to( #1a365c ) );
     box-shadow: 0px 0px 8px #4b7dbc40;
 }
 
-/* 未记录位置的播放按钮样式 */
+.ActionButton.Recorded:hover {
+    background-color: gradient( linear, 0% 0%, 0% 100%, from( #385d8c ), to( #234775 ) );
+    brightness: 1.2;
+}
+
 .ActionButton.Disabled {
     opacity: 0.5;
     saturation: 0.5;
 }
 
-.ActionButton.Recorded:hover {
-    background-color: gradient( linear, 0% 0%, 0% 100%, from( #385d8c ), to( #234775 ) );
-}
-
 .ActionButton Label {
-    color: #ffffff;
+    color: #d5d5d5;
     font-size: 14px;
     horizontal-align: center;
     vertical-align: center;

@@ -35,14 +35,36 @@
 }
 
 .TabButton {
-    padding: 10px 20px;
-    margin: 0 5px;
-    background-color: #444;
-    border-radius: 5px 5px 0 0;
-}
+    height: 40px;
+    width: 200px;
+    background-color: gradient( linear, 0% 0%, 0% 100%, from( #2a2a35 ), to( #1a1a25 ) );
+    border: 1px solid #444450;
+    margin-right: 5px;
+    transition-property: background-color, brightness, border;
+    transition-duration: 0.2s;
+  }
+  .TabButton:hover {
+    background-color: gradient( linear, 0% 0%, 0% 100%, from( #3a3a45 ), to( #2a2a35 ) );
+    border-color: #ccaa66;
+    brightness: 1.2;
+  }
+  
+  .TabButton:selected {
+    background-color: gradient( linear, 0% 0%, 0% 100%, from( #2d4b73 ), to( #1a365c ) );
+    box-shadow: 0px 0px 8px #4b7dbc40;
+  }
+
+  .TabButton Label {
+    color: #d5d5d5;
+    font-size: 16px;
+    text-align: center;
+    horizontal-align: center;
+    vertical-align: center;
+  }
 
 .TabButton.ActiveTab {
     background-color: #666;
+    brightness: 1.5;
 }
 
 

@@ -1,27 +1,46 @@
-.GameSetupPanelSettingsRow2 {
-    flow-children: down;
-    width: 100%;
-    margin-bottom: 12px;
-  }
+.GameSetupPanelSettingsRow {
+  flow-children: right;
+  width: 100%;
+  margin-bottom: 12px;
+  padding: 4px;
+}
 
-  .GameSetupPanelSettingsRow3 {
-    flow-children: right;
-    width: 100%;
-    margin-bottom: 12px;
-  }
-  
+.GameSetupPanelSettingsRow2 {
+  flow-children: down;
+  width: 100%;
+  margin-bottom: 12px;
+  background-color: #14141e44;
+  border: 1px solid #333340;
+  padding: 10px;
+}
+
+.GameSetupPanelSettingsRow3 {
+  flow-children: right;
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.GameSetupPanelSettingsRow4 {
+  flow-children: down;
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+
+.StrategySelectionRow {
+  flow-children: right;
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+
   .HeroSelectionMainRow, .HeroSelectionSubRow {
     width: 100%;
     flow-children: right;
     margin-bottom: 8px;
   }
   
-  .GameSetupPanelSettingLabel1 {
-    font-size: 20px;
-    color: #E0E0E0;
-    width: 40%;
-    vertical-align: top;
-  }
+
   
   .HeroSelectionRightContent {
     flow-children: down;
@@ -34,7 +53,7 @@
     margin-bottom: 8px;
   }
   
-  .HeroLabel, .ModifyButton {
+  .HeroLabel{
     margin-right: 10px;
   }
   
@@ -45,27 +64,35 @@
     vertical-align: center;
   }
   
-  .AddItemButton, .ModifyButton, .HeroAIToggle {
+  .AddItemButton{
     width: 80px;
     height: 30px;
+    background-color: gradient( linear, 0% 0%, 0% 100%, from( #2a2a35 ), to( #1a1a25 ) );
+    border: 1px solid #444450;
+    border-radius: 4px;
+    margin-left: 10px;
+    transition-property: background-color, brightness, border;
+    transition-duration: 0.2s;
   }
   
-  .AddItemButton, .ModifyButton {
-    background-color: gradient( linear, 0% 0%, 0% 100%, from( #4a76a8 ), to( #3a5a80 ) );
-    border: 1px solid #5b92cc;
+  .AddItemButton:hover{
+    background-color: gradient( linear, 0% 0%, 0% 100%, from( #3a3a45 ), to( #2a2a35 ) );
+    border-color: #ccaa66;
+    brightness: 1.2;
+  }
+
+  .AddItemButton:active {
+    brightness: 1.5;
+    sound: "ui_generic_button_click";
   }
   
-  .AddItemButton:hover, .ModifyButton:hover {
-    background-color: gradient( linear, 0% 0%, 0% 100%, from( #5b92cc ), to( #4a76a8 ) );
-  }
-  
-  .AddItemButton Label, .ModifyButton Label, .HeroAIToggleLabel {
-    color: #FFFFFF;
+  .AddItemButton Label{
+    color: #d5d5d5;
     font-size: 14px;
     font-weight: bold;
     text-transform: uppercase;
-    vertical-align: center;
     horizontal-align: center;
+    vertical-align: center;
   }
   
   .GameSetupPanelhidden {
@@ -85,15 +112,17 @@
 
   
   .HeroAIToggle:selected {
-    background-color: gradient( linear, 0% 0%, 0% 100%, from( #5aa15a ), to( #407240 ) );
+    border-color: #ccaa66;
+    border-width: 2px;
+    box-shadow: 0px 0px 8px #ccaa6640;
   }
   
   .HeroAIToggle {
     width: 80px;
     height: 30px;
     margin-left: 10px;
-    border-radius: 5px;
-    border: 2px solid #6fb76f;
+    border: 1px solid #444450;
+    border-radius: 3px;
     vertical-align: center; /* 添加这行 */
 }
 
@@ -105,7 +134,7 @@
     width: 100%;
     height: 100%;
 
-    padding-top: -3px;
+    padding-top: -4px;
 }
 
 #SelfHeroItemPanel, #OpponentHeroItemPanel {
@@ -153,116 +182,153 @@
     vertical-align: center;
 }
 
-.GameSetupPanelSettingsRow4 {
-  flow-children: down;
-  width: 100%;
-  margin-bottom: 12px;
-}
-
-.StrategySelectionRow {
-  flow-children: right;
-  width: 100%;
-  margin-bottom: 8px;
-}
 
 .StrategyLabel {
   font-size: 18px;
-  color: #E0E0E0;
+  color: #ccaa66;
   width: 120px;
   vertical-align: center;
 }
 
+
 .StrategyValue {
-  color: #FFFFFF;
+  color: #d5d5d5;
   font-size: 18px;
-  font-weight: normal;
   vertical-align: center;
   margin-right: 10px;
   width: fill-parent-flow(1.0);
-
 }
+
 
 .StrategySelectionPanel {
-  position: 32% 20% 0px;
+  position: 36% 20% 0px;
   flow-children: down;
   width: 300px;
-  background-color: #000000dd;
-  border: 2px solid #4a76a8;
-  padding: 10px;
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #0a0a0e99 ), to( #1a1a2599 ) );
+  border: 2px solid #333340;
+  box-shadow: 0px 0px 12px #00000099;
+  padding: 16px;
 }
+
 
 .StrategySelectionTitle {
   font-size: 24px;
-  color: #FFFFFF;
-  margin-bottom: 10px;
+  color: #ccaa66;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow: 0px 0px 6px #ccaa6633;
+  horizontal-align: center;
 }
+
+
 
 .StrategyList {
   flow-children: down;
   width: 100%;
-  max-height: 600px;  /* 设置最大高度 */
-  overflow: scroll;   /* 启用滚动 */
+  max-height: 500px;
+  overflow: squish scroll;
+  margin-bottom: 10px;
+  background-color: #14141e44;
+  padding: 8px;
+  border: 1px solid #333340;
 }
-
 
 .StrategyToggle {
   width: 100%;
   height: 40px;
-  margin-bottom: 5px;
+  margin-bottom: 6px;
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #2a2a35 ), to( #1a1a25 ) );
+  border: 1px solid #444450;
+  border-radius: 3px;
+  transition-property: background-color, brightness, border;
+  transition-duration: 0.2s;
+}
 
-    border-color: #444444;
+.StrategyToggle:hover {
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #3a3a45 ), to( #2a2a35 ) );
+  border-color: #ccaa66;
+  brightness: 1.2;
 }
 
 .StrategyToggle:selected {
-  background-color: gradient( linear, 0% 0%, 0% 100%, from( #5b92cc ), to( #4a76a8 ) );
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #2d4b73 ), to( #1a365c ) );
+  box-shadow: 0px 0px 8px #4b7dbc40;
 }
 
-
+.StrategyToggle:selected:hover {
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #385d8c ), to( #234775 ) );
+  brightness: 1.2;
+}
 
 .StrategyToggle Label {
-  color: #FFFFFF;
+  color: #d5d5d5;
   font-size: 16px;
   vertical-align: center;
   horizontal-align: left;
   margin-left: 10px;
 }
 
+
 .ConfirmButton {
   width: 100%;
   height: 40px;
   margin-top: 10px;
-  background-color: gradient( linear, 0% 0%, 0% 100%, from( #4a76a8 ), to( #3a5a80 ) );
-  border: 1px solid #5b92cc;
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #2a2a35 ), to( #1a1a25 ) );
+  border: 1px solid #444450;
+  border-radius: 4px;
+  transition-property: background-color, brightness, border;
+  transition-duration: 0.2s;
 }
 
 .ConfirmButton:hover {
-  background-color: gradient( linear, 0% 0%, 0% 100%, from( #5b92cc ), to( #4a76a8 ) );
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #3a3a45 ), to( #2a2a35 ) );
+  border-color: #ccaa66;
+  brightness: 1.2;
+}
+
+.ConfirmButton:active {
+  brightness: 1.5;
+  sound: "ui_generic_button_click";
 }
 
 .ConfirmButton Label {
-  color: #FFFFFF;
+  color: #ccaa66;
   font-size: 16px;
   font-weight: bold;
   text-transform: uppercase;
+  letter-spacing: 1px;
   vertical-align: center;
   horizontal-align: center;
+  text-shadow: 1px 1px 2px #000000;
 }
+
 
 .CloseButton1 {
   width: 80px;
   height: 30px;
   margin-top: 10px;
   horizontal-align: right;
-  background-color: gradient( linear, 0% 0%, 0% 100%, from( #4a76a8 ), to( #3a5a80 ) );
-  border: 1px solid #5b92cc;
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #2a2a35 ), to( #1a1a25 ) );
+  border: 1px solid #444450;
+  border-radius: 4px;
+  transition-property: background-color, brightness, border;
+  transition-duration: 0.2s;
 }
 
 .CloseButton1:hover {
-  background-color: gradient( linear, 0% 0%, 0% 100%, from( #5b92cc ), to( #4a76a8 ) );
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #3a3a45 ), to( #2a2a35 ) );
+  border-color: #ccaa66;
+  brightness: 1.2;
+}
+
+.CloseButton1:active {
+  brightness: 1.5;
+  sound: "ui_generic_button_click";
 }
 
 .CloseButton1 Label {
-  color: #FFFFFF;
+  color: #d5d5d5;
   font-size: 14px;
   font-weight: bold;
   text-transform: uppercase;

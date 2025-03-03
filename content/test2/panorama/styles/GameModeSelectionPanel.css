@@ -2,79 +2,87 @@
   margin-top: 150px;
   margin-right: 150px;
   horizontal-align: center;
-  width: 700px; /* 稍微减小整体宽度 */
+  width: 700px;
   height: 1000px;
-  background-color: gradient( linear, 0% 0%, 0% 100%, from( #25282A ), to( #333333 ) );
-  border: 2px solid #4d5259;
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #0a0a0e ), to( #1a1a25 ) );
+  border: 2px solid #333340;
   box-shadow: #00000066 0px 0px 8px 0px;
   opacity: 0;
   z-index: 92;
   flow-children: down;
-  padding: 16px; /* 减小内边距 */
-  transform: translateX( -60px) translateY( -80px);
+  padding: 16px;
+  transform: translateX( 100px) translateY( -80px);
   transition-property: opacity, transform;
   transition-duration: 0.2s;
   overflow: squish scroll;
 }
 
-
 .GameModeSelectionPanel.Visible {
-  transform: translateX( 0px) translateY( -80px);
+  transform: translateX( 200px) translateY( -80px);
   opacity: 1;
 }
 
 .GameModeSelectionPanel > Label {
   font-size: 24px;
-  color: #ffffff;
+  color: #ccaa66;
   margin-bottom: 20px;
   text-align: center;
   width: 100%;
+  text-transform: uppercase;
 }
   
 .CategoryTitle {
-  font-size: 20px; /* 减小标题字体 */
-  color: #ffffff;
-  margin-top: 12px; /* 减小上边距 */
-  margin-bottom: 8px; /* 减小下边距 */
+  font-size: 20px;
+  color: #ccaa66;
+  margin-top: 12px;
+  margin-bottom: 8px;
   width: 100%;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  border-bottom: 1px solid #555555; /* 减小分隔线粗细 */
+  border-bottom: 1px solid #444450;
   padding-bottom: 4px;
 }
 
 .CategoryContainer {
   flow-children: down;
   width: 100%;
-  margin-bottom: 12px; /* 减小分类间距 */
+  margin-bottom: 12px;
+  background-color: #14141e44;
+  padding: 10px;
+  border: 1px solid #333340;
 }
 
 .ModesRow {
   flow-children: right;
   width: 100%;
   horizontal-align: left;
-  margin-bottom: 6px; /* 减小行间距 */
+  margin-bottom: 6px;
 }
 
 .GameModeOption {
-  width: 150px; /* 减小按钮宽度 */
-  height: 36px; /* 减小按钮高度 */
-  background-color: gradient( linear, 0% 0%, 0% 100%, from( #4d4d4d ), to( #3a3a3a ) );
-  border: 1px solid #555555;
-  margin-right: 6px; /* 减小按钮间距 */
+  width: 150px;
+  height: 36px;
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #2a2a35 ), to( #1a1a25 ) );
+  border: 1px solid #444450;
+  margin-right: 6px;
   margin-bottom: 6px;
-  transition-property: background-color;
+  transition-property: background-color, border;
   transition-duration: 0.2s;
 }
 
 .GameModeOption Label {
-  font-size: 14px; /* 减小文字大小 */
-  color: #ffffff;
+  font-size: 14px;
+  color: #d5d5d5;
   vertical-align: middle;
   horizontal-align: center;
   text-align: center;
 }
-  .GameModeOption:hover {
-    background-color: gradient( linear, 0% 0%, 0% 100%, from( #5a5a5a ), to( #474747 ) );
-  }
-  
+
+.GameModeOption:hover {
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #3a3a45 ), to( #2a2a35 ) );
+  border: 1px solid #ccaa66;
+}
+
+.GameModeOption:active {
+  sound: "ui_generic_button_click";
+  brightness: 1.5;
+}

@@ -200,62 +200,6 @@ end
 
 
 
-function Main:PlayVictoryEffects(killer)
-    if not killer then return end
-
-    -- 清理周围的树木，创造特效空间
-    GridNav:DestroyTreesAroundPoint(killer:GetOrigin(), 500, false)
-
-    -- 让英雄面向屏幕
-    killer:SetForwardVector(Vector(0, -1, 0))
-    self:gradual_slow_down(killer:GetAbsOrigin(), killer:GetAbsOrigin())
-    -- 播放胜利动作
-    killer:StartGesture(ACT_DOTA_VICTORY)
-    
-    -- 播放胜利音效
-    EmitSoundOn("Hero_LegionCommander.Duel.Victory", killer)
-
-    -- 创建胜利光环特效
-    local particle = ParticleManager:CreateParticle(
-        "particles/units/heroes/hero_legion_commander/legion_commander_duel_victory.vpcf",
-        PATTACH_OVERHEAD_FOLLOW,
-        killer
-    )
-    ParticleManager:SetParticleControl(particle, 0, killer:GetAbsOrigin())
-    
-    -- 创建聚光灯特效
-    local spotlightParticle = ParticleManager:CreateParticle(
-        "particles/econ/taunts/ursa/ursa_unicycle/ursa_unicycle_taunt_spotlight.vpcf",
-        PATTACH_ABSORIGIN,
-        killer
-    )
-    ParticleManager:SetParticleControl(spotlightParticle, 0, killer:GetAbsOrigin())
-
-    -- 延迟释放特效
-    Timers:CreateTimer(5.0, function()
-        ParticleManager:DestroyParticle(particle, false)
-        ParticleManager:DestroyParticle(spotlightParticle, false)
-        ParticleManager:ReleaseParticleIndex(particle)
-        ParticleManager:ReleaseParticleIndex(spotlightParticle)
-    end)
-
-    -- 可以添加额外的胜利特效
-    local surroundingParticle = ParticleManager:CreateParticle(
-        "particles/generic_gameplay/rune_doubledamage.vpcf",
-        PATTACH_ABSORIGIN_FOLLOW,
-        killer
-    )
-    ParticleManager:SetParticleControl(surroundingParticle, 0, killer:GetAbsOrigin())
-    
-    -- 5秒后释放环绕特效
-    Timers:CreateTimer(5.0, function()
-        ParticleManager:DestroyParticle(surroundingParticle, false)
-        ParticleManager:ReleaseParticleIndex(surroundingParticle)
-    end)
-end
-
-
-
 function Main:SetupCombatBuffs(hero)
     if not hero then
         print("错误：SetupCombatBuffs收到了空的英雄实体")

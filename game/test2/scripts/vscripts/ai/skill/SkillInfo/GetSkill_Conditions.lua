@@ -64,10 +64,11 @@ HeroSkillConditions = {
     ["npc_dota_hero_broodmother"] = {
         ["broodmother_spin_web"] = {
             function(self, caster, log)
-                local forbiddenModifiers = {
-                    "modifier_broodmother_spin_web",
-                }
-                return self:IsNotUnderModifiers(caster, forbiddenModifiers, log)
+                -- local forbiddenModifiers = {
+                --     "modifier_broodmother_spin_web",
+                -- }
+                -- return self:IsNotUnderModifiers(caster, forbiddenModifiers, log)
+                return false
             end
         },
     },
@@ -1685,6 +1686,11 @@ HeroSkillConditions = {
                 return potentialTarget ~= nil
             end
         },
+        ["tidehunter_dead_in_the_water"] = {
+            function(self, caster, log)
+                return false
+            end
+        },
     },
 
     
@@ -2834,13 +2840,25 @@ HeroSkillConditions = {
                 local ability = caster:FindAbilityByName("magnataur_empower")
                 if not ability then return false end
         
-                self.Ally = self:FindBestAllyHeroTarget(
-                    caster,
-                    ability,
-                    {"modifier_magnataur_empower"},
-                    0.5,
-                    "attack"
-                )
+                if caster:GetHeroFacetID() == 3 then
+                    self.Ally = self:FindBestAllyHeroTarget(
+                        caster,
+                        ability,
+                        {"modifier_magnataur_empower"},
+                        0.5,
+                        "attack",
+                        true,
+                        false
+                    )
+                else
+                    self.Ally = self:FindBestAllyHeroTarget(
+                        caster,
+                        ability,
+                        {"modifier_magnataur_empower"},
+                        0.5,
+                        "attack"
+                    )
+                end
                 
                 return self.Ally ~= nil
             end
@@ -2977,7 +2995,7 @@ HeroSkillConditions = {
                     end
                     return true
                 else
-                    if caster:GetHealthPercent() < 20 then
+                    if caster:GetHealthPercent() < 50 then
                         if log then
                             log("骨弓有死亡契约buff，但生命值低于20%，可以使用技能")
                         end
@@ -4303,9 +4321,9 @@ HeroSkillConditions = {
     },
 
     ["npc_dota_hero_treant"] = {
-        ["treant_living_armor"] = {
+        ["treant_overgrowth"] = {
             function(self, caster, log)
-                local ability = caster:FindAbilityByName("treant_living_armor")
+                local ability = caster:FindAbilityByName("treant_overgrowth")
                 if not ability then return false end
     
                 local potentialTarget = self:FindBestEnemyHeroTarget(
@@ -4323,9 +4341,9 @@ HeroSkillConditions = {
                 return potentialTarget ~= nil
             end
         },
-        ["treant_overgrowth"] = {
+        ["treant_living_armor"] = {
             function(self, caster, log)
-                local ability = caster:FindAbilityByName("treant_overgrowth")
+                local ability = caster:FindAbilityByName("treant_living_armor")
                 if not ability then return false end
     
                 self.Ally = self:FindBestAllyHeroTarget(
@@ -6802,7 +6820,6 @@ function CommonAI:getMinCooldownOfValidSkills(caster, excludeAbilities)
     return minCooldown ~= math.huge and minCooldown or 0
 end
 
-
 function CommonAI:CheckSkillConditions(entity, heroName)
     local conditionName = string.find(heroName, "npc_dota_brewmaster") 
         and "npc_dota_brewmaster" 
@@ -6813,11 +6830,15 @@ function CommonAI:CheckSkillConditions(entity, heroName)
     local isSpecialHero = heroName == "npc_dota_hero_morphling" or heroName == "npc_dota_hero_rubick"
     local heroConditions = isSpecialHero and {} or (HeroSkillConditions[conditionName] or {})
 
-
     self:log(string.format("检查英雄 %s 的技能条件", heroName))
 
     if not self.disabledSkills[heroName] then
         self.disabledSkills[heroName] = {}
+    end
+
+    -- 确保 dazzle_nothl_projection_end 始终在禁用列表中
+    if not self:tableContains(self.disabledSkills[heroName], "dazzle_nothl_projection_end") then
+        table.insert(self.disabledSkills[heroName], "dazzle_nothl_projection_end")
     end
 
     local abilities = {}
@@ -6834,6 +6855,12 @@ function CommonAI:CheckSkillConditions(entity, heroName)
 
     for _, ability in ipairs(abilities) do
         local abilityName = ability:GetAbilityName()
+        
+        -- 跳过 dazzle_nothl_projection_end 的检查
+        if abilityName == "dazzle_nothl_projection_end" then
+            goto continue
+        end
+
         --self:log(string.format("检查英雄 %s 的技能 %s", heroName, abilityName))
         if ability:GetAbilityType() == ABILITY_TYPE_ULTIMATE then
             --self:log(string.format("检查英雄 %s 的大招 %s", heroName, abilityName))

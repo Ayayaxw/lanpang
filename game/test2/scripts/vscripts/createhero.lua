@@ -33,17 +33,17 @@ function CreateHero(playerId, heroName, FacetID, spawnPosition, team, isControll
 end
 
 function CreateHeroHeroChaos(playerId, heroName, FacetID, spawnPosition, team, isControllableByPlayer, parentHero, callback)
-
+    local hPlayer = PlayerResource:GetPlayer(playerId)
     -- 使用传入的母体创建目标英雄
     local hero = CreateUnitByName(
         heroName,
         spawnPosition,
         true,
-        parentHero,
+        hPlayer,
         parentHero,
         team
     )
-    local hPlayer = PlayerResource:GetPlayer(playerId)
+
     if isControllableByPlayer then
         hero:SetControllableByPlayer(playerId, true)
     
@@ -75,6 +75,142 @@ function CreateHeroHeroChaos(playerId, heroName, FacetID, spawnPosition, team, i
 end
 
 
+function CreateHeroWithoutPlayer(playerId, heroName, FacetID, spawnPosition, team, isControllableByPlayer, callback)
+    -- 计算临时英雄的偏移位置
+    local offsetX = math.random(100, 200) * (math.random(0, 1) == 0 and 1 or -1)
+    local offsetY = math.random(100, 200) * (math.random(0, 1) == 0 and 1 or -1)
+    local tempPosition = Vector(
+        spawnPosition.x + offsetX,
+        spawnPosition.y + offsetY,
+        spawnPosition.z
+    )
+
+    -- 首先创建临时英雄
+    CreateHero(playerId, "npc_dota_hero_axe", FacetID, tempPosition, team, true,
+        function(tempHero)
+            if not tempHero then
+                print("错误：临时英雄创建失败")
+                return
+            end
+
+            local tempPlayerId = tempHero:GetPlayerID()
+
+            -- 使用临时英雄创建目标英雄
+            CreateHeroHeroChaos(playerId, heroName, FacetID, spawnPosition, team, isControllableByPlayer, tempHero,
+                function(realHero)
+                    if not realHero then
+                        print("错误：目标英雄创建失败 " .. heroName)
+                        return
+                    end
+
+                    -- 先删除临时英雄，确认删除后再执行回调
+                    if tempPlayerId then
+                        
+                        -- 延迟执行回调，确保临时英雄已被删除
+                        Timers:CreateTimer(0.03, function()
+                            DisconnectClient(tempPlayerId, true)
+                            Timers:CreateTimer(0.6, function()
+                                if callback then
+                                    callback(realHero)
+                                end
+                            end)
+                        end)
+                    end
+                end)
+            end)
+end
+
+function CreateParentHeroesWithFacets(callback)
+    local playerId = 0
+    local heroName = "npc_dota_hero_chen"
+    local spawnPosition = Vector(-10000, 10000, 128)
+    
+    local teams = {
+        DOTA_TEAM_GOODGUYS,
+        DOTA_TEAM_BADGUYS, 
+        DOTA_TEAM_CUSTOM_1,
+        DOTA_TEAM_CUSTOM_2
+    }
+    
+    local allHeroes = {
+        good = {},
+        bad = {},
+        custom1 = {},
+        custom2 = {}
+    }
+    local tempHeroes = {}
+    local heroCount = 0
+    local expectedCount = 20 -- 4个队伍 x 5个facet
+
+    -- 为每个team创建5个不同facet的英雄
+    for _, team in ipairs(teams) do
+        for facetId = 1, 5 do
+            -- 计算偏移位置
+            local offsetX = math.random(100, 200) * (math.random(0, 1) == 0 and 1 or -1)
+            local offsetY = math.random(100, 200) * (math.random(0, 1) == 0 and 1 or -1)
+            local tempPosition = Vector(
+                spawnPosition.x + offsetX,
+                spawnPosition.y + offsetY,
+                spawnPosition.z
+            )
+
+            -- 创建临时英雄
+            CreateHero(playerId, "npc_dota_hero_chen", facetId, tempPosition, team, true,
+                function(tempHero)
+                    if not tempHero then
+                        print("错误：临时英雄创建失败")
+                        return
+                    end
+
+                    local tempPlayerId = tempHero:GetPlayerID()
+                    table.insert(tempHeroes, {hero = tempHero, playerId = tempPlayerId})
+
+                    -- 使用临时英雄创建目标英雄
+                    CreateHeroHeroChaos(playerId, heroName, facetId, spawnPosition, team, false, tempHero,
+                        function(realHero)
+                            if not realHero then
+                                print("错误：目标英雄创建失败 " .. heroName)
+                                return
+                            end
+
+                            -- 添加modifier_wearable
+                            realHero:AddNewModifier(realHero, nil, "modifier_wearable", {})
+
+                            heroCount = heroCount + 1
+                            
+                            -- 按照队伍和facetId存储英雄
+                            if team == DOTA_TEAM_GOODGUYS then
+                                allHeroes.good[facetId] = realHero
+                            elseif team == DOTA_TEAM_BADGUYS then
+                                allHeroes.bad[facetId] = realHero
+                            elseif team == DOTA_TEAM_CUSTOM_1 then
+                                allHeroes.custom1[facetId] = realHero
+                            elseif team == DOTA_TEAM_CUSTOM_2 then
+                                allHeroes.custom2[facetId] = realHero
+                            end
+
+                            -- 当所有英雄都创建完成后
+                            if heroCount == expectedCount then
+                                -- 延迟执行断开连接
+                                Timers:CreateTimer(0.03, function()
+                                    -- 断开所有临时英雄的连接
+                                    for _, tempData in ipairs(tempHeroes) do
+                                        DisconnectClient(tempData.playerId, true)
+                                    end
+
+                                    -- 等待所有断开连接完成后回调
+                                    Timers:CreateTimer(0.6, function()
+                                        if callback then
+                                            callback(allHeroes)
+                                        end
+                                    end)
+                                end)
+                            end
+                        end)
+                end)
+        end
+    end
+end
 
 function CreateAIForHero(heroEntity, overallStrategy, heroStrategy, aiName, thinkInterval)
     -- print("为英雄创建AI: " .. heroEntity:GetUnitName())

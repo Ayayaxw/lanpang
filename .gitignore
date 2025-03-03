@@ -3,6 +3,8 @@
 *.vpk
 *.log
 *.bin
+*.vjs_c
+*.vcss_c
 /bin/
 
 # 忽略VSCode工作区设置
@@ -13,3 +15,4 @@ game/test2/tools_thumbnail_cache.bin
 
 # 忽略 VS 工作区设置
 .vs/
+game/test2/tools_asset_info.bin

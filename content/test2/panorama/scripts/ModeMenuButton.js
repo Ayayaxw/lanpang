@@ -1009,23 +1009,69 @@
         
 
 
-    // 更新游戏模式选择面板中的游戏模式
-    function updateGameModes() {
-      // 清除现有的按钮
-      selectionPanel.RemoveAndDeleteChildren();
-  
-      // 动态创建每个游戏模式的按钮
-      gameModes.forEach(mode => {
-        const button = $.CreatePanel('Button', selectionPanel, '');
-        button.AddClass('GameModeOption');
-  
-        const label = $.CreatePanel('Label', button, '');
-        label.text = mode.name;
-  
-        button.SetPanelEvent('onactivate', () => {
-          selectGameMode(mode.code, mode.name);
+      // 更新游戏模式选择面板中的游戏模式
+      function updateGameModes() {
+        // 清除现有的按钮
+        selectionPanel.RemoveAndDeleteChildren();
+    
+        // 按category对游戏模式进行分组
+        const categorizedModes = {};
+        gameModes.forEach(mode => {
+            if (!categorizedModes[mode.category]) {
+                categorizedModes[mode.category] = [];
+            }
+            categorizedModes[mode.category].push(mode);
         });
-      });
+    
+        // 定义category的显示顺序和显示名称
+        const categoryOrder = {
+            "test": { order: 1, name: "测试模式" },
+            "creep": { order: 2, name: "刷兵模式" },
+            "single": { order: 3, name: "单人模式" },
+            "multiplayer": { order: 4, name: "多人模式" }
+            // 可以根据需要添加更多类别
+        };
+    
+        // 按照定义的顺序创建分类
+        Object.entries(categorizedModes)
+            .sort(([catA], [catB]) => {
+                const orderA = categoryOrder[catA]?.order || 999;
+                const orderB = categoryOrder[catB]?.order || 999;
+                return orderA - orderB;
+            })
+            .forEach(([category, modes]) => {
+                // 创建分类容器
+                const categoryContainer = $.CreatePanel('Panel', selectionPanel, '');
+                categoryContainer.AddClass('CategoryContainer');
+    
+                // 创建分类标题
+                const categoryTitle = $.CreatePanel('Label', categoryContainer, '');
+                categoryTitle.AddClass('CategoryTitle');
+                categoryTitle.text = categoryOrder[category]?.name || category;
+    
+                // 创建一行用于放置模式按钮
+                let currentRow = $.CreatePanel('Panel', categoryContainer, '');
+                currentRow.AddClass('ModesRow');
+                
+                // 每行最多放置3个模式按钮
+                const MODES_PER_ROW = 4;
+                modes.forEach((mode, index) => {
+                    if (index > 0 && index % MODES_PER_ROW === 0) {
+                        currentRow = $.CreatePanel('Panel', categoryContainer, '');
+                        currentRow.AddClass('ModesRow');
+                    }
+    
+                    const button = $.CreatePanel('Button', currentRow, '');
+                    button.AddClass('GameModeOption');
+    
+                    const label = $.CreatePanel('Label', button, '');
+                    label.text = mode.name;
+    
+                    button.SetPanelEvent('onactivate', () => {
+                        selectGameMode(mode.code, mode.name);
+                    });
+                });
+            });
     }
   
     // 切换游戏模式选择面板的可见性

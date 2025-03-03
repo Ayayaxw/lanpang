@@ -2,24 +2,19 @@
   margin-top: 150px;
   margin-right: 150px;
   horizontal-align: center;
-  width: 500px;
-  height: 400px;
+  width: 700px; /* 稍微减小整体宽度 */
+  height: 1000px;
   background-color: gradient( linear, 0% 0%, 0% 100%, from( #25282A ), to( #333333 ) );
   border: 2px solid #4d5259;
   box-shadow: #00000066 0px 0px 8px 0px;
   opacity: 0;
   z-index: 92;
   flow-children: down;
-  padding: 20px;
+  padding: 16px; /* 减小内边距 */
   transform: translateX( -60px) translateY( -80px);
-
   transition-property: opacity, transform;
   transition-duration: 0.2s;
-
-
-    overflow: squish scroll;
-
-
+  overflow: squish scroll;
 }
 
 
@@ -36,24 +31,50 @@
   width: 100%;
 }
   
-  .GameModeOption {
-    width: 90%;
-    height: 50px;
-    background-color: gradient( linear, 0% 0%, 0% 100%, from( #4d4d4d ), to( #3a3a3a ) );
-    border: 1px solid #555555;
-    margin-top: 10px;
-    transition-property: background-color;
-    transition-duration: 0.2s;
-  }
-  
+.CategoryTitle {
+  font-size: 20px; /* 减小标题字体 */
+  color: #ffffff;
+  margin-top: 12px; /* 减小上边距 */
+  margin-bottom: 8px; /* 减小下边距 */
+  width: 100%;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-bottom: 1px solid #555555; /* 减小分隔线粗细 */
+  padding-bottom: 4px;
+}
+
+.CategoryContainer {
+  flow-children: down;
+  width: 100%;
+  margin-bottom: 12px; /* 减小分类间距 */
+}
+
+.ModesRow {
+  flow-children: right;
+  width: 100%;
+  horizontal-align: left;
+  margin-bottom: 6px; /* 减小行间距 */
+}
+
+.GameModeOption {
+  width: 150px; /* 减小按钮宽度 */
+  height: 36px; /* 减小按钮高度 */
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #4d4d4d ), to( #3a3a3a ) );
+  border: 1px solid #555555;
+  margin-right: 6px; /* 减小按钮间距 */
+  margin-bottom: 6px;
+  transition-property: background-color;
+  transition-duration: 0.2s;
+}
+
+.GameModeOption Label {
+  font-size: 14px; /* 减小文字大小 */
+  color: #ffffff;
+  vertical-align: middle;
+  horizontal-align: center;
+  text-align: center;
+}
   .GameModeOption:hover {
     background-color: gradient( linear, 0% 0%, 0% 100%, from( #5a5a5a ), to( #474747 ) );
   }
   
-  .GameModeOption Label {
-    font-size: 18px;
-    color: #ffffff;
-    vertical-align: middle;
-    horizontal-align: center;
-    text-align: center;
-  }

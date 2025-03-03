@@ -9,6 +9,7 @@ function modifier_wearable:CheckState()
 		[MODIFIER_STATE_INVULNERABLE] = true,
 		[MODIFIER_STATE_UNSELECTABLE] = true,
         [MODIFIER_STATE_OUT_OF_GAME] = true,
+        [MODIFIER_STATE_DISARMED] = true, -- 添加缴械状态
 	}
 	return state
 end

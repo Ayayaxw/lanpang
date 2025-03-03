@@ -85,7 +85,7 @@ function Main:InitGameMode()
 	GameRules:GetGameModeEntity():SetDaynightCycleDisabled(false)
 	GameRules:GetGameModeEntity():SetKillingSpreeAnnouncerDisabled(true)
 	GameRules:GetGameModeEntity():SetLoseGoldOnDeath(false)
-    GameRules:SetTimeOfDay(0) -- 0.5代表正午
+    GameRules:SetTimeOfDay(0.5) -- 0.5代表正午
 
 	
 

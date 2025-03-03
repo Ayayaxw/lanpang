@@ -35,7 +35,7 @@ require("challenges/CreepChaos")
 require("challenges/Aoe_10X")  
 require("challenges/Level7Dazzle")  
 require("challenges/waterfall_hero_chaos")  
-
+require("challenges/award_ceremony")  
 
 
 Main.Challenges = {}
@@ -109,6 +109,13 @@ Main.GameModes = {
         id = "waterfall_hero_chaos",
         code = 0010,
         name = "瀑布大乱斗",
+        menuConfig = {},
+        category = "test"
+    },
+    {
+        id = "award_ceremony",
+        code = 0011,
+        name = "颁奖模式",
         menuConfig = {},
         category = "test"
     },
@@ -323,7 +330,8 @@ function Main:SendGameModesData()
             code = mode.code,
             name = mode.name,
             menuConfig = mode.menuConfig,
-            menuConfigType = "array"
+            menuConfigType = "array",
+            category = mode.category
         }
 
         table.insert(gameModes, modeData)

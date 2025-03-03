@@ -176,25 +176,44 @@ function Main:Init_CD0_2skill(event, playerID)
         local ability_modifiers = {
             npc_dota_hero_morphling = {
                 pangolier_shield_crash = {
-                    AbilityCooldown = 0,
-                    AbilityManaCost = 0,
+                    
+                    AbilityValues = {
+                        AbilityCooldown = {
+                            value = 0
+                        },
+                        AbilityManaCost = 0,
+                    },
+                    
                 },
                 pangolier_gyroshell = {
-                    shield_crash_cooldown = 0,
+                    AbilityValues = {
+                        shield_crash_cooldown = 0,
+                    }
                 }
             },
             npc_dota_hero_pangolier = {
                 pangolier_shield_crash = {
-                    AbilityCooldown = 0,
                     AbilityManaCost = 0,
+                    AbilityValues = {
+                        AbilityCooldown = {
+                            value = 0
+                        },
+                        AbilityManaCost = 0,
+                    },
+
                 },
                 pangolier_gyroshell = {
-                    shield_crash_cooldown = 0,
+                    AbilityValues = {
+                        shield_crash_cooldown = 0
+                    }
                 }
             },
             npc_dota_hero_kunkka = {
                 kunkka_tidebringer = {
-                    AbilityCooldown = 0,
+                    AbilityValues = {
+                        AbilityCooldown = 0,
+                    }
+                    
                 }
             },
             npc_dota_hero_night_stalker = {

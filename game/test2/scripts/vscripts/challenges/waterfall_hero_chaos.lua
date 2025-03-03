@@ -1,16 +1,13 @@
 
-
 function Main:Init_waterfall_hero_chaos(event, playerID)
     -- 初始化全局变量
     self.showTeamPanel = true  
     self.isTestMode = false
-    self.heroesPerTeam = 3  -- 每个队伍初始传送的英雄数量，作为独立参数
-    self.preCreatePerTeam = 7  -- 每个队伍初始创建的英雄数量，作为独立参数
+    self.heroesPerTeam = 1  -- 每个队伍初始传送的英雄数量，作为独立参数
+    self.preCreatePerTeam = 3 -- 每个队伍初始创建的英雄数量，作为独立参数
     self.currentDeployIndex = 1  -- 当前部署的英雄索引
-    hero_duel.EndDuel = false  -- 标记战斗是否结束
-    self.currentTimer = (self.currentTimer or 0) + 1
-    self.currentMatchID = self:GenerateUniqueID() 
-    self.SPAWN_POINT_FAR = Vector(-12686, 15127, 128)
+
+    self.SPAWN_POINT_FAR = Vector(-10000, 10000, 128)
     self.ARENA_CENTER = Main.waterFall_Center
     self.SPAWN_DISTANCE = 500
 
@@ -66,7 +63,7 @@ function Main:Init_waterfall_hero_chaos(event, playerID)
     end
 
     self.heroFacets = {
-        npc_dota_hero_faceless_void = 3,  -- 虚空假面
+        npc_dota_hero_faceless_void = 5,  -- 虚空假面
         npc_dota_hero_life_stealer = 2,   -- 噬魂鬼
         npc_dota_hero_mirana = 2,
         npc_dota_hero_windrunner = 3,
@@ -75,42 +72,21 @@ function Main:Init_waterfall_hero_chaos(event, playerID)
         npc_dota_hero_huskar = 3,
         npc_dota_hero_death_prophet = 2,
         npc_dota_hero_sand_king = 2,
-        npc_dota_hero_winter_wyvern = 2,
+        npc_dota_hero_winter_wyvern = 4,
         npc_dota_hero_leshrac = 2,
         npc_dota_hero_phantom_assassin = 2,
-        npc_dota_hero_sniper = 2,
+        npc_dota_hero_sniper = 1,
         npc_dota_hero_lion = 2,
         npc_dota_hero_lone_druid = 3,
+        npc_dota_hero_mirana = 3,
+        npc_dota_hero_magnataur = 4,
+        npc_dota_hero_invoker = 5,
+        npc_dota_hero_Jakiro = 4,
+        npc_dota_hero_dazzle = 2,
+        npc_dota_hero_arc_warden = 3,
+        npc_dota_hero_troll_warlord= 2,
         -- 可以继续添加其他英雄的命石设置
     }
-
-    self.createUnitHeroes = {
-        ["npc_dota_hero_kez"] = true,
-        ["npc_dota_hero_riki"] = true,
-        ["npc_dota_hero_spirit_breaker"] = true,
-        ["npc_dota_hero_magnataur"] = true,
-        ["npc_dota_hero_techies"] = true,
-        ["npc_dota_hero_disruptor"] = true,
-        ["npc_dota_hero_bane"] = true,
-        ["npc_dota_hero_venomancer"] = true,
-        ["npc_dota_hero_night_stalker"] = true,
-        ["npc_dota_hero_ogre_magi"] = true,
-        ["npc_dota_hero_troll_warlord"] = true,
-        ["npc_dota_hero_alchemist"] = true,
-        ["npc_dota_hero_bounty_hunter"] = true,
-        ["npc_dota_hero_templar_assassin"] = true,
-        ["npc_dota_hero_skeleton_king"] = true,
-        ["npc_dota_hero_ringmaster"] = true,
-        ["npc_dota_hero_pangolier"] = true,
-        ["npc_dota_hero_dark_willow"] = true,
-        ["npc_dota_hero_monkey_king"] = true,
-        ["npc_dota_hero_oracle"] = true,
-        ["npc_dota_hero_phoenix"] = true,
-        ["npc_dota_hero_legion_commander"] = true,
-        ["npc_dota_hero_skywrath_mage"] = true,
-        ["npc_dota_hero_abaddon"] = true,
-    }
-
 
     self.testModeHeroes = {
         [1] = { -- 力量英雄
@@ -126,7 +102,7 @@ function Main:Init_waterfall_hero_chaos(event, playerID)
     }
     self:InitializeWaterfallHeroSequence()--初始化英雄序列
 
-    self:InitialPreCreateHeroes()--预创建英雄
+    self:InitialPreWaterFallCreateHeroes()--预创建英雄
     Timers:CreateTimer(10, function()
         self:Initialize_waterfall_hero_chaos_UI()
         self:Initial_waterfall_hero_chaos_DeployHeroes()
@@ -137,128 +113,10 @@ function Main:Init_waterfall_hero_chaos(event, playerID)
 end
 
 
-function Main:SendKillFeedToClient(killer, killed)
-    if not killer or not killed then 
-        print("[Arena] Error: killer or killed is nil")
-        return 
-    end
 
-    -- 定义团队类型
-
-    -- 收集击杀数据
-    local killerType = nil
-    local killedType = nil
-    local killerData = nil
-    local killedData = nil
-
-    -- 遍历团队类型来找到击杀者和被击杀者的数据
-    for heroType, _ in pairs(self.teamTypes) do
-        if self.heroSequence[heroType] then
-            -- 遍历该类型的所有英雄
-            for i = 1, #self.heroSequence[heroType].sequence do
-                if self.heroSequence[heroType].sequence[i] and 
-                   self.heroSequence[heroType].sequence[i].entity then
-                    local hero = self.heroSequence[heroType].sequence[i].entity
-                    if hero:GetUnitName() == killer:GetUnitName() then
-                        killerType = heroType
-                        killerData = self.heroSequence[heroType].sequence[i]
-                    elseif hero:GetUnitName() == killed:GetUnitName() then
-                        killedType = heroType
-                        killedData = self.heroSequence[heroType].sequence[i]
-                    end
-                end
-            end
-        end
-    end
-
-    -- 检查是否找到了所有需要的数据
-    if not killerType or not killedType or not killerData or not killedData then
-        print("[Arena] Error: Could not find complete killer or victim data")
-        print("KillerType:", killerType)
-        print("KilledType:", killedType)
-        print("KillerData:", killerData)
-        print("KilledData:", killedData)
-        return
-    end
-
-    -- 构建击杀数据
-    local killData = {
-        killer_hero = killer:GetUnitName(),
-        killer_name = killerData.chinese,
-        killer_type = self.teamTypes[killerType].type,
-        victim_hero = killed:GetUnitName(),
-        victim_name = killedData.chinese,
-        victim_type = self.teamTypes[killedType].type
-    }
-
-    print("[Arena] Sending kill feed data:")
-    DeepPrintTable(killData)
-    
-    -- 发送数据到前端
-    CustomGameEventManager:Send_ServerToAllClients("hero_chaos_kill_feed", killData)
-end
-
-
-
-function Main:PlayVictoryEffects(killer)
-    if not killer then return end
-
-    -- 清理周围的树木，创造特效空间
-    GridNav:DestroyTreesAroundPoint(killer:GetOrigin(), 500, false)
-
-    -- 让英雄面向屏幕
-    killer:SetForwardVector(Vector(0, -1, 0))
-    self:gradual_slow_down(killer:GetAbsOrigin(), killer:GetAbsOrigin())
-    -- 播放胜利动作
-    killer:StartGesture(ACT_DOTA_VICTORY)
-    
-    -- 播放胜利音效
-    EmitSoundOn("Hero_LegionCommander.Duel.Victory", killer)
-
-    -- 创建胜利光环特效
-    local particle = ParticleManager:CreateParticle(
-        "particles/units/heroes/hero_legion_commander/legion_commander_duel_victory.vpcf",
-        PATTACH_OVERHEAD_FOLLOW,
-        killer
-    )
-    ParticleManager:SetParticleControl(particle, 0, killer:GetAbsOrigin())
-    
-    -- 创建聚光灯特效
-    local spotlightParticle = ParticleManager:CreateParticle(
-        "particles/econ/taunts/ursa/ursa_unicycle/ursa_unicycle_taunt_spotlight.vpcf",
-        PATTACH_ABSORIGIN,
-        killer
-    )
-    ParticleManager:SetParticleControl(spotlightParticle, 0, killer:GetAbsOrigin())
-
-    -- 延迟释放特效
-    Timers:CreateTimer(5.0, function()
-        ParticleManager:DestroyParticle(particle, false)
-        ParticleManager:DestroyParticle(spotlightParticle, false)
-        ParticleManager:ReleaseParticleIndex(particle)
-        ParticleManager:ReleaseParticleIndex(spotlightParticle)
-    end)
-
-    -- 可以添加额外的胜利特效
-    local surroundingParticle = ParticleManager:CreateParticle(
-        "particles/generic_gameplay/rune_doubledamage.vpcf",
-        PATTACH_ABSORIGIN_FOLLOW,
-        killer
-    )
-    ParticleManager:SetParticleControl(surroundingParticle, 0, killer:GetAbsOrigin())
-    
-    -- 5秒后释放环绕特效
-    Timers:CreateTimer(5.0, function()
-        ParticleManager:DestroyParticle(surroundingParticle, false)
-        ParticleManager:ReleaseParticleIndex(surroundingParticle)
-    end)
-end
-
-
-
-function Main:SetupCombatBuffs(hero)
+function Main:SetupWaterFallCombatBuffs(hero)
     if not hero then
-        print("错误：SetupCombatBuffs收到了空的英雄实体")
+        print("错误：SetupWaterFallCombatBuffs收到了空的英雄实体")
         return false
     end
     
@@ -269,8 +127,21 @@ function Main:SetupCombatBuffs(hero)
     hero:AddNewModifier(hero, nil, "modifier_item_ultimate_scepter_consumed", {})
     hero:AddNewModifier(hero, nil, "modifier_auto_elevation_waterfall", {})
 
-    -- 给所有英雄添加 item_titan_sliver
-    hero:AddItemByName("item_titan_sliver")
+    -- 添加并升级技能
+    hero:AddAbility("dazzle_nothl_projection")
+    local ability = hero:FindAbilityByName("dazzle_nothl_projection")
+    if ability then
+        ability:SetLevel(3)
+        
+        -- 计算前方500码的位置
+        local forward = hero:GetForwardVector()
+        local origin = hero:GetAbsOrigin()
+        local targetPos = origin + forward * 500
+        
+        -- 设置目标位置并释放技能
+        hero:SetCursorPosition(targetPos)
+        ability:OnSpellStart()
+    end
 
     -- 查找英雄type
     local heroName = hero:GetUnitName()
@@ -280,17 +151,6 @@ function Main:SetupCombatBuffs(hero)
         if heroData.name == heroName then
             heroType = heroData.type
             break
-        end
-    end
-
-    -- 根据type添加对应装备
-    if heroType == 1 then
-        for i = 1, 6 do
-            hero:AddItemByName("item_bracer_custom")
-        end
-    elseif heroType == 2 then
-        for i = 1, 6 do
-            hero:AddItemByName("item_wraith_band_custom")
         end
     end
     
@@ -328,7 +188,7 @@ function Main:Initial_waterfall_hero_chaos_DeployHeroes()
             local currentIndex = i
             Timers:CreateTimer((i - 1) * 0.1, function()
                 self.currentDeployIndex = currentIndex  -- 设置当前部署索引
-                self:DeployHero(heroType, true)
+                self:DeployWaterFallHero(heroType, true)
                 
                 if currentIndex < heroesToDeploy then
                     self.heroSequence[heroType].currentIndex = self.heroSequence[heroType].currentIndex + 1
@@ -338,7 +198,7 @@ function Main:Initial_waterfall_hero_chaos_DeployHeroes()
     end
 end
 
-function Main:CleanupHeroAndSummons(heroType, heroIndex, callback)
+function Main:CleanupWaterFallHeroAndSummons(heroType, heroIndex, callback)
     if not self.heroSequence[heroType] then
         print(string.format("[Arena] 警告：未找到类型 %d 的队伍数据", heroType))
         if callback then callback() end
@@ -361,64 +221,25 @@ function Main:CleanupHeroAndSummons(heroType, heroIndex, callback)
         return
     end
 
-    -- 检查是否在不删除列表中
-    if self.createUnitHeroes[hero:GetUnitName()] then
-        print(string.format("[Arena] 英雄 %s 在保留列表中，跳过删除", hero:GetUnitName()))
-        heroData.entity = nil
-        
-
-        
-        hero:SetAbsOrigin(Vector(10000, 10000, 0))
-        -- Timers:CreateTimer(1, function()
-        --     if callback then callback() end
-        -- end)
-        return 
-    end
-
-    if not hero:IsAlive() then
-        hero:RespawnHero(false, false)
-    end
-
-    local playerID = hero:GetPlayerOwnerID()
-    if hero:IsHero() and not hero:IsClone() and hero:GetPlayerOwner() then
-        
-        DisconnectClient(playerID, true)
-        UTIL_Remove(hero)
-        GameRules:ResetPlayer( playerID )
-    else
-        hero:Destroy()
-    end
-
-    -- 清除实体引用
     heroData.entity = nil
 
-    Timers:CreateTimer(1, function()
-        if callback then callback() end
+    Timers:CreateTimer(10, function()
+        hero:SetAbsOrigin(Vector(10000, 10000, 0))
     end)
+    -- 20秒后移除英雄实体
+    Timers:CreateTimer(60, function()
+        if not hero:IsNull() then
+            print(string.format("正在准备清理: %s (EntityIndex: %d)", 
+                hero:GetName(),           -- 英雄名字
+                hero:GetEntityIndex()     -- 实体索引
+            ))
+            UTIL_Remove(hero)
+        end
+    end)
+
+    if callback then callback() end
 end
 
-function Main:CheckForVictory(winnerType)
-    print("[Arena] 检查胜利条件 - 获胜者类型:", winnerType)
-    
-    -- 检查所有其他队伍是否已经全部阵亡
-    for heroType, data in pairs(self.heroSequence) do
-        if heroType ~= winnerType then
-            print(string.format("[Arena] 检查队伍 %d: 死亡数 %d, 总英雄数 %d", 
-                heroType, 
-                data.teamStats.deaths or 0, 
-                #data.sequence))
-            
-            -- 如果有任何队伍的死亡数小于总人数，说明还没结束
-            if (data.teamStats.deaths or 0) < #data.sequence then
-                print("[Arena] 该队伍还有存活英雄，未达到胜利条件")
-                return false
-            end
-        end
-    end
-    
-    print("[Arena] 所有其他队伍都已全部阵亡，达到胜利条件")
-    return true
-end
 
 function Main:OnUnitKilled_waterfall_hero_chaos(killedUnit, args)
     if not killedUnit or not killedUnit:IsRealHero() then return end
@@ -428,41 +249,20 @@ function Main:OnUnitKilled_waterfall_hero_chaos(killedUnit, args)
     local heroToProcess = nil
     local killedHeroIndex = nil  -- 添加这个变量来存储被击杀英雄的索引
     
-    -- 特殊处理米波及其分身
-    if killedUnit:GetUnitName() == "npc_dota_hero_meepo" then
-        for type, data in pairs(self.heroSequence) do
-            if data and data.sequence then
-                for i = 1, #data.sequence do  -- 遍历整个序列
-                    if data.sequence[i] and data.sequence[i].entity then
-                        local currentHero = data.sequence[i].entity
-                        if currentHero and currentHero:GetUnitName() == "npc_dota_hero_meepo" and 
-                           killedUnit:GetTeamNumber() == currentHero:GetTeamNumber() then
-                            killedHeroType = type
-                            heroToProcess = currentHero  -- 使用本体进行后续处理
-                            killedHeroIndex = i  -- 记录索引
-                            break
-                        end
+    for type, data in pairs(self.heroSequence) do
+        if data and data.sequence then
+            for i = 1, #data.sequence do  -- 遍历整个序列
+                if data.sequence[i] and data.sequence[i].entity then
+                    local currentHero = data.sequence[i].entity
+                    if currentHero == killedUnit then
+                        killedHeroType = type
+                        heroToProcess = killedUnit
+                        killedHeroIndex = i  -- 记录索引
+                        break
                     end
                 end
-                if killedHeroType then break end
             end
-        end
-    else
-        for type, data in pairs(self.heroSequence) do
-            if data and data.sequence then
-                for i = 1, #data.sequence do  -- 遍历整个序列
-                    if data.sequence[i] and data.sequence[i].entity then
-                        local currentHero = data.sequence[i].entity
-                        if currentHero == killedUnit then
-                            killedHeroType = type
-                            heroToProcess = killedUnit
-                            killedHeroIndex = i  -- 记录索引
-                            break
-                        end
-                    end
-                end
-                if killedHeroType then break end
-            end
+            if killedHeroType then break end
         end
     end
 
@@ -521,7 +321,7 @@ function Main:OnUnitKilled_waterfall_hero_chaos(killedUnit, args)
             if nextIndex <= #self.heroSequence[killedHeroType].sequence then
                 self.heroSequence[killedHeroType].currentIndex = nextIndex
                 -- 部署新的英雄
-                self:DeployHero(killedHeroType, false)
+                self:DeployWaterFallHero(killedHeroType, false)
             else
                 print(string.format("[Arena] 警告：队伍 %d 已无可用英雄", killedHeroType))
             end
@@ -594,11 +394,11 @@ function Main:OnUnitKilled_waterfall_hero_chaos(killedUnit, args)
                 end
             end
             -- 使用正确的索引进行清理
-            Timers:CreateTimer(5, function()
-                self:CleanupHeroAndSummons(killedHeroType, indexToClean, function()
-                    self:PreCreateHeroes(killedHeroType)
-                end)
+
+            self:CleanupWaterFallHeroAndSummons(killedHeroType, indexToClean, function()
+                self:PreCreateWaterFallHeroes(killedHeroType)
             end)
+            
         else
             print("[Arena] 警告：无法找到被击杀英雄的队伍数据")
         end
@@ -606,75 +406,75 @@ function Main:OnUnitKilled_waterfall_hero_chaos(killedUnit, args)
 end
 -- 在初始化时
 function Main:InitializeWaterfallHeroSequence()
-    local heroesGroup1 = {
-        "npc_dota_hero_night_stalker", "npc_dota_hero_night_stalker", "npc_dota_hero_night_stalker",
-        "npc_dota_hero_tidehunter", "npc_dota_hero_tidehunter", "npc_dota_hero_tidehunter",
-        "npc_dota_hero_axe", "npc_dota_hero_axe", "npc_dota_hero_axe",
-        "npc_dota_hero_elder_titan", "npc_dota_hero_elder_titan", "npc_dota_hero_elder_titan",
-        "npc_dota_hero_mars", "npc_dota_hero_mars", "npc_dota_hero_mars",
-        "npc_dota_hero_doom_bringer", "npc_dota_hero_doom_bringer", "npc_dota_hero_doom_bringer",
-        "npc_dota_hero_slardar", "npc_dota_hero_slardar", "npc_dota_hero_slardar",
-        "npc_dota_hero_ogre_magi", "npc_dota_hero_ogre_magi", "npc_dota_hero_ogre_magi",
-        "npc_dota_hero_pudge", "npc_dota_hero_pudge", "npc_dota_hero_pudge",
-        "npc_dota_hero_legion_commander", "npc_dota_hero_legion_commander", "npc_dota_hero_legion_commander",
-        "npc_dota_hero_dragon_knight", "npc_dota_hero_dragon_knight", "npc_dota_hero_dragon_knight",
-        "npc_dota_hero_undying", "npc_dota_hero_undying", "npc_dota_hero_undying",
-        "npc_dota_hero_abyssal_underlord", "npc_dota_hero_abyssal_underlord", "npc_dota_hero_abyssal_underlord", 
-        "npc_dota_hero_chaos_knight", "npc_dota_hero_chaos_knight", "npc_dota_hero_chaos_knight",
-        "npc_dota_hero_tusk", "npc_dota_hero_tusk", "npc_dota_hero_tusk",
-        "npc_dota_hero_shredder", "npc_dota_hero_shredder", "npc_dota_hero_shredder",
-        "npc_dota_hero_bristleback", "npc_dota_hero_bristleback", "npc_dota_hero_bristleback",
-        "npc_dota_hero_tiny", "npc_dota_hero_tiny", "npc_dota_hero_tiny",
-        "npc_dota_hero_kunkka", "npc_dota_hero_kunkka", "npc_dota_hero_kunkka",
-        "npc_dota_hero_alchemist", "npc_dota_hero_alchemist", "npc_dota_hero_alchemist",
-        "npc_dota_hero_life_stealer", "npc_dota_hero_life_stealer", "npc_dota_hero_life_stealer",
-        "npc_dota_hero_dawnbreaker", "npc_dota_hero_dawnbreaker", "npc_dota_hero_dawnbreaker",
-        "npc_dota_hero_sven", "npc_dota_hero_sven", "npc_dota_hero_sven",
-        "npc_dota_hero_huskar", "npc_dota_hero_huskar", "npc_dota_hero_huskar",
-        "npc_dota_hero_primal_beast", "npc_dota_hero_primal_beast", "npc_dota_hero_primal_beast",
-        "npc_dota_hero_earth_spirit", "npc_dota_hero_earth_spirit", "npc_dota_hero_earth_spirit",
-        "npc_dota_hero_centaur", "npc_dota_hero_centaur", "npc_dota_hero_centaur",
-        "npc_dota_hero_omniknight", "npc_dota_hero_omniknight", "npc_dota_hero_omniknight",
-        "npc_dota_hero_spirit_breaker", "npc_dota_hero_spirit_breaker", "npc_dota_hero_spirit_breaker",
-        "npc_dota_hero_skeleton_king", "npc_dota_hero_skeleton_king", "npc_dota_hero_skeleton_king",
-        "npc_dota_hero_treant", "npc_dota_hero_treant", "npc_dota_hero_treant",
-        "npc_dota_hero_earthshaker", "npc_dota_hero_earthshaker", "npc_dota_hero_earthshaker"
-    }
+    -- local heroesGroup1 = {
+    --     "npc_dota_hero_night_stalker", "npc_dota_hero_night_stalker", "npc_dota_hero_night_stalker",
+    --     "npc_dota_hero_tidehunter", "npc_dota_hero_tidehunter", "npc_dota_hero_tidehunter",
+    --     "npc_dota_hero_axe", "npc_dota_hero_axe", "npc_dota_hero_axe",
+    --     "npc_dota_hero_elder_titan", "npc_dota_hero_elder_titan", "npc_dota_hero_elder_titan",
+    --     "npc_dota_hero_mars", "npc_dota_hero_mars", "npc_dota_hero_mars",
+    --     "npc_dota_hero_doom_bringer", "npc_dota_hero_doom_bringer", "npc_dota_hero_doom_bringer",
+    --     "npc_dota_hero_slardar", "npc_dota_hero_slardar", "npc_dota_hero_slardar",
+    --     "npc_dota_hero_ogre_magi", "npc_dota_hero_ogre_magi", "npc_dota_hero_ogre_magi",
+    --     "npc_dota_hero_pudge", "npc_dota_hero_pudge", "npc_dota_hero_pudge",
+    --     "npc_dota_hero_legion_commander", "npc_dota_hero_legion_commander", "npc_dota_hero_legion_commander",
+    --     "npc_dota_hero_dragon_knight", "npc_dota_hero_dragon_knight", "npc_dota_hero_dragon_knight",
+    --     "npc_dota_hero_undying", "npc_dota_hero_undying", "npc_dota_hero_undying",
+    --     "npc_dota_hero_abyssal_underlord", "npc_dota_hero_abyssal_underlord", "npc_dota_hero_abyssal_underlord", 
+    --     "npc_dota_hero_chaos_knight", "npc_dota_hero_chaos_knight", "npc_dota_hero_chaos_knight",
+    --     "npc_dota_hero_tusk", "npc_dota_hero_tusk", "npc_dota_hero_tusk",
+    --     "npc_dota_hero_shredder", "npc_dota_hero_shredder", "npc_dota_hero_shredder",
+    --     "npc_dota_hero_bristleback", "npc_dota_hero_bristleback", "npc_dota_hero_bristleback",
+    --     "npc_dota_hero_tiny", "npc_dota_hero_tiny", "npc_dota_hero_tiny",
+    --     "npc_dota_hero_kunkka", "npc_dota_hero_kunkka", "npc_dota_hero_kunkka",
+    --     "npc_dota_hero_alchemist", "npc_dota_hero_alchemist", "npc_dota_hero_alchemist",
+    --     "npc_dota_hero_life_stealer", "npc_dota_hero_life_stealer", "npc_dota_hero_life_stealer",
+    --     "npc_dota_hero_dawnbreaker", "npc_dota_hero_dawnbreaker", "npc_dota_hero_dawnbreaker",
+    --     "npc_dota_hero_sven", "npc_dota_hero_sven", "npc_dota_hero_sven",
+    --     "npc_dota_hero_huskar", "npc_dota_hero_huskar", "npc_dota_hero_huskar",
+    --     "npc_dota_hero_primal_beast", "npc_dota_hero_primal_beast", "npc_dota_hero_primal_beast",
+    --     "npc_dota_hero_earth_spirit", "npc_dota_hero_earth_spirit", "npc_dota_hero_earth_spirit",
+    --     "npc_dota_hero_centaur", "npc_dota_hero_centaur", "npc_dota_hero_centaur",
+    --     "npc_dota_hero_omniknight", "npc_dota_hero_omniknight", "npc_dota_hero_omniknight",
+    --     "npc_dota_hero_spirit_breaker", "npc_dota_hero_spirit_breaker", "npc_dota_hero_spirit_breaker",
+    --     "npc_dota_hero_skeleton_king", "npc_dota_hero_skeleton_king", "npc_dota_hero_skeleton_king",
+    --     "npc_dota_hero_treant", "npc_dota_hero_treant", "npc_dota_hero_treant",
+    --     "npc_dota_hero_earthshaker", "npc_dota_hero_earthshaker", "npc_dota_hero_earthshaker"
+    -- }
     
-    local heroesGroup2 = {
-        "npc_dota_hero_slark", "npc_dota_hero_slark", "npc_dota_hero_slark",
-        "npc_dota_hero_bloodseeker", "npc_dota_hero_bloodseeker", "npc_dota_hero_bloodseeker",
-        "npc_dota_hero_templar_assassin", "npc_dota_hero_templar_assassin", "npc_dota_hero_templar_assassin",
-        "npc_dota_hero_phantom_lancer", "npc_dota_hero_phantom_lancer", "npc_dota_hero_phantom_lancer",
-        "npc_dota_hero_weaver", "npc_dota_hero_weaver", "npc_dota_hero_weaver",
-        "npc_dota_hero_medusa", "npc_dota_hero_medusa", "npc_dota_hero_medusa",
-        "npc_dota_hero_morphling", "npc_dota_hero_morphling", "npc_dota_hero_morphling",
-        "npc_dota_hero_ursa", "npc_dota_hero_ursa", "npc_dota_hero_ursa",
-        "npc_dota_hero_juggernaut", "npc_dota_hero_juggernaut", "npc_dota_hero_juggernaut",
-        "npc_dota_hero_antimage", "npc_dota_hero_antimage", "npc_dota_hero_antimage",
-        "npc_dota_hero_phantom_assassin", "npc_dota_hero_phantom_assassin", "npc_dota_hero_phantom_assassin",
-        "npc_dota_hero_riki", "npc_dota_hero_riki", "npc_dota_hero_riki",
-        "npc_dota_hero_luna", "npc_dota_hero_luna", "npc_dota_hero_luna",
-        "npc_dota_hero_kez", "npc_dota_hero_kez", "npc_dota_hero_kez",
-        "npc_dota_hero_faceless_void", "npc_dota_hero_faceless_void", "npc_dota_hero_faceless_void",
-        "npc_dota_hero_bounty_hunter", "npc_dota_hero_bounty_hunter", "npc_dota_hero_bounty_hunter",
-        "npc_dota_hero_viper", "npc_dota_hero_viper", "npc_dota_hero_viper",
-        "npc_dota_hero_razor", "npc_dota_hero_razor", "npc_dota_hero_razor",
-        "npc_dota_hero_nevermore", "npc_dota_hero_nevermore", "npc_dota_hero_nevermore",
-        "npc_dota_hero_ember_spirit", "npc_dota_hero_ember_spirit", "npc_dota_hero_ember_spirit",
-        "npc_dota_hero_drow_ranger", "npc_dota_hero_drow_ranger", "npc_dota_hero_drow_ranger",
-        "npc_dota_hero_naga_siren", "npc_dota_hero_naga_siren", "npc_dota_hero_naga_siren",
-        "npc_dota_hero_clinkz", "npc_dota_hero_clinkz", "npc_dota_hero_clinkz",
-        "npc_dota_hero_terrorblade", "npc_dota_hero_terrorblade", "npc_dota_hero_terrorblade",
-        "npc_dota_hero_arc_warden", "npc_dota_hero_arc_warden", "npc_dota_hero_arc_warden",
-        "npc_dota_hero_troll_warlord", "npc_dota_hero_troll_warlord", "npc_dota_hero_troll_warlord",
-        "npc_dota_hero_gyrocopter", "npc_dota_hero_gyrocopter", "npc_dota_hero_gyrocopter",
-        "npc_dota_hero_sniper", "npc_dota_hero_sniper", "npc_dota_hero_sniper",
-        "npc_dota_hero_spectre", "npc_dota_hero_spectre", "npc_dota_hero_spectre",
-        "npc_dota_hero_meepo", "npc_dota_hero_meepo", "npc_dota_hero_meepo",
-        "npc_dota_hero_hoodwink", "npc_dota_hero_hoodwink", "npc_dota_hero_hoodwink",
-        "npc_dota_hero_monkey_king", "npc_dota_hero_monkey_king", "npc_dota_hero_monkey_king"
-    }
+    -- local heroesGroup2 = {
+    --     "npc_dota_hero_slark", "npc_dota_hero_slark", "npc_dota_hero_slark",
+    --     "npc_dota_hero_bloodseeker", "npc_dota_hero_bloodseeker", "npc_dota_hero_bloodseeker",
+    --     "npc_dota_hero_templar_assassin", "npc_dota_hero_templar_assassin", "npc_dota_hero_templar_assassin",
+    --     "npc_dota_hero_phantom_lancer", "npc_dota_hero_phantom_lancer", "npc_dota_hero_phantom_lancer",
+    --     "npc_dota_hero_weaver", "npc_dota_hero_weaver", "npc_dota_hero_weaver",
+    --     "npc_dota_hero_medusa", "npc_dota_hero_medusa", "npc_dota_hero_medusa",
+    --     "npc_dota_hero_morphling", "npc_dota_hero_morphling", "npc_dota_hero_morphling",
+    --     "npc_dota_hero_ursa", "npc_dota_hero_ursa", "npc_dota_hero_ursa",
+    --     "npc_dota_hero_juggernaut", "npc_dota_hero_juggernaut", "npc_dota_hero_juggernaut",
+    --     "npc_dota_hero_antimage", "npc_dota_hero_antimage", "npc_dota_hero_antimage",
+    --     "npc_dota_hero_phantom_assassin", "npc_dota_hero_phantom_assassin", "npc_dota_hero_phantom_assassin",
+    --     "npc_dota_hero_riki", "npc_dota_hero_riki", "npc_dota_hero_riki",
+    --     "npc_dota_hero_luna", "npc_dota_hero_luna", "npc_dota_hero_luna",
+    --     "npc_dota_hero_kez", "npc_dota_hero_kez", "npc_dota_hero_kez",
+    --     "npc_dota_hero_faceless_void", "npc_dota_hero_faceless_void", "npc_dota_hero_faceless_void",
+    --     "npc_dota_hero_bounty_hunter", "npc_dota_hero_bounty_hunter", "npc_dota_hero_bounty_hunter",
+    --     "npc_dota_hero_viper", "npc_dota_hero_viper", "npc_dota_hero_viper",
+    --     "npc_dota_hero_razor", "npc_dota_hero_razor", "npc_dota_hero_razor",
+    --     "npc_dota_hero_nevermore", "npc_dota_hero_nevermore", "npc_dota_hero_nevermore",
+    --     "npc_dota_hero_ember_spirit", "npc_dota_hero_ember_spirit", "npc_dota_hero_ember_spirit",
+    --     "npc_dota_hero_drow_ranger", "npc_dota_hero_drow_ranger", "npc_dota_hero_drow_ranger",
+    --     "npc_dota_hero_naga_siren", "npc_dota_hero_naga_siren", "npc_dota_hero_naga_siren",
+    --     "npc_dota_hero_clinkz", "npc_dota_hero_clinkz", "npc_dota_hero_clinkz",
+    --     "npc_dota_hero_terrorblade", "npc_dota_hero_terrorblade", "npc_dota_hero_terrorblade",
+    --     "npc_dota_hero_arc_warden", "npc_dota_hero_arc_warden", "npc_dota_hero_arc_warden",
+    --     "npc_dota_hero_troll_warlord", "npc_dota_hero_troll_warlord", "npc_dota_hero_troll_warlord",
+    --     "npc_dota_hero_gyrocopter", "npc_dota_hero_gyrocopter", "npc_dota_hero_gyrocopter",
+    --     "npc_dota_hero_sniper", "npc_dota_hero_sniper", "npc_dota_hero_sniper",
+    --     "npc_dota_hero_spectre", "npc_dota_hero_spectre", "npc_dota_hero_spectre",
+    --     "npc_dota_hero_meepo", "npc_dota_hero_meepo", "npc_dota_hero_meepo",
+    --     "npc_dota_hero_hoodwink", "npc_dota_hero_hoodwink", "npc_dota_hero_hoodwink",
+    --     "npc_dota_hero_monkey_king", "npc_dota_hero_monkey_king", "npc_dota_hero_monkey_king"
+    -- }
     
     -- 创建一个查找表来确定英雄类型
 
@@ -850,7 +650,6 @@ function Main:InitializeWaterfallHeroSequence()
     end
 end
 
-
 function Main:OnAttack_waterfall_hero_chaos(keys)
     local attacker = EntIndexToHScript(keys.entindex_attacker)
     local victim = EntIndexToHScript(keys.entindex_killed)
@@ -903,15 +702,8 @@ function Main:OnAttack_waterfall_hero_chaos(keys)
 end
 
 
-function Main:StopScoreBoardMonitor()
-    if self.scoreMonitorTimer then
-        Timers:RemoveTimer(self.scoreMonitorTimer)
-        self.scoreMonitorTimer = nil
-    end
-end
 
-
-function Main:PreCreateHeroes(heroType)
+function Main:PreCreateWaterFallHeroes(heroType)
     local data = self.heroSequence[heroType]
     if not data then
         print(string.format("[Arena] 错误：无效的英雄属性类型: %d", heroType))
@@ -927,75 +719,49 @@ function Main:PreCreateHeroes(heroType)
             print(string.format("[Arena] 准备创建英雄: %s (序号: %d)", 
                 heroData.chinese, i))
             
-            if self.createUnitHeroes[heroName] then
-                -- 使用对应阵营的母体
-                local parentHero = self.parentHeroes[heroType]
-                
-                if not parentHero then
-                    print(string.format("[Arena] 错误：未找到阵营 %d 的母体", heroType))
-                    return
-                end 
-                
-                CreateHeroHeroChaos(
-                    0,
-                    heroName,
-                    1,  -- 固定使用命石1
-                    self.SPAWN_POINT_FAR,
-                    data.team,
-                    false,
-                    parentHero,
-                    function(createdHero)
-                        if not createdHero then
-                            print(string.format("[Arena] 错误：创建英雄失败: %s", heroData.chinese))
-                            return
-                        end
-                        
-                        if heroName == "npc_dota_hero_weaver" then
-                            print("[Arena] 检测到编织者，立即升至最高等级")
-                            HeroMaxLevel(createdHero)
-                        end
-                        
-                        heroData.entity = createdHero
-                        self:SetupInitialBuffs(createdHero)
-                        
-                        print(string.format("[Arena] 成功创建英雄: %s", heroData.chinese))
-                    end
-                )
-            else
-                -- 使用CreateHero创建
-                local facet = self.heroFacets[heroName] or 1
-                print(string.format("[Arena] 命石: %d", facet))
-                
-                CreateHero(
-                    0,
-                    heroName,
-                    facet,
-                    self.SPAWN_POINT_FAR,
-                    data.team,
-                    false,
-                    function(createdHero)
-                        if not createdHero then
-                            print(string.format("[Arena] 错误：创建英雄失败: %s", heroData.chinese))
-                            return
-                        end
-                        
-                        -- 编织者特殊处理
-                        if heroName == "npc_dota_hero_weaver" then
-                            print("[Arena] 检测到编织者，立即升至最高等级")
-                            HeroMaxLevel(createdHero)
-                        end
-                        
-                        -- 记录创建的英雄实体
-                        heroData.entity = createdHero
-                        
-                        -- 设置初始状态
-                        self:SetupInitialBuffs(createdHero)
-                        
-                        print(string.format("[Arena] 成功创建英雄: %s", heroData.chinese))
-                    end
-                )
-                return true  -- 成功开始创建一个英雄
+            local parentHeroes = self.parentHeroes[heroType]
+            if not parentHeroes then
+                print(string.format("[Arena] 错误：未找到阵营 %d 的母体", heroType))
+                return
+            end 
+
+            local facet = self.heroFacets[heroName] or 1
+            print(string.format("[Arena] 命石: %d", facet))
+
+            -- 获取对应命石的母体英雄
+            local parentHero = parentHeroes[facet]
+            if not parentHero then
+                print(string.format("[Arena] 错误：未找到阵营 %d 命石 %d 的母体", heroType, facet))
+                return
             end
+
+            CreateHeroHeroChaos(
+                0,
+                heroName,
+                facet, 
+                self.SPAWN_POINT_FAR,
+                data.team,
+                false,
+                parentHero,
+                function(createdHero)
+                    if not createdHero then
+                        print(string.format("[Arena] 错误：创建英雄失败: %s", heroData.chinese))
+                        return
+                    end
+                    
+                    if heroName == "npc_dota_hero_weaver" then
+                        print("[Arena] 检测到编织者，立即升至最高等级")
+                        HeroMaxLevel(createdHero)
+                    end
+                    
+                    heroData.entity = createdHero
+                    self:SetupInitialBuffs(createdHero)
+                    
+                    print(string.format("[Arena] 成功创建英雄: %s", heroData.chinese))
+                end
+            )
+            return true
+
         else
             print(string.format("[Arena] 英雄已存在，继续查找下一个: %s", heroData.chinese))
         end
@@ -1006,7 +772,8 @@ function Main:PreCreateHeroes(heroType)
 end
 
 
-function Main:DeployHero(heroType, isInitialSpawn)
+
+function Main:DeployWaterFallHero(heroType, isInitialSpawn)
     local data = self.heroSequence[heroType]
     if not data then return end
     
@@ -1078,54 +845,25 @@ function Main:DeployHero(heroType, isInitialSpawn)
             local delay = isInitialSpawn and 10.0 or 0.5
             print(string.format("[Arena] 英雄 %s 将在 %.1f 秒后移除无敌状态", hero:GetUnitName(), delay))
 
-            Timers:CreateTimer(delay, function()
-                -- 移除无敌状态
-                if hero:HasModifier("modifier_invulnerable") then
-                    hero:RemoveModifierByName("modifier_invulnerable")
-                    hero:Purge(false, true, false, false, false)
-                end
-                
-                -- 清理传送特效
-                ParticleManager:DestroyParticle(particle, false)
-                ParticleManager:ReleaseParticleIndex(particle)
-                
-                -- 创建AI并设置战斗状态
-                CreateAIForHero(hero,{"攻击无敌单位"})
-                self:SetupCombatBuffs(hero)
-                
-                -- 执行英雄特殊效果
-                local heroStrategy = hero.ai and hero.ai.heroStrategy or nil
-                self:HeroBenefits(hero:GetUnitName(), hero, heroStrategy)
-                
-                -- -- 米波特殊处理
-                -- if hero:GetUnitName() == "npc_dota_hero_meepo" then
-                --     Timers:CreateTimer(0.1, function()
-                --         local meepos = FindUnitsInRadius(
-                --             hero:GetTeam(),
-                --             hero:GetAbsOrigin(),
-                --             nil,
-                --             FIND_UNITS_EVERYWHERE,
-                --             DOTA_UNIT_TARGET_TEAM_FRIENDLY,
-                --             DOTA_UNIT_TARGET_HERO,
-                --             DOTA_UNIT_TARGET_FLAG_PLAYER_CONTROLLED,
-                --             FIND_ANY_ORDER,
-                --             false
-                --         )
-                        
-                --         for _, meepo in pairs(meepos) do
-                --             if meepo:HasModifier("modifier_meepo_divided_we_stand") and 
-                --                meepo:IsRealHero() and 
-                --                meepo ~= hero then
-                --                 local overallStrategy = hero.ai and hero.ai.overallStrategy or nil
-                --                 local heroStrategy = hero.ai and hero.ai.heroStrategy or nil
-                --                 CreateAIForHero(meepo, overallStrategy, heroStrategy)
-                --             end
-                --         end
-                --     end)
-                -- end
-                
-                self:StartAbilitiesMonitor(hero)
-            end)
+            -- 移除无敌状态
+            if hero:HasModifier("modifier_invulnerable") then
+                hero:RemoveModifierByName("modifier_invulnerable")
+                hero:Purge(false, true, false, false, false)
+            end
+            
+            -- 清理传送特效
+            ParticleManager:DestroyParticle(particle, false)
+            ParticleManager:ReleaseParticleIndex(particle)
+            
+            -- 创建AI并设置战斗状态
+            CreateAIForHero(hero,{"攻击无敌单位"})
+            self:SetupWaterFallCombatBuffs(hero)
+            
+            -- 执行英雄特殊效果
+            local heroStrategy = hero.ai and hero.ai.heroStrategy or nil
+            self:HeroBenefits(hero:GetUnitName(), hero, heroStrategy)
+            self:StartAbilitiesMonitor(hero)
+
         end)
 
         return nil -- 不再继续等待
@@ -1162,61 +900,11 @@ function Main:Initialize_waterfall_hero_chaos_UI()
 end
 
 
--- 当需要更新UI数据时
-function Main:UpdateTeamPanelData()
-    if not self.showTeamPanel then
-        return
-    end
 
-    -- 遍历所有在 teamTypes 中定义的队伍
-    for type, teamData in pairs(self.teamTypes) do  -- type就是1,2这样的数字
-        local heroSequence = self.heroSequence[type]  -- 直接使用type
-        if heroSequence then
-            -- 获取当前英雄
-            local currentData = heroSequence.sequence[heroSequence.currentIndex]
-            local currentHero = currentData and currentData.entity and currentData.entity:GetUnitName()
-            
-            -- 获取下一个英雄
-            local nextHeroIndex = heroSequence.currentIndex + 1
-            local nextHeroData = heroSequence.sequence[nextHeroIndex]
-            local nextHero = nextHeroData and nextHeroData.entity and nextHeroData.entity:GetUnitName()
-
-            -- 使用teamStats中的deaths来获取已死亡英雄数量
-            local deadHeroes = heroSequence.teamStats.deaths or 0
-
-            -- 构建数据
-            local data = {
-                type = teamData.type,  -- 直接使用type
-                currentHero = currentHero,
-                nextHero = nextHero,
-                remainingHeroes = #heroSequence.sequence - deadHeroes,
-                totalHeroes = #heroSequence.sequence,
-                kills = heroSequence.teamStats.kills or 0,
-                deadHeroes = deadHeroes
-            }
-            
-            -- 添加中文打印信息
-            print("==== 队伍状态更新 ====")
-            print(string.format("队伍类型: %s (%s)", teamData.type, teamData.name))
-            print(string.format("当前英雄: %s", currentHero or "无"))
-            print(string.format("下一个英雄: %s", nextHero or "无"))
-            print(string.format("总英雄数: %d", #heroSequence.sequence))
-            print(string.format("已死亡英雄: %d", deadHeroes))
-            print(string.format("剩余英雄: %d", #heroSequence.sequence - deadHeroes))
-            print(string.format("队伍击杀数: %d", heroSequence.teamStats.kills or 0))
-            print("========================")
-            
-            CustomGameEventManager:Send_ServerToAllClients("update_team_data", data)
-        end
-    end
-end
-
-
-function Main:InitialPreCreateHeroes()
+function Main:InitialPreWaterFallCreateHeroes()
     -- 先创建母体，再创建英雄
     local PARENT_SPAWN_POINT = Vector(9999, 9999, 128)
     self.parentHeroes = {}
-    local hPlayer = PlayerResource:GetPlayer(0)
 
     -- 团队到DOTA_TEAM的映射
     local teamMapping = {
@@ -1225,27 +913,6 @@ function Main:InitialPreCreateHeroes()
         [4] = DOTA_TEAM_CUSTOM_1,   -- 蓝队
         [8] = DOTA_TEAM_CUSTOM_2    -- 紫队
     }
-
-    -- 创建四个阵营的母体函数
-    local function CreateParentHeroes(callback)
-        local remaining = 4
-        
-        for heroType, team in pairs(teamMapping) do
-            DebugCreateHeroWithVariant(hPlayer, "npc_dota_hero_chen", 1, team, false,
-                function(parentHero)
-                    if parentHero then
-                        parentHero:SetAbsOrigin(PARENT_SPAWN_POINT)
-                        self.parentHeroes[heroType] = parentHero
-                        print(string.format("创建母体成功，阵营: %d, 队伍: %d", heroType, team))
-                        
-                        remaining = remaining - 1
-                        if remaining == 0 and callback then
-                            callback()
-                        end
-                    end
-                end)
-        end
-    end
 
     -- 创建英雄的函数
     local function CreateHeroes()
@@ -1264,99 +931,33 @@ function Main:InitialPreCreateHeroes()
         for _, heroType in ipairs(heroTypes) do
             for i = 1, heroesPerType do
                 Timers:CreateTimer(interval * currentIndex, function()
-                    self:PreCreateHeroes(heroType)
+                    self:PreCreateWaterFallHeroes(heroType)
                 end)
                 currentIndex = currentIndex + 1
             end
         end
     end
 
-    -- 先创建母体，完成后再创建英雄
-    CreateParentHeroes(CreateHeroes)
-end
+    -- 使用新的方式创建母体
+    CreateParentHeroesWithFacets(function(allHeroes)
+        -- 将创建的英雄按照阵营分配到self.parentHeroes中
+        self.parentHeroes[1] = allHeroes.bad        -- 红队
+        self.parentHeroes[2] = allHeroes.good       -- 绿队
+        self.parentHeroes[4] = allHeroes.custom1    -- 蓝队
+        self.parentHeroes[8] = allHeroes.custom2    -- 紫队
 
-
-function Main:GetTeamIndex(heroType)
-    local index = 1
-    for _, teamData in pairs(self.teamTypes) do
-        if tonumber(teamData.type) == heroType then
-            return index
-        end
-        index = index + 1
-    end
-    return 1  -- 默认返回1
-end
-
-function Main:GetSpawnPointForType(heroType, isInitialSpawn, hero)
-    if isInitialSpawn then
-        if self.heroesPerTeam <= 1 then
-            -- 单个英雄时使用序号来决定角度
-            local teamIndex = self:GetTeamIndex(heroType)
-            local totalTeams = 0
-            for _ in pairs(self.teamTypes) do totalTeams = totalTeams + 1 end
-            local angle = (teamIndex - 1) * (2 * math.pi / totalTeams)
-            
-            local x = self.ARENA_CENTER.x + self.SPAWN_DISTANCE * math.cos(angle)
-            local y = self.ARENA_CENTER.y + self.SPAWN_DISTANCE * math.sin(angle)
-            return Vector(x, y, self.ARENA_CENTER.z)
-        else
-            -- 多个英雄时在直线上均匀分布
-            local x = self.ARENA_CENTER.x
-            local teamIndex = self:GetTeamIndex(heroType)
-            local baseOffset = 200
-            
-            -- 根据队伍序号决定位置
-            if teamIndex == 1 then 
-                x = self.ARENA_CENTER.x + self.SPAWN_DISTANCE + baseOffset  -- 右边
-            elseif teamIndex == 2 then 
-                x = self.ARENA_CENTER.x - self.SPAWN_DISTANCE - baseOffset  -- 左边
-            elseif teamIndex == 3 then 
-                x = self.ARENA_CENTER.x + self.SPAWN_DISTANCE + (baseOffset * 2)  -- 更右边
-            elseif teamIndex == 4 then 
-                x = self.ARENA_CENTER.x - self.SPAWN_DISTANCE - (baseOffset * 2)  -- 更左边
+        -- 打印日志确认创建成功
+        for heroType, heroes in pairs(self.parentHeroes) do
+            for facetId, hero in pairs(heroes) do
+                print(string.format("创建母体成功，阵营: %d, facetID: %d", heroType, facetId))
             end
-            
-            -- 增加垂直方向的总范围
-            local totalHeight = self.SPAWN_DISTANCE * 3.0
-            
-            -- 如果英雄数量大于5，进一步增加间距
-            if self.heroesPerTeam > 5 then
-                totalHeight = self.SPAWN_DISTANCE * 4.0
-            end
-            
-            local stepSize = totalHeight / (self.heroesPerTeam - 1)
-            local verticalOffset = (self.currentDeployIndex - 1) * stepSize - totalHeight/2
-            
-            local y = self.ARENA_CENTER.y + verticalOffset
-            return Vector(x, y, self.ARENA_CENTER.z)
-        end
-    else
-        local spawnDistance = 600 -- 默认距离
-
-        -- 根据heroType设置不同的spawn距离
-        if heroType == 1 then
-            spawnDistance = 600
-        elseif heroType == 2 then
-            spawnDistance = 600
-        elseif heroType == 4 then
-            spawnDistance = 600
-        elseif heroType == 8 then
-            spawnDistance = 600
         end
 
-        -- 如果是远程英雄，减少生成距离
-        if hero and hero:IsRangedAttacker() then
-            spawnDistance = spawnDistance - 200
-        end
-
-        local timeBasedOffset = GameRules:GetGameTime() * 17.53
-        local randomAngle = RandomFloat(0, 2 * math.pi) + timeBasedOffset % (2 * math.pi)
-        
-        local x = self.ARENA_CENTER.x + spawnDistance * math.cos(randomAngle)
-        local y = self.ARENA_CENTER.y + spawnDistance * math.sin(randomAngle)
-        return Vector(x, y, self.ARENA_CENTER.z)
-    end
+        -- 创建其他英雄
+        CreateHeroes()
+    end)
 end
+
 
 
 

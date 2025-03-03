@@ -129,7 +129,7 @@ heroes_precache = {
     {particleName = "void_spirit", soundName = "void_spirit", name = "npc_dota_hero_void_spirit", chinese = "虚无之灵", id = 126, model = "void_spirit"},
     {particleName = "windrunner", soundName = "windrunner", name = "npc_dota_hero_windrunner", chinese = "风行者", id = 21, model = "windrunner"},
     {particleName = "winter_wyvern", soundName = "winter_wyvern", name = "npc_dota_hero_winter_wyvern", chinese = "寒冬飞龙", id = 112, model = "winterwyvern"},
-    {particleName = "target_dummy", soundName = "target_dummy", name = "npc_dota_hero_target_dummy", chinese = "傀儡目标", id = 999, model = "target_dummy"},
+    -- {particleName = "target_dummy", soundName = "target_dummy", name = "npc_dota_hero_target_dummy", chinese = "傀儡目标", id = 999, model = "target_dummy"},
 }
 
 local function GetHeroTypeFromAttribute(attribute)

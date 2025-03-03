@@ -75,7 +75,13 @@ function Precache(context)
     PrecacheResource("model", "models/heroes/ogre_magi/ogre_magi.vmdl", context)
     PrecacheResource("model", "models/heroes/undying/undying.vmdl", context)
     PrecacheResource("model", "models/heroes/ringmaster/ringmaster_unicycle.vmdl", context)
+    local particleFolders = {
+        "particles/units/heroes",  -- 英雄特效
+    }
     
+    for _, folder in ipairs(particleFolders) do
+        PrecacheResource("particle_folder", folder, context)
+    end
     -- 预加载音效
 end
 

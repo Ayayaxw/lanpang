@@ -8,10 +8,14 @@ function Main:Init_Magnataur5(event, playerID)
     local ability_modifiers = {
         npc_dota_hero_magnataur = {
             magnataur_skewer = {
-                AbilityCooldown = 3,
+                AbilityValues = {
+                    AbilityCooldown = 3,
+                }
             },
             magnataur_horn_toss = {
-                AbilityCooldown = 3,
+                AbilityValues = {
+                    AbilityCooldown = 3,
+                }
             },
         },
     }

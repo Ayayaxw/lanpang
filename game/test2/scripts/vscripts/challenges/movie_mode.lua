@@ -52,8 +52,85 @@ function Main:Init_movie_mode(heroName, heroFacet,playerID, heroChineseName)
     --CreateBeastmasterAndBot()
     --Create100Bots()
     --SpawnTestCreeps()
-    CreateHeroSequence()
+    --CreateHeroSequence()
+    --CreateRandomHeroes(100)
+    -- 假设你要创建的位置
+    -- CreateParentHeroesWithFacets(function(allHeroes)
+    --DisplayHeroes()
+    -- end)
 end
+
+function CreateRandomHeroes(amount)
+    -- 英雄名称列表
+    local heroList = {
+        "npc_dota_hero_crystal_maiden",
+        "npc_dota_hero_lina",
+        "npc_dota_hero_lion",
+        "npc_dota_hero_shadow_shaman",
+        "npc_dota_hero_sven",
+        "npc_dota_hero_tiny",
+        "npc_dota_hero_vengefulspirit",
+        "npc_dota_hero_windrunner",
+        "npc_dota_hero_zeus"
+    }
+
+    -- 队伍列表
+    local teams = {
+        DOTA_TEAM_GOODGUYS,
+        DOTA_TEAM_BADGUYS,
+        DOTA_TEAM_CUSTOM_1,
+        DOTA_TEAM_CUSTOM_2
+    }
+
+    -- 基础出生点
+    local baseSpawnPoint = Vector(0, 0, 128)
+    
+    -- 创建英雄的函数
+    local function CreateOneHero(index)
+        -- 随机选择英雄和队伍
+        local randomHero = heroList[math.random(#heroList)]
+        local randomTeam = teams[math.random(#teams)]
+        local randomFacetID = math.random(1, 2)  -- 随机选择模型变体
+        
+        -- 计算分散的出生点
+        local spawnRadius = 1000  -- 出生点分布半径
+        local angle = (index / amount) * 2 * math.pi
+        local spawnPoint = Vector(
+            baseSpawnPoint.x + math.cos(angle) * spawnRadius,
+            baseSpawnPoint.y + math.sin(angle) * spawnRadius,
+            baseSpawnPoint.z
+        )
+        
+        -- 创建英雄
+        CreateHeroWithoutPlayer(
+            0,  -- playerId 使用0
+            randomHero,
+            randomFacetID,
+            spawnPoint,
+            randomTeam,
+            false,  -- 不可控制
+            function(hero)
+                if hero then
+                    print(string.format("成功创建第%d个英雄: %s, 队伍: %d", index, randomHero, randomTeam))
+                    -- 可以在这里添加额外的英雄设置
+                    hero:SetHealth(hero:GetMaxHealth())
+                    hero:SetMana(hero:GetMaxMana())
+                    
+                    -- 如果还有下一个英雄需要创建，则继续创建
+                    if index < amount then
+                        CreateOneHero(index + 1)
+                    end
+                end
+            end
+        )
+    end
+
+    -- 开始创建第一个英雄
+    if amount > 0 then
+        CreateOneHero(1)
+    end
+end
+
 
 
 function CreateHeroSequence()
@@ -3014,37 +3091,6 @@ function TestCreateTenHeroes()
     end)
 end
 
-function SpawnFourHeroes()
-    local heroData = {
-        {name = "npc_dota_hero_nevermore", position = Vector(767.79, 6149.44, 384.00)},
-        --{name = "npc_dota_hero_earthshaker", position = Vector(767.79, 6149.44, 384.00)},
-        {name = "npc_dota_hero_necrolyte", position = Vector(1028.40, 6142.33, 256.00)},
-        {name = "npc_dota_hero_lina", position = Vector(505.00, 6144.75, 128.00)},
-        --{name = "npc_dota_hero_ember_spirit", position = Vector(505.00, 6144.75, 128.00)},
-        {name = "npc_dota_hero_lion", position = Vector(1335.26, 6084.06, 0.00)}
-    }
-
-    local function SetupHero(newHero, isFirst)
-        newHero:SetControllableByPlayer(0, true)
-        newHero:StartGesture(ACT_DOTA_VICTORY)
-        HeroMaxLevel(newHero)
-        newHero:AddNewModifier(newHero, nil, "modifier_disarmed", {})
-        newHero:AddNewModifier(newHero, nil, "modifier_damage_reduction_100", {})
-        newHero:AddNewModifier(newHero, nil, "modifier_break", {})
-
-        if isFirst then
-            local particleName = "particles/events/ti6_teams/teleport_start_ti6_lvl3_mvp_phoenix.vpcf"
-            local particle = ParticleManager:CreateParticle(particleName, PATTACH_ABSORIGIN, newHero)
-            ParticleManager:SetParticleControl(particle, 0, newHero:GetAbsOrigin())
-        end
-    end
-
-    for i, data in ipairs(heroData) do
-        local newHero = CreateUnitByName(data.name, data.position, true, nil, nil, DOTA_TEAM_GOODGUYS)
-        SetupHero(newHero, i <= 1)  -- 只给第一个英雄加特效
-        newHero:SetForwardVector(Vector(0, -1, 0))  -- 朝南
-    end
-end
 
 function SpawnSimpleHeroGrid()
     local heroes = {

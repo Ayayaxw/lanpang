@@ -183,26 +183,6 @@
     "IsHidden"              "1"
 }
 
-
-	"my_arrow"
-	{
-		"BaseClass"           "ability_lua"
-		"ScriptFile"			"my_arrow"
-
-		"AbilityBehavior"     "DOTA_ABILITY_BEHAVIOR_POINT"
-		"AbilityTextureName"     "mirana_arrow"
-
-		"AbilityValues"
-		{
-			"01"
-			{
-				"var_type" 	"FIELD_INTEGER"
-				"speed" 		"999999"
-			}
-		}
-	}
-
-
 	// "phantom_assassin_blur"
 	// 	{
 

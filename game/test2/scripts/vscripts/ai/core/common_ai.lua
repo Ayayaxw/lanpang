@@ -182,9 +182,8 @@ function CommonAI:Think(entity)
     end
 
     -- 4. 主要目标查找逻辑
-    if target then
-        self:log("找到英雄目标，敌人数量：" .. self.enemyHeroCount)
-    else
+    if not target or self:containsStrategy(self.global_strategy, "谁近打谁") then
+
         self:log("未找到英雄目标，寻找普通单位")
         target = self:FindTarget(entity)
         
@@ -304,7 +303,6 @@ function CommonAI:Think(entity)
         self:log(string.format("准备施放技能 %s", abilityInfo.abilityName))
         target = self.target
         if target then
-            
             -- 处理特殊技能的逻辑
             local result = self:AdjustAbilityTarget(entity, abilityInfo, target)
             if result ~= false then
@@ -336,7 +334,7 @@ function CommonAI:Think(entity)
         else
             -- 处理没有找到目标的情况
             if self.attackTarget then
-                print("有攻击目标1")
+                self:log("没有找到目标，但是有攻击目标1")
                 return self:HandleAttack(self.attackTarget)
             else
                 self:HandleNoTargetFound(entity)
@@ -344,21 +342,16 @@ function CommonAI:Think(entity)
         end
     else
 
-        if self.attackTarget then
-            print("有攻击目标1")
-            return self:HandleAttack(self.attackTarget)
-        end
-
         if target then 
-            print("攻击target")
+            self:log("攻击target")
             return self:HandleAttack(target)
         elseif self.attackTarget then
-            print("有攻击目标2")
+            self:log("有攻击目标2")
             return self:HandleAttack(self.attackTarget)
         else
             return self.nextThinkTime
         end
-        print("没有找到技能，执行攻击逻辑")
+        self:log("没有找到技能，执行攻击逻辑")
 
         
     end
@@ -1294,7 +1287,7 @@ function CommonAI:HandleAttack(target, abilityInfo, targetInfo)
 
 
     if self:containsStrategy(self.global_strategy, "不要优先拆墓碑、棒子") then
-        
+        self:log("不要优先拆墓碑、棒子")
     elseif self:containsStrategy(self.global_strategy, "优先打小僵尸") and self.attackTarget then
         target = self.attackTarget
     elseif self.attackTarget then 
@@ -1399,7 +1392,7 @@ function CommonAI:HandleAttack(target, abilityInfo, targetInfo)
             
             if currentTarget then
                 -- 如果当前目标是英雄,检查骷髅王大招效果
-                if currentTarget:IsHero() then
+                if currentTarget:IsHero() and not currentTarget:IsIllusion() then
                     -- 检查当前目标是否有骷髅王大招特效
                     local hasSkeletonKingModifier = currentTarget:HasModifier("modifier_skeleton_king_reincarnation_scepter_active")
                     
@@ -1427,7 +1420,7 @@ function CommonAI:HandleAttack(target, abilityInfo, targetInfo)
                         end
                     end
                 -- 如果当前目标不是英雄且不等于目标target,切换到target
-                elseif currentTarget ~= target then
+                elseif currentTarget ~= target and not self:containsStrategy(self.global_strategy, "谁近打谁") then
                     self:log("当前目标非英雄且不是指定目标,切换攻击到指定目标")
                     self:SetState(AIStates.Attack)
                     local order = {
@@ -1438,28 +1431,56 @@ function CommonAI:HandleAttack(target, abilityInfo, targetInfo)
                     }
                     ExecuteOrderFromTable(order)
                     return self.nextThinkTime
+
                 end
             end
             
             return self.nextThinkTime
         end
-        
-        -- 目标不是无敌时正常执行攻击
-        self:SetState(AIStates.Attack)
-        local order = {
-            UnitIndex = self.entity:entindex(),
-            OrderType = DOTA_UNIT_ORDER_ATTACK_TARGET,
-            TargetIndex = target:entindex(),
-            Position = targetInfo and targetInfo.targetPos or target:GetAbsOrigin()
+
+        -- 定义特殊技能表
+
+        local SPECIAL_ABILITIES = {
+            ["spawnlord_master_freeze"] = true
         }
-        ExecuteOrderFromTable(order)
+
+        -- 检查是否拥有特殊技能且非冷却状态
+        for abilityName in pairs(SPECIAL_ABILITIES) do
+            local ability = self.entity:FindAbilityByName(abilityName)
+            if ability then
+                self:log("检查技能:" .. abilityName)
+                if ability:IsFullyCastable() then
+                    self:log("技能 " .. abilityName .. " 可用且非冷却,返回")
+                    return self.nextThinkTime
+                else
+                    self:log("技能 " .. abilityName .. " 在冷却中或不可用")
+                end
+            end
+        end
+                
+        if self:containsStrategy(self.global_strategy, "谁近打谁") then
+            local targetName = "unknown"
+            if target and type(target.GetUnitName) == "function" then
+                targetName = target:GetUnitName()
+            end
+            self:log("进入攻击状态，攻击目标:", targetName)
+            self:SetState(AIStates.Attack)
+            self.entity:MoveToTargetToAttack(target)
+        else
+        -- 目标不是无敌时正常执行攻击
+            self:SetState(AIStates.Attack)
+            local order = {
+                UnitIndex = self.entity:entindex(),
+                OrderType = DOTA_UNIT_ORDER_ATTACK_TARGET,
+                TargetIndex = target:entindex(),
+                Position = targetInfo and targetInfo.targetPos or target:GetAbsOrigin()
+            }
+            ExecuteOrderFromTable(order)
+        end
     end
 
-    local targetName = "unknown"
-    if target and type(target.GetUnitName) == "function" then
-        targetName = target:GetUnitName()
-    end
-    self:log("进入攻击状态，攻击目标:", targetName)
+
+
     
     return self.nextThinkTime
 end

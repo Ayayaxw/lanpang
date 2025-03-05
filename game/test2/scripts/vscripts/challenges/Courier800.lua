@@ -234,11 +234,7 @@ function Main:Init_Courier800(event, playerID)
         )
 
         -- 结束决斗并更新UI，显示胜利和击杀数
-        CustomGameEventManager:Send_ServerToAllClients("update_final_score", {
-            result = "victory",
-            survivalTime = "01:00.00",  -- 满时间
-            killCount = hero_duel.killCount
-        })
+
 
         -- 可以添加胜利特效
         if self.leftTeamHero1 and not self.leftTeamHero1:IsNull() then
@@ -531,11 +527,7 @@ function Main:ProcessHeroDeath_Courier800(killedUnit, killer)
 
             -- 结束决斗并更新UI
             print("Sending final score update to clients")
-            CustomGameEventManager:Send_ServerToAllClients("update_final_score", {
-                result = "defeat",
-                survivalTime = formattedTime,
-                killCount = hero_duel.killCount
-            })
+
         else
             print("courier died, updating kill count")
             if killer then
@@ -603,12 +595,7 @@ function Main:ProcessHeroDeath_Courier800(killedUnit, killer)
                 )
 
                 -- 发送胜利消息给前端
-                CustomGameEventManager:Send_ServerToAllClients("update_final_score", {
-                    result = "victory",
-                    survivalTime = formattedTime,
-                    killCount = hero_duel.killCount,
-                    totalScore = totalScore
-                })
+
 
                 -- 为玩家英雄播放胜利效果
                 if self.leftTeamHero1 and not self.leftTeamHero1:IsNull() then

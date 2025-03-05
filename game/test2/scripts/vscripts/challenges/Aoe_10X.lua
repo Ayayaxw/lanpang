@@ -10,6 +10,9 @@ function Main:Init_Aoe_10X(event, playerID)
     local teams = {DOTA_TEAM_GOODGUYS, DOTA_TEAM_BADGUYS} -- 或其他你需要的队伍
     self:CreateTrueSightWards(teams)
     Main:AmplifyAbilityAOE(10)
+    
+    self:SetDamagePanelEnabled(true)
+
     self.HERO_CONFIG = {
         ALL = {
             function(hero)
@@ -245,13 +248,7 @@ function Main:Init_Aoe_10X(event, playerID)
             ["当前总分"] = finalScore
         }
         CustomGameEventManager:Send_ServerToAllClients("update_score", data)
-        -- 结束决斗并更新UI，显示胜利和得分
-        CustomGameEventManager:Send_ServerToAllClients("update_final_score", {
-            result = "victory",
-            survivalTime = "01:00.00",  -- 满时间
-            killCount = hero_duel.killCount,
-            finalScore = finalScore
-        })
+
     
         -- 播放胜利效果
         if self.leftTeamHero1 and not self.leftTeamHero1:IsNull() then

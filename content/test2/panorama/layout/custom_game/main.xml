@@ -3,7 +3,7 @@
     <include src="s2r://panorama/styles/dotastyles.vcss_c" />
     <include src="file://{resources}/styles/MainPanel.css" />
 
-
+    <include src="file://{resources}/styles/damage_panel.css" />
 
 
     <include src="file://{resources}/styles/fc-heropick.css" />
@@ -51,7 +51,7 @@
     <include src="file://{resources}/scripts/Init/HideDOTA2Panel.js" />
     <!-- <include src="file://{resources}/scripts/custom_ability_display.js" /> -->
 
-
+    <include src="file://{resources}/scripts/damage_panel.js" />
     <!--按钮功能-->
     <include src="file://{resources}/scripts/ScoreButton1.js" />
     <include src="file://{resources}/scripts/ScoreButton2.js" />
@@ -91,6 +91,36 @@
   
   <Panel id="Greenpanel" class = "Greenpanel"/> -->
     <Panel id="WhiteboardRoot" hittest="false" />
+
+
+
+
+
+<Panel class="DamagePanelRoot" hittest="false">
+    <Panel id="AbilityDamagePanel" class="AbilityDamagePanel">
+        <Panel id="AbilityDamageGlow" class="AbilityDamageGlow" />
+        <Panel class="PanelBorder" />
+        
+        <Panel class="DamagePanelContent">
+            <Panel class="DamageInfoLayout">
+                <!-- Left damage counter section -->
+                <Panel class="DamageCountSection">
+                    <Label id="AbilityDamageValue" class="AbilityDamageCounter" text="1038" />
+                    <Label id="AbilityDamageIncrease" class="AbilityDamageIncrease" text="+233" />
+                </Panel>
+                
+                <!-- Middle section (ability info) -->
+                <Panel class="AbilityDamage_InfoSection">
+                    <Panel class="AbilityIconWrapper">
+                        <Label id="AbilityDamageAbilityName" class="AbilityDamageAbilityName" text="冰晶爆裂" />
+                        <Panel id="AbilityDamageAbilityIcon" class="AbilityDamageAbilityIcon" />
+
+                    </Panel>
+                </Panel>
+            </Panel>
+        </Panel>
+    </Panel>
+</Panel>
 
   <Panel id="CustomHeroStatsRoot" class="CustomHeroStatsRoot hidden">
       <Panel id="LeftHeroStatsContainer" class="HeroStatsContainer" />
@@ -330,14 +360,17 @@
 
 
       <Panel id="MainButtonContainer" class="MainButtonContainer">
-          <Button id="ScoreButton1" class="ScoreButton">
-          <Label text="积分版1" />
-          </Button>
-          <Button id="ScoreButton2" class="ScoreButton">
+
+          <!-- <Button id="ScoreButton2" class="ScoreButton">
           <Label text="积分版2" />
-          </Button>
+          </Button> -->
           <Button id="ModeMenuButton" class="ScoreButton">
           <Label text="开始游戏" />
+          </Button>
+          
+
+          <Button id="ScoreButton1" class="ScoreButton">
+          <Label text="积分版" />
           </Button>
 
           <Button id="HideDefaultButton" class="ScoreButton">
@@ -353,6 +386,10 @@
           </Button>
           <Button id="CameraControlButton" class="ScoreButton">
               <Label text="相机控制" />
+          </Button>
+
+          <Button id="SandboxModeButtonUnique" class="ScoreButton">
+            <Label text="沙盒模式" />
           </Button>
       </Panel>
 
@@ -570,7 +607,10 @@
         </Panel>
       </Panel>
 
-
+      <Panel id="SandboxModePanelUnique" class="GameModeSelectionPanel">
+          <Label text="沙盒模式" />
+          <!-- 内容将由JavaScript动态填充 -->
+      </Panel>
       <!-- 模式主菜单 -->
 
     <Panel class="GameModeMainPanel" id="GameModeMainPanel" style="visibility: collapse;">

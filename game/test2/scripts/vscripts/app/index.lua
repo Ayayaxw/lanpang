@@ -222,6 +222,8 @@ function Main:CreateReferee(position)
     referee:AddNewModifier(referee, nil, "modifier_disarmed", {})  -- 添加缴械效果
     referee:SetForwardVector(Vector(0, -1, 0))
 
+    --最后再次把单位传送到目标位置
+    FindClearSpaceForUnit(referee, position, true)
     return referee
 end
 ----------------------------------
@@ -340,6 +342,14 @@ function Main:createLocalizedMessage(...)
     })
 
     return true
+end
+
+
+
+function formatTime(seconds)
+    local minutes = math.floor(seconds / 60)
+    local remainingSeconds = seconds % 60
+    return string.format("%d:%02d", minutes, remainingSeconds)
 end
 
 function table.deepcopy(orig)

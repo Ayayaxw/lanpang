@@ -123,59 +123,84 @@ end
 function Main:UpdateAbilityModifiers(ability_modifiers, debug_print)
     debug_print = debug_print or false
 
-    for hero_name, hero_abilities in pairs(ability_modifiers) do
-        for ability_name, ability_data in pairs(hero_abilities) do
-            local key = hero_name .. "_" .. ability_name
-            if not self.original_values[key] then
-                local original_data = self:GetOriginalAbilityValue(hero_name, ability_name)
-                if original_data then
-                    self.original_values[key] = original_data
+    -- 处理每个外层键
+    for key, data in pairs(ability_modifiers) do
+        -- 判断是否为英雄键（格式为npc_dota_hero_xxx）
+        if string.match(key, "^npc_dota_hero_") then
+            -- 处理指定英雄的技能
+            local hero_name = key
+            for ability_name, ability_data in pairs(data) do
+                local ability_key = hero_name .. "_" .. ability_name
+                -- 保存原始数据
+                if not self.original_values[ability_key] then
+                    local original_data = self:GetOriginalAbilityValue(hero_name, ability_name)
+                    if original_data then
+                        self.original_values[ability_key] = original_data
+                    end
                 end
+                -- 设置新的技能数据
+                if ability_data.AbilityValues then
+                    if debug_print then
+                        print(string.format("更新英雄技能: %s", ability_key))
+                        DeepPrintTable(ability_data.AbilityValues)
+                    end
+                    CustomNetTables:SetTableValue("edit_kv", ability_key, ability_data.AbilityValues)
+                end
+            end
+        else
+            -- 处理全局技能（应用到所有英雄）
+            local ability_name = key
+            local global_key = "*_" .. ability_name
+            -- 保存全局技能的原始数据（需确保GetOriginalAbilityValue支持全局查询）
+            if not self.original_values[global_key] then
+                local original_data = self:GetOriginalAbilityValue(nil, ability_name) -- 假设支持全局查询
+                if original_data then
+                    self.original_values[global_key] = original_data
+                end
+            end
+            -- 设置全局技能数据
+            if data.AbilityValues then
+                if debug_print then
+                    print(string.format("设置全局技能: %s", global_key))
+                    DeepPrintTable(data.AbilityValues)
+                end
+                CustomNetTables:SetTableValue("edit_kv", global_key, data.AbilityValues)
             end
         end
     end
 
+    -- 打印NetTable内容（调试用）
     local function PrintEditKvContents()
         local found_data = false
-        
-        for hero_name, hero_abilities in pairs(ability_modifiers) do
-            for ability_name, _ in pairs(hero_abilities) do
-                local key = hero_name .. "_" .. ability_name
-                local data = CustomNetTables:GetTableValue("edit_kv", key)
+        for key, _ in pairs(ability_modifiers) do
+            if string.match(key, "^npc_dota_hero_") then
+                for ability_name, _ in pairs(ability_modifiers[key]) do
+                    local specific_key = key .. "_" .. ability_name
+                    local data = CustomNetTables:GetTableValue("edit_kv", specific_key)
+                    if data then
+                        found_data = true
+                        if debug_print then
+                            print("英雄技能数据 "..specific_key..":")
+                            DeepPrintTable(data)
+                        end
+                    end
+                end
+            else
+                local global_key = "*_" .. key
+                local data = CustomNetTables:GetTableValue("edit_kv", global_key)
                 if data then
                     found_data = true
                     if debug_print then
-                        print(string.format("找到数据 %s:", key))
+                        print("全局技能数据 "..global_key..":")
                         DeepPrintTable(data)
                     end
                 end
             end
         end
-        
         if not found_data and debug_print then
-            print("edit_kv 表是空的或没有找到任何数据")
+            print("edit_kv 表中未找到数据")
         end
     end
-
-    -- 设置新数据
-    for hero_name, hero_abilities in pairs(ability_modifiers) do
-        for ability_name, ability_data in pairs(hero_abilities) do
-            local ability_index = hero_name .. "_" .. ability_name
-            
-            if ability_data['AbilityValues'] then
-                if debug_print then
-                    print(string.format("更新技能: %s_%s", hero_name, ability_name))
-                    print("设置数据:")
-                    DeepPrintTable(ability_data['AbilityValues'])
-                end
-                CustomNetTables:SetTableValue("edit_kv", ability_index, ability_data['AbilityValues'])
-            elseif debug_print then
-                print(string.format("警告: %s_%s 没有 AbilityValues 数据", hero_name, ability_name))
-            end
-        end
-    end
-    
-    -- 打印更新后的内容
     PrintEditKvContents()
 end
 

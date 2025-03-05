@@ -77,25 +77,6 @@
 		}
 	}
 
-
-
-
-
-
-	"item_abyssal_blade"
-	{
-		"AbilityCastRange"				"500"
-	}
-
-	"item_belt_of_strength"
-	{
-
-		"AbilityValues"	
-		{
-				"bonus_strength"		"-14"
-		}
-	}
-
 	"item_iron_branch_custom"
 	{
 		"ID"                            "1000"  // 确保这个ID是唯一的

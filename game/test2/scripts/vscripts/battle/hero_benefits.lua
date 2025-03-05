@@ -142,32 +142,7 @@ function Main:HeroBenefits(heroName, hero, overallStrategy, heroStrategy)
         end
     end
 
-    if heroName == "npc_dota_hero_nevermore" then
-        local necromasteryAbility = hero:FindAbilityByName("nevermore_necromastery")
-        if necromasteryAbility and necromasteryAbility:GetLevel() > 0 then
-            local maxSouls = 20
-            -- 检查是否有阿哈利姆神杖效果
-            if hero:HasScepter() then
-                maxSouls = 25
-            end
-            hero:SetModifierStackCount("modifier_nevermore_necromastery", hero, maxSouls)
-        else
-            print("错误：未能找到影魔的灵魂积累技能或技能未升级！")
-        end
-    end
 
-    if heroName == "npc_dota_hero_skeleton_king" then
-        local necromasteryAbility = hero:FindAbilityByName("skeleton_king_bone_guard")
-        if necromasteryAbility and necromasteryAbility:GetLevel() > 0 then
-            local abilityLevel = necromasteryAbility:GetLevel()
-            local maxSouls = 2 + (math.max(abilityLevel - 1, 0) * 2)
-            
-            hero:SetModifierStackCount("modifier_skeleton_king_bone_guard", hero, maxSouls)
-            print("找到骷髅王技能了, 当前技能等级" .. abilityLevel .. "层数" .. maxSouls)
-        else
-            print("错误：未能找到骷髅王白骨护卫或技能未升级！")
-        end
-    end
 
     if heroName == "npc_dota_hero_wisp" then
         print("【小精灵连接】开始处理小精灵连接逻辑")
@@ -966,6 +941,33 @@ function Main:HeroPreparation(heroName, hero, overallStrategy, heroStrategy)
                 wex:OnSpellStart()
                 invoke:OnSpellStart()
             end
+        end
+    end
+
+    if heroName == "npc_dota_hero_nevermore" then
+        local necromasteryAbility = hero:FindAbilityByName("nevermore_necromastery")
+        if necromasteryAbility and necromasteryAbility:GetLevel() > 0 then
+            local maxSouls = 20
+            -- 检查是否有阿哈利姆神杖效果
+            if hero:HasScepter() then
+                maxSouls = 25
+            end
+            hero:SetModifierStackCount("modifier_nevermore_necromastery", hero, maxSouls)
+        else
+            print("错误：未能找到影魔的灵魂积累技能或技能未升级！")
+        end
+    end
+
+    if heroName == "npc_dota_hero_skeleton_king" then
+        local necromasteryAbility = hero:FindAbilityByName("skeleton_king_bone_guard")
+        if necromasteryAbility and necromasteryAbility:GetLevel() > 0 then
+            local abilityLevel = necromasteryAbility:GetLevel()
+            local maxSouls = 2 + (math.max(abilityLevel - 1, 0) * 2)
+            
+            hero:SetModifierStackCount("modifier_skeleton_king_bone_guard", hero, maxSouls)
+            print("找到骷髅王技能了, 当前技能等级" .. abilityLevel .. "层数" .. maxSouls)
+        else
+            print("错误：未能找到骷髅王白骨护卫或技能未升级！")
         end
     end
 end

@@ -36,6 +36,8 @@ require("challenges/Aoe_10X")
 require("challenges/Level7Dazzle")  
 require("challenges/waterfall_hero_chaos")  
 require("challenges/award_ceremony")  
+require("challenges/SoulOut")  
+require("challenges/SoulOut_Sniper")  
 
 
 Main.Challenges = {}
@@ -306,6 +308,20 @@ Main.GameModes = {
         name = "10倍技能范围",
         menuConfig = {"SelfHeroRow"},
         category = "single"
+    },
+    {
+        id = "SoulOut",
+        code = 3014,
+        name = "灵魂出窍生存",
+        menuConfig = {"SelfHeroRow"},
+        category = "single"
+    },
+    {
+        id = "SoulOut_Sniper",
+        code = 3015,
+        name = "灵魂出窍狙击",
+        menuConfig = {"SelfHeroRow"},
+        category = "single"
     }
 }
 
@@ -434,7 +450,11 @@ function Main:RequestStrategyData()
         },
         {
             name = "留控打断",
-            id = "1"
+            id = "keep_control_interrupt"
+        },
+        {
+            name = "谁近打谁",
+            id = "who_near_attack_who"
         },
     }
 

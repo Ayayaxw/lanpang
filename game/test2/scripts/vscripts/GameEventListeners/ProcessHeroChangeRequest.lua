@@ -70,12 +70,10 @@ function Main:SetupNewHero(event, playerID)
         self.PlayerChineseName = heroChineseName
         self.currentMatchID = self:GenerateUniqueID()    --比赛ID
         hero_duel.EndDuel = false  -- 标记战斗是否结束
-
-
-
-
-
-
+        hero_duel.abilityDamageTracker = {}
+        hero_duel.damagePanelEnabled = false -- 默认禁用
+        hero_duel.currentHighestAbility = nil
+        hero_duel.damagePanelTimerStarted = false
 
         if challengeName then
             -- 构建初始化函数的名称

@@ -2,6 +2,13 @@ if not modifier_auto_elevation_waterfall then
     modifier_auto_elevation_waterfall = class({})
 end
 
+modifier_auto_elevation_waterfall.BOUNDARY = {
+    X_MIN = -6959,
+    X_MAX = -5070,
+    Y_MIN = -794,
+    Y_MAX = 1060
+}
+
 function modifier_auto_elevation_waterfall:IsHidden()
     return true
 end
@@ -29,10 +36,25 @@ function modifier_auto_elevation_waterfall:OnCreated()
     end
 end
 
+function modifier_auto_elevation_waterfall:IsOutOfBounds(pos)
+    local bounds = self.BOUNDARY
+    local margin = 1000 -- 超出边界的容许距离
+
+    -- 检查是否超出边界太远
+    if pos.x < (bounds.X_MIN - margin) or 
+       pos.x > (bounds.X_MAX + margin) or
+       pos.y < (bounds.Y_MIN - margin) or
+       pos.y > (bounds.Y_MAX + margin) then
+        return true
+    end
+    return false
+end
+
 function modifier_auto_elevation_waterfall:FindHigherGround(currentPos, initialRadius)
     local searchRadius = initialRadius
     local maxRadius = 2000
     local gridSize = 32
+    local bounds = self.BOUNDARY
     
     -- 从当前位置开始搜索
     while searchRadius <= maxRadius do
@@ -42,12 +64,13 @@ function modifier_auto_elevation_waterfall:FindHigherGround(currentPos, initialR
         for x = -searchRadius, searchRadius, gridSize do
             for y = -searchRadius, searchRadius, gridSize do
                 local testPos = Vector(currentPos.x + x, currentPos.y + y, 0)
-                -- 添加X坐标限制
-                if testPos.y > -1050 and testPos.y < 1300 and testPos.x > -7200 and testPos.x < -4800 then
+                -- 确保测试点在矩形范围内
+                if testPos.x >= bounds.X_MIN and testPos.x <= bounds.X_MAX and
+                   testPos.y >= bounds.Y_MIN and testPos.y <= bounds.Y_MAX then
                     local height = GetGroundHeight(testPos, self:GetParent())
                     
-                    -- 只寻找高度为128的地点
-                    if height == 128 then
+                    -- 只寻找高度为128或以上的地点
+                    if height >= 128 then
                         local distance = (Vector(currentPos.x, currentPos.y, 0) - Vector(testPos.x, testPos.y, 0)):Length2D()
                         if distance < closestDistance then
                             closestDistance = distance
@@ -65,9 +88,11 @@ function modifier_auto_elevation_waterfall:FindHigherGround(currentPos, initialR
         searchRadius = searchRadius + 200
     end
     
-    -- 如果在当前位置周围找不到，从(0, -900, 0)开始找
+    -- 如果在当前位置周围找不到，从中心点开始找
+    local centerX = (bounds.X_MIN + bounds.X_MAX) / 2
+    local centerY = (bounds.Y_MIN + bounds.Y_MAX) / 2
+    local startPos = Vector(centerX, centerY, 0)
     searchRadius = initialRadius
-    local startPos = Vector(-6000, -32, 0)
     
     while searchRadius <= maxRadius do
         local bestPoint = nil
@@ -76,12 +101,11 @@ function modifier_auto_elevation_waterfall:FindHigherGround(currentPos, initialR
         for x = -searchRadius, searchRadius, gridSize do
             for y = -searchRadius, searchRadius, gridSize do
                 local testPos = Vector(startPos.x + x, startPos.y + y, 0)
-                -- 添加X坐标限制
-                if testPos.y > -1050 and testPos.y < 1300 and testPos.x > -7200 and testPos.x < -4800 then
+                if testPos.x >= bounds.X_MIN and testPos.x <= bounds.X_MAX and
+                   testPos.y >= bounds.Y_MIN and testPos.y <= bounds.Y_MAX then
                     local height = GetGroundHeight(testPos, self:GetParent())
                     
-                    -- 只寻找高度为128的地点
-                    if height == 128 then
+                    if height >= 128 then
                         local distance = (startPos - Vector(testPos.x, testPos.y, 0)):Length2D()
                         if distance < closestDistance then
                             closestDistance = distance
@@ -101,6 +125,7 @@ function modifier_auto_elevation_waterfall:FindHigherGround(currentPos, initialR
     
     return nil
 end
+
 
 function modifier_auto_elevation_waterfall:ClearTreesAroundPoint(point, radius)
     local trees = GridNav:GetAllTreesAroundPoint(point, radius, false)
@@ -124,32 +149,44 @@ function modifier_auto_elevation_waterfall:HasExcludedModifier()
     return false
 end
 
+function modifier_auto_elevation_waterfall:IsInvulnerable()
+    local unit = self:GetParent()
+    return unit:IsInvulnerable() or unit:IsOutOfGame() or unit:HasModifier("modifier_invulnerable")
+end
+
 function modifier_auto_elevation_waterfall:OnIntervalThink()
     if IsServer() then
         local unit = self:GetParent()
         
-        -- 检查是否有排除的modifier
-        if self:HasExcludedModifier() then
-            return
-        end
+        if not unit:IsAlive() then return end
+        if self:HasExcludedModifier() then return end
         
         local currentPos = unit:GetAbsOrigin()
         
+        -- 如果高度太低，无论是否无敌都要传送
         if currentPos.z <= 0 then
             local bestPoint = self:FindHigherGround(currentPos, 200)
-            
             if bestPoint then
-                -- Clear trees within 300 units of the teleport point
-                self:ClearTreesAroundPoint(bestPoint, 300)
-                -- Wait a short moment for tree destruction to complete
-                
-                FindClearSpaceForUnit(unit, bestPoint, true)
-                
-            else
-                print("Warning: No suitable high ground found within 2000 units!")
-                local currentGroundHeight = GetGroundHeight(currentPos, unit)
-                if currentGroundHeight > 0 then
-                    FindClearSpaceForUnit(unit, Vector(currentPos.x, currentPos.y, currentGroundHeight), true)
+                if GridNav:IsTraversable(bestPoint) and not GridNav:IsBlocked(bestPoint) then
+                    self:ClearTreesAroundPoint(bestPoint, 300)
+                    Timers:CreateTimer(0.1, function()
+                        if unit:IsAlive() then
+                            FindClearSpaceForUnit(unit, bestPoint, true)
+                        end
+                    end)
+                end
+            end
+        -- 如果是超出边界太远，则需要检查是否无敌
+        elseif self:IsOutOfBounds(currentPos) and not self:IsInvulnerable() then
+            local bestPoint = self:FindHigherGround(currentPos, 200)
+            if bestPoint then
+                if GridNav:IsTraversable(bestPoint) and not GridNav:IsBlocked(bestPoint) then
+                    self:ClearTreesAroundPoint(bestPoint, 300)
+                    Timers:CreateTimer(0.1, function()
+                        if unit:IsAlive() then
+                            FindClearSpaceForUnit(unit, bestPoint, true)
+                        end
+                    end)
                 end
             end
         end

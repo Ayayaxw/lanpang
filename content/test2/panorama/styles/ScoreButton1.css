@@ -1,99 +1,83 @@
 .BattleScorePanel1 {
-    width: 350px;
-    height: fit-children;
-    vertical-align: top;
-    horizontal-align: right;
-    background-color: gradient( linear, 0% 0%, 0% 100%, from( #0a0a0e99 ), to( #1a1a2599 ) );
-    border: 2px solid #333340;
-    box-shadow: 0px 0px 12px #00000099;
-    border-radius: 5px;
-    position: -0.5% 1% 0px;
-    z-index: 100;
-    flow-children: down;
-    padding: 12px;
-    transition-property: opacity, transform;
-    transition-duration: 0.3s;
-    visibility: collapse;
-  }
-  
-  .BattleScorePanel1[style~="collapse"] {
-    visibility: collapse;
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  
-  .OverlayPanel {
-    width: 100%;
-    height: 120%;
-    z-index: -1;
-  }
+  width: 350px;
+  height: fit-children;
+  vertical-align: top;
+  horizontal-align: right;
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #0a0a0e99 ), to( #1a1a2599 ) );
+  border: 2px solid #333340;
+  box-shadow: 0px 0px 12px #00000099;
+  border-radius: 5px;
+  position: -0.5% 1% 0px;
+  z-index: 100;
+  flow-children: down;
+  padding: 12px;
+  transition-property: opacity, transform;
+  transition-duration: 0.3s;
+  visibility: collapse;
+}
 
-  .ScorePanel1TopRow {
-    width: 100%;
-    height: 50px;
-    vertical-align: center;
-    border-bottom: 1px solid #444450;
-    margin-bottom: 10px;
-    padding-bottom: 8px;
-  }
-  
-  #ScorePanel1TitleLabel {
-    font-size: 26px;
-    color: #ccaa66;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    text-shadow: 0px 0px 6px #ccaa6633;
-    text-align: center;
-    vertical-align: center;
-    height: 50px;
-    line-height: 50px;
-    width: 100%;
-  }
-  
-  .ScorePanel1LabelRow {
-    width: 100%;
-    height: 36px;
-    flow-children: right;
-    horizontal-align: center;
-    vertical-align: center;
-    margin-top: 4px;
-    margin-bottom: 4px;
-    background-color: gradient( linear, 0% 0%, 100% 0%, from( #00000022 ), to( #00000000 ) );
-    border-radius: 3px;
-    padding: 2px 0px;
-  }
-  
+.BattleScorePanel1[style~="collapse"] {
+  visibility: collapse;
+  opacity: 0;
+  transform: translateY(-20px);
+}
 
+.OverlayPanel {
+  width: 100%;
+  height: 120%;
+  z-index: -1;
+}
 
-  .ScorePanel1KeyLabel {
-    font-size: 18px;
-    color: #8da1b6;
-    text-align: left;
-    vertical-align: center;
-    width: 50%;
-    height: 30px;
-    line-height: 30px;
-    margin-left: 5%;
-    padding-right: 5px;
-    text-shadow: 1px 1px 1px #000000;
-    font-weight: semi-bold;
-  }
-  
-  .ScorePanel1ValueLabel {
-    font-size: 18px;
-    color: #d5d5d5;
-    text-align: left;
-    vertical-align: center;
-    width: 45%;
-    height: 30px;
-    line-height: 30px;
-    margin-right: 5%;
-    padding-left: 5px;
-    text-shadow: 1px 1px 1px #000000;
-  }
+.ScorePanel1TopRow {
+  width: 100%;
+  height: 50px;
+  vertical-align: center;
+  border-bottom: 1px solid #444450;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+}
 
+#ScorePanel1TitleLabel {
+  font-size: 26px;
+  color: #ccaa66;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow: 0px 0px 6px #ccaa6633;
+  text-align: center;
+  vertical-align: center;
+  height: 50px;
+  line-height: 50px;
+  width: 100%;
+}
 
-.ScorePanel1TimeLabel {
+.ScorePanel1LabelRow {
+  width: 100%;
+  height: 36px;
+  flow-children: right;
+  horizontal-align: center;
+  vertical-align: center;
+  margin-top: 4px;
+  margin-bottom: 4px;
+  background-color: gradient( linear, 0% 0%, 100% 0%, from( #00000022 ), to( #00000000 ) );
+  border-radius: 3px;
+  padding: 2px 0px;
+}
+
+.ScorePanel1KeyLabel {
+  font-size: 18px;
+  color: #8da1b6;
+  text-align: left;
+  vertical-align: center;
+  width: 50%;
+  height: 30px;
+  line-height: 30px;
+  margin-left: 5%;
+  padding-right: 5px;
+  text-shadow: 1px 1px 1px #000000;
+  font-weight: semi-bold;
+}
+
+.ScorePanel1ValueLabel {
   font-size: 18px;
   color: #d5d5d5;
   text-align: left;
@@ -106,18 +90,106 @@
   text-shadow: 1px 1px 1px #000000;
 }
 
+.ScorePanel1TimeLabel {
+font-size: 18px;
+color: #d5d5d5;
+text-align: left;
+vertical-align: center;
+width: 45%;
+height: 30px;
+line-height: 30px;
+margin-right: 5%;
+padding-left: 5px;
+text-shadow: 1px 1px 1px #000000;
+transition-property: transform, text-shadow, color;
+transition-duration: 0.3s;
+}
+
+/* 小动画效果 - 10的整数倍时应用 */
+.ScorePanel1TimeLabel.TimeMilestone {
+transform: scale3d(1.1, 1.1, 1.0);
+text-shadow: 0px 0px 8px #88ccff;
+color: #ffffff;
+transition-timing-function: ease-out;
+}
+
+/* 大动画效果 - 60的整数倍时应用 */
+.ScorePanel1TimeLabel.TimeMajorMilestone {
+transform: scale3d(1.2, 1.2, 1.0);
+text-shadow: 0px 0px 12px #ffcc00;
+color: #ffcc00;
+transition-timing-function: ease-out;
+}
+
+/* 紧急倒计时效果，使用Panorama兼容的方式 */
+.ScorePanel1TimeLabel.TimeUrgent {
+color: #ff3333;
+text-shadow: 0px 0px 10px #ff0000;
+transition-property: transform, opacity;
+transition-duration: 0.25s;
+transition-timing-function: ease-in-out;
+transform: scale3d(1.15, 1.15, 1.0);
+opacity: 1.0;
+}
+
+/* 添加动画交替效果，通过JS来切换这两个类 */
+.ScorePanel1TimeLabel.TimeUrgentAlt {
+color: #ff3333;
+text-shadow: 0px 0px 10px #ff0000;
+transition-property: transform, opacity;
+transition-duration: 0.25s;
+transition-timing-function: ease-in-out;
+transform: scale3d(1.0, 1.0, 1.0);
+opacity: 0.9;
+}
+
 #HeroPortrait {
-    width: 180px;
-    height: 240px;
-    border: 2px solid #333340;
-    box-shadow: inset 0px 0px 8px #000000;
-    border-radius: 3px;
-    margin-bottom: 8px;
-  }
-  
-  #portraitHUDOverlay,
-  #portraitHUD1 {
-    width: 500px;
-    height: 500px;
-  }
-  
+width: 180px;
+height: 240px;
+border: 2px solid #333340;
+box-shadow: inset 0px 0px 8px #000000;
+border-radius: 3px;
+margin-bottom: 8px;
+}
+
+#portraitHUDOverlay,
+#portraitHUD1 {
+width: 500px;
+height: 500px;
+}
+
+
+/* 为Panorama兼容的值更新动画效果 */
+.ScorePanel1ValueLabel,
+.ScorePanel1TimeLabel {
+  transition-property: transform, text-shadow, opacity;
+  transition-duration: 0.3s;
+  transition-timing-function: ease-out;
+}
+
+/* 增加值的效果 */
+.ValueIncreased {
+  transform: translateY(-2px);
+  text-shadow: 0px 0px 6px #88ccff;
+  color: #aaddff;
+}
+
+/* 减少值的效果 */
+.ValueDecreased {
+  transform: translateY(2px);
+  text-shadow: 0px 0px 6px #ccaa66;
+  color: #ffcc88;
+}
+
+/* 一般变化的效果 */
+.ValueChanged {
+  transform: scale3d(1.05, 1.05, 1.0);
+  text-shadow: 0px 0px 4px #ffffff77;
+}
+
+/* 恢复正常状态的类 */
+.ValueNormal {
+  transform: translateY(0px) scale3d(1.0, 1.0, 1.0);
+  text-shadow: 1px 1px 1px #000000;
+  color: #d5d5d5;
+}

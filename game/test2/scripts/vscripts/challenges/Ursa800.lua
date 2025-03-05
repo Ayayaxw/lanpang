@@ -420,11 +420,7 @@ function Main:ProcessHeroDeath_Ursa800(killedUnit, killer)
 
             -- 结束决斗并更新UI
             print("Sending final score update to clients")
-            CustomGameEventManager:Send_ServerToAllClients("update_final_score", {
-                result = "defeat",
-                survivalTime = formattedTime,
-                killCount = hero_duel.killCount
-            })
+
         else
             print("Ursa died, updating kill count")
             if killer then

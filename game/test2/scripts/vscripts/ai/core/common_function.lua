@@ -300,13 +300,6 @@ function CommonAI:MoveToRange(targetPosition, range)
     end
 
 
-
-
-
-
-
-
-
     local distance = (self.entity:GetOrigin() - targetPosition):Length2D()
     
     if distance > range then
@@ -323,8 +316,48 @@ function CommonAI:MoveToRange(targetPosition, range)
             self:log("滚滚老奶奶跟随")
         else
             if not self.entity:IsChanneling() then
-                self.entity:MoveToPosition(movePosition)
-                self:log(string.format("移动至距离 %s %d 范围内的位置 %s", tostring(targetPosition), range, tostring(movePosition)))
+
+                if self:containsStrategy(self.global_strategy, "谁近打谁") then
+                    local isTargetClosest = false
+                    -- 检查当前目标是否就是最近的目标
+                    local entities = FindUnitsInRadius(
+                        self.entity:GetTeamNumber(),
+                        self.entity:GetAbsOrigin(),
+                        nil,
+                        999999,
+                        DOTA_UNIT_TARGET_TEAM_ENEMY,
+                        DOTA_UNIT_TARGET_ALL,
+                        DOTA_UNIT_TARGET_FLAG_NONE,
+                        FIND_CLOSEST,
+                        false
+                    )
+                    if #entities > 0 and entities[1] == target then
+                        isTargetClosest = true
+                    end
+                
+                    if isTargetClosest then
+                        -- 如果目标是最近的单位,执行移动
+                        self.entity:MoveToPosition(movePosition)
+                        self:log(string.format("目标是最近单位,移动至距离 %s %d 范围内的位置 %s", tostring(targetPosition), range, tostring(movePosition)))
+                    else
+                        -- 如果目标不是最近的单位,执行原有的攻击逻辑
+                        if self.entity:IsAttacking() then
+                            return self.nextThinkTime
+                        else
+                            self:SetState(AIStates.Attack)
+                            local order = {
+                                UnitIndex = self.entity:entindex(),
+                                OrderType = DOTA_UNIT_ORDER_ATTACK_MOVE,
+                                TargetIndex = target:entindex(),
+                                Position = targetPosition
+                            }
+                            ExecuteOrderFromTable(order)
+                        end
+                    end
+                else
+                    self.entity:MoveToPosition(movePosition)
+                    self:log(string.format("移动至距离 %s %d 范围内的位置 %s", tostring(targetPosition), range, tostring(movePosition)))
+                end
             end
         end
     else

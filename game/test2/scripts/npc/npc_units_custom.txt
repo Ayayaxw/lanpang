@@ -430,7 +430,7 @@
 	{
 		"BaseClass"					"npc_dota_hero"	// Class of entity of link to.
 		"Model"						"models/heroes/sniper/sniper.vmdl"	// Model.	
-		//"SoundSet"					"Hero_Sniper"					// Name of sound set.
+		"SoundSet"					"Hero_Sniper"					// Name of sound set.
 		"ModelScale"				"1"
 		"Level"						"1"
 		"AttributeBaseStrength"		"100"
@@ -627,6 +627,13 @@
 			}
 		}
 	}
+
+
+	"npc_dota_neutral_prowler_shaman"
+	{
+		"BaseClass"             "npc_dota_creature"
+	}
+
 	"npc_dota_hero_puck_wearable_dummy"
 	{
 		"BaseClass"             "npc_dota_creature"
@@ -670,36 +677,7 @@
 		"AttackAcquisitionRange"	"9999"		// 可获取目标的范围。
 
 	}
-	"item_branches"
-	{
-		// General
-		//-------------------------------------------------------------------------------------------------------------
-		"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_POINT"
-		"Model"							"models/props_gameplay/branch.vmdl"
 
-		// Stats
-		//-------------------------------------------------------------------------------------------------------------
-		"AbilityCastRange"				"400"
-		"AbilityCastPoint"				"0.0"
-		"AbilityCooldown"				"0.0"
-		
-		
-		// Item Info
-		//-------------------------------------------------------------------------------------------------------------
-		"ItemCost"						"50"
-		"ItemShopTags"					"agi;int;str"
-		"ItemQuality"					"consumable"
-		"ItemAliases"					"gg branch;iron branch"
-		"ShouldBeInitiallySuggested"	"1"
-
-		// Special	
-		//-------------------------------------------------------------------------------------------------------------
-		"AbilityValues"
-		{
-				"bonus_all_stats"		"0"
-				"tree_duration"		"60"
-		}
-	}
 
 
 

@@ -57,6 +57,7 @@ function Main:Init_movie_mode(heroName, heroFacet,playerID, heroChineseName)
     -- 假设你要创建的位置
     -- CreateParentHeroesWithFacets(function(allHeroes)
     --DisplayHeroes()
+    SpawnAllNeutralCreeps1()
     -- end)
 end
 

@@ -723,6 +723,8 @@ function CommonAI:FindBestAbilityToUse(entity, target)
                         ability:ToggleAutoCast()
                         self.autoCastSkills[abilityName] = true
                         self:log(string.format("技能 %s 已设置为自动施法", abilityName))
+                    else
+                        self:log(string.format("技能 %s 已经是自动施法状态", abilityName))
                     end
                 end
                 goto continue
@@ -785,10 +787,6 @@ function CommonAI:FindBestAbilityToUse(entity, target)
                 goto continue
             end
 
-
-
-
-            
             local isInRange = true
             local targetTeam = self:GetSkillTargetTeam(ability)
 
@@ -887,9 +885,9 @@ function CommonAI:FindBestAbilityToUse(entity, target)
         end
     end
 
-    if DEBUG_MODE == 1 and bestSkill then
+    if bestSkill then
         self:log(string.format("选择的最佳技能是 %s，施法距离为 %d", bestSkill:GetAbilityName(), maxCastRange))
-    elseif DEBUG_MODE == 1 then
+    else
         self:log("没有可用的技能")
     end
     

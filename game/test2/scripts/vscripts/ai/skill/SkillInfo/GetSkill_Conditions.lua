@@ -6400,6 +6400,20 @@ HeroSkillConditions = {
             end
         }
     },
+    ["npc_dota_neutral_prowler_shaman"] = {
+        ["spawnlord_master_freeze"] = {
+            function(self, caster, log)
+                local currentAbility = caster:GetCurrentActiveAbility()
+                if currentAbility then  
+                    self:log("当前技能:" .. currentAbility:GetAbilityName())
+                else
+                    self:log("没有当前技能")
+                end
+
+                return true
+            end
+        }
+    },
 
 
 

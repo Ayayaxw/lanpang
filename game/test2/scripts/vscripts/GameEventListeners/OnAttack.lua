@@ -1,71 +1,85 @@
 function Main:OnAttack(keys)
-    -- local attacker = EntIndexToHScript(keys.entindex_attacker)
-    -- local victim = EntIndexToHScript(keys.entindex_killed)
-    -- local damage = keys.damage
+    local attacker = EntIndexToHScript(keys.entindex_attacker)
+    local victim = EntIndexToHScript(keys.entindex_killed)
+    local damage = keys.damage
+    local ability = nil
+    if keys.entindex_inflictor then
+        ability = EntIndexToHScript(keys.entindex_inflictor)
+    end
 
-    -- print("\n========== Attack Event Debug Info ==========")
+    local attacker = keys.entindex_attacker and EntIndexToHScript(keys.entindex_attacker)
+    local target = keys.entindex_killed and EntIndexToHScript(keys.entindex_killed)
+    local inflictor = keys.entindex_inflictor and EntIndexToHScript(keys.entindex_inflictor)
     
-    -- -- 打印基本信息
-    -- print("Damage Amount:", damage)
+    -- 如果攻击者或目标为空，则返回
+    if not attacker or not target then
+        return
+    end
 
-    -- -- 打印被攻击者信息
-    -- if victim then
-    --     print("\n--- Victim Info ---")
-    --     print("Name:", victim:GetUnitName())
-    --     print("Team:", victim:GetTeamNumber())
-    --     print("Is Hero:", victim:IsHero())
-    --     print("Entity Index:", victim:GetEntityIndex())
-    -- else
-    --     print("\n--- Victim Info ---")
-    --     print("Invalid victim entity")
-    -- end
+    local damage = keys.damage
 
-    -- -- 增强版的攻击者信息打印
-    -- if attacker then
-    --     print("\n--- Attacker Info ---")
-    --     print("Name:", attacker:GetUnitName())
-    --     print("Team:", attacker:GetTeamNumber())
-    --     print("Is Hero:", attacker:IsHero())
-    --     print("Is Illusion:", attacker:IsIllusion())
-    --     print("Is Clone:", attacker:IsClone())
-    --     print("Is Tempest Double:", attacker.IsTempestDouble and attacker:IsTempestDouble() or "N/A")
-    --     print("Is Controllable:", attacker:IsControllableByAnyPlayer())
-    --     print("Entity Index:", attacker:GetEntityIndex())
-    --     print("PlayerID:", attacker:GetPlayerOwnerID())
-    -- else
-    --     print("\n--- Attacker Info ---")
-    --     print("Invalid attacker entity")
-    -- end
+    -- 记录所有单位的攻击信息
+    local attackerName = attacker:GetUnitName()
+    local targetName = target:GetUnitName()
+    local damageRounded = string.format("%.2f", damage or 0)
 
-    -- -- 打印真实所有者信息
-    -- print("\n--- Real Owner Info ---")
-    -- local realOwner = self:GetRealOwner(attacker)
-    -- if realOwner then
-    --     print("\nFinal Real Owner:")
-    --     print("Name:", realOwner:GetUnitName())
-    --     print("Team:", realOwner:GetTeamNumber())
-    --     print("Entity Index:", realOwner:GetEntityIndex())
-    --     print("PlayerID:", realOwner:GetPlayerOwnerID())
-    -- else
-    --     print("\nNo real owner found")
-    -- end
+    -- 追踪技能伤害
+    if hero_duel.damagePanelEnabled and inflictor then
+        -- 获取技能名称
+        local abilityName = inflictor:GetName()
+        
+        -- 确定攻击者的属性
+        local attribute = "All"
+        if attacker:IsHero() then
+            local heroData = Main.heroListKV[attackerName]
+            if heroData then
+                local attributePrimary = heroData["AttributePrimary"]
+                local attributeType = GetHeroTypeFromAttribute(attributePrimary)
+                
+                if attributeType == 1 then
+                    attribute = "Strength"
+                elseif attributeType == 2 then
+                    attribute = "Agility"
+                elseif attributeType == 4 then
+                    attribute = "Intelligence"
+                elseif attributeType == 8 then
+                    attribute = "All"
+                end
+            end
+        end
+        
+        -- 为这个技能+攻击者组合创建唯一键
+        local abilityKey = abilityName .. "_" .. attacker:GetEntityIndex()
+        
+        -- 获取当前时间
+        local currentTime = GameRules:GetGameTime()
+        
+        -- 如果这个技能已经在追踪中
+        if hero_duel.abilityDamageTracker[abilityKey] then
+            -- 更新技能信息
+            local abilityInfo = hero_duel.abilityDamageTracker[abilityKey]
+            local previousDamage = abilityInfo.damage
+            abilityInfo.damage = abilityInfo.damage + damage
+            abilityInfo.lastDamageTime = currentTime
+        else
+            -- 为这个技能创建新条目
+            hero_duel.abilityDamageTracker[abilityKey] = {
+                abilityName = abilityName,
+                attackerName = attacker:GetUnitName(),
+                attribute = attribute,
+                damage = damage,
+                lastDamageTime = currentTime
+            }
+        end
+    end
 
-    -- print("\n===========================================\n")
-
-    
     -- 处理特定英雄之间的交互
     if self.leftTeamHero1 and self.rightTeamHero1 then
         local attacker = keys.entindex_attacker and EntIndexToHScript(keys.entindex_attacker)
         local target = keys.entindex_killed and EntIndexToHScript(keys.entindex_killed)
         local inflictor = keys.entindex_inflictor and EntIndexToHScript(keys.entindex_inflictor)
-        
-        -- print("攻击者:", attacker and attacker:GetUnitName() or "nil")
-        -- print("目标:", target and target:GetUnitName() or "nil")
-        -- print("技能:", inflictor and inflictor:GetName() or "nil")
-        
         -- 如果attacker或target为nil，则直接返回
         if not attacker or not target then
-            -- print("攻击者或目标无效")
             return
         end
     
@@ -85,28 +99,16 @@ function Main:OnAttack(keys)
     
             -- 根据Inflictor判断攻击类型和来源
             if inflictor then
-                -- print("检测到技能:", inflictor:GetName())
                 eventData.attackType = "ability_attack"
                 eventData.abilityName = inflictor:GetName()
             else
-                -- print("未检测到技能，判定为普通攻击")
                 eventData.attackType = "normal_attack"
                 eventData.abilityName = nil
             end
-    
-            -- -- 在发送事件之前打印数据
-            -- print("准备发送的攻击信息:")
-            -- for k, v in pairs(eventData) do
-            --     print(k .. ": " .. tostring(v))
-            -- end
-            -- print("攻击信息结束")
-    
-            -- 发送事件到适当的接收函数
+
             if attacker == self.leftTeamHero1 then
-                -- print("发送左方英雄攻击信息")
                 CustomGameEventManager:Send_ServerToAllClients("left_hero_attack_info", eventData)
             else
-                -- print("发送右方英雄攻击信息")
                 CustomGameEventManager:Send_ServerToAllClients("right_hero_attack_info", eventData)
             end
         end
@@ -121,30 +123,6 @@ function Main:OnAttack(keys)
         end
     end
 
-    -- -- 原有逻辑开始
-    -- if self.currentChallenge == Main.Challenges.HeroChaos then
-    --     local attacker = EntIndexToHScript(keys.entindex_attacker)
-    --     local victim = EntIndexToHScript(keys.entindex_killed)
-    --     local damage = keys.damage
-    
-    --     if attacker:IsHero() and attacker:GetTeamNumber() ~= victim:GetTeamNumber() then
-    --         if not self.heroData then
-    --             self.heroData = {}  -- 确保heroData存在
-    --         end
-    
-    --         for _, hero in ipairs(self.heroData) do
-    --             if hero.name == self:GetHeroChineseName(attacker:GetUnitName()) then
-    --                 hero.damage = math.ceil(hero.damage + damage)  -- 采用进一法保留整数
-    --                 break
-    --             end
-    --         end
-    
-    --         -- 将更新后的英雄数据转换为JSON字符串
-    --         local heroDataJson = json.encode(self.heroData)
-    --         -- 使用CustomGameEventManager将数据发送给前端JS
-    --         CustomGameEventManager:Send_ServerToAllClients("update_hero_data", {heroData = heroDataJson})
-    --     end
-    -- end
     local challengeId = self.currentChallenge
 
     -- 查找对应的挑战模式名称
@@ -162,11 +140,133 @@ function Main:OnAttack(keys)
         if self[challengeFunctionName] then
             -- 调用对应的处理函数
             self[challengeFunctionName](self, keys)
-        else
-            --print("没有找到对应挑战模式的处理函数: " .. challengeName)
         end
-    else
-        print("未知的挑战模式ID: " .. tostring(challengeId))
     end
+end
 
+-- 检查过期技能的函数
+function Main:CheckExpiredAbilities()
+    if not hero_duel.damagePanelEnabled then 
+        return 
+    end
+    
+    local currentTime = GameRules:GetGameTime()
+    local keysToRemove = {}
+    
+    -- 检查每个技能
+    local count = 0
+    for key, abilityInfo in pairs(hero_duel.abilityDamageTracker) do
+        count = count + 1
+        -- 如果距离上次伤害超过5秒
+        local timeSinceLastDamage = currentTime - abilityInfo.lastDamageTime
+        if timeSinceLastDamage > 5 then
+            table.insert(keysToRemove, key)
+        end
+    end
+    
+    -- 移除过期技能
+    for _, key in ipairs(keysToRemove) do
+        hero_duel.abilityDamageTracker[key] = nil
+    end
+end
+
+-- 查找最高伤害技能的函数
+function Main:FindHighestDamagingAbility()
+    if not hero_duel.damagePanelEnabled then 
+        return nil 
+    end
+    
+    local highestDamage = 1000 -- 最低阈值
+    local highestAbility = nil
+    
+    for key, abilityInfo in pairs(hero_duel.abilityDamageTracker) do
+        if abilityInfo.damage > highestDamage then
+            highestDamage = abilityInfo.damage
+            highestAbility = abilityInfo
+        end
+    end
+    
+    return highestAbility
+end
+
+
+function Main:UpdateDamagePanel()
+    if not hero_duel.damagePanelEnabled then 
+        print("[伤害面板] 面板已禁用，跳过更新")
+        return 
+    end
+    
+    -- 检查过期技能
+    --print("[伤害面板] 开始检查过期技能...")
+    self:CheckExpiredAbilities()
+    
+    -- 查找最高伤害技能
+    --print("[伤害面板] 开始查找最高伤害技能...")
+    local highestAbility = self:FindHighestDamagingAbility()
+    
+    -- 如果没有技能造成超过1000点伤害，不做任何操作
+    if not highestAbility then
+        --print("[伤害面板] 未找到超过1000点伤害的技能，跳过更新")
+        return
+    end
+    
+    -- print(string.format("[伤害面板] 找到最高伤害技能: %s, 伤害值: %.2f", 
+    --     highestAbility.abilityName, 
+    --     highestAbility.damage
+    -- ))
+    
+    -- 如果最高伤害技能发生变化，发送完整更新
+    if not hero_duel.currentHighestAbility or hero_duel.currentHighestAbility.abilityName ~= highestAbility.abilityName then
+        print(string.format("[伤害面板] 最高伤害技能发生变化，发送完整更新数据 - 技能: %s, 属性: %s, 伤害: %.2f",
+            highestAbility.abilityName,
+            highestAbility.attribute,
+            highestAbility.damage
+        ))
+        
+        local eventData = {
+            ability_name = highestAbility.abilityName,
+            attribute = highestAbility.attribute,
+            initial_damage = math.floor(highestAbility.damage)
+        }
+        
+        CustomGameEventManager:Send_ServerToAllClients("damage_panel_update_initial", eventData)
+        hero_duel.currentHighestAbility = table.deepcopy(highestAbility)
+    -- 如果是同一个技能但伤害发生变化
+    elseif hero_duel.currentHighestAbility.damage ~= highestAbility.damage then
+        print(string.format("[伤害面板] 技能伤害发生变化 - 技能: %s, 旧伤害: %.2f, 新伤害: %.2f",
+            highestAbility.abilityName,
+            hero_duel.currentHighestAbility.damage,
+            highestAbility.damage
+        ))
+        
+        local eventData = {
+            damage = math.floor(highestAbility.damage)
+        }
+        
+        CustomGameEventManager:Send_ServerToAllClients("damage_panel_update_damage", eventData)
+        hero_duel.currentHighestAbility.damage = highestAbility.damage
+    end
+end
+
+function Main:StartDamagePanelTimer()
+    print("[伤害面板] 启动伤害面板更新定时器")
+    Timers:CreateTimer(function()
+        if hero_duel.damagePanelEnabled then
+            self:UpdateDamagePanel()
+            return 1 -- 1秒后再次运行
+        else
+            print("[伤害面板] 面板已禁用，停止定时器")
+            return nil -- 如果功能被禁用则停止定时器
+        end
+    end)
+end
+
+-- 启用/禁用伤害面板的函数
+function Main:SetDamagePanelEnabled(enabled)
+    hero_duel.damagePanelEnabled = enabled
+    
+    if enabled and not hero_duel.damagePanelTimerStarted then
+        self:StartDamagePanelTimer()
+        hero_duel.damagePanelTimerStarted = true
+    end
 end

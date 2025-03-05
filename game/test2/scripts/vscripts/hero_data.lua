@@ -132,14 +132,14 @@ heroes_precache = {
     -- {particleName = "target_dummy", soundName = "target_dummy", name = "npc_dota_hero_target_dummy", chinese = "傀儡目标", id = 999, model = "target_dummy"},
 }
 
-local function GetHeroTypeFromAttribute(attribute)
+function GetHeroTypeFromAttribute(attribute)
     local attributeTypes = {
         ["DOTA_ATTRIBUTE_STRENGTH"] = 1,
         ["DOTA_ATTRIBUTE_AGILITY"] = 2,
         ["DOTA_ATTRIBUTE_INTELLECT"] = 4,
         ["DOTA_ATTRIBUTE_ALL"] = 8
     }
-    return attributeTypes[attribute] or 1
+    return attributeTypes[attribute] or 8
 end
 
 -- 只更新type值

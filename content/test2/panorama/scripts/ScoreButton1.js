@@ -20,6 +20,8 @@
     
     var timerLabel;
     var endTime;
+    var startValue; // 计时器起始值
+    var isCountUp = false; // 是否为向上计时（存活时间）
     var interval;
     var keyOrder = {};
 
@@ -71,18 +73,38 @@
         // 首先停止计时器
         stopTimer();
         
-        // 确保计时器显示停止在当前时间
+        // 确保计时器显示停止在当前时间，如果小于0.1秒则显示0
         if (timerLabel) {
-            var currentTime = timerLabel.text;
-            timerLabel.text = currentTime;
+            // 检查是否是倒计时标签
+            var isCountdownTimer = !isCountUp; // 使用全局的 isCountUp 变量判断
+    
+            if (isCountdownTimer) {
+                var currentTime = timerLabel.text;
+                var decimalPlaces = (currentTime.split('.')[1] || '').length;
+                var timeNumber = parseFloat(currentTime);
+                if (timeNumber < 0.05) {
+                    timerLabel.text = "0." + "0".repeat(decimalPlaces);
+                } else {
+                    timerLabel.text = currentTime;
+                }
+            }
+            // 如果是存活时间，保持当前值不变
         }
     
         // 更新倒计时显示
         var timeCountdown = $('#TimeCountdown');
         if (timeCountdown && timeCountdown.text) {
             var currentCount = timeCountdown.text;
-            timeCountdown.text = currentCount;
+            var decimalPlaces = (currentCount.split('.')[1] || '').length;
+            var countNumber = parseFloat(currentCount);
+            if (countNumber < 0.05) {
+                timeCountdown.text = "0." + "0".repeat(decimalPlaces);
+            } else {
+                timeCountdown.text = currentCount;
+            }
         }
+    
+    
     
         // 隐藏 HUD 元素
         var hud = GetHud();
@@ -161,37 +183,128 @@
             }
         }
     });
-
     function updateLabelByKey(key, newValue) {
         var keyOrder = getKeyOrder(key);
         var labelId = key + "Value_" + keyOrder;
+        $.Msg("Updating label:");
+        $.Msg("- Key: " + key);
+        $.Msg("- Value: " + newValue);
+        $.Msg("- Label ID: " + labelId);
+    
     
         var label = $("#"+labelId);
         if (label) {
-            if (key === "剩余时间") {
-                stopTimer();
+            // 检查值是否真的发生了变化
+            var currentValue = label.text;
+            var newValueStr = newValue.toString();
+            
+            if (currentValue !== newValueStr) {
+                // 先移除所有动画类
+                label.RemoveClass("ValueIncreased");
+                label.RemoveClass("ValueDecreased");
+                label.RemoveClass("ValueChanged");
+                label.RemoveClass("ValueNormal");
                 
-                // 解析时间字符串
-                var timeParts = newValue.split(':');
-                var minutes = parseInt(timeParts[0], 10);
-                var seconds = parseFloat(timeParts[1]);
-                endTime = minutes * 60 + seconds;
-    
-                //$.Msg(endTime + " endTime ");
+                // 根据值的变化确定动画类
+                var animClass = "ValueChanged";
                 
-                // 更新 TimeCountdown 元素
-                $('#TimeCountdown').text = Math.ceil(endTime).toString();
+                // 尝试对可能是数字的值进行数值比较
+                if (!isNaN(currentValue) && !isNaN(newValueStr)) {
+                    var oldNum = parseFloat(currentValue);
+                    var newNum = parseFloat(newValueStr);
+                    
+                    if (newNum > oldNum) {
+                        animClass = "ValueIncreased";
+                    } else if (newNum < oldNum) {
+                        animClass = "ValueDecreased";
+                    }
+                }
                 
-                // 更新标签文本
-                label.text = newValue;
-                
-
-            } else {
-                label.text = newValue.toString();
+                if (key === "剩余时间") {
+                    stopTimer();
+                    
+                    // 确保 newValue 是字符串
+                    newValue = String(newValue);
+                    
+                    // 解析时间字符串
+                    var timeParts = newValue.split(':');
+                    var minutes = parseInt(timeParts[0], 10) || 0;
+                    var seconds = parseFloat(timeParts[1]) || 0;
+                    endTime = minutes * 60 + seconds;
+                    startValue = 0; // 剩余时间从0开始倒计时
+                    isCountUp = false; // 设置为倒计时模式
+                    
+                    // 更新 TimeCountdown 元素
+                    $('#TimeCountdown').text = Math.ceil(endTime).toString();
+                    
+                    // 更新标签文本
+                    label.text = newValue;
+                    
+                    // 添加动画类
+                    label.AddClass(animClass);
+                    
+                    // 在过渡完成后恢复正常状态
+                    $.Schedule(0.4, function() {
+                        if (label) {
+                            label.RemoveClass(animClass);
+                            label.AddClass("ValueNormal");
+                        }
+                    });
+                } else if (key === "存活时间") {
+                    stopTimer();
+                    
+                    // 调试日志
+                    $.Msg("解析存活时间:");
+                    $.Msg("- 原始值: " + newValue);
+                    
+                    // 新的解析逻辑
+                    var timeParts = newValue.split(':');
+                    var minutePart = parseInt(timeParts[0], 10) || 0;
+                    var secondParts = timeParts[1].split('.'); // 处理小数点
+                    var secondPart = parseInt(secondParts[0], 10) || 0;
+                    var millisPart = parseInt(secondParts[1], 10) || 0;
+                    
+                    // 转换为秒
+                    startValue = minutePart * 60 + secondPart + (millisPart / 100);
+                    
+                    $.Msg("- 解析结果: " + startValue + " 秒");
+                    
+                    isCountUp = true;
+                    
+                    // 更新标签文本
+                    label.text = newValue;
+                    
+                    // 添加动画类
+                    label.AddClass(animClass);
+                    
+                    // 在过渡完成后恢复正常状态
+                    $.Schedule(0.4, function() {
+                        if (label) {
+                            label.RemoveClass(animClass);
+                            label.AddClass("ValueNormal");
+                        }
+                    });
+                    
+                    // 开始计时器
+                    startTimer();
+                } else {
+                    // 对于普通字段，更新文本并应用动画
+                    label.text = newValueStr;
+                    
+                    // 添加动画类
+                    label.AddClass(animClass);
+                    
+                    // 在过渡完成后恢复正常状态
+                    $.Schedule(0.4, function() {
+                        if (label) {
+                            label.RemoveClass(animClass);
+                            label.AddClass("ValueNormal");
+                        }
+                    });
+                }
             }
-            //$.Msg("Updated label " + labelId + " with new value: " + newValue);
         } else {
-            //$.Msg("Label " + labelId + " not found.");
+            $.Msg("Label " + labelId + " not found.");
         }
     }
 
@@ -233,8 +346,16 @@
     }
     
     function createTimerRow(label, seconds) {
-        endTime = parseFloat(seconds);
-        timerLabel = createLabelRow(label, formatTime(endTime));
+        if (label === "剩余时间") {
+            endTime = parseFloat(seconds);
+            startValue = 0;
+            isCountUp = false;
+        } else if (label === "存活时间") {
+            startValue = parseFloat(seconds);
+            isCountUp = true;
+        }
+        
+        timerLabel = createLabelRow(label, formatTime(isCountUp ? startValue : endTime));
         return timerLabel;
     }
 
@@ -242,7 +363,7 @@
         var minutes = Math.floor(seconds / 60);
         var remainingSeconds = Math.floor(seconds % 60);
         var centiseconds = Math.floor((seconds % 1) * 100);
-        return ("0" + minutes).slice(-2) + ":" + 
+        return minutes + ":" + 
                ("0" + remainingSeconds).slice(-2) + "." + 
                ("0" + centiseconds).slice(-2);
     }
@@ -256,8 +377,9 @@
         }
     }
 
+    // 修改后的startTimer函数
     function startTimer() {
-        if (endTime === undefined || !timerLabel) {
+        if ((endTime === undefined && !isCountUp) || !timerLabel) {
             var contentPanel = BattleScorePanel1.FindChild("ContentPanel");
             if (contentPanel) {
                 timerLabel = contentPanel.FindChildrenWithClassTraverse("ScorePanel1TimeLabel")[0];
@@ -266,37 +388,115 @@
             if (!timerLabel) {
                 timerLabel = BattleScorePanel1.FindChildrenWithClassTraverse("ScorePanel1TimeLabel")[0];
             }
-    
+
             if (!timerLabel) {
-                // $.Msg("Timer label not found. Panel structure:");
-                // logPanelStructure(BattleScorePanel1);
                 return;
             }
         }
-    
+
         var startTime = Game.Time();
-    
+        var lastIntSeconds = -1; // 记录上一次的整数秒，用于检测变化
+
         function updateTimer() {
             var elapsedTime = Game.Time() - startTime;
-            var remainingTime = Math.max(0, endTime - elapsedTime);
-        
-            if (remainingTime <= 0) {
-                timerLabel.text = "00:00.00";
-                $('#TimeCountdown').text = "0";
-                $.CancelScheduled(interval);
-            } else {
-                timerLabel.text = formatTime(remainingTime);
+            
+            if (isCountUp) {
+                // 存活时间：向上计时
+                var currentTime = startValue + elapsedTime;
+                timerLabel.text = formatTime(currentTime);
                 
-                // 计算向上取整的秒数
-                var ceilingSeconds = Math.ceil(remainingTime);
-                $('#TimeCountdown').text = ceilingSeconds.toString();
+                // 获取当前整数秒，用于检测变化
+                var intSeconds = Math.floor(currentTime);
+                
+                // 只在整数秒变化时检查里程碑
+                if (intSeconds !== lastIntSeconds) {
+                    checkAndApplyMilestoneEffects(intSeconds, true);
+                    lastIntSeconds = intSeconds;
+                }
                 
                 interval = $.Schedule(0.01, updateTimer);
+            } else {
+                // 剩余时间：倒计时
+                var remainingTime = Math.max(0, endTime - elapsedTime);
+                
+                // 如果剩余时间非常接近0（小于0.01秒），则强制设为0
+                if (remainingTime < 0.01) {
+                    remainingTime = 0;
+                    timerLabel.text = "00:00.00";
+                    $('#TimeCountdown').text = "0";
+                    $.CancelScheduled(interval);
+                    
+                    // 倒计时结束时移除所有效果
+                    removeAllTimerEffects();
+                    return;
+                } else {
+                    timerLabel.text = formatTime(remainingTime);
+                    
+                    // 计算向上取整的秒数
+                    var ceilingSeconds = Math.ceil(remainingTime);
+                    $('#TimeCountdown').text = ceilingSeconds.toString();
+                    
+                    // 获取当前整数秒，用于检测变化
+                    var intSeconds = Math.floor(remainingTime);
+                    
+                    // 只在整数秒变化时检查里程碑
+                    if (intSeconds !== lastIntSeconds) {
+                        checkAndApplyMilestoneEffects(intSeconds, false);
+                        lastIntSeconds = intSeconds;
+                    }
+                    
+                    interval = $.Schedule(0.01, updateTimer);
+                }
             }
         }
-    
+
         stopTimer();
         updateTimer();
+    }
+    
+    // 新增函数：检查并应用里程碑效果
+    function checkAndApplyMilestoneEffects(intSeconds, isCountUp) {
+        // 移除之前的效果类
+        removeAllTimerEffects();
+        
+        // 检查是否是10的整数倍（小动画）
+        if (intSeconds % 10 === 0 && intSeconds > 0) {
+            // 检查是否是60的整数倍（大动画优先）
+            if (intSeconds % 60 === 0) {
+                timerLabel.AddClass("TimeMajorMilestone");
+                
+                // 在0.5秒后移除动画效果
+                $.Schedule(0.5, function() {
+                    if (timerLabel) {
+                        timerLabel.RemoveClass("TimeMajorMilestone");
+                    }
+                });
+            } else {
+                timerLabel.AddClass("TimeMilestone");
+                
+                // 在0.3秒后移除动画效果
+                $.Schedule(0.3, function() {
+                    if (timerLabel) {
+                        timerLabel.RemoveClass("TimeMilestone");
+                    }
+                });
+            }
+        }
+        
+        // 检查倒计时是否接近结束（紧急效果）
+        // 只有在倒计时模式下才应用紧急效果
+        if (!isCountUp && intSeconds <= 10) {
+            timerLabel.AddClass("TimeUrgent");
+        }
+    }
+    
+    // 移除所有计时器效果
+    function removeAllTimerEffects() {
+        if (timerLabel) {
+            timerLabel.RemoveClass("TimeMilestone");
+            timerLabel.RemoveClass("TimeMajorMilestone");
+            timerLabel.RemoveClass("TimeUrgent");
+        }
     }
     
     function stopTimer() {
@@ -304,6 +504,8 @@
             $.CancelScheduled(interval);
             interval = null;
         }
+        // 停止计时器时移除所有效果
+        removeAllTimerEffects();
     }
 
     function updateScoreboard(data) {
@@ -311,6 +513,8 @@
         BattleScorePanel1.RemoveAndDeleteChildren();
         timerLabel = null;
         endTime = null;
+        isCountUp = false;
+        startValue = 0;
     
         var title = $.CreatePanel("Label", BattleScorePanel1, "ScorePanel1TitleLabel");
         title.text = "积分板";
@@ -323,6 +527,8 @@
             if (data.hasOwnProperty(key)) {
                 var value = data[key];
                 if (key === "剩余时间") {
+                    createTimerRow(key, parseFloat(value).toFixed(2));
+                } else if (key === "存活时间") {
                     createTimerRow(key, parseFloat(value).toFixed(2));
                 } else {
                     createLabelRow(key, value, "", contentPanel);

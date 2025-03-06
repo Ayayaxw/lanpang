@@ -59,7 +59,7 @@
     <include src="file://{resources}/scripts/HideMenuButton.js" />
     <include src="file://{resources}/scripts/GameSpeedControl.js" />
     <include src="file://{resources}/scripts/floating_text.js" />
-
+    <include src="file://{resources}/scripts/Sandbox.js" />
     <include src="file://{resources}/scripts/MatchUI/CameraController.js" />
     <include src="file://{resources}/scripts/MatchUI/CountdownContainer.js" />
     <include src="file://{resources}/scripts/MatchUI/HeroVersus.js" />
@@ -92,7 +92,11 @@
   <Panel id="Greenpanel" class = "Greenpanel"/> -->
     <Panel id="WhiteboardRoot" hittest="false" />
 
-
+      <Panel class="fc-heropick minimized" id="FcHeroPickPanel">
+        <DOTAUIHeroPicker id="HeroPicker" facet-select-popup="true" />
+        <Panel class="fc-ability-add" id="AbilityAdd" />
+        <Panel class="fc-ability-existing" id="AbilityExisting" />
+      </Panel>
 
 
 
@@ -733,11 +737,7 @@
         </Panel>
       </Panel>
       <!-- 英雄选择面板 -->
-      <Panel class="fc-heropick minimized" id="FcHeroPickPanel">
-        <DOTAUIHeroPicker id="HeroPicker" facet-select-popup="true" />
-        <Panel class="fc-ability-add" id="AbilityAdd" />
-        <Panel class="fc-ability-existing" id="AbilityExisting" />
-      </Panel>
+
             <!-- 添加新的物品选择面板 -->
       <Panel id="ItemSelectionDialog" class="ItemSelectionDialog" style="visibility: collapse;">
           <Panel class="ItemSelectionContent">

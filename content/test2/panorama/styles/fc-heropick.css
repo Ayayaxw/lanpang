@@ -11,7 +11,7 @@
     transform: translateX( 0px) translateY( -80px);
     transition-property: opacity, transform;
     transition-duration: 0.2s;
-    z-index: 91;
+    z-index: 101;
 }
 
 .fc-heropick.minimized

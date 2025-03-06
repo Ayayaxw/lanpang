@@ -129,10 +129,11 @@ function Main:InitGameMode()
     CustomGameEventManager:RegisterListener("request_unit_info", Dynamic_Wrap(self, "OnRequestUnitInfo"))
     CustomGameEventManager:RegisterListener("request_nearby_units_info", Dynamic_Wrap(self, "OnRequestNearbyUnitsInfo"))
     CustomGameEventManager:RegisterListener("SetFogOverride", Dynamic_Wrap(self, "OnFogToggled"))
+    CustomGameEventManager:RegisterListener("sandbox_custom_event", Dynamic_Wrap(self, "HandleSandboxEvent"))
+    CustomGameEventManager:RegisterListener("sandbox_request", Dynamic_Wrap(self, "RequestSandboxData"))
     --CustomGameEventManager:RegisterListener("set_challenge_type", Dynamic_Wrap(self, "OnSetChallengeType"))
 
     --ListenToGameEvent( "set_challenge_type", Dynamic_Wrap( self, 'OnSetChallengeType' ), self )
-
 
 
     -- local heroName = "npc_dota_hero_ringmaster"

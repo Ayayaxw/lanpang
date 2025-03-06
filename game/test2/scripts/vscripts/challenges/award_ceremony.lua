@@ -1,6 +1,6 @@
 function Main:Init_award_ceremony(heroName, heroFacet,playerID, heroChineseName)
     local spawnOrigin = Vector(43, -300, 256)  -- 假设的生成位置，您可以根据需要调整
-    --SpawnFourHeroes()
+    SpawnFourHeroes()
     --DisplayHeroes()
 
 end
@@ -8,12 +8,13 @@ end
 
 function SpawnFourHeroes()
     local heroData = {
-        {name = "npc_dota_hero_nevermore", position = Vector(767.79, 6149.44, 384.00)},
+        {name = "npc_dota_hero_meepo", position = Vector(767.79, 6149.44, 384.00)},
+        {name = "npc_dota_hero_mars", position = Vector(767.79, 6149.44, 384.00)},
         --{name = "npc_dota_hero_earthshaker", position = Vector(767.79, 6149.44, 384.00)},
-        {name = "npc_dota_hero_necrolyte", position = Vector(1028.40, 6142.33, 256.00)},
-        {name = "npc_dota_hero_lina", position = Vector(505.00, 6144.75, 128.00)},
+        --{name = "npc_dota_hero_necrolyte", position = Vector(1028.40, 6142.33, 256.00)},
+        {name = "npc_dota_hero_pugna", position = Vector(505.00, 6144.75, 128.00)},
         --{name = "npc_dota_hero_ember_spirit", position = Vector(505.00, 6144.75, 128.00)},
-        {name = "npc_dota_hero_lion", position = Vector(1335.26, 6084.06, 0.00)}
+        {name = "npc_dota_hero_phantom_assassin", position = Vector(1335.26, 6084.06, 0.00)}
     }
 
     local function SetupHero(newHero, isFirst)

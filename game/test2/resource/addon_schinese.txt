@@ -3,6 +3,7 @@
 	"Tokens" {
 		"caipan" "裁判"
 		"luosi" "螺丝"
+		"sniper" "狙击手"
 		"double_on_death_mega" "超级僵尸"
 		"npc_dota_neutral_king" "狗头人之王"
 		"attribute_stack_modifier" "工件计数"

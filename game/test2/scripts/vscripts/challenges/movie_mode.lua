@@ -57,9 +57,145 @@ function Main:Init_movie_mode(heroName, heroFacet,playerID, heroChineseName)
     -- 假设你要创建的位置
     -- CreateParentHeroesWithFacets(function(allHeroes)
     --DisplayHeroes()
-    SpawnAllNeutralCreeps1()
+    --SpawnAllNeutralCreeps1()
+    CreateOgreMagi()
     -- end)
 end
+
+function CreateOgreMagi()
+    CreateHero(
+        0,                           
+        "npc_dota_hero_ogre_magi",   
+        1,                           
+        Main.waterFall_Center,               
+        DOTA_TEAM_BADGUYS,          
+        true,                        
+        function(hero)
+            HeroMaxLevel(hero)
+            
+            hero:AddNewModifier(hero, nil, "modifier_item_ultimate_scepter_consumed", {})
+            hero:AddNewModifier(hero, nil, "modifier_item_aghanims_shard", {})
+            hero:AddNewModifier(hero, nil, "modifier_disarmed", {})
+            hero:Stop()
+            --朝南
+            hero:SetForwardVector(Vector(0, -1, 0))
+
+            for i = 1, 6 do
+                hero:AddItemByName("item_skadi")
+            end
+    
+            hero:AddAbility("dazzle_nothl_projection")
+            local ability = hero:FindAbilityByName("dazzle_nothl_projection")
+            if ability then
+                ability:SetLevel(3)
+            end
+    
+            local radius = 600
+            local totalUnits = 5
+            local angleStep = 360 / totalUnits
+            local createdUnits = {}
+
+            for i = 1, totalUnits do
+                local centerPoint = Main.waterFall_Center
+                local angle = math.rad(i * angleStep)
+                local spawnX = centerPoint.x + radius * math.cos(angle)
+                local spawnY = centerPoint.y + radius * math.sin(angle)
+                local spawnPos = Vector(spawnX, spawnY, 128)
+                
+                local unit = CreateUnitByName("sniper", spawnPos, true, nil, nil, DOTA_TEAM_GOODGUYS)
+                unit:SetControllableByPlayer(0, true)
+                table.insert(createdUnits, unit)
+                
+                if unit then
+                    unit:SetBaseMoveSpeed(200)
+                    local dummy = CreateUnitByName(
+                        "npc_dota_hero_sniper_wearable_dummy",
+                        unit:GetAbsOrigin(),
+                        false,
+                        unit,
+                        unit,
+                        DOTA_TEAM_BADGUYS
+                    )
+                    
+                    if dummy then
+                        dummy:SetControllableByPlayer(-1, false)
+                        dummy:FollowEntity(unit, true)
+                        dummy:AddNewModifier(dummy, nil, "modifier_wearable", {})
+                        unit.wearableDummy = dummy
+                    end
+    
+                    if Main then
+                        Main.prowlerSpawnPositions = Main.prowlerSpawnPositions or {}
+                        Main.prowlerSpawnPositions[unit:GetEntityIndex()] = spawnPos
+                    end
+    
+                    local directionToCenter = (Main.waterFall_Center - spawnPos):Normalized()
+                    unit:SetForwardVector(directionToCenter)
+                    unit:AddNewModifier(unit, nil, "modifier_disarmed", {})
+                    
+                    for j = 1, 6 do
+                        unit:AddItemByName("item_moon_shard")
+                    end
+                    
+                    for j = 1, 30 do
+                        unit:HeroLevelUp(false)
+                    end
+    
+                    local headshot = unit:FindAbilityByName("sniper_headshot")
+                    if headshot then
+                        headshot:SetLevel(1)
+                    end
+                end
+            end
+
+            -- 1秒后让食人魔魔法师释放技能
+            Timers:CreateTimer(2.0, function()
+                local ability = hero:FindAbilityByName("dazzle_nothl_projection")
+                if ability then
+
+                    --朝自己当前位置的西边200码
+                    local origin = hero:GetAbsOrigin()
+                    local targetPos = origin + Vector(-200, -50, 0)
+                    hero:SetCursorPosition(targetPos)
+                    ability:OnSpellStart()
+                end
+            end)
+
+            Timers:CreateTimer(3.0, function()
+                local modifier = hero:FindModifierByName("modifier_dazzle_nothl_projection_soul_debuff")
+                if modifier then
+                    -- 设置modifier持续时间为无限(-1表示永久持续)
+                    modifier:SetDuration(-1, true)
+                end
+            end)
+
+            -- 2秒后移除所有sniper的缴械
+            Timers:CreateTimer(10, function()
+                for _, unit in pairs(createdUnits) do
+                    if unit and IsValidEntity(unit) then
+                        unit:RemoveModifierByName("modifier_disarmed")
+                    end
+                end
+            end)
+        end
+    )
+end
+
+
+function Main:OnNPCSpawned_movie_mode(spawnedUnit, event)
+    -- 如果不是被排除的单位，则应用战场效果
+    if not self:isExcludedUnit(spawnedUnit) then
+        -- 检查单位是否有指定的modifier
+        Timers:CreateTimer(1, function()
+        local modifier = spawnedUnit:FindModifierByName("modifier_dazzle_nothl_projection_soul_debuff")
+        if modifier then
+            -- 设置modifier持续时间为无限(-1表示永久持续)
+            modifier:SetDuration(-1, true)
+        end
+    end)
+    end
+end
+
 
 function CreateRandomHeroes(amount)
     -- 英雄名称列表

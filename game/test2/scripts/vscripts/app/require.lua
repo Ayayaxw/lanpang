@@ -32,6 +32,7 @@ require("trigger/quanshui")
 require("spawn_manager") 
 require("hero_spawn") 
 require("hero_chaos") 
+require("sandbox") 
 
 
 LinkLuaModifier("modifier_judu", "modifier/judu.lua", LUA_MODIFIER_MOTION_NONE)

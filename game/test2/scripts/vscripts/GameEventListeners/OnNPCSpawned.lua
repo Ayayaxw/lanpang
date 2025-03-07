@@ -30,6 +30,7 @@ function Main:isExcludedUnit(unit)
         "npc_dota_wisp_spirit",
         "npc_dota_muerta_revenant",
         "npc_dota_wraith_king_skeleton_warrior",
+        "",
 
     }
     -- 检查单位名称是否在排除列表中
@@ -48,6 +49,8 @@ function Main:isExcludedUnit(unit)
 
     return false
 end
+
+
 function Main:OnNPCSpawned(event)
     local spawnedUnit = EntIndexToHScript(event.entindex)
     if not spawnedUnit then
@@ -80,9 +83,9 @@ function Main:OnNPCSpawned(event)
         local aiUnitKeywords = {
             "npc_dota_lone_druid_bear"
         }
-
-        if unitName and unitName ~= "" then
-            --DebugPrint("检查单位2：" .. unitName)
+        if self:isExcludedUnit(spawnedUnit) then
+            DebugPrint("函数结束：单位在排除列表中")
+            return
         end
 
         Timers:CreateTimer(0.03, function()
@@ -98,10 +101,7 @@ function Main:OnNPCSpawned(event)
                 return
             end
         
-            if self:isExcludedUnit(spawnedUnit) then
-                DebugPrint("函数结束：单位在排除列表中")
-                return
-            end
+
 
             local isIllusion = spawnedUnit:IsIllusion()
             if spawnedUnit:IsIllusion() then

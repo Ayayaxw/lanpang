@@ -67,7 +67,6 @@ function Main:SetupNewHero(event, playerID)
 
         SendToServerConsole("host_timescale 1")
         self.currentTimer = (self.currentTimer or 0) + 1
-        self.PlayerChineseName = heroChineseName
         self.currentMatchID = self:GenerateUniqueID()    --比赛ID
         hero_duel.EndDuel = false  -- 标记战斗是否结束
         hero_duel.abilityDamageTracker = {}

@@ -146,7 +146,11 @@ function modifier_auto_elevation_large:OnIntervalThink()
                 FindClearSpaceForUnit(unit, bestPoint, true)
                 
             else
-                print("Warning: No suitable high ground found within 2000 units!")
+                print("Warning: No suitable high ground found within 2000 units!")--打印单位名字
+                print(unit:GetUnitName())--如果没有名字，就打印单位class
+                if unit:GetUnitName() == "" then
+                    print(unit:GetClassname())
+                end
                 local currentGroundHeight = GetGroundHeight(currentPos, unit)
                 if currentGroundHeight > 0 then
                     FindClearSpaceForUnit(unit, Vector(currentPos.x, currentPos.y, currentGroundHeight), true)

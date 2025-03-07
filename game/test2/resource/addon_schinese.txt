@@ -11,6 +11,10 @@
 		"DOTA_Tooltip_ability_item_iron_branch_custom_Description" "提供额外的一级全属性加成"
 		"DOTA_Tooltip_ability_item_iron_branch_custom_Lore"   "蕴含着神奇力量的树枝"
 
+		"DOTA_Tooltip_ability_item_attribute_amplifier_10x"        "十倍属性树枝"
+		"DOTA_Tooltip_ability_item_attribute_amplifier_10x_Description" "提供英雄十倍的基础属性加成"
+		"DOTA_Tooltip_ability_item_attribute_amplifier_10x_Lore"   "倍化之力"
+
 		"DOTA_Tooltip_ability_item_attribute_amplifier_5x"        "五倍属性树枝"
 		"DOTA_Tooltip_ability_item_attribute_amplifier_5x_Description" "提供英雄五倍的基础属性加成"
 		"DOTA_Tooltip_ability_item_attribute_amplifier_5x_Lore"   "倍化之力"

@@ -103,7 +103,7 @@ function modifier_caipan:OnIntervalThink()
                         
                         FindClearSpaceForUnit(unit, bestPoint, true)
                     else
-                        print("Warning: No suitable high ground found within 2000 units!")
+                        print("裁判")
                         local currentGroundHeight = GetGroundHeight(unitPos, unit)
                         if currentGroundHeight > 0 then
                             FindClearSpaceForUnit(unit, Vector(unitPos.x, unitPos.y, currentGroundHeight), true)

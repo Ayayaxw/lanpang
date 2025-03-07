@@ -111,7 +111,7 @@
 		"ScriptFile"                    "items/item_attribute_amplifier_5x"
 		"AbilityBehavior"              "DOTA_ABILITY_BEHAVIOR_PASSIVE"
 		"AbilityTextureName"           "item_branches" // 可以更换图标
-		
+		"ItemIsNeutralActiveDrop"				"1"
 		"ItemCost"                     "0"
 		"ItemShopTags"                 "attributes"
 		"ItemQuality"                  "epic"
@@ -120,7 +120,7 @@
 		"ItemInitialCharges"           "0"
 		"ItemRequiresCharges"          "0"
 		"ItemDisplayCharges"           "0"
-		
+		"ItemDroppable"    "0"    // 设置为0表示不可丢弃
 		"MaxUpgradeLevel"              "1"
 		"ItemBaseLevel"                "1"
 		
@@ -133,6 +133,8 @@
 			}
 		}
 	}
+
+
 		"item_attribute_amplifier_3x"
 	{
 		"ID"                            "1000002" // 自定义ID
@@ -149,7 +151,8 @@
 		"ItemInitialCharges"           "0"
 		"ItemRequiresCharges"          "0"
 		"ItemDisplayCharges"           "0"
-		
+		"ItemIsNeutralActiveDrop"				"1"
+		"ItemDroppable"    "0"    // 设置为0表示不可丢弃
 		"MaxUpgradeLevel"              "1"
 		"ItemBaseLevel"                "1"
 		
@@ -177,7 +180,37 @@
 		"ItemInitialCharges"           "0"
 		"ItemRequiresCharges"          "0"
 		"ItemDisplayCharges"           "0"
-		
+		"ItemDroppable"    "0"    // 设置为0表示不可丢弃
+		"MaxUpgradeLevel"              "1"
+		"ItemBaseLevel"                "1"
+		"ItemIsNeutralActiveDrop"				"1"
+		"AbilitySpecial"
+		{
+			"01"
+			{
+				"var_type"              "FIELD_INTEGER"
+				"bonus_all_stats"       "0"
+			}
+		}
+	}
+	
+	"item_attribute_amplifier_10x"
+	{
+		"ID"                            "1000004" // 自定义ID
+		"BaseClass"                     "item_lua"
+		"ScriptFile"                    "items/item_attribute_amplifier_10x"
+		"AbilityBehavior"              "DOTA_ABILITY_BEHAVIOR_PASSIVE"
+		"AbilityTextureName"           "item_branches" // 可以更换图标
+		"ItemIsNeutralActiveDrop"				"1"
+		"ItemCost"                     "0"
+		"ItemShopTags"                 "attributes"
+		"ItemQuality"                  "epic"
+		"ItemAliases"                  "10x;attribute amplifier"
+		"ItemPermanent"                "1"
+		"ItemInitialCharges"           "0"
+		"ItemRequiresCharges"          "0"
+		"ItemDisplayCharges"           "0"
+		"ItemDroppable"    "0"    // 设置为0表示不可丢弃
 		"MaxUpgradeLevel"              "1"
 		"ItemBaseLevel"                "1"
 		
@@ -190,6 +223,7 @@
 			}
 		}
 	}
+
 
 
 

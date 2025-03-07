@@ -39,13 +39,34 @@
             }
     
             var reorderedData = {};
+            $.Msg("开始处理积分板数据并进行本地化...");
+            
             for (var i = 0; i < orderArray.length; i++) {
                 var key = orderArray[i];
                 if (event.data.hasOwnProperty(key)) {
-                    reorderedData[key] = event.data[key];
+                    var value = event.data[key];
+                    
+                    // 尝试对键名进行本地化 - 添加"#"前缀
+                    var localizedKey = $.Localize("#" + key);
+                    if (localizedKey !== "#" + key) {
+                        $.Msg("键名已本地化: " + key + " -> " + localizedKey);
+                        key = localizedKey;
+                    }
+                    
+                    // 如果值是字符串，尝试本地化 - 添加"#"前缀
+                    if (typeof value === 'string') {
+                        var localizedValue = $.Localize("#" + value);
+                        if (localizedValue !== "#" + value) {
+                            $.Msg("值已本地化: " + value + " -> " + localizedValue);
+                            value = localizedValue;
+                        }
+                    }
+                    
+                    reorderedData[key] = value;
                 }
             }
-    
+            
+            $.Msg("本地化处理完成，更新积分板...");
             updateScoreboard(reorderedData);
         } else {
             $.Msg("Event data or order is missing.");
@@ -75,20 +96,64 @@
         
         // 确保计时器显示停止在当前时间，如果小于0.1秒则显示0
         if (timerLabel) {
+            // 打印处理前的值
+            $.Msg("停止计时器 - 处理前：" + timerLabel.text);
+            
             // 检查是否是倒计时标签
             var isCountdownTimer = !isCountUp; // 使用全局的 isCountUp 变量判断
     
             if (isCountdownTimer) {
                 var currentTime = timerLabel.text;
-                var decimalPlaces = (currentTime.split('.')[1] || '').length;
-                var timeNumber = parseFloat(currentTime);
-                if (timeNumber < 0.05) {
-                    timerLabel.text = "0." + "0".repeat(decimalPlaces);
+                $.Msg("当前时间格式：" + currentTime);
+                
+                // 提取实际的秒数值，无论是否有冒号
+                var timeNumber;
+                var decimalPlaces = 2; // 默认2位小数
+                
+                if (currentTime.indexOf(':') !== -1) {
+                    // 处理带冒号的格式 (如 "0:00.01")
+                    var parts = currentTime.split(':');
+                    var minutes = parseInt(parts[0]) || 0;
+                    var secondsPart = parts[1] || "0";
+                    
+                    // 提取秒和小数部分
+                    var secondsComponents = secondsPart.split('.');
+                    var seconds = parseInt(secondsComponents[0]) || 0;
+                    var decimal = secondsComponents[1] || "00";
+                    
+                    // 计算总秒数
+                    timeNumber = minutes * 60 + seconds + (parseFloat("0." + decimal) || 0);
+                    decimalPlaces = decimal.length;
+                    
+                    $.Msg("解析的时间组件 - 分钟: " + minutes + ", 秒: " + seconds + ", 小数: " + decimal);
+                    $.Msg("计算的总秒数: " + timeNumber);
                 } else {
+                    // 对于不带冒号的格式(纯数字)
+                    decimalPlaces = (currentTime.split('.')[1] || '').length;
+                    timeNumber = parseFloat(currentTime);
+                }
+                
+                // 应用统一的逻辑判断时间是否接近0
+                if (timeNumber < 0.05) {
+                    // 根据原始格式决定输出格式
+                    if (currentTime.indexOf(':') !== -1) {
+                        // 对于带冒号的格式，保持格式但设置为0
+                        timerLabel.text = "0:00." + "0".repeat(decimalPlaces);
+                    } else {
+                        // 对于不带冒号的格式，使用原来的输出方式
+                        timerLabel.text = "0." + "0".repeat(decimalPlaces);
+                    }
+                    $.Msg("时间接近0，设置为0");
+                } else {
+                    // 时间不接近0，保持原值
                     timerLabel.text = currentTime;
+                    $.Msg("时间不接近0，保持原值");
                 }
             }
             // 如果是存活时间，保持当前值不变
+            
+            // 打印处理后的值
+            $.Msg("停止计时器 - 处理后：" + timerLabel.text);
         }
     
         // 更新倒计时显示

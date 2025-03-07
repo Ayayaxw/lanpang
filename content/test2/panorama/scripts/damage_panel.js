@@ -108,11 +108,11 @@
             
             logMessage("已订阅所有事件");
             
-            // 添加测试按钮（仅用于测试）
-            if (abilityDamagePanel) {
-                abilityDamagePanel.SetPanelEvent("onactivate", RunTest);
-                logMessage("已设置面板点击测试事件");
-            }
+            // // 添加测试按钮（仅用于测试）
+            // if (abilityDamagePanel) {
+            //     abilityDamagePanel.SetPanelEvent("onactivate", RunTest);
+            //     logMessage("已设置面板点击测试事件");
+            // }
             
             logMessage("初始化完成");
             

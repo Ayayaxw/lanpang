@@ -378,7 +378,6 @@ function Main:OnUnitKilled_Aoe_10X(killedUnit, args)
         return -- 英雄死亡后直接返回，不再处理其他逻辑
     end
 
-    -- 如果不是英雄死亡，检查是否是马格纳斯死亡
     if killedUnit:GetUnitName() == "sniper" then
         self:ProcessHeroDeath_Aoe_10X(killedUnit, killer)
     end
@@ -388,8 +387,6 @@ function Main:ProcessHeroDeath_Aoe_10X(killedUnit, killer)
         return hero_duel.killCount * 10
     end
 
-    -- print("ProcessHeroDeath_Aoe_10X called for unit: ", killedUnit:GetUnitName())
-    
     if killedUnit:GetUnitName() == "sniper" then
         -- 播放击杀特效
         if killer then

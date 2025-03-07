@@ -771,15 +771,21 @@ function Main:HeroPreparation(heroName, hero, overallStrategy, heroStrategy)
         local ability_modifiers = {
             npc_dota_hero_morphling = {
                 morphling_replicate = {
-                    duration = 1    
+                    AbilityValues = {
+                        duration = 1    
+                    },
                 },
                 morphling_morph_agi = {
-                    points_per_tick = 2,
-                    morph_cooldown = 0.01    
+                    AbilityValues = {
+                        points_per_tick = 2,
+                        morph_cooldown = 0.001    
+                    },
                 },
                 morphling_morph_str = {
-                    points_per_tick = 2,
-                    morph_cooldown = 0.01    
+                    AbilityValues = {
+                        points_per_tick = 2,
+                        morph_cooldown = 0.001    
+                    },
                 },
             },
         }

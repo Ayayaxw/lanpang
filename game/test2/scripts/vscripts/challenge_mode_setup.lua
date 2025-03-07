@@ -38,7 +38,7 @@ require("challenges/waterfall_hero_chaos")
 require("challenges/award_ceremony")  
 require("challenges/SoulOut")  
 require("challenges/SoulOut_Sniper")  
-
+require("challenges/Golem_100")  
 
 Main.Challenges = {}
 Main.ModeConfig = {}
@@ -320,6 +320,13 @@ Main.GameModes = {
         id = "SoulOut_Sniper",
         code = 3015,
         name = "灵魂出窍狙击",
+        menuConfig = {"SelfHeroRow"},
+        category = "single"
+    },
+    {
+        id = "Golem_100",
+        code = 3016,
+        name = "100地狱火",
         menuConfig = {"SelfHeroRow"},
         category = "single"
     }

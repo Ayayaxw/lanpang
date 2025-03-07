@@ -117,7 +117,7 @@ function Main:Init_CreepChaos(event, playerID)
         local currentUnit = creepUnit  -- 显式保存当前单位的引用
         Timers:CreateTimer(0.1, function()
             for i = 0, currentUnit:GetAbilityCount() - 1 do
-                local ability = currentUnit:GetAbilityByIndex(abilityIndex)
+                local ability = currentUnit:GetAbilityByIndex(i)
                 if ability then
                     if ability:GetName() == "neutral_upgrade" then
                         currentUnit:RemoveAbility("neutral_upgrade")
@@ -342,7 +342,6 @@ function Main:OnUnitKilled_CreepChaos(killedUnit, args)
             
             -- 更新前端显示
             CustomGameEventManager:Send_ServerToAllClients("update_score", {
-                ["剩余时间"] = formattedTime,
                 ["当前得分"] = tostring(hero_duel.finalScore)
             })
             

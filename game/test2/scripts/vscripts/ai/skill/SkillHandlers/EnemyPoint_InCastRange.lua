@@ -849,6 +849,7 @@ function CommonAI:HandleEnemyPoint_InCastRange(entity,target,abilityInfo,targetI
         return true
 
     elseif abilityInfo.abilityName == "queenofpain_blink" then
+  
         local castPosition = targetInfo.targetPos - (targetInfo.targetDirection * 200)
         entity:CastAbilityOnPosition(castPosition, abilityInfo.skill, 0)
         abilityInfo.castPoint = CommonAI:calculateAdjustedCastPoint(entity, castPosition, abilityInfo.castPoint)

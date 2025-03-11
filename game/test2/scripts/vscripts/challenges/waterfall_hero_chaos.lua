@@ -6,13 +6,13 @@ function Main:Init_waterfall_hero_chaos(event, playerID)
     self.preCreatePerTeam = 3 -- 每个队伍初始创建的英雄数量，作为独立参数
     self.currentDeployIndex = 1  -- 当前部署的英雄索引
 
-    self.SPAWN_POINT_FAR = Vector(-10000, 10000, 128)
+
     self.ARENA_CENTER = Main.waterFall_Center
     self.SPAWN_DISTANCE = 500
 
     local teams = {DOTA_TEAM_GOODGUYS, DOTA_TEAM_BADGUYS,DOTA_TEAM_CUSTOM_1,DOTA_TEAM_CUSTOM_2,DOTA_TEAM_CUSTOM_3,DOTA_TEAM_CUSTOM_4} -- 或其他你需要的队伍
     self:CreateTrueSightWards(teams)
-    self:SendCameraPositionToJS(Main.waterFall_Center, 1)
+    self:SendCameraPositionToJS(self.ARENA_CENTER, 1)
 
     -- 定义不同的队伍类型配置
     local TEAM_CONFIGS = {
@@ -63,11 +63,24 @@ function Main:Init_waterfall_hero_chaos(event, playerID)
 
     self.heroFacets = {
         npc_dota_hero_faceless_void = 3,  -- 虚空假面
-        npc_dota_hero_life_stealer = 5,   -- 噬魂鬼
-        npc_dota_hero_windrunner = 3,
+        npc_dota_hero_life_stealer = 4,   -- 噬魂鬼
+        --帕吉3
+        npc_dota_hero_pudge = 3,
+        --斯拉达2
+        npc_dota_hero_slardar = 2,
+        npc_dota_hero_night_stalker = 3,
+        npc_dota_hero_chaos_knight = 4,
+        npc_dota_hero_lycan = 2,
+        npc_dota_hero_primal_beast = 3,
+        --炼金术师2
+        npc_dota_hero_alchemist = 2,
+        npc_dota_hero_sven = 2,
         npc_dota_hero_earthshaker = 2,
+        --修补匠2
         npc_dota_hero_tinker = 2,
+        --哈斯卡3
         npc_dota_hero_huskar = 3,
+        --死亡先知2
         npc_dota_hero_death_prophet = 2,
         npc_dota_hero_sand_king = 2,
         npc_dota_hero_winter_wyvern = 4,
@@ -77,12 +90,19 @@ function Main:Init_waterfall_hero_chaos(event, playerID)
         npc_dota_hero_lion = 2,
         npc_dota_hero_lone_druid = 3,
         npc_dota_hero_mirana = 3,
-        npc_dota_hero_magnataur = 4,
+        npc_dota_hero_marci = 3,
+
         npc_dota_hero_invoker = 5,
         npc_dota_hero_jakiro = 4,
         npc_dota_hero_dazzle = 2,
         npc_dota_hero_arc_warden = 3,
         npc_dota_hero_troll_warlord= 2,
+        --马格纳斯3
+        npc_dota_hero_magnataur= 3,
+        --先知2
+        npc_dota_hero_furion = 2,
+        npc_dota_hero_enigma = 2,
+        npc_dota_hero_windrunner = 5,
         -- 可以继续添加其他英雄的命石设置
     }
 
@@ -104,7 +124,7 @@ function Main:Init_waterfall_hero_chaos(event, playerID)
     Timers:CreateTimer(10, function()
         self:Initialize_waterfall_hero_chaos_UI()
         self:Initial_waterfall_hero_chaos_DeployHeroes()
-        self:UpdateTeamPanelData()
+        self:UpdateWaterFallTeamPanelData()
         self:Start_waterfall_hero_chaos_ScoreBoardMonitor()
         --self:CreateAllTeamHeroes()
         end)
@@ -196,6 +216,8 @@ function Main:CleanupWaterFallHeroAndSummons(heroType, heroIndex, callback)
         return
     end
 
+
+
     local hero = heroData.entity
     if hero:IsNull() then
         print("[Arena] 警告：英雄实体已失效")
@@ -203,7 +225,10 @@ function Main:CleanupWaterFallHeroAndSummons(heroType, heroIndex, callback)
         return
     end
 
-    heroData.entity = nil
+    if heroData then
+        heroData.isDead = true  -- 新增死亡标记
+        heroData.entity = nil   -- 原有清理逻辑
+    end
 
     Timers:CreateTimer(10, function()
         local targetPos = Vector(10000, 10000, 0)
@@ -212,7 +237,7 @@ function Main:CleanupWaterFallHeroAndSummons(heroType, heroIndex, callback)
         -- 使用FindUnitsInRadius搜索整个地图的单位
         local allUnits = FindUnitsInRadius(
             hero:GetTeamNumber(),
-            Main.waterFall_Center,
+            self.ARENA_CENTER,
             nil,
             5000, -- 足够大的半径以覆盖整个地图
             DOTA_UNIT_TARGET_TEAM_BOTH,
@@ -395,7 +420,7 @@ function Main:OnUnitKilled_waterfall_hero_chaos(killedUnit, args)
                 end
                 killerTeamData.teamStats.kills = (killerTeamData.teamStats.kills or 0) + 1
                 
-                self:UpdateTeamPanelData()
+                self:UpdateWaterFallTeamPanelData()
                 self:SendKillFeedToClient(realKiller, heroToProcess)
                 
                 if self:CheckForVictory(killerType) then
@@ -422,6 +447,53 @@ function Main:OnUnitKilled_waterfall_hero_chaos(killedUnit, args)
     -- end)
 end
 -- 在初始化时
+function Main:UpdateWaterFallTeamPanelData()
+    if not self.showTeamPanel then return end
+
+    for type, teamData in pairs(self.teamTypes) do  -- type就是1,2这样的数字
+        local heroSequence = self.heroSequence[type]  -- 直接使用type
+        if heroSequence then
+            -- 获取当前英雄
+            local currentData = heroSequence.sequence[heroSequence.currentIndex]
+            local currentHero = currentData and currentData.entity and currentData.entity:GetUnitName()
+            
+            -- 获取下一个英雄
+            local nextHeroIndex = heroSequence.currentIndex + 1
+            local nextHeroData = heroSequence.sequence[nextHeroIndex]
+            local nextHero = nextHeroData and nextHeroData.entity and nextHeroData.entity:GetUnitName()
+
+            -- 使用teamStats中的deaths来获取已死亡英雄数量
+            local deadHeroes = heroSequence.teamStats.deaths or 0
+
+            -- 构建数据
+            local data = {
+                type = teamData.type,  -- 直接使用type
+                currentHero = currentHero,
+                nextHero = nextHero,
+                remainingHeroes = #heroSequence.sequence - deadHeroes,
+                totalHeroes = #heroSequence.sequence,
+                kills = heroSequence.teamStats.kills or 0,
+                deadHeroes = deadHeroes
+            }
+            
+            -- 添加中文打印信息
+            print("==== 队伍状态更新 ====")
+            print(string.format("队伍类型: %s (%s)", teamData.type, teamData.name))
+            print(string.format("当前英雄: %s", currentHero or "无"))
+            print(string.format("下一个英雄: %s", nextHero or "无"))
+            print(string.format("总英雄数: %d", #heroSequence.sequence))
+            print(string.format("已死亡英雄: %d", deadHeroes))
+            print(string.format("剩余英雄: %d", #heroSequence.sequence - deadHeroes))
+            print(string.format("队伍击杀数: %d", heroSequence.teamStats.kills or 0))
+            print("========================")
+            
+            CustomGameEventManager:Send_ServerToAllClients("update_team_data", data)
+        end
+    end
+end
+
+
+
 
 
 
@@ -459,6 +531,7 @@ function Main:InitializeWaterfallHeroSequence()
     }
     
     local heroesGroup2 = {
+        "npc_dota_hero_elder_titan",
         "npc_dota_hero_warlock",
         "npc_dota_hero_juggernaut",
         "npc_dota_hero_abaddon",
@@ -473,7 +546,7 @@ function Main:InitializeWaterfallHeroSequence()
         "npc_dota_hero_tusk",
         "npc_dota_hero_pudge",
         "npc_dota_hero_phantom_lancer",
-"npc_dota_hero_warlock",    
+        "npc_dota_hero_warlock",    
         "npc_dota_hero_nevermore",
         "npc_dota_hero_pangolier",
         "npc_dota_hero_ember_spirit",
@@ -482,7 +555,7 @@ function Main:InitializeWaterfallHeroSequence()
         "npc_dota_hero_enigma",
         "npc_dota_hero_necrolyte",
         "npc_dota_hero_faceless_void",
-        "npc_dota_hero_elder_titan",
+
         "npc_dota_hero_bloodseeker",
         "npc_dota_hero_ogre_magi",
         "npc_dota_hero_monkey_king",
@@ -1114,5 +1187,27 @@ function Main:Start_waterfall_hero_chaos_ScoreBoardMonitor()
         })
 
         return 0.1
+    end)
+end
+
+
+
+function Main:OnNPCSpawned_waterfall_hero_chaos(spawnedUnit, event)
+    local minX = -7023.13
+    local maxX = -4999.12
+    local minY = -876.53
+    local maxY = 1157.39
+    
+    Timers:CreateTimer(2.0, function()
+        if not spawnedUnit or spawnedUnit:IsNull() then
+            return
+        end
+
+        if spawnedUnit:IsIllusion() and spawnedUnit:HasModifier("modifier_spectre_haunt") then
+            local origin = spawnedUnit:GetAbsOrigin()
+            if origin.x < minX or origin.x > maxX or origin.y < minY or origin.y > maxY then
+                spawnedUnit:Kill(nil, nil)
+            end
+        end
     end)
 end

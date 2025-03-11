@@ -1,6 +1,5 @@
-
 -- 初始化函数
-function Main:Init_SnipeHunt(event, playerID)
+function Main:Init_Mine_Challenge(event, playerID)
     -- 基础参数初始化
     self.currentMatchID = self:GenerateUniqueID()    
     SendToServerConsole("host_timescale 1")
@@ -28,7 +27,6 @@ function Main:Init_SnipeHunt(event, playerID)
                 hero:AddNewModifier(hero, nil, "modifier_item_aghanims_shard", {})
                 hero:AddNewModifier(hero, nil, "modifier_item_ultimate_scepter_consumed", {})
                 HeroMaxLevel(hero)
-                hero:AddNewModifier(hero, nil, "modifier_sniper_kill_bonus", {})
                 hero:AddNewModifier(hero, nil, "modifier_auto_elevation", {})
             end,
         },
@@ -49,7 +47,18 @@ function Main:Init_SnipeHunt(event, playerID)
         }
     }
 
-    local ability_modifiers = {}
+    local ability_modifiers = {
+        npc_dota_hero_techies = {
+            techies_land_mines = {
+                AbilityValues = {
+                    proximity_threshold = 0
+                }
+            }
+        }
+    }
+
+
+
     self:UpdateAbilityModifiers(ability_modifiers)
 
     -- 数据获取
@@ -108,7 +117,7 @@ function Main:Init_SnipeHunt(event, playerID)
 
     Timers:CreateTimer(2, function()
         if self.currentTimer ~= timerId or hero_duel.EndDuel then return end
-        self:DeploySnipers(timerId)  -- 传入 timerId
+        self:DeployMine(timerId)  -- 传入 timerId
     end)
 
 
@@ -189,125 +198,69 @@ function Main:Init_SnipeHunt(event, playerID)
     
         -- 更新显示
         CustomGameEventManager:Send_ServerToAllClients("update_score", {
-            ["剩余时间"] = "0",
             ["当前得分"] = tostring(finalScore)
         })
     
-        -- 添加英雄胜利效果
-        if self.leftTeamHero1 and not self.leftTeamHero1:IsNull() then
-            -- 添加限制效果
-            local modifiers = {"modifier_disarmed", "modifier_silence", "modifier_rooted", "modifier_break"}
-            for _, modifier in ipairs(modifiers) do
-                self.leftTeamHero1:AddNewModifier(self.leftTeamHero1, nil, modifier, { duration = self.endduration })
-            end
-            
-            -- 胜利特效
-            EmitSoundOn("endAegis.Timer", self.leftTeamHero1)
-            self:gradual_slow_down(self.leftTeamHero1:GetOrigin(), self.leftTeamHero1:GetOrigin())
-            
-            -- 胜利粒子效果
-            local particle = ParticleManager:CreateParticle(
-                "particles/units/heroes/hero_legion_commander/legion_commander_duel_victory.vpcf", 
-                PATTACH_OVERHEAD_FOLLOW, 
-                self.leftTeamHero1
-            )
-            ParticleManager:SetParticleControl(particle, 0, self.leftTeamHero1:GetAbsOrigin())
-            ParticleManager:ReleaseParticleIndex(particle)
-            
-            -- 聚光灯效果
-            local particle1 = ParticleManager:CreateParticle(
-                "particles/econ/taunts/ursa/ursa_unicycle/ursa_unicycle_taunt_spotlight.vpcf", 
-                PATTACH_ABSORIGIN, 
-                self.leftTeamHero1
-            )
-            ParticleManager:SetParticleControl(particle1, 0, self.leftTeamHero1:GetAbsOrigin())
-            ParticleManager:ReleaseParticleIndex(particle1)
-            
-            -- 胜利动作和伤害减免
-            self.leftTeamHero1:StartGesture(ACT_DOTA_VICTORY)
-            self.leftTeamHero1:AddNewModifier(self.leftTeamHero1, nil, "modifier_damage_reduction_100", {duration = self.endduration})
-        end
+        self:PlayVictoryEffects(self.leftTeamHero1)
     end)
 end
 
-
--- 部署狙击手到战场
-function Main:DeploySnipers(timerId)
+-- 部署地雷到战场
+function Main:DeployMine(timerId)
     local startPos = Vector(8550, -8796.45, 128.00)
     local endPos = Vector(8550, 7131.07, 128.00)
-    local totalSnipers = 100
-    local distanceStep = (endPos.y - startPos.y) / (totalSnipers - 1)
+    local totalMines = 100
+    local distanceStep = (endPos.y - startPos.y) / (totalMines - 1)
     
-    hero_duel.sniperPool = {}
+    -- 创建地雷池
+    hero_duel.minePool = {}
     
-    for i = 1, totalSnipers do
-        local pos = Vector(startPos.x, startPos.y + distanceStep * (i - 1), startPos.z)
-        local sniper = CreateUnitByName(
-            "sniper",
-            pos,
-            true,
-            nil,
-            nil,
-            DOTA_TEAM_BADGUYS
-        )
+    -- 创建一个炸弹人英雄
+    local techies = CreateUnitByName(
+        "npc_dota_hero_techies",
+        endPos,
+        true,
+        nil,
+        nil,
+        DOTA_TEAM_BADGUYS
+    )
+    
+    if techies then
+        -- 最大等级
+        HeroMaxLevel(techies)
+        techies:AddNewModifier(techies, nil, "modifier_kv_editor", {})
+        -- 查找地雷技能
+        local landMineAbility = techies:FindAbilityByName("techies_land_mines")
         
-        if sniper then
-            -- 移除狙击手原有的可穿戴装备
-            local wearable = sniper:FirstMoveChild()
-            while wearable ~= nil do
-                if wearable:GetClassname() == "dota_item_wearable" then
-                    local nextWearable = wearable:NextMovePeer()
-                    UTIL_Remove(wearable)
-                    wearable = nextWearable
-                else
-                    wearable = wearable:NextMovePeer()
-                end
-            end
+        if landMineAbility then
+            landMineAbility:SetLevel(4)
             
-            -- 创建可穿戴假人
-            local dummy = CreateUnitByName(
-                "npc_dota_hero_sniper_wearable_dummy",
-                sniper:GetAbsOrigin(),
-                false,
-                sniper,
-                sniper,
-                DOTA_TEAM_BADGUYS
-            )
-            
-            if dummy then
-                dummy:SetControllableByPlayer(-1, false)
-                dummy:FollowEntity(sniper, true)
-
-                dummy:AddNewModifier(dummy, nil, "modifier_wearable", {})
-                sniper.wearableDummy = dummy
+            -- 在每个位置放置地雷
+            for i = 1, totalMines do
+                local pos = Vector(startPos.x, startPos.y + distanceStep * (i - 1), startPos.z)
+                
+                -- 设置光标位置并释放技能
+                techies:SetCursorPosition(pos)
+                landMineAbility:OnSpellStart()
+                
+                -- 短暂延迟确保技能释放完成
+                Timers:CreateTimer(0.03, function()
+                    -- 继续下一个地雷
+                    return nil
+                end)
             end
-    
-            -- 升到7级
-            for i = 1, 6 do
-                sniper:HeroLevelUp(false)
-            end
-            
-            -- 设置技能等级
-            local headshot = sniper:FindAbilityByName("sniper_headshot")
-            local assassinate = sniper:FindAbilityByName("sniper_assassinate")
-    
-            if headshot then
-                headshot:SetLevel(4)
-            end
-            
-            if assassinate then
-                assassinate:SetLevel(1)
-            end
-    
-            sniper:SetForwardVector(Vector(-1, 0, 0))
-            sniper:AddNewModifier(sniper, nil, "modifier_rooted", {})
-            table.insert(hero_duel.sniperPool, sniper)
         end
+        
+        -- 隐藏技师英雄（可选）
+        --techies:AddNoDraw()
+        
+        -- 保存技师引用，以便后续使用
+        hero_duel.techiesHero = techies
     end
 end
 
 -- 死亡判定函数
-function Main:OnUnitKilled_SnipeHunt(killedUnit, args)
+function Main:OnUnitKilled_Mine_Challenge(killedUnit, args)
     local killedUnit = EntIndexToHScript(args.entindex_killed)
     
     if hero_duel.EndDuel then return end
@@ -315,35 +268,19 @@ function Main:OnUnitKilled_SnipeHunt(killedUnit, args)
     -- 玩家死亡判定
     if killedUnit:IsRealHero() and killedUnit:GetTeamNumber() == DOTA_TEAM_GOODGUYS then
         -- 计算剩余时间
-        local endTime = GameRules:GetGameTime()
-        local timeSpent = endTime - hero_duel.startTime
-        local remainingTime = self.limitTime - timeSpent
-        local formattedTime = string.format("%02d:%02d.%02d", 
-            math.floor(remainingTime / 60),
-            math.floor(remainingTime % 60),
-            math.floor((remainingTime * 100) % 100))
-        
-        -- 更新显示剩余时间和得分
-        CustomGameEventManager:Send_ServerToAllClients("update_score", {
-            ["剩余时间"] = formattedTime,
-            ["击杀数量"] = tostring(hero_duel.killCount),
-            ["最终得分"] = tostring(hero_duel.killCount)
-        })
-        
-        -- 向裁判发送消息
-        self:createLocalizedMessage(
-            "[LanPang_RECORD][",
-            self.currentMatchID,
-            "]",
-            "[挑战失败]击杀数:" .. hero_duel.killCount .. ",最终得分:" .. hero_duel.killCount
-        )
-
-        hero_duel.EndDuel = true
+        --先记下死亡的地点
+        --等待0.03秒
+        Timers:CreateTimer(0.03, function()
+            local deathPos = killedUnit:GetAbsOrigin()
+            killedUnit:RespawnHero(false, false)
+            killedUnit:RemoveModifierByName("modifier_fountain_invulnerability")
+            killedUnit:SetAbsOrigin(deathPos)
+        end)
         return
     end
 
-    -- 狙击手死亡判定部分的修改
-    if killedUnit:IsRealHero() and killedUnit:GetTeamNumber() == DOTA_TEAM_BADGUYS then
+    -- 地雷死亡判定
+    if killedUnit:GetUnitName() == "npc_dota_techies_land_mine" then
         hero_duel.killCount = hero_duel.killCount + 1
         local killer = EntIndexToHScript(args.entindex_attacker)
         local particle = ParticleManager:CreateParticle("particles/generic_gameplay/lasthit_coins_local.vpcf", PATTACH_ABSORIGIN, killedUnit)
@@ -429,8 +366,18 @@ function Main:OnUnitKilled_SnipeHunt(killedUnit, args)
     end
 end
 
-function Main:OnNPCSpawned_SnipeHunt(spawnedUnit, event)
-    -- 如果不是被排除的单位，则应用战场效果
+function Main:OnNPCSpawned_Mine_Challenge(spawnedUnit, event)
+    -- 检查是否是地雷单位
+    if spawnedUnit:GetUnitName() == "npc_dota_techies_land_mine" then
+        -- 将地雷添加到地雷池中
+        table.insert(hero_duel.minePool, spawnedUnit)
+        spawnedUnit:AddNewModifier(spawnedUnit, nil, "modifier_anti_invisible", {})
+        
+        -- 可以在这里对地雷进行额外设置
+        spawnedUnit:SetForwardVector(Vector(-1, 0, 0))
+    end
+    
+    -- 原有逻辑保留
     if not self:isExcludedUnit(spawnedUnit) then
         self:ApplyConfig(spawnedUnit, "BATTLEFIELD")
     end

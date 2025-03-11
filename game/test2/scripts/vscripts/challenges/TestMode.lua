@@ -52,7 +52,7 @@ function Main:Init_TestMode(event, playerID)
         ,
         BATTLEFIELD = {
             function(hero)
-                hero:AddNewModifier(hero, nil, "modifier_auto_elevation_small", {})
+                --hero:AddNewModifier(hero, nil, "modifier_auto_elevation_small", {})
             end,
         }
     }
@@ -278,6 +278,7 @@ end
 
 
 function Main:OnNPCSpawned_TestMode(spawnedUnit, event)
+    --过两秒打印单位身上的modifier名字
     if not self:isExcludedUnit(spawnedUnit) then
         self:ApplyConfig(spawnedUnit, "BATTLEFIELD")
     end

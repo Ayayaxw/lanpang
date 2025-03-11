@@ -1688,7 +1688,7 @@ HeroSkillConditions = {
         },
         ["tidehunter_dead_in_the_water"] = {
             function(self, caster, log)
-                return false
+                return true
             end
         },
     },
@@ -3855,6 +3855,11 @@ HeroSkillConditions = {
                 )
     
                 return self.Ally ~= nil
+            end
+        },
+        ["marci_special_delivery"] = {
+            function(self, caster, log)
+                return false
             end
         },
     

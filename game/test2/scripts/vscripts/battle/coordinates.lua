@@ -36,3 +36,6 @@ Main.Save_Mor = Vector(2403, 5441, 128)
 --打螺丝场地
 Main.Work_Work = Vector(-134, -7500, 128)
 Main.Work_Work_Camera = Vector(-130, -7500, 128)
+
+Main.SPAWN_POINT_FAR = Vector(-10000, 10000, 128)
+    

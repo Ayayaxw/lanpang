@@ -15,6 +15,9 @@ modifier_auto_elevation_small.excluded_modifiers = {
     ["modifier_pangolier_shield_crash_jump"] = true,
     ["modifier_phoenix_icarus_dive"] = true,
     ["modifier_monkey_king_fur_army_soldier"] = true,
+    ["modifier_dawnbreaker_solar_guardian_air_time"] = true,
+    ["modifier_dawnbreaker_solar_guardian_disable"] = true,
+    
 }
 
 function modifier_auto_elevation_small:OnCreated()

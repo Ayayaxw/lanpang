@@ -2,6 +2,8 @@ function Main:OnUnitKilled(args)
     -- 获取被杀死的单位的entindex
     local killedUnit = EntIndexToHScript(args.entindex_killed)
     
+
+
     -- 如果是米波克隆体，找到本体
     if killedUnit:GetUnitName() == "npc_dota_hero_meepo" and killedUnit:IsClone() then
         local mainMeepo = killedUnit:GetRealOwner()
@@ -40,6 +42,10 @@ function Main:OnUnitKilled(args)
             break
         end
     end
+    --打印死亡的单位名字
+    print("死亡的单位名字: " .. killedUnit:GetUnitName())
+
+
 
     if challengeName then
         -- 构建处理函数的名称

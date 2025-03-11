@@ -388,6 +388,7 @@ function Main:CreateTrueSightWards(teams)
             ward:AddNewModifier(ward, nil, "modifier_invisible", {})
             ward:AddNewModifier(ward, nil, "modifier_global_truesight", {})
             ward:AddNewModifier(ward, nil, "modifier_wearable", {})
+            ward:AddNoDraw()
         end
     end
 end

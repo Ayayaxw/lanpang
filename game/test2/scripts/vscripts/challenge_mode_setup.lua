@@ -39,6 +39,9 @@ require("challenges/award_ceremony")
 require("challenges/SoulOut")  
 require("challenges/SoulOut_Sniper")  
 require("challenges/Golem_100")  
+require("challenges/Mine_Challenge")
+require("challenges/Skill_Probability_100")
+
 
 Main.Challenges = {}
 Main.ModeConfig = {}
@@ -120,6 +123,13 @@ Main.GameModes = {
         name = "颁奖模式",
         menuConfig = {},
         category = "test"
+    },
+    {
+        id = "SoulOut",
+        code = 0012,
+        name = "灵魂出窍生存",
+        menuConfig = {"SelfHeroRow"},
+        category = "single"
     },
 
     -- Creep Challenge modes (1000-1999)
@@ -223,6 +233,7 @@ Main.GameModes = {
         menuConfig = {"SelfHeroRow", "OpponentHeroRow"},
         category = "multiplayer"
     },
+
     {
         id = "Level7Dazzle",
         code = 2014,
@@ -230,6 +241,22 @@ Main.GameModes = {
         menuConfig = {"SelfHeroRow", "OpponentHeroRow"},
         category = "multiplayer"
     },
+        --技能概率变为100%的模式
+    {
+        id = "Skill_Probability_100",
+        code = 2015,
+        name = "技能概率100%",
+        menuConfig = {"SelfHeroRow", "OpponentHeroRow"},
+        category = "multiplayer"
+    },
+
+
+    
+
+
+
+
+
 
     -- Single player modes (3000-3999)
     {
@@ -309,13 +336,7 @@ Main.GameModes = {
         menuConfig = {"SelfHeroRow"},
         category = "single"
     },
-    {
-        id = "SoulOut",
-        code = 3014,
-        name = "灵魂出窍生存",
-        menuConfig = {"SelfHeroRow"},
-        category = "single"
-    },
+
     {
         id = "SoulOut_Sniper",
         code = 3015,
@@ -327,6 +348,14 @@ Main.GameModes = {
         id = "Golem_100",
         code = 3016,
         name = "100地狱火",
+        menuConfig = {"SelfHeroRow"},
+        category = "single"
+    },
+    --踩雷挑战
+    {
+        id = "Mine_Challenge",
+        code = 3017,
+        name = "踩雷挑战",
         menuConfig = {"SelfHeroRow"},
         category = "single"
     }

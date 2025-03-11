@@ -75,6 +75,8 @@ function Precache(context)
     PrecacheResource("model", "models/heroes/ogre_magi/ogre_magi.vmdl", context)
     PrecacheResource("model", "models/heroes/undying/undying.vmdl", context)
     PrecacheResource("model", "models/heroes/ringmaster/ringmaster_unicycle.vmdl", context)
+    PrecacheResource("model", "models/heroes/tidehunter/tidehunter_anchor.vmdl", context)
+    PrecacheResource("model", "models/heroes/tidehunter/tidehunter_anchor_clamp.vmdl", context)
     local particleFolders = {
         "particles/units/heroes",  -- 英雄特效
     }

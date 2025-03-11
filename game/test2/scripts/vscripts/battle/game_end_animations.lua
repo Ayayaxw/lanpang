@@ -114,10 +114,9 @@ end
 
 function Main:gradual_slow_down(loserPos, winnerPos)--游戏结束时的慢动作聚焦
     SendToServerConsole("host_timescale 0.1")
-    
-    Timers:CreateTimer(0.1,function()
+
     CustomGameEventManager:Send_ServerToAllClients("stop_timer", {winnerPos})
-    end)
+
 
     Timers:CreateTimer(0.2,function()
         SendToServerConsole("host_timescale 1")

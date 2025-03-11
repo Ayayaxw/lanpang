@@ -86,3 +86,142 @@
   sound: "ui_generic_button_click";
   brightness: 1.5;
 }
+
+.SelectionLabel {
+  font-size: 14px;
+  color: #d5d5d5;
+  width: 100px;
+  vertical-align: middle;
+  margin-right: 10px;
+}
+
+.SelectionDropdown {
+  width: 150px;
+  height: 32px;
+  background-color: #1a1a25;
+  border: 1px solid #444450;
+  margin-right: 10px;
+}
+
+.CoordinateInput {
+  width: 70px;
+  height: 32px;
+  background-color: #1a1a25;
+  border: 1px solid #444450;
+  margin-right: 10px;
+  color: #d5d5d5;
+  font-size: 14px;
+  text-align: center;
+}
+
+.SelectedValueLabel {
+  font-size: 14px;
+  color: #ccaa66;
+  vertical-align: middle;
+  margin-left: 10px;
+}
+
+/* 英雄详情行样式 */
+.HeroDetailsRow {
+  flow-children: right;
+  width: 100%;
+  margin-top: 8px;
+  margin-bottom: 12px;
+  background-color: #1a1a2588;
+  padding: 8px;
+  border: 1px solid #444450;
+  border-radius: 4px;
+}
+
+/* 英雄图标样式 */
+.HeroIcon {
+
+  width: 64px;
+  height: 36px;
+    /*16:9*/
+  border: 2px solid #ccaa66;
+  margin-right: 12px;
+  overflow: clip;
+}
+
+/* 英雄信息面板样式 */
+.HeroInfoPanel {
+  flow-children: down;
+  vertical-align: middle;
+}
+
+/* 英雄名称样式 */
+.HeroName {
+  font-size: 18px;
+  color: #ffffff;
+  font-weight: bold;
+  margin-bottom: 4px;
+  text-shadow: 0px 0px 3px #000000;
+}
+
+/* 命石名称样式 */
+.FacetName {
+  font-size: 14px;
+  color: #ccaa66;
+  font-style: italic;
+}
+
+/* 选择部分的标题 */
+.SelectionSectionTitle {
+  font-size: 16px;
+  color: #aaaaaa;
+  margin-top: 8px;
+  margin-bottom: 4px;
+}
+
+.CustomTeamSelector {
+    z-index: 1000;
+    flow-children: none;
+    width: 140px;
+}
+
+.TeamSelectorBackdrop {
+    width: 100%;
+    height: 100%;
+    background-color: #00000001; /* 近乎透明的背景 */
+}
+
+.TeamSelectorBackground {
+    padding: 8px;
+    background-color: gradient( linear, 0% 0%, 0% 100%, from( #1a1a25 ), to( #0a0a0e ) );
+    border: 2px solid #444450;
+    box-shadow: #00000066 0px 0px 8px 0px;
+    flow-children: down;
+    z-index: 1001;
+    horizontal-align: left;
+    vertical-align: top;
+}
+
+.TeamOptionButton {
+    width: 120px;
+    height: 36px;
+    margin: 4px 0;
+    transition-property: brightness;
+    transition-duration: 0.2s;
+}
+
+.TeamOptionButton:hover {
+    brightness: 1.5;
+}
+
+.TeamOptionLabel {
+    font-size: 14px;
+    color: #ffffff;
+    horizontal-align: center;
+    vertical-align: middle;
+    text-shadow: 0px 0px 3px #000000;
+}
+
+.TeamSelectLabel {
+  font-size: 14px;
+  color: #ffffff;
+  horizontal-align: center;
+  vertical-align: middle;
+  width: 100%;
+  text-align: center;
+}

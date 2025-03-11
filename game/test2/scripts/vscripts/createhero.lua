@@ -122,8 +122,7 @@ end
 
 function CreateParentHeroesWithFacets(callback)
     local playerId = 0
-    local heroName = "npc_dota_hero_chen"
-    local spawnPosition = Vector(-10000, 10000, 128)
+    local spawnPosition = Main.largeSpawnCenter
     
     local teams = {
         DOTA_TEAM_GOODGUYS,
@@ -145,6 +144,9 @@ function CreateParentHeroesWithFacets(callback)
     -- 为每个team创建5个不同facet的英雄
     for _, team in ipairs(teams) do
         for facetId = 1, 5 do
+            -- 根据facetId决定英雄名称
+            local heroName = (facetId == 2) and "npc_dota_hero_ursa" or "npc_dota_hero_chen"
+            
             -- 计算偏移位置
             local offsetX = math.random(100, 200) * (math.random(0, 1) == 0 and 1 or -1)
             local offsetY = math.random(100, 200) * (math.random(0, 1) == 0 and 1 or -1)
@@ -155,7 +157,7 @@ function CreateParentHeroesWithFacets(callback)
             )
 
             -- 创建临时英雄
-            CreateHero(playerId, "npc_dota_hero_chen", facetId, tempPosition, team, true,
+            CreateHero(playerId, heroName, facetId, tempPosition, team, true,
                 function(tempHero)
                     if not tempHero then
                         print("错误：临时英雄创建失败")
@@ -166,7 +168,7 @@ function CreateParentHeroesWithFacets(callback)
                     table.insert(tempHeroes, {hero = tempHero, playerId = tempPlayerId})
 
                     -- 使用临时英雄创建目标英雄
-                    CreateHeroHeroChaos(playerId, heroName, facetId, spawnPosition, team, false, tempHero,
+                    CreateHeroHeroChaos(playerId, heroName, facetId, spawnPosition, team, true, tempHero,
                         function(realHero)
                             if not realHero then
                                 print("错误：目标英雄创建失败 " .. heroName)
@@ -174,7 +176,9 @@ function CreateParentHeroesWithFacets(callback)
                             end
 
                             -- 添加modifier_wearable
-                            realHero:AddNewModifier(realHero, nil, "modifier_wearable", {})
+                            --realHero:AddNewModifier(realHero, nil, "modifier_wearable", {})
+                            --添加无敌modifier
+                            realHero:AddNewModifier(realHero, nil, "modifier_invulnerable", {})
 
                             heroCount = heroCount + 1
                             
@@ -199,7 +203,7 @@ function CreateParentHeroesWithFacets(callback)
                                     end
 
                                     -- 等待所有断开连接完成后回调
-                                    Timers:CreateTimer(0.6, function()
+                                    Timers:CreateTimer(1, function()
                                         if callback then
                                             callback(allHeroes)
                                         end

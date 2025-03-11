@@ -58,9 +58,47 @@ function Main:Init_movie_mode(heroName, heroFacet,playerID, heroChineseName)
     -- CreateParentHeroesWithFacets(function(allHeroes)
     --DisplayHeroes()
     --SpawnAllNeutralCreeps1()
-    CreateOgreMagi()
+    --CreateOgreMagi()
+    CreateMaxLevelHeroes()
     -- end)
 end
+
+
+function CreateMaxLevelHeroes(axePosition, warlockPosition)
+    -- 创建斧王 (Axe)
+    CreateHero(0, "npc_dota_hero_wisp", 1, Main.largeSpawnCenter, DOTA_TEAM_GOODGUYS, true,
+        function(axeHero)
+            if not axeHero then
+                print("错误：斧王创建失败")
+                return
+            end
+            
+            -- 给斧王满级
+            HeroMaxLevel(axeHero)
+            
+            -- 给斧王添加10倍属性增幅器物品
+            axeHero:AddItemByName("item_attribute_amplifier_10x")
+            
+            print("斧王已创建并升至满级，添加了属性增幅器物品")
+            
+            -- 创建术士 (Warlock)
+            CreateHero(0, "npc_dota_hero_warlock", 1, Main.largeSpawnCenter, DOTA_TEAM_BADGUYS, true,
+                function(warlockHero)
+                    if not warlockHero then
+                        print("错误：术士创建失败")
+                        return
+                    end                    
+                    -- 给术士满级
+                    HeroMaxLevel(warlockHero)
+                    
+                    print("术士已创建并升至满级")
+                    
+
+                end)
+        end)
+end
+
+
 
 function CreateOgreMagi()
     CreateHero(

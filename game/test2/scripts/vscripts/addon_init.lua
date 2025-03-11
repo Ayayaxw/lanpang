@@ -41,3 +41,7 @@ LinkLuaModifier("modifier_auto_bullwhip", "modifier/modifier_auto_bullwhip.lua",
 LinkLuaModifier("modifier_reduced_ability_cost", "modifier/modifier_reduced_ability_cost.lua", LUA_MODIFIER_MOTION_NONE)
 LinkLuaModifier("modifier_custom_unicycle", "modifier/modifier_custom_unicycle.lua", LUA_MODIFIER_MOTION_NONE)
 LinkLuaModifier("modifier_aoe_bonus_percentage", "modifier/modifier_aoe_bonus_percentage.lua", LUA_MODIFIER_MOTION_NONE)
+LinkLuaModifier("modifier_damage_reduction_dynamic", "modifier/modifier_damage_reduction_dynamic.lua", LUA_MODIFIER_MOTION_NONE)
+LinkLuaModifier("modifier_damage_amplification", "modifier/modifier_damage_amplification.lua", LUA_MODIFIER_MOTION_NONE)
+LinkLuaModifier("modifier_health_bonus_percentage", "modifier/modifier_health_bonus_percentage.lua", LUA_MODIFIER_MOTION_NONE)
+LinkLuaModifier("modifier_attack_damage_percentage", "modifier/modifier_attack_damage_percentage.lua", LUA_MODIFIER_MOTION_NONE)

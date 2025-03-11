@@ -1,4 +1,3 @@
-
 -- 发送沙盒功能数据到前端
 function Main:SendSandboxFunctionsData()
     local sandboxFunctions = {}
@@ -53,15 +52,19 @@ function Main:HandleSandboxEvent(data)
         -- 调用对应的功能函数
         local functionName = targetFunction.functionName
         if Main[functionName] then
-            -- 根据功能是否需要额外参数调用不同的方法
+            -- 新增参数处理
+            local teamId = data.teamId or DOTA_TEAM_GOODGUYS
+            local position = Vector(tonumber(data.positionX) or 0, 
+                                   tonumber(data.positionY) or 0, 
+                                   tonumber(data.positionZ) or 0)
+            
+            -- 根据功能类型传递参数
             if targetFunction.requiresSelection and targetFunction.selectionType == "hero" then
-                -- 对于需要选择英雄的功能，从data中提取英雄ID和facetID
                 local heroId = data.heroId
                 local facetId = data.facetId
-                Main[functionName](Main, playerId, heroId, facetId)
+                Main[functionName](Main, playerId, heroId, facetId, teamId, position)  -- 新增参数
             else
-                -- 对于普通功能，直接调用
-                Main[functionName](Main, playerId)
+                Main[functionName](Main, playerId, teamId, position)  -- 新增参数
             end
         else
             print("Function not found: " .. functionName)
@@ -187,26 +190,24 @@ Main.SandboxFunctions = {
 
 
 -- 英雄操作类功能
-function Main:CreateHero_Sandbox(playerId, heroId, facetId)
-    print("Creating hero for player " .. playerId .. ", heroId: " .. (heroId or "none"))
+function Main:CreateHero_Sandbox(playerId, heroId, facetId, teamId, position)
+    print(string.format("Creating hero for player %d, heroId: %s, team: %d, position: (%d,%d,%d)",
+                      playerId, tostring(heroId), teamId, position.x, position.y, position.z))
     
     if heroId then
-        -- 设置默认参数
-        local spawnPosition = Vector(0, 0, 0)
-        local team = DOTA_TEAM_GOODGUYS
+        -- 使用前端传递的参数
+        local spawnPosition = position
         local isControllableByPlayer = true
         
-        -- 从heroId获取英雄名称
         local heroName = DOTAGameManager:GetHeroUnitNameByID(heroId)
         
         if heroName then
-            -- 调用新的CreateHero函数
             CreateHero(
                 playerId,
                 heroName,
-                facetId or 0, -- 如果facetId为nil则使用0
+                facetId or 0,
                 spawnPosition,
-                team,
+                teamId,  -- 使用前端选择的队伍
                 isControllableByPlayer,
                 function(hero)
                     -- 可以在这里添加额外的英雄设置
@@ -216,21 +217,152 @@ function Main:CreateHero_Sandbox(playerId, heroId, facetId)
             print("Error: Invalid heroId")
         end
     else
-        -- 如果没有指定英雄ID，可以设置一个默认英雄
         print("Warning: No hero specified")
     end
 end
 
+-- 英雄删除函数修改
 function Main:DeleteHero(playerId)
-    print("Deleting hero for player " .. playerId)
-    -- 实现删除英雄的代码
+    print("尝试删除玩家 " .. playerId .. " 选中的英雄")
+    
+    -- 直接获取玩家选择的英雄
+    local selectedHero = PlayerResource:GetSelectedHeroEntity(playerId)
+    
+    if selectedHero then
+        -- 获取英雄位置以显示特效
+        local heroPos = selectedHero:GetAbsOrigin()
+        local particleID = ParticleManager:CreateParticle("particles/units/heroes/hero_invoker/invoker_sun_strike.vpcf", PATTACH_CUSTOMORIGIN, nil)
+        ParticleManager:SetParticleControl(particleID, 0, heroPos)
+        ParticleManager:SetParticleControl(particleID, 1, Vector(100, 0, 0))
+        ParticleManager:ReleaseParticleIndex(particleID)
+        
+        -- 播放音效
+        EmitSoundOnLocationWithCaster(heroPos, "Hero_Invoker.SunStrike.Ignite", selectedHero)
+        
+        -- 获取英雄所属玩家ID
+        local heroOwner = selectedHero:GetPlayerOwnerID()
+        
+        print("删除英雄: " .. selectedHero:GetUnitName())
+        
+        -- 检查英雄是否有关联的玩家
+        if heroOwner ~= -1 and heroOwner ~= 0 and PlayerResource:IsValidPlayerID(heroOwner) then
+            -- 有关联玩家，断开玩家连接
+            print("英雄有关联玩家 " .. heroOwner .. "，断开玩家连接")
+            DisconnectClient(heroOwner, true)
+        else
+            -- 没有关联玩家，直接删除英雄
+            print("英雄没有关联玩家，直接删除")
+            UTIL_Remove(selectedHero)
+        end
+    else
+        print("未选中英雄单位")
+    end
 end
 
+-- 英雄升级函数修复
 function Main:LevelUpHero(playerId)
-    print("Leveling up hero for player " .. playerId)
-    -- 实现升级英雄的代码
-    -- 例如：local hero = PlayerResource:GetSelectedHeroEntity(playerId)
-    -- if hero then hero:HeroLevelUp(true) end
+    print("尝试升级玩家 " .. playerId .. " 选中的英雄")
+    
+    -- 直接获取玩家选择的英雄
+    local selectedHero = PlayerResource:GetSelectedHeroEntity(0)    
+    self:PrintAllPlayersAndHeroes()
+    
+    if selectedHero then
+        print("升级英雄: " .. selectedHero:GetUnitName())
+        
+        HeroMaxLevel(selectedHero)
+        
+        -- 获取英雄位置以显示特效
+        local heroPos = selectedHero:GetAbsOrigin()
+        local particleID = ParticleManager:CreateParticle("particles/units/heroes/hero_invoker/invoker_sun_strike.vpcf", PATTACH_CUSTOMORIGIN, nil)
+        ParticleManager:SetParticleControl(particleID, 0, heroPos)
+        ParticleManager:SetParticleControl(particleID, 1, Vector(100, 0, 0))
+        ParticleManager:ReleaseParticleIndex(particleID)
+        
+        -- 播放音效
+        EmitSoundOnLocationWithCaster(heroPos, "Hero_Invoker.SunStrike.Ignite", selectedHero)
+        
+        print("英雄已升级到 " .. selectedHero:GetLevel() .. " 级")
+    else
+        print("未选中英雄单位")
+    end
+end
+
+function Main:PrintAllPlayersAndHeroes()
+    print("打印所有玩家及其选中英雄信息：")
+    print("----------------------------------------------")
+    
+    -- Dota 2默认最多支持10个玩家ID (0-9)
+    local maxPlayers = 10
+    local foundPlayers = false
+    
+    for playerId = 0, maxPlayers - 1 do
+        if PlayerResource:IsValidPlayerID(playerId) then
+            foundPlayers = true
+            
+            -- 获取玩家名称
+            local playerName = PlayerResource:GetPlayerName(playerId)
+            
+            -- 获取玩家队伍
+            local teamId = PlayerResource:GetTeam(playerId)
+            local teamName = "未知"
+            if teamId == DOTA_TEAM_GOODGUYS then
+                teamName = "天辉"
+            elseif teamId == DOTA_TEAM_BADGUYS then
+                teamName = "夜魇"
+            elseif teamId == DOTA_TEAM_CUSTOM_1 then
+                teamName = "自定义1"
+            elseif teamId == DOTA_TEAM_CUSTOM_2 then
+                teamName = "自定义2"
+            elseif teamId == DOTA_TEAM_CUSTOM_3 then
+                teamName = "自定义3"
+            elseif teamId == DOTA_TEAM_CUSTOM_4 then
+                teamName = "自定义4"
+            elseif teamId == DOTA_TEAM_CUSTOM_5 then
+                teamName = "自定义5"
+            elseif teamId == DOTA_TEAM_CUSTOM_6 then
+                teamName = "自定义6"
+            elseif teamId == DOTA_TEAM_CUSTOM_7 then
+                teamName = "自定义7"
+            elseif teamId == DOTA_TEAM_CUSTOM_8 then
+                teamName = "自定义8"
+            elseif teamId == DOTA_TEAM_NEUTRALS then
+                teamName = "中立"
+            end
+            
+            -- 检查是否为AI玩家
+            local isAI = PlayerResource:IsFakeClient(playerId)
+            local playerType = isAI and "AI" or "玩家"
+            
+            print("玩家ID: " .. playerId .. " | 名称: " .. playerName .. " | 类型: " .. playerType .. " | 队伍: " .. teamName)
+            
+            -- 获取玩家选择的英雄
+            local selectedHero = PlayerResource:GetSelectedHeroEntity(playerId)
+            
+            if selectedHero then
+                local heroName = selectedHero:GetUnitName()
+                local heroLevel = selectedHero:GetLevel()
+                local heroHealth = selectedHero:GetHealth() .. "/" .. selectedHero:GetMaxHealth()
+                local heroMana = selectedHero:GetMana() .. "/" .. selectedHero:GetMaxMana()
+                
+                print("  选中英雄: " .. heroName .. " | 等级: " .. heroLevel .. " | 生命值: " .. heroHealth .. " | 魔法值: " .. heroMana)
+                
+                -- 获取英雄所属玩家ID
+                local heroOwner = selectedHero:GetPlayerOwnerID()
+                if heroOwner ~= playerId then
+                    print("  警告：此英雄实际归属于玩家ID: " .. heroOwner)
+                end
+            else
+                print("  未选中英雄")
+            end
+            
+            print("----------------------------------------------")
+        end
+    end
+    
+    if not foundPlayers then
+        print("没有找到任何有效玩家")
+    end
 end
 
 function Main:GetAllSkills(playerId)

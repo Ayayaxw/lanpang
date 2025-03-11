@@ -618,35 +618,37 @@
     function onHeroSelected(heroId, facetId) {
       // $.Msg("接收到的英雄 ID：", heroId);
       // $.Msg("接收到的 Facet ID：", facetId);
-    
+      if (GameEvents.GameSetup.currentAction === 'SandboxHeroSelect') {
+        return; 
+    }
       const action = GameEvents.GameSetup.currentAction;
       
       // 添加对沙盒模式英雄选择的处理
-      if (action === 'SandboxHeroSelect') {
-          // 从GameSetup中获取之前保存的功能ID
-          const functionId = GameEvents.GameSetup.sandboxFunctionId;
+      // if (action === 'SandboxHeroSelect') {
+      //     // 从GameSetup中获取之前保存的功能ID
+      //     const functionId = GameEvents.GameSetup.sandboxFunctionId;
           
-          // 发送功能执行请求，包含选中的英雄信息
-          if (functionId) {
-              GameEvents.SendCustomGameEventToServer("sandbox_custom_event", {
-                  functionId: functionId,
-                  heroId: heroId,
-                  facetId: facetId
-              });
+      //     // 发送功能执行请求，包含选中的英雄信息
+      //     if (functionId) {
+      //         GameEvents.SendCustomGameEventToServer("sandbox_custom_event", {
+      //             functionId: functionId,
+      //             heroId: heroId,
+      //             facetId: facetId
+      //         });
               
-              $.Msg("执行沙盒功能: " + functionId + "，英雄ID: " + heroId);
+      //         $.Msg("执行沙盒功能: " + functionId + "，英雄ID: " + heroId);
               
-              // 清除功能ID
-              GameEvents.GameSetup.sandboxFunctionId = null;
-          }
+      //         // 清除功能ID
+      //         GameEvents.GameSetup.sandboxFunctionId = null;
+      //     }
           
-          // 最小化英雄选择面板
-          if (fcHeroPickPanel) {
-              fcHeroPickPanel.AddClass('minimized');
-          }
+      //     // 最小化英雄选择面板
+      //     if (fcHeroPickPanel) {
+      //         fcHeroPickPanel.AddClass('minimized');
+      //     }
           
-          return; // 处理完沙盒操作后返回
-      }
+      //     return; // 处理完沙盒操作后返回
+      // }
       if (action === 'ModifySelfHero') {
         selfHero.heroId = heroId;
         selfHero.facetId = facetId;

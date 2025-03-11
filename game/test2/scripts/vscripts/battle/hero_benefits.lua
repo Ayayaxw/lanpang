@@ -321,7 +321,32 @@ function Main:HeroBenefits(heroName, hero, overallStrategy, heroStrategy)
             createUnitAndCastSpell("npc_dota_neutral_centaur_khan")
         end
     end
+    if heroName == "npc_dota_hero_nevermore" then
+        local necromasteryAbility = hero:FindAbilityByName("nevermore_necromastery")
+        if necromasteryAbility and necromasteryAbility:GetLevel() > 0 then
+            local maxSouls = 20
+            -- 检查是否有阿哈利姆神杖效果
+            if hero:HasScepter() then
+                maxSouls = 25
+            end
+            hero:SetModifierStackCount("modifier_nevermore_necromastery", hero, maxSouls)
+        else
+            print("错误：未能找到影魔的灵魂积累技能或技能未升级！")
+        end
+    end
 
+    if heroName == "npc_dota_hero_skeleton_king" then
+        local necromasteryAbility = hero:FindAbilityByName("skeleton_king_bone_guard")
+        if necromasteryAbility and necromasteryAbility:GetLevel() > 0 then
+            local abilityLevel = necromasteryAbility:GetLevel()
+            local maxSouls = 2 + (math.max(abilityLevel - 1, 0) * 2)
+            
+            hero:SetModifierStackCount("modifier_skeleton_king_bone_guard", hero, maxSouls)
+            print("找到骷髅王技能了, 当前技能等级" .. abilityLevel .. "层数" .. maxSouls)
+        else
+            print("错误：未能找到骷髅王白骨护卫或技能未升级！")
+        end
+    end
 
 
     if heroName == "npc_dota_hero_chen" then
@@ -486,7 +511,7 @@ function Main:HeroBenefits(heroName, hero, overallStrategy, heroStrategy)
                     if string.match(unit:GetUnitName(), "npc_dota_lone_druid_bear") then
                         print("找到了熊!")
                         -- 先清空熊的所有装备
-                        for itemSlot = 0, 8 do
+                        for itemSlot = 0, 16 do
                             local bearItem = unit:GetItemInSlot(itemSlot)
                             if bearItem then
                                 unit:RemoveItem(bearItem)
@@ -494,7 +519,7 @@ function Main:HeroBenefits(heroName, hero, overallStrategy, heroStrategy)
                         end
                         
                         -- 复制英雄的装备给熊
-                        for itemSlot = 0, 8 do
+                        for itemSlot = 0, 16 do
                             local item = hero:GetItemInSlot(itemSlot)
                             if item then
                                 local itemName = item:GetName()
@@ -626,6 +651,19 @@ function Main:HeroBenefits(heroName, hero, overallStrategy, heroStrategy)
             hero:SetModifierStackCount("modifier_lion_finger_of_death_kill_counter", hero, stacks)
         end
     end
+
+    if heroName == "npc_dota_hero_marci" then
+        --给他创建一个信使并且给信使狂战斧
+        --跟他一个team
+        local heroTeam = hero:GetTeamNumber()
+        local courier = CreateUnitByName("npc_dota_courier", hero:GetAbsOrigin() + Vector(9999, 9999, 0), true, nil, nil, heroTeam)
+        --允许玩家0控制
+        courier:SetControllableByPlayer(0, true)
+        --狂战斧
+        courier:AddItemByName("item_bfury")
+
+    end
+
     if heroName == "npc_dota_hero_pudge" then
         local heroLevel = hero:GetLevel()
         local stacks = math.floor(heroLevel / 3)
@@ -777,13 +815,13 @@ function Main:HeroPreparation(heroName, hero, overallStrategy, heroStrategy)
                 },
                 morphling_morph_agi = {
                     AbilityValues = {
-                        points_per_tick = 2,
+                        points_per_tick = 1,
                         morph_cooldown = 0.001    
                     },
                 },
                 morphling_morph_str = {
                     AbilityValues = {
-                        points_per_tick = 2,
+                        points_per_tick = 1,
                         morph_cooldown = 0.001    
                     },
                 },
@@ -950,30 +988,5 @@ function Main:HeroPreparation(heroName, hero, overallStrategy, heroStrategy)
         end
     end
 
-    if heroName == "npc_dota_hero_nevermore" then
-        local necromasteryAbility = hero:FindAbilityByName("nevermore_necromastery")
-        if necromasteryAbility and necromasteryAbility:GetLevel() > 0 then
-            local maxSouls = 20
-            -- 检查是否有阿哈利姆神杖效果
-            if hero:HasScepter() then
-                maxSouls = 25
-            end
-            hero:SetModifierStackCount("modifier_nevermore_necromastery", hero, maxSouls)
-        else
-            print("错误：未能找到影魔的灵魂积累技能或技能未升级！")
-        end
-    end
 
-    if heroName == "npc_dota_hero_skeleton_king" then
-        local necromasteryAbility = hero:FindAbilityByName("skeleton_king_bone_guard")
-        if necromasteryAbility and necromasteryAbility:GetLevel() > 0 then
-            local abilityLevel = necromasteryAbility:GetLevel()
-            local maxSouls = 2 + (math.max(abilityLevel - 1, 0) * 2)
-            
-            hero:SetModifierStackCount("modifier_skeleton_king_bone_guard", hero, maxSouls)
-            print("找到骷髅王技能了, 当前技能等级" .. abilityLevel .. "层数" .. maxSouls)
-        else
-            print("错误：未能找到骷髅王白骨护卫或技能未升级！")
-        end
-    end
 end

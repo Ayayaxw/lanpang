@@ -13,7 +13,8 @@ end
 modifier_auto_elevation_small.excluded_modifiers = {
     ["modifier_ursa_earthshock_move"] = true,
     ["modifier_pangolier_shield_crash_jump"] = true,
-    ["modifier_phoenix_icarus_dive"] = true
+    ["modifier_phoenix_icarus_dive"] = true,
+    ["modifier_monkey_king_fur_army_soldier"] = true,
 }
 
 function modifier_auto_elevation_small:OnCreated()
@@ -38,7 +39,7 @@ function modifier_auto_elevation_small:FindHigherGround(currentPos, initialRadiu
                 if testPos.y < -2100 then
                     local height = GetGroundHeight(testPos, self:GetParent())
                     
-                    if height >= 128 then
+                    if height >= 128 and height < 200 then
                         local distance = (Vector(currentPos.x, currentPos.y, 0) - Vector(testPos.x, testPos.y, 0)):Length2D()
                         if distance < closestDistance then
                             closestDistance = distance
@@ -70,7 +71,7 @@ function modifier_auto_elevation_small:FindHigherGround(currentPos, initialRadiu
                 if testPos.y < -2100 then
                     local height = GetGroundHeight(testPos, self:GetParent())
                     
-                    if height >= 128 then
+                    if height >= 128 and height < 200 then
                         local distance = (startPos - Vector(testPos.x, testPos.y, 0)):Length2D()
                         if distance < closestDistance then
                             closestDistance = distance

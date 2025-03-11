@@ -401,7 +401,16 @@
             if (abilityIcon.paneltype === "DOTAAbilityImage") {
                 abilityIcon.abilityname = data.ability_name;
                 abilityIcon.AddClass("AbilityDamage_AbilityImageFull");
-                logMessage("已更新技能图标: " + data.ability_name);
+                
+                // 添加tooltip功能
+                abilityIcon.SetPanelEvent("onmouseover", function() {
+                    $.DispatchEvent("DOTAShowAbilityTooltip", abilityIcon, data.ability_name);
+                });
+                abilityIcon.SetPanelEvent("onmouseout", function() {
+                    $.DispatchEvent("DOTAHideAbilityTooltip");
+                });
+                
+                logMessage("已更新技能图标: " + data.ability_name + " 并添加tooltip功能");
             } else {
                 // 需要先清除现有内容
                 abilityIcon.RemoveAndDeleteChildren();
@@ -409,8 +418,16 @@
                 const abilityImage = $.CreatePanel('DOTAAbilityImage', abilityIcon, '');
                 abilityImage.abilityname = data.ability_name;
                 abilityImage.AddClass("AbilityDamage_AbilityImageFull");
-
-                logMessage("已创建并设置技能图标: " + data.ability_name);
+                
+                // 添加tooltip功能
+                abilityImage.SetPanelEvent("onmouseover", function() {
+                    $.DispatchEvent("DOTAShowAbilityTooltip", abilityImage, data.ability_name);
+                });
+                abilityImage.SetPanelEvent("onmouseout", function() {
+                    $.DispatchEvent("DOTAHideAbilityTooltip");
+                });
+        
+                logMessage("已创建并设置技能图标: " + data.ability_name + " 并添加tooltip功能");
             }
         } else {
             logMessage("错误: 无法找到技能图标面板");
@@ -425,7 +442,6 @@
      * 更新伤害数值
      * @param {Object} data - 包含伤害信息的数据对象
      */
-
     function OnUpdateDamage(data) {
         logMessage("收到伤害更新事件");
         
@@ -434,7 +450,6 @@
             return;
         }
     
-
         // 保存目标值
         const newTarget = data.damage;
         
@@ -449,10 +464,17 @@
             logMessage("取消进行中的动画");
         }
     
-        // 计算增量（基于当前显示值）
+        // 计算增量（判断面板是否可见，如果不可见则从0开始计算）
         const damageIncrease = $("#AbilityDamageIncrease");
         if (damageIncrease && damageIncrease.IsValid()) {
-            const increase = targetDamage - currentDisplayValue;
+            // 检查面板是否可见
+            const isPanelVisible = abilityDamagePanel && abilityDamagePanel.IsValid() && 
+                                  abilityDamagePanel.BHasClass("Visible");
+            
+            // 如果面板不可见，则从0开始计算差值
+            const baseValue = isPanelVisible ? currentDisplayValue : 0;
+            const increase = Math.abs(targetDamage - baseValue); // 使用绝对值确保增量为正
+            
             damageIncrease.text = "+" + increase;
             damageIncrease.AddClass("Show");
             
@@ -460,14 +482,20 @@
             $.Schedule(1.7, () => damageIncrease.RemoveClass("Show"));
         }
     
+        // 如果面板当前不可见，立即将currentDisplayValue设为0以便从0开始动画
+        if (abilityDamagePanel && abilityDamagePanel.IsValid() && 
+            !abilityDamagePanel.BHasClass("Visible")) {
+            currentDisplayValue = 0;
+            logMessage("面板从不可见状态开始显示，重置显示值为0");
+        }
+    
         // 开始新的动画
         startNumberAnimation();
         
-        // 显示面板并重置计时器
+        // 显示面板并重置计时器（立即显示，不延迟）
         showDamagePanel();
     }
 
-    
     function startNumberAnimation() {
         const damageValue = $("#AbilityDamageValue");
         if (!damageValue || !damageValue.IsValid()) return;
@@ -507,7 +535,6 @@
         animationHandle = $.Schedule(0.01, update);
     }
 
-    
     /**
      * 数值动画函数
      * @param {Object} element - 要动画的元素

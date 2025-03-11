@@ -172,51 +172,55 @@
     
     
         // 隐藏 HUD 元素
-        var hud = GetHud();
-        var panelsToToggle = [
-            "ButtonBar",
-            "lower_hud"
-        ];
-        for (var panel of panelsToToggle) {
-            var testPanel = hud.FindChildTraverse(panel);
-            if (testPanel) {
-                testPanel.visible = false;
+        $.Schedule(1, function() {
+            // 隐藏 HUD 元素
+            var hud = GetHud();
+            var panelsToToggle = [
+                "ButtonBar",
+                "lower_hud"
+            ];
+            for (var panel of panelsToToggle) {
+                var testPanel = hud.FindChildTraverse(panel);
+                if (testPanel) {
+                    testPanel.visible = false;
+                }
             }
-        }
-    
-        // 隐藏技能面板
-        const leftPanel = $('#LeftHeroAbilities');
-        const rightPanel = $('#RightHeroAbilities');
+
+            // 隐藏技能面板
+            const leftPanel = $('#LeftHeroAbilities');
+            const rightPanel = $('#RightHeroAbilities');
+            
+            if (leftPanel) {
+                leftPanel.AddClass('AbilitiesContainerhidden');
+                $.Msg("左方技能面板已隐藏");
+            }
+            
+            if (rightPanel) {
+                rightPanel.AddClass('AbilitiesContainerhidden');
+                $.Msg("右方技能面板已隐藏");
+            }
+                    // 处理相机移动
+            if (event && event["1"]) {
+                var positionString = event["1"];
+                var coordinates = positionString.split(' ');
         
-        if (leftPanel) {
-            leftPanel.AddClass('AbilitiesContainerhidden');
-            $.Msg("左方技能面板已隐藏");
-        }
-        
-        if (rightPanel) {
-            rightPanel.AddClass('AbilitiesContainerhidden');
-            $.Msg("右方技能面板已隐藏");
-        }
-    
-        // 处理相机移动
-        if (event && event["1"]) {
-            var positionString = event["1"];
-            var coordinates = positionString.split(' ');
-    
-            if (coordinates.length === 3) {
-                var jsPosition = coordinates.map(Number);
-                
-                if (!jsPosition.some(isNaN)) {
-                    cinematicCameraMove(jsPosition);
+                if (coordinates.length === 3) {
+                    var jsPosition = coordinates.map(Number);
+                    
+                    if (!jsPosition.some(isNaN)) {
+                        cinematicCameraMove(jsPosition);
+                    } else {
+                        $.Msg("无效的坐标值:", positionString);
+                    }
                 } else {
-                    $.Msg("无效的坐标值:", positionString);
+                    $.Msg("坐标数量不正确:", positionString);
                 }
             } else {
-                $.Msg("坐标数量不正确:", positionString);
+                $.Msg("事件中没有收到位置数据:", event);
             }
-        } else {
-            $.Msg("事件中没有收到位置数据:", event);
-        }
+        });
+    
+
     });
 
     GameEvents.Subscribe("move_to_winner", function(event) {

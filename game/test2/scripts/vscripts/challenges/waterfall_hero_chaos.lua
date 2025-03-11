@@ -1,9 +1,8 @@
-
 function Main:Init_waterfall_hero_chaos(event, playerID)
     -- 初始化全局变量
     self.showTeamPanel = true  
     self.isTestMode = false
-    self.heroesPerTeam = 1  -- 每个队伍初始传送的英雄数量，作为独立参数
+    self.heroesPerTeam = 3  -- 每个队伍初始传送的英雄数量，作为独立参数
     self.preCreatePerTeam = 3 -- 每个队伍初始创建的英雄数量，作为独立参数
     self.currentDeployIndex = 1  -- 当前部署的英雄索引
 
@@ -32,7 +31,7 @@ function Main:Init_waterfall_hero_chaos(event, playerID)
     }
 
     -- 设置当前使用的队伍配置类型
-    self.teamConfig = "ATTRIBUTE"  -- 可以是 "ATTRIBUTE" 或 "TOURNAMENT" 或其他配置
+    self.teamConfig = "TOURNAMENT"  -- 可以是 "ATTRIBUTE" 或 "TOURNAMENT" 或其他配置
     
     -- 设置实际使用的队伍类型
     self.teamTypes = TEAM_CONFIGS[self.teamConfig]
@@ -63,9 +62,8 @@ function Main:Init_waterfall_hero_chaos(event, playerID)
     end
 
     self.heroFacets = {
-        npc_dota_hero_faceless_void = 5,  -- 虚空假面
-        npc_dota_hero_life_stealer = 2,   -- 噬魂鬼
-        npc_dota_hero_mirana = 2,
+        npc_dota_hero_faceless_void = 3,  -- 虚空假面
+        npc_dota_hero_life_stealer = 5,   -- 噬魂鬼
         npc_dota_hero_windrunner = 3,
         npc_dota_hero_earthshaker = 2,
         npc_dota_hero_tinker = 2,
@@ -81,7 +79,7 @@ function Main:Init_waterfall_hero_chaos(event, playerID)
         npc_dota_hero_mirana = 3,
         npc_dota_hero_magnataur = 4,
         npc_dota_hero_invoker = 5,
-        npc_dota_hero_Jakiro = 4,
+        npc_dota_hero_jakiro = 4,
         npc_dota_hero_dazzle = 2,
         npc_dota_hero_arc_warden = 3,
         npc_dota_hero_troll_warlord= 2,
@@ -126,22 +124,6 @@ function Main:SetupWaterFallCombatBuffs(hero)
     hero:AddNewModifier(hero, nil, "modifier_item_aghanims_shard", {})
     hero:AddNewModifier(hero, nil, "modifier_item_ultimate_scepter_consumed", {})
     hero:AddNewModifier(hero, nil, "modifier_auto_elevation_waterfall", {})
-
-    -- 添加并升级技能
-    hero:AddAbility("dazzle_nothl_projection")
-    local ability = hero:FindAbilityByName("dazzle_nothl_projection")
-    if ability then
-        ability:SetLevel(3)
-        
-        -- 计算前方500码的位置
-        local forward = hero:GetForwardVector()
-        local origin = hero:GetAbsOrigin()
-        local targetPos = origin + forward * 500
-        
-        -- 设置目标位置并释放技能
-        hero:SetCursorPosition(targetPos)
-        ability:OnSpellStart()
-    end
 
     -- 查找英雄type
     local heroName = hero:GetUnitName()
@@ -224,15 +206,50 @@ function Main:CleanupWaterFallHeroAndSummons(heroType, heroIndex, callback)
     heroData.entity = nil
 
     Timers:CreateTimer(10, function()
-        hero:SetAbsOrigin(Vector(10000, 10000, 0))
+        local targetPos = Vector(10000, 10000, 0)
+        hero:SetAbsOrigin(targetPos)
+        
+        -- 使用FindUnitsInRadius搜索整个地图的单位
+        local allUnits = FindUnitsInRadius(
+            hero:GetTeamNumber(),
+            Main.waterFall_Center,
+            nil,
+            5000, -- 足够大的半径以覆盖整个地图
+            DOTA_UNIT_TARGET_TEAM_BOTH,
+            DOTA_UNIT_TARGET_ALL,
+            --所有单位
+            DOTA_UNIT_TARGET_FLAG_NONE,
+            
+            FIND_ANY_ORDER,
+            false
+        )
+        
+        local cleanedCount = 0
+        for _, unit in pairs(allUnits) do
+            if unit and not unit:IsNull() and unit ~= hero and unit:IsAlive() then
+                local owner = unit:GetRealOwner()
+                if owner == hero then
+                    unit:SetAbsOrigin(targetPos)
+                    unit:ForceKill(false)
+                    cleanedCount = cleanedCount + 1
+                end
+            end
+        end
+        
+        print(string.format("[Arena] 已清理 %d 个属于英雄 %s 的召唤物", 
+            cleanedCount, hero:GetUnitName()))
     end)
-    -- 20秒后移除英雄实体
+
     Timers:CreateTimer(60, function()
         if not hero:IsNull() then
             print(string.format("正在准备清理: %s (EntityIndex: %d)", 
                 hero:GetName(),           -- 英雄名字
                 hero:GetEntityIndex()     -- 实体索引
             ))
+            --如果单位死了，先复活再移除
+            if not hero:IsAlive() then
+                hero:RespawnHero(false, false)
+            end
             UTIL_Remove(hero)
         end
     end)
@@ -329,24 +346,24 @@ function Main:OnUnitKilled_waterfall_hero_chaos(killedUnit, args)
             -- 在更新完被击杀者状态后，再处理击杀者数据和胜利检查
             if realKiller and killerType and killerData and killerTeamData then
                 --self:KamiBlessing(realKiller)
-                -- local newHealth = realKiller:GetHealth() + realKiller:GetMaxHealth() / 3
-                -- if newHealth > realKiller:GetMaxHealth() then
-                --     newHealth = realKiller:GetMaxHealth()
-                -- end
+                local newHealth = realKiller:GetHealth() + realKiller:GetMaxHealth() / 3
+                if newHealth > realKiller:GetMaxHealth() then
+                    newHealth = realKiller:GetMaxHealth()
+                end
                 
-                -- local newMana = realKiller:GetMana() + realKiller:GetMaxMana()  / 3
-                -- if newMana > realKiller:GetMaxMana() then
-                --     newMana = realKiller:GetMaxMana()
-                -- end
+                local newMana = realKiller:GetMana() + realKiller:GetMaxMana()  / 3
+                if newMana > realKiller:GetMaxMana() then
+                    newMana = realKiller:GetMaxMana()
+                end
                 
-                -- realKiller:SetHealth(newHealth)
-                -- realKiller:SetMana(newMana)
+                realKiller:SetHealth(newHealth)
+                realKiller:SetMana(newMana)
                 
 
-                -- local particle = ParticleManager:CreateParticle("particles/econ/items/omniknight/hammer_ti6_immortal/omniknight_purification_ti6_immortal.vpcf", PATTACH_ABSORIGIN_FOLLOW, realKiller)
-                -- ParticleManager:SetParticleControl(particle, 0, realKiller:GetAbsOrigin())
-                -- ParticleManager:ReleaseParticleIndex(particle)
-                -- 重置所有技能冷却和充能
+                local particle = ParticleManager:CreateParticle("particles/econ/items/omniknight/hammer_ti6_immortal/omniknight_purification_ti6_immortal.vpcf", PATTACH_ABSORIGIN_FOLLOW, realKiller)
+                ParticleManager:SetParticleControl(particle, 0, realKiller:GetAbsOrigin())
+                ParticleManager:ReleaseParticleIndex(particle)
+                --重置所有技能冷却和充能
                 -- for i = 0, realKiller:GetAbilityCount() - 1 do
                 --     local ability = realKiller:GetAbilityByIndex(i)
                 --     if ability then
@@ -356,7 +373,7 @@ function Main:OnUnitKilled_waterfall_hero_chaos(killedUnit, args)
                 --             local totalCooldown = ability:GetCooldown(ability:GetLevel())
                 --             ability:EndCooldown()
                 --             -- 当前剩余冷却时间减去总冷却的一半
-                --             local newCooldown = math.max(0, currentCooldown - totalCooldown * 0.5)
+                --             local newCooldown = math.max(0, currentCooldown - totalCooldown * 0.3)
                 --             ability:StartCooldown(newCooldown)
                 --         end
                         
@@ -405,76 +422,72 @@ function Main:OnUnitKilled_waterfall_hero_chaos(killedUnit, args)
     -- end)
 end
 -- 在初始化时
+
+
+
+
 function Main:InitializeWaterfallHeroSequence()
-    -- local heroesGroup1 = {
-    --     "npc_dota_hero_night_stalker", "npc_dota_hero_night_stalker", "npc_dota_hero_night_stalker",
-    --     "npc_dota_hero_tidehunter", "npc_dota_hero_tidehunter", "npc_dota_hero_tidehunter",
-    --     "npc_dota_hero_axe", "npc_dota_hero_axe", "npc_dota_hero_axe",
-    --     "npc_dota_hero_elder_titan", "npc_dota_hero_elder_titan", "npc_dota_hero_elder_titan",
-    --     "npc_dota_hero_mars", "npc_dota_hero_mars", "npc_dota_hero_mars",
-    --     "npc_dota_hero_doom_bringer", "npc_dota_hero_doom_bringer", "npc_dota_hero_doom_bringer",
-    --     "npc_dota_hero_slardar", "npc_dota_hero_slardar", "npc_dota_hero_slardar",
-    --     "npc_dota_hero_ogre_magi", "npc_dota_hero_ogre_magi", "npc_dota_hero_ogre_magi",
-    --     "npc_dota_hero_pudge", "npc_dota_hero_pudge", "npc_dota_hero_pudge",
-    --     "npc_dota_hero_legion_commander", "npc_dota_hero_legion_commander", "npc_dota_hero_legion_commander",
-    --     "npc_dota_hero_dragon_knight", "npc_dota_hero_dragon_knight", "npc_dota_hero_dragon_knight",
-    --     "npc_dota_hero_undying", "npc_dota_hero_undying", "npc_dota_hero_undying",
-    --     "npc_dota_hero_abyssal_underlord", "npc_dota_hero_abyssal_underlord", "npc_dota_hero_abyssal_underlord", 
-    --     "npc_dota_hero_chaos_knight", "npc_dota_hero_chaos_knight", "npc_dota_hero_chaos_knight",
-    --     "npc_dota_hero_tusk", "npc_dota_hero_tusk", "npc_dota_hero_tusk",
-    --     "npc_dota_hero_shredder", "npc_dota_hero_shredder", "npc_dota_hero_shredder",
-    --     "npc_dota_hero_bristleback", "npc_dota_hero_bristleback", "npc_dota_hero_bristleback",
-    --     "npc_dota_hero_tiny", "npc_dota_hero_tiny", "npc_dota_hero_tiny",
-    --     "npc_dota_hero_kunkka", "npc_dota_hero_kunkka", "npc_dota_hero_kunkka",
-    --     "npc_dota_hero_alchemist", "npc_dota_hero_alchemist", "npc_dota_hero_alchemist",
-    --     "npc_dota_hero_life_stealer", "npc_dota_hero_life_stealer", "npc_dota_hero_life_stealer",
-    --     "npc_dota_hero_dawnbreaker", "npc_dota_hero_dawnbreaker", "npc_dota_hero_dawnbreaker",
-    --     "npc_dota_hero_sven", "npc_dota_hero_sven", "npc_dota_hero_sven",
-    --     "npc_dota_hero_huskar", "npc_dota_hero_huskar", "npc_dota_hero_huskar",
-    --     "npc_dota_hero_primal_beast", "npc_dota_hero_primal_beast", "npc_dota_hero_primal_beast",
-    --     "npc_dota_hero_earth_spirit", "npc_dota_hero_earth_spirit", "npc_dota_hero_earth_spirit",
-    --     "npc_dota_hero_centaur", "npc_dota_hero_centaur", "npc_dota_hero_centaur",
-    --     "npc_dota_hero_omniknight", "npc_dota_hero_omniknight", "npc_dota_hero_omniknight",
-    --     "npc_dota_hero_spirit_breaker", "npc_dota_hero_spirit_breaker", "npc_dota_hero_spirit_breaker",
-    --     "npc_dota_hero_skeleton_king", "npc_dota_hero_skeleton_king", "npc_dota_hero_skeleton_king",
-    --     "npc_dota_hero_treant", "npc_dota_hero_treant", "npc_dota_hero_treant",
-    --     "npc_dota_hero_earthshaker", "npc_dota_hero_earthshaker", "npc_dota_hero_earthshaker"
-    -- }
+    local heroesGroup1 = {
+        "npc_dota_hero_gyrocopter",
+        "npc_dota_hero_sven",
+        "npc_dota_hero_tidehunter",
+        "npc_dota_hero_witch_doctor",
+        "npc_dota_hero_spectre",
+        "npc_dota_hero_luna",
+        "npc_dota_hero_sand_king",
+        "npc_dota_hero_magnataur",
+        "npc_dota_hero_dragon_knight",
+        "npc_dota_hero_queenofpain",
+        "npc_dota_hero_earthshaker",
+        "npc_dota_hero_bristleback",
+        "npc_dota_hero_axe",
+        "npc_dota_hero_kunkka",
+        "npc_dota_hero_dawnbreaker",
+        "npc_dota_hero_abyssal_underlord",
+        "npc_dota_hero_marci",
+        "npc_dota_hero_lion",
+        "npc_dota_hero_tiny",
+        "npc_dota_hero_medusa",
+        "npc_dota_hero_kez",
+        "npc_dota_hero_templar_assassin",
+        "npc_dota_hero_mars",
+        "npc_dota_hero_obsidian_destroyer",
+        "npc_dota_hero_storm_spirit",
+        "npc_dota_hero_meepo",
+        "npc_dota_hero_weaver",
+        "npc_dota_hero_morphling"
+    }
     
-    -- local heroesGroup2 = {
-    --     "npc_dota_hero_slark", "npc_dota_hero_slark", "npc_dota_hero_slark",
-    --     "npc_dota_hero_bloodseeker", "npc_dota_hero_bloodseeker", "npc_dota_hero_bloodseeker",
-    --     "npc_dota_hero_templar_assassin", "npc_dota_hero_templar_assassin", "npc_dota_hero_templar_assassin",
-    --     "npc_dota_hero_phantom_lancer", "npc_dota_hero_phantom_lancer", "npc_dota_hero_phantom_lancer",
-    --     "npc_dota_hero_weaver", "npc_dota_hero_weaver", "npc_dota_hero_weaver",
-    --     "npc_dota_hero_medusa", "npc_dota_hero_medusa", "npc_dota_hero_medusa",
-    --     "npc_dota_hero_morphling", "npc_dota_hero_morphling", "npc_dota_hero_morphling",
-    --     "npc_dota_hero_ursa", "npc_dota_hero_ursa", "npc_dota_hero_ursa",
-    --     "npc_dota_hero_juggernaut", "npc_dota_hero_juggernaut", "npc_dota_hero_juggernaut",
-    --     "npc_dota_hero_antimage", "npc_dota_hero_antimage", "npc_dota_hero_antimage",
-    --     "npc_dota_hero_phantom_assassin", "npc_dota_hero_phantom_assassin", "npc_dota_hero_phantom_assassin",
-    --     "npc_dota_hero_riki", "npc_dota_hero_riki", "npc_dota_hero_riki",
-    --     "npc_dota_hero_luna", "npc_dota_hero_luna", "npc_dota_hero_luna",
-    --     "npc_dota_hero_kez", "npc_dota_hero_kez", "npc_dota_hero_kez",
-    --     "npc_dota_hero_faceless_void", "npc_dota_hero_faceless_void", "npc_dota_hero_faceless_void",
-    --     "npc_dota_hero_bounty_hunter", "npc_dota_hero_bounty_hunter", "npc_dota_hero_bounty_hunter",
-    --     "npc_dota_hero_viper", "npc_dota_hero_viper", "npc_dota_hero_viper",
-    --     "npc_dota_hero_razor", "npc_dota_hero_razor", "npc_dota_hero_razor",
-    --     "npc_dota_hero_nevermore", "npc_dota_hero_nevermore", "npc_dota_hero_nevermore",
-    --     "npc_dota_hero_ember_spirit", "npc_dota_hero_ember_spirit", "npc_dota_hero_ember_spirit",
-    --     "npc_dota_hero_drow_ranger", "npc_dota_hero_drow_ranger", "npc_dota_hero_drow_ranger",
-    --     "npc_dota_hero_naga_siren", "npc_dota_hero_naga_siren", "npc_dota_hero_naga_siren",
-    --     "npc_dota_hero_clinkz", "npc_dota_hero_clinkz", "npc_dota_hero_clinkz",
-    --     "npc_dota_hero_terrorblade", "npc_dota_hero_terrorblade", "npc_dota_hero_terrorblade",
-    --     "npc_dota_hero_arc_warden", "npc_dota_hero_arc_warden", "npc_dota_hero_arc_warden",
-    --     "npc_dota_hero_troll_warlord", "npc_dota_hero_troll_warlord", "npc_dota_hero_troll_warlord",
-    --     "npc_dota_hero_gyrocopter", "npc_dota_hero_gyrocopter", "npc_dota_hero_gyrocopter",
-    --     "npc_dota_hero_sniper", "npc_dota_hero_sniper", "npc_dota_hero_sniper",
-    --     "npc_dota_hero_spectre", "npc_dota_hero_spectre", "npc_dota_hero_spectre",
-    --     "npc_dota_hero_meepo", "npc_dota_hero_meepo", "npc_dota_hero_meepo",
-    --     "npc_dota_hero_hoodwink", "npc_dota_hero_hoodwink", "npc_dota_hero_hoodwink",
-    --     "npc_dota_hero_monkey_king", "npc_dota_hero_monkey_king", "npc_dota_hero_monkey_king"
-    -- }
+    local heroesGroup2 = {
+        "npc_dota_hero_warlock",
+        "npc_dota_hero_juggernaut",
+        "npc_dota_hero_abaddon",
+        "npc_dota_hero_drow_ranger",
+        "npc_dota_hero_huskar",
+        "npc_dota_hero_warlock",
+        "npc_dota_hero_life_stealer",
+        "npc_dota_hero_naga_siren",
+        "npc_dota_hero_troll_warlord",
+
+        "npc_dota_hero_phantom_assassin",
+        "npc_dota_hero_tusk",
+        "npc_dota_hero_pudge",
+        "npc_dota_hero_phantom_lancer",
+"npc_dota_hero_warlock",    
+        "npc_dota_hero_nevermore",
+        "npc_dota_hero_pangolier",
+        "npc_dota_hero_ember_spirit",
+
+        "npc_dota_hero_silencer",
+        "npc_dota_hero_enigma",
+        "npc_dota_hero_necrolyte",
+        "npc_dota_hero_faceless_void",
+        "npc_dota_hero_elder_titan",
+        "npc_dota_hero_bloodseeker",
+        "npc_dota_hero_ogre_magi",
+        "npc_dota_hero_monkey_king",
+        "npc_dota_hero_crystal_maiden"
+    }
     
     -- 创建一个查找表来确定英雄类型
 
@@ -833,8 +846,11 @@ function Main:DeployWaterFallHero(heroType, isInitialSpawn)
         local particle = ParticleManager:CreateParticle(particleName, PATTACH_CUSTOMORIGIN, nil)
         ParticleManager:SetParticleControl(particle, 0, spawnPoint)
         
+        local delay = isInitialSpawn and 10.0 or 1
+        print(string.format("[Arena] 英雄 %s 将在 %.1f 秒后移除无敌状态", hero:GetUnitName(), delay))
+
         -- 4秒后开始传送
-        Timers:CreateTimer(1.0, function()
+        Timers:CreateTimer(delay, function()
             -- 移除隐身相关的buff
             if hero:HasModifier("modifier_wearable") then
                 hero:RemoveModifierByName("modifier_wearable")
@@ -842,8 +858,6 @@ function Main:DeployWaterFallHero(heroType, isInitialSpawn)
             FindClearSpaceForUnit(hero, spawnPoint, true)
 
             -- 根据是否是初始生成决定延迟时间
-            local delay = isInitialSpawn and 10.0 or 0.5
-            print(string.format("[Arena] 英雄 %s 将在 %.1f 秒后移除无敌状态", hero:GetUnitName(), delay))
 
             -- 移除无敌状态
             if hero:HasModifier("modifier_invulnerable") then
@@ -914,6 +928,30 @@ function Main:InitialPreWaterFallCreateHeroes()
         [8] = DOTA_TEAM_CUSTOM_2    -- 紫队
     }
 
+    -- 根据配置类型确定需要创建的阵营
+    local teamsToCreate = {}
+    if self.teamConfig == "ATTRIBUTE" then
+        teamsToCreate = {1, 2, 4, 8}  -- 力量、敏捷、智力、全才
+    elseif self.teamConfig == "TOURNAMENT" then
+        teamsToCreate = {1, 2}  -- 只创建力量和敏捷阵营
+    else
+        -- 如果有其他配置类型，可以在这里添加
+        print(string.format("[Arena] 警告：未知的队伍配置类型: %s，默认使用所有阵营", self.teamConfig))
+        teamsToCreate = {1, 2, 4, 8}
+    end
+    
+    -- 打印调试信息
+    print(string.format("[Arena] 当前配置: %s，将创建以下阵营的母体:", self.teamConfig))
+    for _, teamType in ipairs(teamsToCreate) do
+        local teamName = ""
+        if teamType == 1 then teamName = "力量"
+        elseif teamType == 2 then teamName = "敏捷"
+        elseif teamType == 4 then teamName = "智力"
+        elseif teamType == 8 then teamName = "全才"
+        end
+        print(string.format("  - 阵营 %d (%s)", teamType, teamName))
+    end
+
     -- 创建英雄的函数
     local function CreateHeroes()
         local heroTypes = {}
@@ -938,24 +976,49 @@ function Main:InitialPreWaterFallCreateHeroes()
         end
     end
 
-    -- 使用新的方式创建母体
+    -- 查找heroFacets中的最大命石值
+    local maxFacet = 1
+    for _, facetValue in pairs(self.heroFacets) do
+        if facetValue > maxFacet then
+            maxFacet = facetValue
+        end
+    end
+    print(string.format("[Arena] 检测到最大命石值: %d", maxFacet))
+
+    -- 使用新的方式创建母体，只创建需要的阵营
     CreateParentHeroesWithFacets(function(allHeroes)
-        -- 将创建的英雄按照阵营分配到self.parentHeroes中
-        self.parentHeroes[1] = allHeroes.bad        -- 红队
-        self.parentHeroes[2] = allHeroes.good       -- 绿队
-        self.parentHeroes[4] = allHeroes.custom1    -- 蓝队
-        self.parentHeroes[8] = allHeroes.custom2    -- 紫队
+        -- 将创建的英雄按照阵营分配到self.parentHeroes中，只分配需要的阵营
+        for _, teamType in ipairs(teamsToCreate) do
+            if teamType == 1 then
+                self.parentHeroes[1] = allHeroes.bad        -- 红队
+            elseif teamType == 2 then
+                self.parentHeroes[2] = allHeroes.good       -- 绿队
+            elseif teamType == 4 then
+                self.parentHeroes[4] = allHeroes.custom1    -- 蓝队
+            elseif teamType == 8 then
+                self.parentHeroes[8] = allHeroes.custom2    -- 紫队
+            end
+        end
 
         -- 打印日志确认创建成功
         for heroType, heroes in pairs(self.parentHeroes) do
+            print(string.format("[Arena] 阵营 %d 母体创建情况:", heroType))
+            local facetCount = 0
             for facetId, hero in pairs(heroes) do
-                print(string.format("创建母体成功，阵营: %d, facetID: %d", heroType, facetId))
+                facetCount = facetCount + 1
+                print(string.format("  - 命石 %d: %s", facetId, hero:GetUnitName()))
+            end
+            
+            -- 检查是否有足够的母体英雄
+            if facetCount < maxFacet then
+                print(string.format("[Arena] 警告：阵营 %d 的母体数量(%d)小于最大命石值(%d)，可能导致命石不匹配", 
+                    heroType, facetCount, maxFacet))
             end
         end
 
         -- 创建其他英雄
         CreateHeroes()
-    end)
+    end, teamsToCreate, maxFacet)  -- 传递需要创建的阵营和最大命石值
 end
 
 

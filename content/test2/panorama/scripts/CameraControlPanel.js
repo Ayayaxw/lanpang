@@ -59,7 +59,7 @@ function cinematicCameraMove(heroPosition) {
         if (t < 1) {
             $.Schedule(0, zoomCamera);
         } else if (elapsedTime < zoomDuration + lockDuration) {
-            $.Schedule(1, moveLeft);
+            // $.Schedule(1, moveLeft);
 
         } else {
             // 放大完成后等待2秒，然后向左移动
@@ -81,27 +81,6 @@ function cinematicCameraMove(heroPosition) {
         // 在这里可以添加移动完成后的其他操作
     }
 
-    // function restoreHeight() {
-    //     var restoreStartTime = Game.GetGameTime();
-    //     var restoreDuration = 0.5;
-
-    //     function restoreUpdate() {
-    //         var currentTime = Game.GetGameTime();
-    //         var elapsedTime = currentTime - restoreStartTime;
-    //         var r = Math.min(elapsedTime / restoreDuration, 1);
-            
-    //         r = easeInOutQuad(r);
-            
-    //         var restoredDistance = targetDistance + (distance - targetDistance) * r;
-    //         GameUI.SetCameraDistance(restoredDistance);
-            
-    //         if (r < 1) {
-    //             $.Schedule(0, restoreUpdate);
-    //         }
-    //     }
-        
-    //     restoreUpdate();
-    // }
 
     function easeInOutQuad(t) {
         return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;

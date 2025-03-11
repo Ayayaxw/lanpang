@@ -50,6 +50,8 @@ function CDOTA_BaseNPC:IsLeashed()
 end
 
 
+--使用说明
+--获取单位的真实所有者
 
 CDOTA_BaseNPC.GetRealOwner = function(self)
     debug = debug or false  -- 默认为false

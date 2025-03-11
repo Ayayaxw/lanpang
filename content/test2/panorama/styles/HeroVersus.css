@@ -251,7 +251,7 @@
     text-shadow: 2px 2px 4px #000000;
     horizontal-align: right;
   }
-  .LeftHeroStoneName {
+  .LeftHeroFacetName {
     font-size: 48px;
     font-weight: bold;
     color: #cccccc;
@@ -262,7 +262,7 @@
     margin-bottom: 5px;
   }
 
-  .RightHeroStoneName {
+  .RightHeroFacetName {
     font-size: 48px;
     font-weight: bold;
     color: #cccccc;

@@ -200,7 +200,7 @@ function Main:Init_Golem_100(event, playerID)
             "[LanPang_RECORD][",
             self.currentMatchID,
             "]",
-            "[挑战完成]击杀数:" .. hero_duel.killCount .. ",最终得分:" .. finalScore
+            "[挑战失败],最终得分:" .. finalScore
         )
         local data = {
             ["击杀数量"] = hero_duel.killCount,
@@ -246,6 +246,8 @@ function Main:PreSpawnGolem()
                     warlock:AddNewModifier(warlock, nil, "modifier_wearable", {})
                     --朝南
                     warlock:SetForwardVector(Vector(0, -1, 0))
+                    --移除warlock_eldritch_summoning
+                    warlock:RemoveAbility("warlock_eldritch_summoning")
                 end
                 
                 -- 2秒后收集所有魔像到池子里
@@ -297,7 +299,8 @@ function Main:DisarmAndRepositionGolems()
         if golem and not golem:IsNull() then
             golem:AddNewModifier(golem, nil, "modifier_disarmed", { duration = 6.0 })
             golem:AddNewModifier(golem, nil, "modifier_damage_reduction_100", { duration = 6.0 })
-            golem:SetAcquisitionRange(2000)
+            golem:SetAcquisitionRange(5000)
+            golem:SetControllableByPlayer(0, false)
         end
     end
     

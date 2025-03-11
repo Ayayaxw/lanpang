@@ -61,6 +61,9 @@ function Main:OnAttack(keys)
             local previousDamage = abilityInfo.damage
             abilityInfo.damage = abilityInfo.damage + damage
             abilityInfo.lastDamageTime = currentTime
+            
+            -- 检查是否产生了新的最高伤害，满足间隔条件时立即更新
+            self:CheckAndUpdateDamagePanel()
         else
             -- 为这个技能创建新条目
             hero_duel.abilityDamageTracker[abilityKey] = {
@@ -70,6 +73,9 @@ function Main:OnAttack(keys)
                 damage = damage,
                 lastDamageTime = currentTime
             }
+            
+            -- 检查是否产生了新的最高伤害，满足间隔条件时立即更新
+            self:CheckAndUpdateDamagePanel()
         end
     end
 
@@ -215,6 +221,9 @@ function Main:UpdateDamagePanel()
     --     highestAbility.damage
     -- ))
     
+    -- 记录当前更新时间
+    hero_duel.lastUpdateTime = GameRules:GetGameTime()
+    
     -- 如果最高伤害技能发生变化，发送完整更新
     if not hero_duel.currentHighestAbility or hero_duel.currentHighestAbility.abilityName ~= highestAbility.abilityName then
         print(string.format("[伤害面板] 最高伤害技能发生变化，发送完整更新数据 - 技能: %s, 属性: %s, 伤害: %.2f",
@@ -248,10 +257,30 @@ function Main:UpdateDamagePanel()
     end
 end
 
+-- 新增：检查并更新伤害面板（当产生新的伤害时调用）
+function Main:CheckAndUpdateDamagePanel()
+    if not hero_duel.damagePanelEnabled then 
+        return 
+    end
+    
+    -- 获取当前时间
+    local currentTime = GameRules:GetGameTime()
+    
+    -- 检查是否满足最小更新间隔条件（1秒）
+    if not hero_duel.lastUpdateTime or (currentTime - hero_duel.lastUpdateTime) >= 0.1 then
+        self:UpdateDamagePanel()
+    end
+end
+
 function Main:StartDamagePanelTimer()
     print("[伤害面板] 启动伤害面板更新定时器")
+    
+    -- 初始化最后更新时间
+    hero_duel.lastUpdateTime = GameRules:GetGameTime()
+    
     Timers:CreateTimer(function()
         if hero_duel.damagePanelEnabled then
+            -- 定时更新仍然保留，以确保过期技能被移除
             self:UpdateDamagePanel()
             return 1 -- 1秒后再次运行
         else
@@ -264,6 +293,11 @@ end
 -- 启用/禁用伤害面板的函数
 function Main:SetDamagePanelEnabled(enabled)
     hero_duel.damagePanelEnabled = enabled
+    
+    -- 当启用面板时，确保初始化最后更新时间
+    if enabled then
+        hero_duel.lastUpdateTime = hero_duel.lastUpdateTime or GameRules:GetGameTime()
+    end
     
     if enabled and not hero_duel.damagePanelTimerStarted then
         self:StartDamagePanelTimer()

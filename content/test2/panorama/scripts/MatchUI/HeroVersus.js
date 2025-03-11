@@ -102,7 +102,7 @@ function showHeroVersus(leftHeroID, rightHeroID, leftHeroFacet, rightHeroFacet, 
       // 设置左侧英雄名称和命石
       let heroNameElement = $('#LeftHeroNameEnglish');
       let heroNameChineseElement = $('#LeftHeroNameChinese');
-      let heroStoneNameElement = $('#LeftHeroStoneName');
+      let heroFacetNameElement = $('#LeftHeroFacetName');
       let heroName1Element = $('#LeftHeroName1');
 
       if (isReversedMode) {
@@ -124,11 +124,11 @@ function showHeroVersus(leftHeroID, rightHeroID, leftHeroFacet, rightHeroFacet, 
         const facetLocalized = $.Localize(facetToken);
         if (facetLocalized !== facetToken) {
             // 如果Facet本地化存在
-            heroStoneNameElement.text = reverseString(facetLocalized);
+            heroFacetNameElement.text = reverseString(facetLocalized);
             heroName1Element.text = reverseString(facetLocalized);
         } else {
             // 如果Facet本地化不存在，尝试使用Ability本地化
-            heroStoneNameElement.text = reverseString($.Localize(abilityToken));
+            heroFacetNameElement.text = reverseString($.Localize(abilityToken));
             heroName1Element.text = reverseString($.Localize(abilityToken));
         }
     } else {
@@ -146,11 +146,11 @@ function showHeroVersus(leftHeroID, rightHeroID, leftHeroFacet, rightHeroFacet, 
         const facetLocalized = $.Localize(facetToken);
         if (facetLocalized !== facetToken) {
             // 如果Facet本地化存在
-            heroStoneNameElement.text = facetLocalized;
+            heroFacetNameElement.text = facetLocalized;
             heroName1Element.text = facetLocalized;
         } else {
             // 如果Facet本地化不存在，尝试使用Ability本地化
-            heroStoneNameElement.text = $.Localize(abilityToken);
+            heroFacetNameElement.text = $.Localize(abilityToken);
             heroName1Element.text = $.Localize(abilityToken);
         }
     }
@@ -222,7 +222,7 @@ function showHeroVersus(leftHeroID, rightHeroID, leftHeroFacet, rightHeroFacet, 
       // 设置右侧英雄名称和命石
       let heroNameElement = $('#RightHeroNameEnglish');
       let heroNameChineseElement = $('#RightHeroNameChinese');
-      let heroStoneNameElement = $('#RightHeroStoneName');
+      let heroFacetNameElement = $('#RightHeroFacetName');
       let heroName1Element = $('#RightHeroName1');
 
       // 无论是否为"反转了"模式，右侧英雄都保持正常显示
@@ -239,11 +239,11 @@ function showHeroVersus(leftHeroID, rightHeroID, leftHeroFacet, rightHeroFacet, 
       const facetLocalized = $.Localize(facetToken);
       if (facetLocalized !== facetToken) {
           // 如果Facet本地化存在
-          heroStoneNameElement.text = facetLocalized;
+          heroFacetNameElement.text = facetLocalized;
           heroName1Element.text = facetLocalized;
       } else {
           // 如果Facet本地化不存在，尝试使用Ability本地化
-          heroStoneNameElement.text = $.Localize(abilityToken);
+          heroFacetNameElement.text = $.Localize(abilityToken);
           heroName1Element.text = $.Localize(abilityToken);
       }
 
@@ -425,7 +425,7 @@ function showSingleHero(heroID, heroFacet) {
         // 设置英雄名称和命石
         let heroNameElement = $('#LeftHeroNameEnglish');
         let heroNameChineseElement = $('#LeftHeroNameChinese');
-        let heroStoneNameElement = $('#LeftHeroStoneName');
+        let heroFacetNameElement = $('#LeftHeroFacetName');
         let heroName1Element = $('#LeftHeroName1');
   
         if (isReversedMode) {
@@ -443,10 +443,10 @@ function showSingleHero(heroID, heroFacet) {
             
             const facetLocalized = $.Localize(facetToken);
             if (facetLocalized !== facetToken) {
-                heroStoneNameElement.text = reverseString(facetLocalized);
+                heroFacetNameElement.text = reverseString(facetLocalized);
                 heroName1Element.text = reverseString(facetLocalized);
             } else {
-                heroStoneNameElement.text = reverseString($.Localize(abilityToken));
+                heroFacetNameElement.text = reverseString($.Localize(abilityToken));
                 heroName1Element.text = reverseString($.Localize(abilityToken));
             }
         } else {
@@ -462,10 +462,10 @@ function showSingleHero(heroID, heroFacet) {
             
             const facetLocalized = $.Localize(facetToken);
             if (facetLocalized !== facetToken) {
-                heroStoneNameElement.text = facetLocalized;
+                heroFacetNameElement.text = facetLocalized;
                 heroName1Element.text = facetLocalized;
             } else {
-                heroStoneNameElement.text = $.Localize(abilityToken);
+                heroFacetNameElement.text = $.Localize(abilityToken);
                 heroName1Element.text = $.Localize(abilityToken);
             }
         }
@@ -687,9 +687,9 @@ var leftHeroFacet = {
           $('#LeftHeroNameChinese').text = heroData[leftHeroID].name;
           // 获取 Facet 名称并本地化
             if (leftFacet.abilityName && leftFacet.abilityName !== "" && leftFacet.abilityName !== leftFacet.name ) {
-              $('#LeftHeroStoneName').text = $.Localize("#DOTA_Tooltip_Ability_" + leftFacet.abilityName);
+              $('#LeftHeroFacetName').text = $.Localize("#DOTA_Tooltip_Ability_" + leftFacet.abilityName);
           } else {
-              $('#LeftHeroStoneName').text = $.Localize("#DOTA_Tooltip_Facet_" + leftFacet.name);
+              $('#LeftHeroFacetName').text = $.Localize("#DOTA_Tooltip_Facet_" + leftFacet.name);
           }
       }
       if (heroData[rightHeroID]) {
@@ -718,9 +718,9 @@ var leftHeroFacet = {
           $('#RightHeroNameChinese').text = heroData[rightHeroID].name; 
           
             if (rightFacet.abilityName && rightFacet.abilityName !== "" && rightFacet.abilityName !== rightFacet.name ) {
-              $('#RightHeroStoneName').text = $.Localize("#DOTA_Tooltip_Ability_" + rightFacet.abilityName);
+              $('#RightHeroFacetName').text = $.Localize("#DOTA_Tooltip_Ability_" + rightFacet.abilityName);
           } else {
-              $('#RightHeroStoneName').text = $.Localize("#DOTA_Tooltip_Facet_" + rightFacet.name);
+              $('#RightHeroFacetName').text = $.Localize("#DOTA_Tooltip_Facet_" + rightFacet.name);
           }
   
       }

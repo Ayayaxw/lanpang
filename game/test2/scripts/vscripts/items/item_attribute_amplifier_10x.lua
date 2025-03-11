@@ -31,6 +31,11 @@ function modifier_attribute_amplifier_10x:DeclareFunctions()
 end
 
 function modifier_attribute_amplifier_10x:OnCreated()
+    --对拥有modifier_monkey_king_fur_army_soldier的单位无效
+    if self:GetParent():HasModifier("modifier_monkey_king_fur_army_soldier") then
+        return
+    end
+
     if not IsServer() then return end
     local hero = self:GetParent()
     

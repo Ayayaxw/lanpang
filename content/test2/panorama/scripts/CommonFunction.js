@@ -2773,11 +2773,23 @@ var heroesFacets = {
                 "Icon": "kez_shadowhawk",
                 "Color": "Blue",
                 "GradientID": "3",
-                "name": "kez_shadowhawk"
+                "name": "kez_shadowhawk_passive",
+                "AbilityName": "kez_shadowhawk_passive"
             }
         }
     }
 };
+
+
+
+
+
+
+
+
+
+
+
 
 function printHeroFacetsNames() {
     let pythonDict = {};

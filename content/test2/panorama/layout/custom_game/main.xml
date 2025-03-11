@@ -326,7 +326,7 @@
 
             <Panel class="LeftChineseNameWrapper">
               <Label class="LeftHeroNameChinese" id="LeftHeroNameChinese" text="主宰"/>
-              <Label class="LeftHeroStoneName" id="LeftHeroStoneName" text="剑圣"/>
+              <Label class="LeftHeroFacetName" id="LeftHeroFacetName" text="剑圣"/>
             </Panel>
             
           </Panel>
@@ -352,7 +352,7 @@
           <Panel class="RightTiltClass" id="RightTiltClass">
             <Label class="RightHeroNameEnglish" id="RightHeroNameEnglish" text="MARCI"/>
             <Panel class="RightChineseNameWrapper">
-              <Label class="RightHeroStoneName" id="RightHeroStoneName" text="唯一挚友"/>
+              <Label class="RightHeroFacetName" id="RightHeroFacetName" text="唯一挚友"/>
               <Label class="RightHeroNameChinese" id="RightHeroNameChinese" text="玛西"/>
             </Panel>
           </Panel>

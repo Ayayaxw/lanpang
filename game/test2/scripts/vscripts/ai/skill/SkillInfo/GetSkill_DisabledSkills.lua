@@ -87,6 +87,10 @@ function CommonAI:Ini_DisabledSkills()
         self.disabledSkills.npc_dota_hero_bristleback = {"bristleback_bristleback"}
     end
 
+    self.disabledSkills_Threshold = {
+
+    }
+
 end
 
 
@@ -104,6 +108,29 @@ function CommonAI:IsDisabledSkill(abilityName, heroName)
     else
         -- 其他英雄按原来的方式检查
         for _, disabledSkill in ipairs(self.disabledSkills[heroName]) do
+            if abilityName == disabledSkill then
+                return true
+            end
+        end
+    end
+    return false
+end
+
+function CommonAI:IsDisabledSkill_Threshold(abilityName, heroName)
+    -- 如果是拉比克或水人，直接检查所有英雄的禁用技能列表
+    if heroName == "npc_dota_hero_rubick" or heroName == "npc_dota_hero_morphling" then
+        -- 遍历所有英雄的禁用技能
+        for _, disabledList in pairs(self.disabledSkills_Threshold) do
+            for _, disabledSkill in ipairs(disabledList) do
+                if abilityName == disabledSkill then
+                    return true
+                end
+            end
+        end
+    else
+        print("检查IsDisabledSkill_Threshold",self.disabledSkills_Threshold[heroName])  
+        -- 其他英雄按原来的方式检查
+        for _, disabledSkill in ipairs(self.disabledSkills_Threshold[heroName]) do
             if abilityName == disabledSkill then
                 return true
             end

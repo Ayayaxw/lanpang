@@ -24,6 +24,38 @@ function Main:ProcessHeroChangeRequest(event)
     self:SetupNewHero(event, playerID)
 
     print("英雄更改请求处理完成")
+
+
+    -- 递归打印表格内容的函数
+    local function DeepPrint(t, indent, visited)
+        indent = indent or 0
+        visited = visited or {}
+        
+        -- 防止循环引用导致的无限递归
+        if visited[t] then
+            print(string.rep("  ", indent) .. "已引用过的表: " .. tostring(t))
+            return
+        end
+        
+        visited[t] = true
+        
+        for k, v in pairs(t) do
+            local prefix = string.rep("  ", indent)
+            if type(v) == "table" then
+                print(prefix .. tostring(k) .. " = {")
+                DeepPrint(v, indent + 1, visited)
+                print(prefix .. "}")
+            else
+                print(prefix .. tostring(k) .. " = " .. tostring(v))
+            end
+        end
+    end
+
+    -- 详细打印event所有内容
+    print("\n========= 事件详细内容 =========")
+    DeepPrint(event)
+    print("================================\n")
+
 end
 
 

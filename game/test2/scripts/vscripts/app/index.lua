@@ -145,8 +145,9 @@ function Main:InitGameMode()
     --     print("未找到英雄: " .. heroName)
     -- end
 
-    --ListenToGameEvent("dota_player_used_ability", Dynamic_Wrap(self, "OnAbilityUsed"), self)
-
+    ListenToGameEvent("dota_non_player_used_ability", Dynamic_Wrap(self, "OnAbilityUsed"),self)
+    ListenToGameEvent("dota_ability_channel_finished", Dynamic_Wrap(self, "OnAbilityUsed"),self)
+    ListenToGameEvent("dota_player_used_ability", Dynamic_Wrap(self, "OnAbilityUsed"),self)
     --ListenToGameEvent("entity_hurt", Dynamic_Wrap(self, "OnEntityHurt"), self)
 	--CreateUnitByName("npc_dota_hero_legion_commander", Vector(0,0,500), true, nil, nil, DOTA_TEAM_BADGUYS)
 
@@ -625,6 +626,12 @@ function Main:OnRequestUnitInfo(event)
     local playerID = event.PlayerID
     local unitEntIndex = event.unit_ent_index
     local unit = EntIndexToHScript(unitEntIndex)
+
+    --打印是否是幻象
+    if unit:IsIllusion() then
+        print(string.format("【单位】%s 是幻象", unit:GetUnitName()))
+    end
+
     onwer = unit:GetRealOwner()
     if onwer then print("主人是，",onwer:GetUnitName())
 

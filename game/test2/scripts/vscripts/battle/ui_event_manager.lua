@@ -339,15 +339,25 @@ function Main:SendHeroAndFacetData(leftHeroName, rightHeroName, LeftFacetID, Rig
     local serializedLeftFacet = convertSingleFacetToSerializable(leftHeroName, LeftFacetID)
     local serializedRightFacet = convertSingleFacetToSerializable(rightHeroName, RightFacetID)
 
+    -- 获取左右英雄实体
+    local leftHero = Entities:FindByName(nil, leftHeroName)
+    local rightHero = Entities:FindByName(nil, rightHeroName)
+
+    -- 获取英雄ID
+    local leftHeroID = leftHero and leftHero:GetHeroID() or -1
+    local rightHeroID = rightHero and rightHero:GetHeroID() or -1
+
     -- 打印即将发送的 Facet 数据
     print("即将发送的左侧英雄 Facet 数据：", serializedLeftFacet)
     print("即将发送的右侧英雄 Facet 数据：", serializedRightFacet)
 
-    -- 发送事件，包含指定的 facet 数据和 AbilityName
+    -- 发送事件，包含指定的 facet 数据、AbilityName 和 heroID
     CustomGameEventManager:Send_ServerToAllClients("show_hero", {
-        selfFacets = serializedLeftFacet,
-        opponentFacets = serializedRightFacet,
+        leftHeroFacets = serializedLeftFacet,
+        rightHeroFacets = serializedRightFacet,
         Time = limitTime,
+        leftHeroID = leftHeroID,
+        rightHeroID = rightHeroID
     })
 end
 

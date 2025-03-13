@@ -1,3 +1,4 @@
+
 function CreateHero(playerId, heroName, FacetID, spawnPosition, team, isControllableByPlayer, callback)
     local hPlayer = PlayerResource:GetPlayer(playerId)
     
@@ -216,12 +217,14 @@ function CreateParentHeroesWithFacets(callback)
     end
 end
 
-function CreateAIForHero(heroEntity, overallStrategy, heroStrategy, aiName, thinkInterval)
-    -- print("为英雄创建AI: " .. heroEntity:GetUnitName())
-    -- print("整体策略: " .. (type(overallStrategy) == "table" and table.concat(overallStrategy, ", ") or tostring(overallStrategy or "默认策略")))
-    -- print("英雄策略: " .. (type(heroStrategy) == "table" and table.concat(heroStrategy, ", ") or tostring(heroStrategy or "默认策略")))
+function CreateAIForHero(heroEntity, overallStrategy, heroStrategy, aiName, thinkInterval,SkillThresholds)
+
+    local heroName = heroEntity:GetUnitName()
+    local heroAI
     
-    local heroAI = HeroAI.CreateAIForHero(heroEntity, overallStrategy or {"默认策略"}, heroStrategy or {"默认策略"}, thinkInterval)
+
+    heroAI = CommonAI.new(heroEntity, overallStrategy or {"默认策略"}, heroStrategy or {"默认策略"}, thinkInterval, SkillThresholds)
+
     
     if heroAI then
         --print("成功创建AI实例: " .. heroEntity:GetUnitName())

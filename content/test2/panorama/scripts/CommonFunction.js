@@ -67,7 +67,7 @@ var heroData = {
     9:   { name: "米拉娜",    englishName: "Mirana",             codeName: "mirana",           facingRight: true,  heightAdjust: 5,  heroAttribute: 8,  avatarAdjust: 40, avatarFacingRight: true },
     10:  { name: "变体精灵",  englishName: "Morphling",          codeName: "morphling",        facingRight: true,  heightAdjust: 0,  heroAttribute: 2,  avatarAdjust: 10, avatarFacingRight: true },
     11:  { name: "影魔",      englishName: "Shadow Fiend",       codeName: "nevermore",        facingRight: true,  heightAdjust: 10, heroAttribute: 2,  avatarAdjust: 0,  avatarFacingRight: true },
-    12:  { name: "幻影长矛手",englishName: "Phantom Lancer",     codeName: "phantom_lancer",   facingRight: true,  heightAdjust: 5,  heroAttribute: 2,  avatarAdjust: 25, avatarFacingRight: false },
+    12:  { name: "幻影长矛手",englishName: "Phantom Lancer",     codeName: "phantom_lancer",   facingRight: true,  heightAdjust: 5,  heroAttribute: 2,  avatarAdjust: 25, avatarFacingRight: true },
     13:  { name: "帕克",      englishName: "Puck",               codeName: "puck",             facingRight: true,  heightAdjust: 0,  heroAttribute: 4,  avatarAdjust: 0,  avatarFacingRight: true },
     14:  { name: "帕吉",      englishName: "Pudge",              codeName: "pudge",            facingRight: true,  heightAdjust: 0,  heroAttribute: 1,  avatarAdjust: 20,  avatarFacingRight: false },
     15:  { name: "雷泽",      englishName: "Razor",              codeName: "razor",            facingRight: true,  heightAdjust: 10, heroAttribute: 2,  avatarAdjust: 0,  avatarFacingRight: true },

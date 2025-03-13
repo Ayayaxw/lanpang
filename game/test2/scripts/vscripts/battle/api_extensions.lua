@@ -162,7 +162,7 @@ CDOTA_BaseNPC.GetRealOwner = function(self)
             PrintDebug("检测到技能召唤物")
             local owner = checkUnit:GetOwnerEntity()
             if owner then
-                PrintDebug("召唤物的直接所有者:", owner:GetUnitName())
+
                 if owner.IsRealHero and owner:IsRealHero() then
                     PrintDebug("找到技能召唤物的英雄主人:", owner:GetUnitName())
                     return owner

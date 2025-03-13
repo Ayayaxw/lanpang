@@ -5,6 +5,95 @@
   padding: 4px;
 }
 
+/* 技能阈值面板样式 */
+.SkillThresholdPanel {
+  flow-children: down;
+  width: 500px;
+  position: 40% 30% 0px;
+  z-index: 10;
+  background-color: #14141ef9;
+  border: 2px solid #444450;
+  box-shadow: 0px 0px 20px #00000099;
+  padding: 15px;
+  border-radius: 5px;
+}
+
+.SkillThresholdTitleBar {
+  flow-children: right;
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.SkillThresholdTitle {
+  font-size: 20px;
+  color: #ccaa66;
+  letter-spacing: 1px;
+  text-shadow: 0px 0px 4px #ccaa6633;
+  width: fill-parent-flow(1.0);
+}
+
+.SkillThresholdRow {
+  flow-children: right;
+  width: 100%;
+  margin-bottom: 8px;
+  padding: 6px;
+  background-color: #14141e44;
+  border: 1px solid #333340;
+  border-radius: 3px;
+}
+
+.SkillNameLabel {
+  width: 80px;
+  color: #d5d5d5;
+  font-size: 16px;
+  vertical-align: center;
+  margin-right: 10px;
+}
+
+.ThresholdContainer {
+  flow-children: right;
+  margin-right: 15px;
+}
+
+.ThresholdLabel {
+  color: #ccaa66;
+  font-size: 14px;
+  vertical-align: center;
+  margin-right: 5px;
+}
+
+.ThresholdInput {
+  width: 90px;
+  height: 30px;
+  background-color: #2a2a35;
+  border: 1px solid #444450;
+  border-radius: 3px;
+  color: white;
+  font-size: 14px;
+  vertical-align: center;
+  text-align: center;
+}
+
+.ThresholdInput:focus {
+  border-color: #ccaa66;
+  box-shadow: 0px 0px 6px #ccaa6666;
+}
+
+.SkillThresholdButtonsRow {
+  flow-children: right;
+  width: 100%;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  horizontal-align: center;
+  padding: 0px 20px;
+}
+
+.SkillThresholdButtonsRow .ConfirmButton {
+  width: 150px;
+  height: 36px;
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #2a3a45 ), to( #1a2a35 ) );
+}
+
 .GameSetupPanelSettingsRow2 {
   flow-children: down;
   width: 100%;
@@ -57,6 +146,8 @@
     margin-right: 10px;
   }
   
+
+  
   .HeroLabel {
     color: #FFFFFF;
     font-size: 18px;
@@ -95,9 +186,11 @@
     vertical-align: center;
   }
   
+
   .GameSetupPanelhidden {
     visibility: collapse;
   }
+
 
   .HeroSelectionSubRow {
     width: 40%;
@@ -271,18 +364,52 @@
 
 
 .ConfirmButton {
-  width: 100%;
-  height: 40px;
-  margin-top: 10px;
-  background-color: gradient( linear, 0% 0%, 0% 100%, from( #2a2a35 ), to( #1a1a25 ) );
+  width: 150px;
+  height: 36px;
+  margin-top: 0px;
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #2a3a45 ), to( #1a2a35 ) );
   border: 1px solid #444450;
   border-radius: 4px;
   transition-property: background-color, brightness, border;
   transition-duration: 0.2s;
 }
 
+.ResetButton {
+  width: 150px;
+  height: 36px;
+  margin-top: 0px;
+  margin-right: 20px;
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #353535 ), to( #252525 ) );
+  border: 1px solid #444450;
+  border-radius: 4px;
+  transition-property: background-color, brightness, border;
+  transition-duration: 0.2s;
+}
+
+.ResetButton:hover {
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #454545 ), to( #353535 ) );
+  border-color: #aaaaaa;
+  brightness: 1.2;
+}
+
+.ResetButton:active {
+  brightness: 1.5;
+  sound: "ui_generic_button_click";
+}
+
+.ResetButton Label {
+  color: #dddddd;
+  font-size: 16px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  vertical-align: center;
+  horizontal-align: center;
+  text-shadow: 1px 1px 2px #000000;
+}
+
 .ConfirmButton:hover {
-  background-color: gradient( linear, 0% 0%, 0% 100%, from( #3a3a45 ), to( #2a2a35 ) );
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #3a4a55 ), to( #2a3a45 ) );
   border-color: #ccaa66;
   brightness: 1.2;
 }
@@ -334,4 +461,49 @@
   text-transform: uppercase;
   vertical-align: center;
   horizontal-align: center;
+}
+
+.SkillThresholdCloseButton {
+  width: 30px;
+  height: 30px;
+  background-color: #222233;
+  border: 1px solid #444450;
+  border-radius: 3px;
+  transition-property: background-color, brightness;
+  transition-duration: 0.2s;
+}
+
+.SkillThresholdCloseButton:hover {
+  background-color: #333344;
+  brightness: 1.2;
+}
+
+.SkillThresholdCloseButton:active {
+  brightness: 1.5;
+}
+
+.SkillThresholdCloseButton Label {
+  color: #ccaa66;
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+  vertical-align: center;
+  horizontal-align: center;
+}
+
+/* 为已修改的技能阈值按钮添加样式 */
+.ModifiedThresholdButton {
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #834040 ), to( #632030 ) );
+  border: 1px solid #ff6666;
+  box-shadow: 0px 0px 8px #ff666666;
+}
+
+.ModifiedThresholdButton:hover {
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #a34040 ), to( #832030 ) );
+  border-color: #ff8888;
+  brightness: 1.2;
+}
+
+.ModifiedThresholdButton Label {
+  color: #ffbbbb;
 }

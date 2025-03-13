@@ -5387,6 +5387,11 @@ HeroSkillConditions = {
                 end
             end
         },
+        ["brewmaster_drunken_brawler"] = {
+            function(self, caster, log)
+                return false
+            end
+        },
 
     },
 
@@ -6225,6 +6230,12 @@ HeroSkillConditions = {
                         log("[PANDA_TEST] 目标有撒旦状态")
                         return true
                     end
+
+                    if potentialTarget:HasModifier("modifier_doom_bringer_doom_aura_self") then
+                        self.target = potentialTarget
+
+                        return true
+                    end
                 end
             
                 -- 如果周围有敌方英雄，选择最近的一个
@@ -6880,47 +6891,46 @@ function CommonAI:CheckSkillConditions(entity, heroName)
             goto continue
         end
 
-        --self:log(string.format("检查英雄 %s 的技能 %s", heroName, abilityName))
-        if ability:GetAbilityType() == ABILITY_TYPE_ULTIMATE then
-            --self:log(string.format("检查英雄 %s 的大招 %s", heroName, abilityName))
+        -- 检查技能是否已在禁用列表中，如果在则直接跳过
+
+
+        local isBelowThreshold = self:IsHPBelowSkillThreshold(ability, entity)
+        if not self.disabledSkills_Threshold[heroName] then
+            self.disabledSkills_Threshold[heroName] = {}
+        end
+        if not isBelowThreshold then
+            -- 未通过检查的日志
+            local currentHp = entity:GetHealthPercent()
+            -- 先检查表是否存在，如果不存在则初始化
+
             
-            local ultimateCheck = self:CheckUltimateConditions(ability, entity)
-            if not ultimateCheck then
-                -- 未通过检查的日志
-                local currentHp = entity:GetHealthPercent()
-                --self:log(string.format("英雄 %s 的大招 %s 未通过检查，当前血量 %.1f%%", 
-                    --heroName, abilityName, currentHp))
-                
-                if not self:tableContains(self.disabledSkills[heroName], abilityName) then
-                    table.insert(self.disabledSkills[heroName], abilityName)
-                    --self:log(string.format("已将大招 %s 添加到 %s 的禁用列表中", abilityName, heroName))
-                else
-                    --self:log(string.format("大招 %s 已在 %s 的禁用列表中", abilityName, heroName))
-                end
-                goto continue
+            if not self:tableContains(self.disabledSkills_Threshold[heroName], abilityName) then
+                table.insert(self.disabledSkills_Threshold[heroName], abilityName)
+                self:log(string.format("已将 %s 添加到 %s 的禁用列表中", abilityName, heroName))
             else
-                -- 通过检查的日志
-                --self:log(string.format("英雄 %s 的大招 %s 通过检查", heroName, abilityName))
-                
-                -- 检查是否在禁用列表中
-                local found = false
-                for i, skill in ipairs(self.disabledSkills[heroName]) do
-                    if skill == abilityName then
-                        found = true
-                        local abilityIndex = ability and ability:GetAbilityIndex() or -1
-                        table.remove(self.disabledSkills[heroName], i)
-                        --self:log(string.format("大招 %s 通过检查,已从禁用列表中移除，技能索引为: %d", abilityName, abilityIndex))
-                        break
-                    end
-                end
-                if not found then
-                    --self:log(string.format("大招 %s 不在禁用列表中，无需移除", abilityName))
+                self:log(string.format(" %s 已在 %s 的禁用列表中", abilityName, heroName))
+            end
+            goto continue
+        else
+            -- 通过检查的日志
+            --self:log(string.format("英雄 %s 的大招 %s 通过检查", heroName, abilityName))
+            
+            -- 检查是否在禁用列表中
+            local found = false
+            for i, skill in ipairs(self.disabledSkills_Threshold[heroName]) do
+                if skill == abilityName then
+                    found = true
+                    local abilityIndex = ability and ability:GetAbilityIndex() or -1
+                    table.remove(self.disabledSkills_Threshold[heroName], i)
+                    --self:log(string.format("大招 %s 通过检查,已从禁用列表中移除，技能索引为: %d", abilityName, abilityIndex))
+                    break
                 end
             end
-        else
-            --self:log(string.format("技能 %s 不是大招，跳过检查", abilityName))
+            if not found then
+                --self:log(string.format("大招 %s 不在禁用列表中，无需移除", abilityName))
+            end
         end
-        
+
         local conditions = isSpecialHero and self:FindConditionsForAbility(abilityName) or heroConditions[abilityName]
     
         if conditions then
@@ -7174,6 +7184,183 @@ function SkillMeetsConditions(self, caster, abilityName, conditions, log)
         end
     end
     return true
+end
+
+
+function CommonAI:IsHPBelowSkillThreshold(ability, entity)
+    local abilityName = ability:GetAbilityName()
+    local skillKey = nil
+    
+
+    --打印ability的技能名
+    print("技能名："..abilityName)
+
+
+    -- 判断是否是大招
+    if ability:GetAbilityType() == ABILITY_TYPE_ULTIMATE then
+        print("大招")
+        skillKey = "skill6" -- 大招对应skill6
+    else
+        -- 普通技能根据索引判断
+        local abilityIndex = ability:GetAbilityIndex() -- 从0开始的技能索引
+        
+        if abilityIndex == 0 then
+            skillKey = "skill1" -- 第一个技能
+        elseif abilityIndex == 1 then
+            skillKey = "skill2" -- 第二个技能
+        elseif abilityIndex == 2 then
+            skillKey = "skill3" -- 第三个技能
+        elseif abilityIndex == 3 then
+            skillKey = "skill4" -- 第四个技能
+        elseif abilityIndex == 4 then
+            skillKey = "skill5" -- 第五个技能
+        else
+            -- 如果索引超出范围，直接返回true
+            return true
+        end
+    end
+    
+    -- 如果没有对应的技能阈值设置或阈值为0，不做限制
+    if not self.skillThresholds or not self.skillThresholds[skillKey] then
+        self:log("技能:", abilityName, "没有设置血量阈值或阈值为0，无限制")
+        return true
+    end
+    
+    local healthPct = entity:GetHealthPercent()
+    local hpThreshold = self.skillThresholds[skillKey].hpThreshold
+    
+    self:log("检测技能:", abilityName, "血量阈值:", hpThreshold, "当前血量百分比:", healthPct)
+    
+    -- 当英雄血量低于等于阈值时，返回true，表示可以释放
+    if healthPct <= hpThreshold then
+        self:log("技能:", abilityName, "血量条件满足: 当前血量", healthPct, "% <= 阈值", hpThreshold, "%")
+        return true
+    else
+        self:log("技能:", abilityName, "血量条件不满足: 当前血量", healthPct, "% > 阈值", hpThreshold, "%")
+        return false
+    end
+end
+
+
+function CommonAI:GetCalculatedSkillRange(ability, entity, range)
+    -- 如果没有目标，直接返回一个很大的值表示无限制
+    if not self.target then
+        self:log("没有目标，返回无限制范围")
+        return 99999
+    end
+
+    local abilityName = ability:GetAbilityName()
+    local skillKey = nil
+    
+    -- 判断是否是大招
+    if ability:GetAbilityType() == ABILITY_TYPE_ULTIMATE then
+        skillKey = "skill6" -- 大招对应skill6
+    else
+        -- 普通技能根据索引判断
+        local abilityIndex = ability:GetAbilityIndex() -- 从0开始的技能索引
+        
+        if abilityIndex == 0 then
+            skillKey = "skill1" -- 第一个技能
+        elseif abilityIndex == 1 then
+            skillKey = "skill2" -- 第二个技能
+        elseif abilityIndex == 2 then
+            skillKey = "skill3" -- 第三个技能
+        elseif abilityIndex == 3 then
+            skillKey = "skill4" -- 第四个技能
+        elseif abilityIndex == 4 then
+            skillKey = "skill5" -- 第五个技能
+        else
+            -- 如果索引超出范围，返回无限制范围
+            return 99999
+        end
+    end
+    
+    -- 如果没有对应的技能距离阈值设置，返回无限制范围
+    if not self.skillThresholds or not self.skillThresholds[skillKey] or not self.skillThresholds[skillKey].distThreshold then
+        self:log("技能:", abilityName, "没有设置距离阈值，返回无限制范围")
+        return 99999
+    end
+    
+    local distance = (entity:GetAbsOrigin() - self.target:GetAbsOrigin()):Length2D()
+    local distThreshold = self.skillThresholds[skillKey].distThreshold
+    
+    -- 如果距离阈值为0，认为是初始值，表示无限制
+    if distThreshold == 0 then
+        self:log("技能:", abilityName, "距离阈值为0(初始值)，返回无限制范围")
+        return 99999
+    end
+    
+    -- 如果传入了range参数，且阈值不为0，取两者中较小的值
+    -- range为0表示无限制，此时仍使用技能阈值
+    if range ~= nil then
+        if range == 0 then
+            self:log("技能:", abilityName, "传入range为0，使用原技能阈值:", distThreshold)
+        elseif distThreshold > 0 then
+            local originalThreshold = distThreshold
+            distThreshold = math.min(distThreshold, range)
+            self:log("技能:", abilityName, "原阈值:", originalThreshold, "range:", range, "最终使用阈值:", distThreshold)
+        end
+    end
+    
+    self:log("技能:", abilityName, "计算后的距离阈值:", distThreshold, "当前距离:", distance)
+    
+    -- 返回计算后的阈值
+    return distThreshold
+end
+
+function CommonAI:GetSkillRangeThreshold(ability, entity, range)
+    local abilityName = ability:GetAbilityName()
+    local skillKey = nil
+    
+    -- 判断是否是大招
+    if ability:GetAbilityType() == ABILITY_TYPE_ULTIMATE then
+        skillKey = "skill6" -- 大招对应skill6
+    else
+        -- 普通技能根据索引判断
+        local abilityIndex = ability:GetAbilityIndex() -- 从0开始的技能索引
+        
+        if abilityIndex == 0 then
+            skillKey = "skill1" -- 第一个技能
+        elseif abilityIndex == 1 then
+            skillKey = "skill2" -- 第二个技能
+        elseif abilityIndex == 2 then
+            skillKey = "skill3" -- 第三个技能
+        elseif abilityIndex == 3 then
+            skillKey = "skill4" -- 第四个技能
+        elseif abilityIndex == 4 then
+            skillKey = "skill5" -- 第五个技能
+        else
+            -- 如果索引超出范围，直接返回range
+            return range
+        end
+    end
+    
+    -- 如果没有对应的技能距离阈值设置，返回range
+    if not self.skillThresholds or not self.skillThresholds[skillKey] or not self.skillThresholds[skillKey].distThreshold then
+        self:log("技能:", abilityName, "没有设置距离阈值，返回range:", range)
+        return range
+    end
+    
+    local distThreshold = self.skillThresholds[skillKey].distThreshold
+    
+    -- 处理range为0的情况
+    if range == 0 then
+        if distThreshold == 0 then
+            self:log("技能:", abilityName, "range和阈值均为0，返回0")
+            return 0
+        else
+            self:log("技能:", abilityName, "range为0，返回阈值:", distThreshold)
+            return distThreshold
+        end
+    end
+    if distThreshold == 0 then
+        return range  -- 阈值为0时不限制，直接使用传入的range
+    end
+    -- 比较阈值和range，返回较小的值
+    local result = math.min(distThreshold, range)
+    self:log("技能:", abilityName, "技能阈值:", distThreshold, "range:", range, "返回较小值:", result)
+    
+    return result
 end
 
 

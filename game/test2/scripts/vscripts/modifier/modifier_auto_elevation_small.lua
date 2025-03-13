@@ -17,7 +17,7 @@ modifier_auto_elevation_small.excluded_modifiers = {
     ["modifier_monkey_king_fur_army_soldier"] = true,
     ["modifier_dawnbreaker_solar_guardian_air_time"] = true,
     ["modifier_dawnbreaker_solar_guardian_disable"] = true,
-    
+    ["modifier_knockback"] = true,
 }
 
 function modifier_auto_elevation_small:OnCreated()

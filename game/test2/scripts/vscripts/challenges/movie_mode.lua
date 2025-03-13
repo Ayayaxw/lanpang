@@ -57,9 +57,9 @@ function Main:Init_movie_mode(heroName, heroFacet,playerID, heroChineseName)
     -- 假设你要创建的位置
     -- CreateParentHeroesWithFacets(function(allHeroes)
     --DisplayHeroes()
-    --SpawnAllNeutralCreeps1()
+    SpawnAllNeutralCreeps1()
     --CreateOgreMagi()
-    CreateMaxLevelHeroes()
+    --CreateMaxLevelHeroes()
     -- end)
 end
 
@@ -928,6 +928,8 @@ function SpawnAllNeutralCreeps1()
             
             local angle = math.atan2(y, x)
             unit:SetForwardVector(Vector(-math.cos(angle), -math.sin(angle), 0))
+            --都为玩家0控制
+            unit:SetControllableByPlayer(0, true)
         end)
     end
 end

@@ -1,4 +1,3 @@
-
 function Main:Init_Skill_Probability_100(event, playerID)
     -- 技能修改器
 
@@ -20,6 +19,12 @@ function Main:Init_Skill_Probability_100(event, playerID)
                 if hero:GetUnitName() == "npc_dota_hero_tidehunter" then
                     hero:AddNewModifier(hero, nil, "modifier_attack_auto_cast_ability", {ability_index = 2})
                     hero:RemoveAbility("special_bonus_unique_tidehunter_8")
+                end
+
+                --如果英雄是npc_dota_hero_doom_bringer，给他modifier
+                if hero:GetUnitName() == "npc_dota_hero_doom_bringer" then
+                    hero:AddNewModifier(hero, nil, "modifier_reset_passive_ability_cooldown", {})
+
                 end
             end,
         },  
@@ -136,6 +141,33 @@ function Main:Init_Skill_Probability_100(event, playerID)
                     AbilityCooldown = 0,
                 }
             },
+            berserker_troll_break = {
+                AbilityValues = {
+                    AbilityCooldown = 0,
+                }
+            },
+            spawnlord_master_freeze = {
+                AbilityValues = {
+                    AbilityCooldown = 0,
+                }
+            },
+
+            big_thunder_lizard_wardrums_aura =
+            {
+                AbilityValues = {
+                    accuracy =  {
+                        value = 100,
+                    }
+                }
+            },
+            alpha_wolf_critical_strike={
+                AbilityValues = {
+                    crit_chance = {
+                        value = 100,
+                    }
+                }
+            },
+            
         },
         npc_dota_hero_chaos_knight = {
             chaos_knight_reins_of_chaos = {
@@ -245,6 +277,13 @@ function Main:Init_Skill_Probability_100(event, playerID)
             },
         },
         npc_dota_hero_faceless_void = {
+            special_bonus_unique_faceless_void_4 = {
+                AbilityValues = {
+                    dodge_chance_pct = {
+                        value = 100
+                    }
+                }
+            },
             faceless_void_time_lock = {
                 AbilityValues = {
                     chance_pct = {
@@ -252,6 +291,7 @@ function Main:Init_Skill_Probability_100(event, playerID)
                     }
                 }
             },
+
         },
         npc_dota_hero_monkey_king = {
             monkey_king_jingu_mastery = {
@@ -271,9 +311,179 @@ function Main:Init_Skill_Probability_100(event, playerID)
                     }
                 }
             },
-        }
+        },
+        npc_dota_hero_disruptor = { 
+            disruptor_electromagnetic_repulsion = {
+                AbilityValues = {
+                    damage_threshold = 1,
+                    AbilityCooldown = {
+                        value = 0
+                    }
+                }
+            },
+        },
+        npc_dota_hero_jakiro = {
+            jakiro_liquid_fire = {
+                AbilityValues = {
+                    AbilityCooldown = {
+                        value = 0
+                    }
+                }
+            },
+            jakiro_liquid_ice = {
+                AbilityValues = {
+                    AbilityCooldown = {
+                        value = 0
+                    }
+                }
+            },  
+        },
+        npc_dota_hero_obsidian_destroyer = {
+            obsidian_destroyer_equilibrium = {
+                AbilityValues = {
+                    proc_chance = {
+                        value = 100
+                    }
+                }
+            },
+        },
+        npc_dota_hero_snapfire = {
+            snapfire_buckshot = {
+                AbilityValues = {
+                    miss_chance = {
+                        value = 100
+                    }
+                }
+            },
+        },
+        npc_dota_hero_phantom_assassin = {
+            phantom_assassin_immaterial = {
+                AbilityValues = {
+                    evasion_base = {
+                        value = 100
+                    }
+                }
+            },
+            phantom_assassin_coup_de_grace = {
+                AbilityValues = {
+                    crit_chance = {
+                        value = 100
+                    },
+                    dagger_crit_chance = {
+                        value = 100
+                    },
+                    attacks_to_proc = {
+                        value = 0
+                    },
+                    attacks_to_proc_creeps = {
+                        value = 0
+                    },
+                }
+            },
+        },
+        npc_dota_hero_weaver = {
+            weaver_geminate_attack = {
+                AbilityValues = {
+                    AbilityCooldown = {
+                        value = 0
+                    }
+                }
+            },
+        },
+        npc_dota_hero_gyrocopter = {
+            gyrocopter_flak_cannon = {
+                AbilityValues = {
+                    sidegunner_fire_rate = {
+                        value = 0
+                    }
+                }
+            },
+        },
+        npc_dota_hero_muerta = {
+            muerta_gunslinger = {
+                AbilityValues = {
+                    double_shot_chance = {
+                        value = 100
+                    }
+                }
+            },
+        },
+        npc_dota_hero_enigma = {
+            enigma_splitting_image = {
+                AbilityValues = {
+                    damage_threshold = 0 ,
+                    eidolon_spawns = 999,
+                }
+            },
+        },
+        npc_dota_hero_phantom_lancer = {
+            phantom_lancer_phantom_edge = {
+                AbilityValues = {
+                    min_distance = {
+                        value = 0
+                    },
+                    AbilityCooldown = {
+                        value = 0
+                    }
+                }
+            },
+            phantom_lancer_juxtapose = {
+                AbilityValues = {
+                    proc_chance_pct = {
+                        value = 100
+                    },
+                    illusion_proc_chance_pct = {
+                        value = 100
+                    }
+                }
+            },
+        },
+        npc_dota_hero_treant = {
+            treant_natures_guise = {
+                AbilityValues = {
+                    shard_cooldown ={
+                        value = 0
+                    },
+                    cooldown_time = {
+                        value = 0
+                    }
+                }
+            },
+        },
+        npc_dota_hero_brewmaster = {
+            brewmaster_drunken_brawler = {
+                AbilityValues = {
+                    dodge_chance = {
+                        value = 100
+                    },
+                    crit_chance = {
+                        value = 100
+                    }
+                }
+            },
+        },
+        npc_dota_hero_omniknight = {
+            omniknight_hammer_of_purity = {
+                AbilityValues = {
+                    AbilityCooldown = {
+                        value = 0
+                    }
+                }
 
-
+            },
+        },
+        npc_dota_hero_razor = {
+            razor_storm_surge = {
+                AbilityValues = {
+                    strike_pct_chance = {
+                        value = 100
+                    },
+                    strike_internal_cd = {
+                        value = 0
+                    }
+                }
+            },
+        },
 
     }
 
@@ -296,6 +506,8 @@ function Main:Init_Skill_Probability_100(event, playerID)
     local selfHeroStrategy = self:getDefaultIfEmpty(event.selfHeroStrategies)
     local opponentOverallStrategy = self:getDefaultIfEmpty(event.opponentOverallStrategies)
     local opponentHeroStrategy = self:getDefaultIfEmpty(event.opponentHeroStrategies)
+    local selfSkillThresholds = event.selfSkillThresholds or {}
+    local opponentSkillThresholds = event.opponentSkillThresholds or {}
 
     -- 获取玩家和对手的英雄名称及中文名称
     local heroName, heroChineseName = self:GetHeroNames(selfHeroId)
@@ -311,7 +523,7 @@ function Main:Init_Skill_Probability_100(event, playerID)
     -- 定义时间参数
     self.duration = 10         -- 赛前准备时间
     self.endduration = 10      -- 赛后庆祝时间
-    self.limitTime = 60        -- 限定时间为准备时间结束后的一分钟
+    self.limitTime = 100        -- 限定时间为准备时间结束后的一分钟
 
 
     self:createLocalizedMessage(
@@ -361,7 +573,7 @@ function Main:Init_Skill_Probability_100(event, playerID)
         if selfAIEnabled then
             Timers:CreateTimer(self.duration - 0.7, function()
                 if self.currentTimer ~= timerId or hero_duel.EndDuel then return end
-                CreateAIForHero(self.leftTeamHero1, selfOverallStrategy, selfHeroStrategy,"leftTeamHero1")
+                CreateAIForHero(self.leftTeamHero1, selfOverallStrategy, selfHeroStrategy,"leftTeamHero1",0.01,selfSkillThresholds)
                 return nil
             end)
         end
@@ -378,7 +590,7 @@ function Main:Init_Skill_Probability_100(event, playerID)
         if opponentAIEnabled then
             Timers:CreateTimer(self.duration - 0.7, function()
                 if self.currentTimer ~= timerId or hero_duel.EndDuel then return end
-                CreateAIForHero(self.rightTeamHero1, opponentOverallStrategy, opponentHeroStrategy,"rightTeamHero1")
+                CreateAIForHero(self.rightTeamHero1, opponentOverallStrategy, opponentHeroStrategy,"rightTeamHero1",0.01,opponentSkillThresholds)
                 return nil
             end)
         end
@@ -492,56 +704,13 @@ end
 
 function Main:OnUnitKilled_Skill_Probability_100(killedUnit, args)
     local killedUnit = EntIndexToHScript(args.entindex_killed)
-    local killer = EntIndexToHScript(args.entindex_attacker)
 
     if hero_duel.EndDuel or not killedUnit:IsRealHero() then
+        print("Unit killed: " .. killedUnit:GetUnitName() .. " (not processed)")
         return
     end
 
-    -- 检查是否有人阵亡
-    local leftTeamAlive = false
-    local rightTeamAlive = false
-
-    -- 检查左方英雄
-    if not self.leftTeamHero1:IsNull() and self.leftTeamHero1:IsAlive() then
-        leftTeamAlive = true
-    end
-
-    -- 检查右方英雄
-    if not self.rightTeamHero1:IsNull() and self.rightTeamHero1:IsAlive() then
-        rightTeamAlive = true
-    end
-
-    -- 判断胜负
-    if not leftTeamAlive or not rightTeamAlive then
-        hero_duel.EndDuel = true
-        
-        -- 获取获胜方和最后一击英雄
-        local winningTeam = leftTeamAlive and "成功" or "失败"
-        local killerName = killer:GetUnitName()
-        
-        -- 记录比赛结果
-        self:createLocalizedMessage(
-            "[LanPang_RECORD][",
-            self.currentMatchID,
-            "]",
-            "[比赛结束]挑战".. winningTeam
-        )
-
-        -- 对获胜的英雄播放胜利特效
-        local winningHero = leftTeamAlive and self.leftTeamHero1 or self.rightTeamHero1
-        if not winningHero:IsNull() and winningHero:IsAlive() then
-            self:PlayVictoryEffects(winningHero)
-        end
-
-        -- 禁用幸存的英雄
-        if not self.leftTeamHero1:IsNull() and self.leftTeamHero1:IsAlive() then
-            self:DisableHeroWithModifiers(self.leftTeamHero1, self.endduration)
-        end
-        if not self.rightTeamHero1:IsNull() and self.rightTeamHero1:IsAlive() then
-            self:DisableHeroWithModifiers(self.rightTeamHero1, self.endduration)
-        end
-    end
+    self:ProcessHeroDeath(killedUnit)
 end
 
 
@@ -550,3 +719,30 @@ function Main:OnNPCSpawned_Skill_Probability_100(spawnedUnit, event)
         self:ApplyConfig(spawnedUnit, "BATTLEFIELD")
     end
 end
+
+function Main:OnAbilityUsed_Skill_Probability_100(event)
+    print("技能释放事件")
+    local caster = EntIndexToHScript(event.caster_entindex)
+    --详细打印event的所有信息，event是表
+    for k, v in pairs(event) do
+        print(k, v)
+    end
+    
+
+
+    local target = caster:GetCursorCastTarget()
+    if target then
+        print("目标实体:", target:GetName(), "实体索引:", target:GetEntityIndex())
+    end
+
+    --如果英雄释放的技能是chaos_knight_reality_rift，让英雄对目标施加持续三秒的缴械、沉默和破坏效果
+    if event.abilityname == "chaos_knight_reality_rift" then
+        target:AddNewModifier(caster, nil, "modifier_break", {duration = 3})
+        target:AddNewModifier(caster, nil, "modifier_silenced", {duration = 3})
+        target:AddNewModifier(caster, nil, "modifier_disarmed", {duration = 3})
+    end
+    
+
+end
+
+

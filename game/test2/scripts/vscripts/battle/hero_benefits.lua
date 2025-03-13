@@ -235,6 +235,47 @@ function Main:HeroBenefits(heroName, hero, overallStrategy, heroStrategy)
                 unit:SetControllableByPlayer(hero:GetPlayerID(), true)
                 hero:SetCursorCastTarget(unit)
                 ability:OnSpellStart()
+            
+                local caster = hero
+                local target = unit
+                
+                -- 获取末日英雄的技能3和技能4（索引为2和3）
+                local ability3 = caster:GetAbilityByIndex(2)
+                local ability4 = caster:GetAbilityByIndex(3)
+            
+                -- 获取目标的前两个技能
+                local targetAbility1 = target:GetAbilityByIndex(0)
+                local targetAbility2 = target:GetAbilityByIndex(1)
+                
+                -- 获取吞噬技能的等级
+                local devourAbility = caster:FindAbilityByName("doom_bringer_devour")
+                local skillLevel = devourAbility and devourAbility:GetLevel() or 1
+
+                -- 复制第一个技能（如果不是creep_piercing）
+                if targetAbility1 then
+                    local ability1Name = targetAbility1:GetAbilityName()
+                    if ability1Name ~= "creep_piercing" and ability1Name ~= "neutral_upgrade" then
+                        caster:RemoveAbility("doom_bringer_empty1")
+                        local newAbility1 = caster:AddAbility(ability1Name)
+                        if newAbility1 then
+                            newAbility1:SetLevel(skillLevel)
+                        end
+                    end
+                    -- 如果是creep_piercing，不做任何操作，保持技能槽为空
+                end
+                
+                -- 复制第二个技能（如果不是creep_piercing）
+                if targetAbility2 then
+                    local ability2Name = targetAbility2:GetAbilityName()
+                    if ability2Name ~= "creep_piercing" and ability2Name ~= "neutral_upgrade" then
+                        caster:RemoveAbility("doom_bringer_empty2")
+                        local newAbility2 = caster:AddAbility(ability2Name)
+                        if newAbility2 then
+                            newAbility2:SetLevel(skillLevel)
+                        end
+                    end
+                    -- 如果是creep_piercing，不做任何操作，保持技能槽为空
+                end
             end
         end
     
@@ -347,7 +388,6 @@ function Main:HeroBenefits(heroName, hero, overallStrategy, heroStrategy)
             print("错误：未能找到骷髅王白骨护卫或技能未升级！")
         end
     end
-
 
     if heroName == "npc_dota_hero_chen" then
         local ability = hero:FindAbilityByName("chen_holy_persuasion")
@@ -718,7 +758,7 @@ function Main:HeroPreparation(heroName, hero, overallStrategy, heroStrategy)
         if ability == nil or ability:GetLevel() < 1 then return end
         
         local function createUnit(unitName)
-            local unit = CreateUnitByName(unitName, hero:GetAbsOrigin() + RandomVector(RandomFloat(100, 200)), true, nil, nil, DOTA_TEAM_NEUTRALS)  
+            --local unit = CreateUnitByName(unitName, hero:GetAbsOrigin() + RandomVector(RandomFloat(100, 200)), true, nil, nil, DOTA_TEAM_NEUTRALS)  
         end
 
         if CommonAI:containsStrategy(heroStrategy, "给予枭兽") then

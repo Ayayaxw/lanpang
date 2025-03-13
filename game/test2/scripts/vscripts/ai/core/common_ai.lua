@@ -56,11 +56,11 @@ AIStates = {
 
 }
 
-function CommonAI:constructor(entity, overallStrategy, heroStrategy, thinkInterval)
+function CommonAI:constructor(entity, overallStrategy, heroStrategy, thinkInterval, skillThresholds)
     -- 初始化策略
     self.global_strategy = overallStrategy or {"默认策略"}
     self.hero_strategy = heroStrategy or {"默认策略"}
-
+    self.skillThresholds = skillThresholds or {}
     self.canReleaseIceBlast = false
     self:Ini_MediumPrioritySkills()
     self:Ini_DisabledSkills()
@@ -88,9 +88,9 @@ function CommonAI:constructor(entity, overallStrategy, heroStrategy, thinkInterv
     self.needToDodge = false
 end
 
-function CommonAI.new(entity, overallStrategy, heroStrategy, thinkInterval)
+function CommonAI.new(entity, overallStrategy, heroStrategy, thinkInterval,skillThresholds)
     local instance = setmetatable({}, CommonAI)  -- 直接使用 CommonAI 作为元表
-    instance:constructor(entity, overallStrategy, heroStrategy, thinkInterval)
+    instance:constructor(entity, overallStrategy, heroStrategy, thinkInterval,skillThresholds)
     return instance
 end
 
@@ -786,18 +786,22 @@ function CommonAI:ClampPositionToRect(position, left, right, top, bottom)
 end
 
 function CommonAI:HandleUnitTargetAbility(entity, abilityInfo, target, targetInfo)
+
     if self:isSelfCastAbility(abilityInfo.abilityName) then --只对自己释放的技能
         if self:isSelfCastAbilityWithRange(abilityInfo.abilityName) then
             -- 对自己释放但需要考虑范围的技能
             if abilityInfo.aoeRadius > 0 then
-                if self:IsInRange(target, abilityInfo.aoeRadius) then
+                local totalRange = self:GetSkillRangeThreshold(abilityInfo.skill, entity, abilityInfo.aoeRadius)
+
+
+                if self:IsInRange(target, totalRange) then
                     entity:CastAbilityOnTarget(entity, abilityInfo.skill, 0)
                     self:OnSpellCast(entity, abilityInfo.skill, abilityInfo.castPoint, abilityInfo.channelTime, entity)
                 else
                     -- 敌人不在施法范围内
                     if self.currentState ~= AIStates.Channeling then
                         -- 移动到施法距离内
-                        self:MoveToRange(targetInfo.targetPos, abilityInfo.aoeRadius)
+                        self:MoveToRange(targetInfo.targetPos, totalRange)
                         self:SetState(AIStates.Seek)
                         self:log(string.format("不在施法范围内，移动到施法范围，进入Seek状态，目标距离: %.2f，施法距离: %.2f", targetInfo.distance, abilityInfo.castRange))
                     end
@@ -827,7 +831,9 @@ function CommonAI:HandleUnitTargetAbility(entity, abilityInfo, target, targetInf
     elseif abilityInfo.targetTeam ~= DOTA_UNIT_TARGET_TEAM_FRIENDLY then
         if abilityInfo.castRange > 0 then
             local currentTarget = self.treetarget or target
-            if self:IsInRange(currentTarget, abilityInfo.castRange) then
+            local totalRange = self:GetSkillRangeThreshold(abilityInfo.skill, entity, abilityInfo.castRange)
+
+            if self:IsInRange(currentTarget, totalRange) then
                 -- 敌人在施法范围内
                 self:HandleEnemyTargetAction(entity, currentTarget, abilityInfo, targetInfo)
                 self:OnSpellCast(entity, abilityInfo.skill, abilityInfo.castPoint, abilityInfo.channelTime, currentTarget)
@@ -838,7 +844,7 @@ function CommonAI:HandleUnitTargetAbility(entity, abilityInfo, target, targetInf
                 elseif self.currentState ~= AIStates.Channeling then
                     -- 移动到施法距离内
                     local targetPosition = self.treetarget and self.treetarget:GetAbsOrigin() or targetInfo.targetPos
-                    self:MoveToRange(targetPosition, abilityInfo.castRange)
+                    self:MoveToRange(targetPosition, totalRange)
                     self:SetState(AIStates.Seek)
                     self:log(string.format("不在施法范围内，移动到施法范围，进入Seek状态，目标距离: %.2f，施法距离: %.2f", targetInfo.distance, abilityInfo.castRange))
                 end
@@ -863,11 +869,12 @@ end
 
 function CommonAI:HandlePointTargetAbility(entity, abilityInfo, target, targetInfo)
     if abilityInfo.targetTeam ~= DOTA_UNIT_TARGET_TEAM_FRIENDLY then
-        if self:IsInRange(target, abilityInfo.castRange) then
+        local totalRange = self:GetSkillRangeThreshold(abilityInfo.skill, entity, abilityInfo.aoeRadius)
+        if self:IsInRange(target, totalRange) then
             -- 敌人在施法范围内
             self:HandleEnemyPoint_InCastRange(entity, target, abilityInfo, targetInfo)
             self:OnSpellCast(entity, abilityInfo.skill, abilityInfo.castPoint, abilityInfo.channelTime, target)
-        elseif self:IsInRange(target, abilityInfo.castRange + abilityInfo.aoeRadius) then
+        elseif self:IsInRange(target, self:GetSkillRangeThreshold(abilityInfo.skill, entity, abilityInfo.castRange + abilityInfo.aoeRadius)) then
             -- 敌人在作用范围内
             self:HandleEnemyPoint_InAoeRange(entity, target, abilityInfo, targetInfo)
             self:OnSpellCast(entity, abilityInfo.skill, abilityInfo.castPoint, abilityInfo.channelTime, target)
@@ -877,9 +884,10 @@ function CommonAI:HandlePointTargetAbility(entity, abilityInfo, target, targetIn
                 self:OnSpellCast(entity, abilityInfo.skill, abilityInfo.castPoint, abilityInfo.channelTime, target)
             else
                 -- 移动到施法距离内
-                self:MoveToRange(targetInfo.targetPos, abilityInfo.castRange + abilityInfo.aoeRadius)
+                local totalRange = self:GetSkillRangeThreshold(abilityInfo.skill, entity, abilityInfo.castRange + abilityInfo.aoeRadius)
+                self:MoveToRange(targetInfo.targetPos, totalRange)
                 self:SetState(AIStates.Seek)
-                self:log(string.format("不在施法范围内，移动到施法范围，进入Seek状态，目标距离: %.2f，施法距离+作用范围: %.2f", targetInfo.distance, abilityInfo.castRange + abilityInfo.aoeRadius))
+                self:log(string.format("不在施法范围内，移动到施法范围，进入Seek状态，目标距离: %.2f，施法距离+作用范围: %.2f", targetInfo.distance, totalRange))
             end
         end
     elseif self:isSelfCastAbility(abilityInfo.abilityName) then
@@ -900,13 +908,14 @@ function CommonAI:HandleNoTargetAbility(entity, abilityInfo, target, targetInfo)
     if abilityInfo.aoeRadius ~= 0 and abilityInfo.aoeRadius < 150 then
         abilityInfo.aoeRadius = 150
     end
-    
-    if abilityInfo.aoeRadius == 0 and abilityInfo.castRange == 0 then
+    local totalRange = self:GetSkillRangeThreshold(abilityInfo.skill, entity, abilityInfo.castRange + abilityInfo.aoeRadius)
+    if  totalRange == 0 then
         self:log(string.format("技能: %s 没有作用范围，直接释放", abilityInfo.abilityName))
         entity:CastAbilityNoTarget(abilityInfo.skill, 0)
         self:OnSpellCast(entity, abilityInfo.skill, abilityInfo.castPoint, abilityInfo.channelTime, target)
     else
-        if self:IsInRange(target, abilityInfo.aoeRadius + abilityInfo.castRange) then
+
+        if self:IsInRange(target, totalRange) then
 
             if abilityInfo.abilityName == "zuus_heavenly_jump" and self.needToDodge == true then
                 local heroPosition = self.entity:GetAbsOrigin()
@@ -1045,7 +1054,7 @@ function CommonAI:HandleNoTargetAbility(entity, abilityInfo, target, targetInfo)
                 self:OnSpellCast(entity, abilityInfo.skill, abilityInfo.castPoint, abilityInfo.channelTime, target)
             end
         else
-            self:MoveToRange(targetInfo.targetPos, abilityInfo.aoeRadius + abilityInfo.castRange)
+            self:MoveToRange(targetInfo.targetPos, totalRange)
             self:SetState(AIStates.Seek)
             self:log(string.format("技能: %s 敌人不在作用范围内，移动到作用范围，目标距离: %.2f，作用范围: %.2f", abilityInfo.abilityName, targetInfo.distance, abilityInfo.aoeRadius + abilityInfo.castRange))
         end

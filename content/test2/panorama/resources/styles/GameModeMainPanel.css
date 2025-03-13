@@ -1,0 +1,22 @@
+/* 添加测试按钮样式 */
+.AddNewHeroButton {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  background-color: #4CAF50;
+  border-radius: 5px;
+  border: 1px solid #388E3C;
+  padding: 8px 15px;
+  width: 200px;
+  height: 40px;
+  color: white;
+  font-size: 16px;
+  transition: background-color 0.2s;
+}
+
+.AddNewHeroButton:hover {
+  background-color: #66BB6A;
+}
+
+.AddNewHeroButton:active {
+  background-color: #388E3C;
+} 

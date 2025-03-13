@@ -476,8 +476,10 @@
 }
 
 
-.GameSetupPanelHidden {
-  visibility: collapse;
+.HeroSetupContainer {
+  width: 100%;
+  flow-children: down;
+  padding: 10px;
 }
 
 

@@ -118,7 +118,7 @@ function modifier_global_ability_listener:CheckForDodgeableAbility(caster, abili
 
 
     if not Main or not Main.currentArenaHeroes then 
-        print("失败：Main 或 currentArenaHeroes 不存在")
+        --print("失败：Main 或 currentArenaHeroes 不存在")
         return 
     end
 
@@ -141,55 +141,55 @@ function modifier_global_ability_listener:CheckForDodgeableAbility(caster, abili
         return
     end
 
-    print("释放技能的玩家：" .. player:GetUnitName())
-    print("AI控制的英雄：" .. aiHero:GetUnitName())
+    --print("释放技能的玩家：" .. player:GetUnitName())
+    --print("AI控制的英雄：" .. aiHero:GetUnitName())
 
     local aiWrapper = AIs[aiHero]
     if not aiWrapper or not aiWrapper.ai then
-        print("失败：AI包装器或AI实例不存在")
+        --print("失败：AI包装器或AI实例不存在")
         return
     end
 
     local ai = aiWrapper.ai
     if not ai.DodgableSkills then
-        print("失败：AI 的 DodgableSkills 不存在")
+        --print("失败：AI 的 DodgableSkills 不存在")
         return
     end
 
     local abilityName = ability:GetAbilityName()
-    print("检查的技能名称：" .. abilityName)
+    --print("检查的技能名称：" .. abilityName)
 
     if ai.DodgableSkills[abilityName] then
-        print("该技能在可躲避列表中")
+        --print("该技能在可躲避列表中")
         local dodgeableAbilities = self:GetHeroDodgeableAbilities(aiHero)
-        print("AI 英雄可用的躲避技能数量：" .. #dodgeableAbilities)
+        --print("AI 英雄可用的躲避技能数量：" .. #dodgeableAbilities)
 
         if #dodgeableAbilities > 0 then
             ai.needToDodge = true
             ai.shouldStop = true
             ai.dodgeableAbilities = dodgeableAbilities
-            print("已经将躲避信息发送给 AI")
-            print("设置 needToDodge 为 true")
-            print("设置 shouldStop 为 true")
-            print("可用的躲避技能：")
+           -- print("已经将躲避信息发送给 AI")
+            --print("设置 needToDodge 为 true")
+            --print("设置 shouldStop 为 true")
+            --print("可用的躲避技能：")
             for _, abilityName in ipairs(dodgeableAbilities) do
                 print("  - " .. abilityName)
             end
 
             if ai.OnNeedToDodge then
-                print("调用 AI 的 OnNeedToDodge 函数")
+                --print("调用 AI 的 OnNeedToDodge 函数")
                 ai:OnNeedToDodge(ability, dodgeableAbilities)
             else
-                print("AI 没有 OnNeedToDodge 函数")
+                --print("AI 没有 OnNeedToDodge 函数")
             end
         else
-            print("AI 英雄没有可用的躲避技能")
+            --print("AI 英雄没有可用的躲避技能")
         end
     else
-        print("该技能不在可躲避列表中")
+        --print("该技能不在可躲避列表中")
     end
 
-    print("检查可躲避技能结束")
+    --print("检查可躲避技能结束")
 end
 
 

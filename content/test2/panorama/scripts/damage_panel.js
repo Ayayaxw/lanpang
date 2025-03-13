@@ -14,7 +14,7 @@
     
     // 日志函数
     function logMessage(message) {
-        $.Msg("[技能伤害面板] " + message);
+        //$.Msg("[技能伤害面板] " + message);
     }
     
     // 模拟的技能数据，用于测试

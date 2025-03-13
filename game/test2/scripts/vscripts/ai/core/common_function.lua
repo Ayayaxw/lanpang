@@ -472,7 +472,8 @@ function CommonAI:IsUnableToCastAbility(entity, skill)
         ["modifier_meepo_megameepo"] = "米波合体",
         ["modifier_witch_doctor_voodoo_switcheroo"] = "巫医变形",
         ["modifier_dawnbreaker_solar_guardian_disable"] = "破晓晨星大招",
-        ["modifier_dazzle_nothl_projection_physical_body_debuff"] = "戴泽灵魂状态"
+        ["modifier_dazzle_nothl_projection_physical_body_debuff"] = "戴泽灵魂状态",
+
     }
 
     for modifierName, description in pairs(negativeModifiers) do
@@ -496,10 +497,13 @@ function CommonAI:IsUnableToAttack(entity, target)
     if self:containsStrategy(self.global_strategy, "禁用普攻") then
         return true
     end
+	
+    
 
     local UNABLE_TO_ATTACK_MODIFIERS = {
         ["modifier_meepo_megameepo"] = true,
         ["modifier_hoodwink_sharpshooter_windup"] = true,
+        ["modifier_spirit_breaker_charge_of_darkness"] = true,
 
     }
 
@@ -711,6 +715,10 @@ end
 
 -- 辅助函数：检查表中是否包含特定元素
 function CommonAI:tableContains(table, element)
+    --允许检查表是不是空的
+    if table == nil or table == {} then
+        return false
+    end
     for _, value in pairs(table) do
         if value == element then
             return true

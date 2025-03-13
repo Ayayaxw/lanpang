@@ -436,6 +436,8 @@ function Main:OnNPCSpawned_SoulOut_Sniper(spawnedUnit, event)
         if modifier then
             -- 设置modifier持续时间为无限(-1表示永久持续)
             modifier:SetDuration(-1, true)
+            --把这个单位归玩家0控制
+            spawnedUnit:SetControllableByPlayer(0, true)
         end
     end)
     end

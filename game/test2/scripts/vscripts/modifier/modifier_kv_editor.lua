@@ -38,6 +38,12 @@ function modifier_kv_editor:GetModifierOverrideAbilitySpecial(params)
 
     local hero_name = hero:GetUnitName()
     local ability_name = ability:GetAbilityName()
+    
+    -- 处理熊猫酒仙的元素分身
+    if hero_name:find("npc_dota_brewmaster_") then
+        hero_name = "npc_dota_hero_brewmaster" -- 使用熊猫酒仙的英雄名
+    end
+    
     local ability_index = hero_name .. "_" .. ability_name
 
     local ability_data = CustomNetTables:GetTableValue("edit_kv", ability_index)
@@ -60,10 +66,17 @@ function modifier_kv_editor:GetModifierOverrideAbilitySpecialValue(params)
     local base_value = ability:GetLevelSpecialValueNoOverride(special_value_name, ability_special_level)
 
     local hero = ability:GetCaster()
-    if not hero or not hero:IsRealHero() then return base_value end
+    if not hero then return base_value end
 
     local hero_name = hero:GetUnitName()
     local ability_name = ability:GetAbilityName()
+    
+    -- 处理熊猫酒仙的元素分身
+    local is_brew_spirit = false
+    if hero_name:find("npc_dota_brewmaster_") then
+        is_brew_spirit = true
+        hero_name = "npc_dota_hero_brewmaster" -- 使用熊猫酒仙的英雄名
+    end
 
     -- 添加龙骑士龙尾的调试信息
     if ability_name == "lion_finger_of_death" then
@@ -71,6 +84,9 @@ function modifier_kv_editor:GetModifierOverrideAbilitySpecialValue(params)
         print("特殊值名称:", special_value_name)
         print("基础值:", base_value)
         print("英雄名称:", hero_name)
+        if is_brew_spirit then
+            print("单位是熊猫酒仙元素分身")
+        end
     end
 
     local ability_index = hero_name .. "_" .. ability_name
@@ -96,6 +112,59 @@ function modifier_kv_editor:GetModifierOverrideAbilitySpecialValue(params)
                 return tonumber(ability_data[special_value_name]:sub(2))
             end
             return ability_data[special_value_name]
+        end
+        return base_value
+    end
+
+    -- 对元素分身的特殊处理：跳过天赋和命石检查
+    if is_brew_spirit then
+        -- 直接处理基础值覆盖
+        if ability_data[special_value_name] then
+            local override_value = ability_data[special_value_name]
+            
+            -- 简单值覆盖
+            if type(override_value) ~= "table" then
+                if type(override_value) == "string" then
+                    if override_value:sub(1,1) == "=" then
+                        return tonumber(override_value:sub(2))
+                    end
+                    local values = {}
+                    for number in override_value:gmatch("%S+") do
+                        table.insert(values, tonumber(number))
+                    end
+                    local level = ability_special_level + 1
+                    
+                    if values[level] then
+                        return values[level]
+                    else
+                        return values[#values]
+                    end
+                else
+                    return override_value
+                end
+            else
+                -- 为元素分身处理复杂表格数据
+                local value = override_value.value
+                if type(value) == "string" then
+                    if value:sub(1,1) == "=" then
+                        return tonumber(value:sub(2))
+                    else
+                        -- 处理多等级值
+                        local values = {}
+                        for number in value:gmatch("%S+") do
+                            table.insert(values, tonumber(number))
+                        end
+                        local level = ability_special_level + 1
+                        if values[level] then
+                            return values[level]
+                        else
+                            return values[#values]
+                        end
+                    end
+                else
+                    return value or base_value
+                end
+            end
         end
         return base_value
     end

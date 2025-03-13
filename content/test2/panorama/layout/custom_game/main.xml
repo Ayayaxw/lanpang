@@ -66,6 +66,9 @@
     <include src="file://{resources}/scripts/MatchUI/HeroVersusTop.js" />
     <include src="file://{resources}/scripts/MatchUI/attack_info.js" />
     <include src="file://{resources}/scripts/Common/PrintMaster.js" />
+    <include src="file://{resources}/scripts/OnReceive/send_item_list.js" />
+    <include src="file://{resources}/scripts/OnReceive/show_hero.js" />
+    <include src="file://{resources}/scripts/OnReceive/show_left_hero.js" />
 
 
   </scripts>
@@ -631,101 +634,105 @@
           </Button>
         </Panel>
 
-    <!-- 自己的英雄设置 -->
-    <Panel class="GameSetupPanelSettingsRow2" id="SelfHeroRow" style="visibility: collapse;">
-      <Panel class="HeroSelectionMainRow">
-        <Label class="GameSetupPanelSettingLabel1" text="英雄（自己）" />
-        <Panel class="HeroSelectionRightContent">
-          <Panel class="HeroLabelContainer">
-            <Label id="SelfHeroLabel" class="HeroLabel" text="未选择英雄" />
-            <Button id="ModifySelfHeroButton" class="ModifyButton">
+      <!-- 自己的英雄设置 -->
+<!--       <Panel class="GameSetupPanelSettingsRow2" id="SelfHeroRow" style="visibility: collapse;">
+        <Panel class="HeroSelectionMainRow">
+          <Label class="GameSetupPanelSettingLabel1" text="英雄（自己）" />
+          <Panel class="HeroSelectionRightContent">
+            <Panel class="HeroLabelContainer">
+              <Label id="SelfHeroLabel" class="HeroLabel" text="未选择英雄" />
+              <Button id="ModifySelfHeroButton" class="ModifyButton">
+                <Label text="修改" />
+              </Button>
+            </Panel>
+          </Panel>
+        </Panel>
+        <Panel id="SelfHeroRow3" class="GameSetupPanelSettingsRow3 GameSetupPanelhidden">
+          <Panel class="HeroSelectionSubRow">
+            <Panel id="SelfHeroItemPanel" class="HeroItemPanel">
+
+            </Panel>
+          </Panel>
+          <Panel class="HeroControlContainer">
+            <Button id="AddSelfItemButton" class="AddItemButton">
+              <Label text="添加物品" />
+            </Button>
+            <ToggleButton id="SelfHeroAIToggle" class="HeroAIToggle">
+              <Label class="HeroAIToggleLabel" text="开启AI" />
+            </ToggleButton>
+          </Panel>
+        </Panel>
+
+        <Panel id="SelfHeroRow4" class="GameSetupPanelSettingsRow4 GameSetupPanelhidden">
+          <Panel class="StrategySelectionRow">
+            <Label class="StrategyLabel" text="整体策略(AI):" />
+            <Label id="SelfOverallStrategyLabel" class="StrategyValue" text="未选择" />
+            <Button id="ModifySelfOverallStrategyButton" class="ModifyButton">
+              <Label text="修改" />
+            </Button>
+          </Panel>
+          <Panel class="StrategySelectionRow">
+            <Label class="StrategyLabel" text="英雄策略(AI):" />
+            <Label id="SelfHeroStrategyLabel" class="StrategyValue" text="未选择" />
+            <Button id="ModifySelfHeroStrategyButton" class="ModifyButton">
               <Label text="修改" />
             </Button>
           </Panel>
         </Panel>
-      </Panel>
-      <Panel id="SelfHeroRow3" class="GameSetupPanelSettingsRow3 GameSetupPanelhidden">
-        <Panel class="HeroSelectionSubRow">
-          <Panel id="SelfHeroItemPanel" class="HeroItemPanel">
-            <!-- 物品条目将动态添加到这里 -->
+      </Panel> -->
+
+      <!-- 对手的英雄设置 -->
+<!--       <Panel class="GameSetupPanelSettingsRow2" id="OpponentHeroRow" style="visibility: collapse;">
+        <Panel class="HeroSelectionMainRow">
+          <Label class="GameSetupPanelSettingLabel1" text="英雄（对手）" />
+          <Panel class="HeroSelectionRightContent">
+            <Panel class="HeroLabelContainer">
+              <Label id="OpponentHeroLabel" class="HeroLabel" text="未选择英雄" />
+              <Button id="ModifyOpponentHeroButton" class="ModifyButton">
+                <Label text="修改" />
+              </Button>
+            </Panel>
           </Panel>
         </Panel>
-        <Panel class="HeroControlContainer">
-          <Button id="AddSelfItemButton" class="AddItemButton">
-            <Label text="添加物品" />
-          </Button>
-          <ToggleButton id="SelfHeroAIToggle" class="HeroAIToggle">
-            <Label class="HeroAIToggleLabel" text="开启AI" />
-          </ToggleButton>
+        <Panel id="OpponentHeroRow3" class="GameSetupPanelSettingsRow3 GameSetupPanelhidden">
+          <Panel class="HeroSelectionSubRow">
+            <Panel id="OpponentHeroItemPanel" class="HeroItemPanel">
+
+            </Panel>
+          </Panel>
+          <Panel class="HeroControlContainer">
+            <Button id="AddOpponentItemButton" class="AddItemButton">
+              <Label text="添加物品" />
+            </Button>
+            <ToggleButton id="OpponentHeroAIToggle" class="HeroAIToggle" selected="true">
+              <Label class="HeroAIToggleLabel" text="开启AI" />
+            </ToggleButton>
+          </Panel>
         </Panel>
-      </Panel>
-
-      <Panel id="SelfHeroRow4" class="GameSetupPanelSettingsRow4 GameSetupPanelhidden">
-        <Panel class="StrategySelectionRow">
-          <Label class="StrategyLabel" text="整体策略(AI):" />
-          <Label id="SelfOverallStrategyLabel" class="StrategyValue" text="未选择" />
-          <Button id="ModifySelfOverallStrategyButton" class="ModifyButton">
-            <Label text="修改" />
-          </Button>
-        </Panel>
-        <Panel class="StrategySelectionRow">
-          <Label class="StrategyLabel" text="英雄策略(AI):" />
-          <Label id="SelfHeroStrategyLabel" class="StrategyValue" text="未选择" />
-          <Button id="ModifySelfHeroStrategyButton" class="ModifyButton">
-            <Label text="修改" />
-          </Button>
-        </Panel>
-      </Panel>
-    </Panel>
-
-
-
-    <!-- 对手的英雄设置 -->
-    <Panel class="GameSetupPanelSettingsRow2" id="OpponentHeroRow" style="visibility: collapse;">
-      <Panel class="HeroSelectionMainRow">
-        <Label class="GameSetupPanelSettingLabel1" text="英雄（对手）" />
-        <Panel class="HeroSelectionRightContent">
-          <Panel class="HeroLabelContainer">
-            <Label id="OpponentHeroLabel" class="HeroLabel" text="未选择英雄" />
-            <Button id="ModifyOpponentHeroButton" class="ModifyButton">
+        <Panel id="OpponentHeroRow4" class="GameSetupPanelSettingsRow4 GameSetupPanelhidden">
+          <Panel class="StrategySelectionRow">
+            <Label class="StrategyLabel" text="整体策略(AI):" />
+            <Label id="OpponentOverallStrategyLabel" class="StrategyValue" text="未选择" />
+            <Button id="ModifyOpponentOverallStrategyButton" class="ModifyButton">
+              <Label text="修改" />
+            </Button>
+          </Panel>
+          <Panel class="StrategySelectionRow">
+            <Label class="StrategyLabel" text="英雄策略(AI):" />
+            <Label id="OpponentHeroStrategyLabel" class="StrategyValue" text="未选择" />
+            <Button id="ModifyOpponentHeroStrategyButton" class="ModifyButton">
               <Label text="修改" />
             </Button>
           </Panel>
         </Panel>
-      </Panel>
-      <Panel id="OpponentHeroRow3" class="GameSetupPanelSettingsRow3 GameSetupPanelhidden">
-        <Panel class="HeroSelectionSubRow">
-          <Panel id="OpponentHeroItemPanel" class="HeroItemPanel">
-            <!-- 物品条目将动态添加到这里 -->
-          </Panel>
-        </Panel>
-        <Panel class="HeroControlContainer">
-          <Button id="AddOpponentItemButton" class="AddItemButton">
-            <Label text="添加物品" />
-          </Button>
-          <ToggleButton id="OpponentHeroAIToggle" class="HeroAIToggle" selected="true">
-            <Label class="HeroAIToggleLabel" text="开启AI" />
-          </ToggleButton>
-        </Panel>
-      </Panel>
-      <Panel id="OpponentHeroRow4" class="GameSetupPanelSettingsRow4 GameSetupPanelhidden">
-        <Panel class="StrategySelectionRow">
-          <Label class="StrategyLabel" text="整体策略(AI):" />
-          <Label id="OpponentOverallStrategyLabel" class="StrategyValue" text="未选择" />
-          <Button id="ModifyOpponentOverallStrategyButton" class="ModifyButton">
-            <Label text="修改" />
-          </Button>
-        </Panel>
-        <Panel class="StrategySelectionRow">
-          <Label class="StrategyLabel" text="英雄策略(AI):" />
-          <Label id="OpponentHeroStrategyLabel" class="StrategyValue" text="未选择" />
-          <Button id="ModifyOpponentHeroStrategyButton" class="ModifyButton">
-            <Label text="修改" />
-          </Button>
-        </Panel>
-      </Panel>
-    </Panel>
+      </Panel> -->
 
+      <!-- 动态添加英雄测试按钮 -->
+      <!-- <Panel class="GameSetupPanelSettingsRow">
+        <Button id="AddNewHeroButton" class="AddNewHeroButton">
+          <Label text="测试添加新英雄" />
+        </Button>
+      </Panel> -->
 
         <Panel class="ButtonRow">
           <Button id="CancelButton" class="CancelButton">

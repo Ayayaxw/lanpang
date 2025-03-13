@@ -579,7 +579,7 @@ function CommonAI:FindBestAbilityToUse(entity, target)
 
         if ability then
             local abilityName = ability:GetAbilityName()
-            if self.disabledSkills[heroName] and self:IsDisabledSkill(abilityName, heroName) then
+            if (self.disabledSkills[heroName] and self:IsDisabledSkill(abilityName, heroName)) or (self.disabledSkills_Threshold[heroName] and self:IsDisabledSkill_Threshold(abilityName, heroName)) then
                 self:log(string.format("忽略禁用的技能 %s", abilityName))
                 goto continue
             end

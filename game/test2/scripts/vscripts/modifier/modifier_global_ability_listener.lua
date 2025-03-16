@@ -1,4 +1,3 @@
-
 -- modifier_global_ability_listener.lua
 if modifier_global_ability_listener == nil then
     modifier_global_ability_listener = class({})
@@ -31,86 +30,127 @@ end
 
 function modifier_global_ability_listener:OnAbilityExecuted(params)
     if IsServer() then
+        print("有单位在放技能")
         local ability = params.ability
         local caster = params.unit
 
         if ability and caster and not ability:IsItem() then
+            print("技能名称: " .. ability:GetAbilityName())
+            print("施法者名称: " .. caster:GetUnitName())
+            
             -- 如果施法者是英雄(包括幻象)
             if caster:IsHero() then
+                print("施法者是英雄: " .. caster:GetUnitName())
                 local message = PrintManager:FormatAbilityMessage(caster, ability)
                 PrintManager:PrintMessage(message)
                 
                 -- 记录使用过技能的英雄
                 Main.heroesUsedAbility[caster:GetEntityIndex()] = true
+                print("已记录英雄使用技能: " .. caster:GetEntityIndex())
+                
+                -- 初始化英雄技能记录表
+                if not Main.heroLastCastAbility then
+                    Main.heroLastCastAbility = {}
+                    print("初始化英雄技能记录表")
+                end
+                
+                local heroIndex = caster:GetEntityIndex()
+                -- 初始化该英雄的技能记录表
+                if not Main.heroLastCastAbility[heroIndex] then
+                    Main.heroLastCastAbility[heroIndex] = {}
+                    print("初始化英雄 " .. caster:GetUnitName() .. " 的技能记录表")
+                end
+
+                local abilityName = ability:GetAbilityName()
+                print("记录技能 " .. abilityName .. " 的释放时间")
+                -- 记录该英雄每个技能最近一次释放的时间
+                Main.heroLastCastAbility[heroIndex][abilityName] = {
+                    hero = caster:GetUnitName(),
+                    time = GameRules:GetGameTime()
+                }
+                print("当前游戏时间: " .. GameRules:GetGameTime())
+            else
+                print("施法者不是英雄: " .. caster:GetUnitName())
+            end
+        else
+            if not ability then
+                print("无效的技能对象")
+            end
+            if not caster then
+                print("无效的施法者对象")
+            end
+            if ability and ability:IsItem() then
+                print("这是一个物品技能: " .. ability:GetAbilityName())
             end
         end
 
         self:CheckForDodgeableAbility(caster, ability)
+        print("检查完可躲避技能")
     end
 end
 
-function modifier_global_ability_listener:CheckForRubick(caster, ability)
-    if not Main or not Main.currentArenaHeroes then 
-        return 
-    end
+-- function modifier_global_ability_listener:CheckForRubick(caster, ability)
+--     if not Main or not Main.currentArenaHeroes then 
+--         return 
+--     end
 
-    local leftHero = Main.currentArenaHeroes[1]
-    local rightHero = Main.currentArenaHeroes[2]
+--     local leftHero = Main.currentArenaHeroes[1]
+--     local rightHero = Main.currentArenaHeroes[2]
 
-    if not leftHero or not rightHero then 
-        return 
-    end
+--     if not leftHero or not rightHero then 
+--         return 
+--     end
 
-    local rubick, opponent
+--     local rubick, opponent
 
-    if leftHero:GetUnitName() == "npc_dota_hero_rubick" then
-        rubick = leftHero
-        opponent = rightHero
-    elseif rightHero:GetUnitName() == "npc_dota_hero_rubick" then
-        rubick = rightHero
-        opponent = leftHero
-    end
+--     if leftHero:GetUnitName() == "npc_dota_hero_rubick" then
+--         rubick = leftHero
+--         opponent = rightHero
+--     elseif rightHero:GetUnitName() == "npc_dota_hero_rubick" then
+--         rubick = rightHero
+--         opponent = leftHero
+--     end
 
-    if rubick and opponent and caster == opponent then
-        local rubickAIWrapper = AIs[rubick]
-        if rubickAIWrapper and rubickAIWrapper.ai then
-            local rubickAI = rubickAIWrapper.ai
-            rubickAI.enemyUsedAbility = true
+--     if rubick and opponent and caster == opponent then
+--         local rubickAIWrapper = AIs[rubick]
+--         if rubickAIWrapper and rubickAIWrapper.ai then
+--             local rubickAI = rubickAIWrapper.ai
+--             rubickAI.enemyUsedAbility = true
             
-            if rubickAI.OnOpponentCastAbility then
-                rubickAI:OnOpponentCastAbility(ability)
-            end
-        end
-    end
-end
+--             if rubickAI.OnOpponentCastAbility then
+--                 rubickAI:OnOpponentCastAbility(ability)
+--             end
+--         end
+--     end
+-- end
 
-function modifier_global_ability_listener:NotifyRubickAI(caster, ability)
-    local arenaHeroes = hero_duel.currentArenaHeroes
-    if not arenaHeroes then 
-        return 
-    end
+-- function modifier_global_ability_listener:NotifyRubickAI(caster, ability)
+--     local arenaHeroes = hero_duel.currentArenaHeroes
+--     if not arenaHeroes then 
+--         return 
+--     end
 
-    local rubick, opponent
+--     local rubick, opponent
     
-    for i = 1, 2 do
-        local hero = arenaHeroes[i]
-        if hero and hero:IsAlive() then
-            if hero:GetUnitName() == "npc_dota_hero_rubick" then
-                rubick = hero
-            else
-                opponent = hero
-            end
-        end
-    end
+--     for i = 1, 2 do
+--         local hero = arenaHeroes[i]
+--         if hero and hero:IsAlive() then
+--             if hero:GetUnitName() == "npc_dota_hero_rubick" then
+--                 rubick = hero
+--             else
+--                 opponent = hero
+--             end
+--         end
+--     end
 
-    if rubick and opponent and caster == opponent then
-        local rubickAIWrapper = AIs[rubick]
-        if rubickAIWrapper and rubickAIWrapper.ai then
-            local rubickAI = rubickAIWrapper.ai
-            rubickAI.enemyUsedAbility = true
-        end
-    end
-end
+--     if rubick and opponent and caster == opponent then
+--         local rubickAIWrapper = AIs[rubick]
+--         if rubickAIWrapper and rubickAIWrapper.ai then
+--             local rubickAI = rubickAIWrapper.ai
+--             rubickAI.enemyUsedAbility = true
+--         end
+--     end
+-- end
 
 
 

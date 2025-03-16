@@ -33,7 +33,7 @@ function CommonAI:Ini_SkillCastRange()
         phoenix_icarus_dive = 100,
         kez_echo_slash = 0,
         kez_shodo_sai = 500,
-        muerta_dead_shot = 2000,
+
         invoker_sun_strike = 9999,
         dawnbreaker_solar_guardian = 9999,
         furion_wrath_of_nature = 9999,
@@ -73,6 +73,7 @@ function CommonAI:GetSkillCastRange(entity, ability)
         local specialValueKeys = {
             mars_spear = "spear_range",
             primal_beast_onslaught = "max_distance",
+            muerta_dead_shot = "AbilityCastRange",
         }
         
         local specialValueKey = specialValueKeys[abilityName]
@@ -344,6 +345,9 @@ function CommonAI:GetSkillCastRange(entity, ability)
         if self:containsStrategy(self.hero_strategy, "先大后矛") then
             self.specificRadius.mars_spear = 620
         end
+    elseif abilityName == "tusk_ice_shards" then
+        print("tusk_ice_shards 的施法距离减少200")
+        castRange = castRange - 80
 
     elseif abilityName == "earthshaker_fissure" and self:containsStrategy(self.hero_strategy, "沟壑连招") then
         -- 获取跳跃技能

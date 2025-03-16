@@ -80,9 +80,9 @@ function GetTableLength(t)
 end
 
 -- 打印npc_abilities表
-print("开始打印npc_abilities表...")
-PrintAbilitiesTable(Main.npc_abilities)
-print("npc_abilities表打印完成")
+-- print("开始打印npc_abilities表...")
+-- PrintAbilitiesTable(Main.npc_abilities)
+-- print("npc_abilities表打印完成")
 
 Main.abilityListKV = {}
 Main.originAbility = {}

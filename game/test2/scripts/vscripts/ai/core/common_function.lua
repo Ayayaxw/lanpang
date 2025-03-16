@@ -236,7 +236,12 @@ end
 function CommonAI:MoveToRange(targetPosition, range)
     if self:containsStrategy(self.global_strategy, "原地不动") then
         self:log("策略:原地不动,禁止移动")
-        return
+        --如果self.entity被沉默了，不return
+        if not self.entity:IsSilenced() then
+            return
+        end
+
+        
     end
 
     local target = self.target
@@ -550,7 +555,10 @@ function CommonAI:IsUnableToAttack(entity, target)
         local attackRange = entity:Script_GetAttackRange()
         if distance > attackRange then
             printReason("原地不动策略，目标超出攻击范围")
-            return true
+            if not self.entity:IsSilenced() then
+                return true
+            end
+
         end
     end
     

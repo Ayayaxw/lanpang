@@ -239,6 +239,13 @@ function Main:Init_Skill_Probability_100(event, playerID)
                     }
                 }
             },
+            kez_falcon_rush = {
+                AbilityValues = {
+                    buff_evasion_pct = {
+                        value = 100
+                    }
+                }
+            },
         },
         npc_dota_hero_drow_ranger = {
             drow_ranger_marksmanship = {
@@ -738,7 +745,7 @@ function Main:OnAbilityUsed_Skill_Probability_100(event)
     --如果英雄释放的技能是chaos_knight_reality_rift，让英雄对目标施加持续三秒的缴械、沉默和破坏效果
     if event.abilityname == "chaos_knight_reality_rift" then
         target:AddNewModifier(caster, nil, "modifier_break", {duration = 3})
-        target:AddNewModifier(caster, nil, "modifier_silenced", {duration = 3})
+        target:AddNewModifier(caster, nil, "modifier_silence", {duration = 3})
         target:AddNewModifier(caster, nil, "modifier_disarmed", {duration = 3})
     end
     

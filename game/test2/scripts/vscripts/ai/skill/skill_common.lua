@@ -115,7 +115,7 @@ function CommonAI:GetAbilityInfo(skill, castRange, aoeRadius)
         return table.concat(names, ", ")
     end
 
-    self:log(string.format("技能: %s", info.abilityName))
+    self:log(string.format("技能信息打印: %s", info.abilityName))
     self:log(string.format("施法前摇时间 (GetCastPoint): %.2f", info.castPoint))
     self:log(string.format("技能引导时间 (GetChannelTime): %.2f", info.channelTime))
     self:log(string.format("施法距离 (GetCastRange): %.2f", info.castRange))
@@ -153,6 +153,7 @@ function CommonAI:GetAbilityBehavior(skill, distance, aoeRadius)
         earth_spirit_geomagnetic_grip = DOTA_ABILITY_BEHAVIOR.POINT,
         phoenix_icarus_dive = DOTA_ABILITY_BEHAVIOR.POINT,
         dragon_knight_breathe_fire = DOTA_ABILITY_BEHAVIOR.POINT,
+        jakiro_dual_breath = DOTA_ABILITY_BEHAVIOR.POINT,
 
         furion_wrath_of_nature = DOTA_ABILITY_BEHAVIOR.UNIT_TARGET,
         dawnbreaker_solar_guardian = DOTA_ABILITY_BEHAVIOR.UNIT_TARGET,

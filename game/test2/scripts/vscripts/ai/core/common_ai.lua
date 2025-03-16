@@ -104,6 +104,14 @@ function CommonAI:Think(entity)
         return nil  -- 彻底停止AI循环
     end
 
+
+    if self:containsStrategy(self.global_strategy, "仅仅控制召唤物") then
+        self:log("仅仅控制召唤物")
+        if self.entity:IsRealHero() then
+            return nil
+        end
+    end
+
     if self.shouldStop == true then
         self:log("[AI] shouldStop为true，当前状态: " .. tostring(self.currentState))
         if self.currentState ~= AIStates.Idle then
@@ -233,16 +241,39 @@ function CommonAI:Think(entity)
                 nil,
                 1500, -- Search radius
                 DOTA_UNIT_TARGET_TEAM_ENEMY,
-                DOTA_UNIT_TARGET_ALL,
-                DOTA_UNIT_TARGET_FLAG_NONE,
+                DOTA_UNIT_TARGET_HERO,
+                DOTA_UNIT_TARGET_FLAG_NOT_ILLUSIONS,
                 FIND_CLOSEST,
                 false
             )
             
+            -- 如果找到非幻象英雄单位
             for _, unit in pairs(units) do
                 if self:CanAttackTarget(entity, unit) then
                     target = unit
                     break
+                end
+            end
+
+            -- 如果没找到非幻象英雄单位，寻找其他单位
+            if not target then
+                units = FindUnitsInRadius(
+                    entity:GetTeamNumber(),
+                    entity:GetAbsOrigin(),
+                    nil,
+                    1500, -- Search radius
+                    DOTA_UNIT_TARGET_TEAM_ENEMY,
+                    DOTA_UNIT_TARGET_ALL,
+                    DOTA_UNIT_TARGET_FLAG_NONE,
+                    FIND_CLOSEST,
+                    false
+                )
+                
+                for _, unit in pairs(units) do
+                    if self:CanAttackTarget(entity, unit) then
+                        target = unit
+                        break
+                    end
                 end
             end
         end
@@ -748,25 +779,123 @@ function CommonAI:HandleMuertaDeadShot(entity, ability)
     local searchCenter = self.target:GetAbsOrigin()
     local searchRadius = self:GetSkillCastRange(entity, ability)
     local trees = GridNav:GetAllTreesAroundPoint(searchCenter, searchRadius, true)
-    local closestTree = nil
-    local closestDistance = math.huge
-
+    local validTrees = {}
+    
+    self:log("搜索到树木总数: " .. #trees)
+    
+    -- 计算从自己到敌人的方向向量
+    local entityPos = entity:GetOrigin()
+    local targetPos = self.target:GetAbsOrigin()
+    local dirToEnemy = (targetPos - entityPos):Normalized()
+    local entityForward = entity:GetForwardVector()
+    
+    -- 计算自己当前朝向与敌人方向的夹角(弧度)
+    local angleToEnemy = math.acos(entityForward:Dot(dirToEnemy))
+    self:log("当前朝向与敌人方向夹角: " .. math.deg(angleToEnemy) .. "度")
+    
+    -- 给每棵树分配一个唯一ID，用于稳定排序
+    local treeCount = 0
+    local frontalTrees = {}  -- 前方的树
+    local otherTrees = {}    -- 其他方向的树
+    local behindEnemyTrees = {}  -- 敌人身后的树
+    
     for _, tree in pairs(trees) do
         local treePos = tree:GetAbsOrigin()
-        local treeDistanceToPlayer = (treePos - entity:GetOrigin()):Length2D()
-        if treeDistanceToPlayer < closestDistance then
-            closestTree = tree
-            closestDistance = treeDistanceToPlayer
+        local treeDistanceToPlayer = (treePos - entityPos):Length2D()
+        
+        -- 确保树在自己的施法范围内
+        if treeDistanceToPlayer <= searchRadius then
+            treeCount = treeCount + 1
+            
+            -- 计算从自己到树的方向
+            local dirToTree = (treePos - entityPos):Normalized()
+            -- 计算从自己到树的方向与自己到敌人方向的夹角(弧度)
+            local angleToTree = math.acos(dirToTree:Dot(dirToEnemy))
+            
+            -- 计算从敌人到树的方向向量
+            local enemyToTreeVector = (treePos - targetPos):Normalized()
+            -- 计算敌人到树的方向与自己到敌人方向的夹角(弧度)
+            local angleEnemyToTree = math.acos(enemyToTreeVector:Dot(dirToEnemy * -1))
+            -- 判断树是否在敌人身后 (夹角小于90度表示在敌人身后形成钝角)
+            local isBehindEnemy = math.deg(angleEnemyToTree) < 90
+            
+            local treeInfo = {
+                tree = tree, 
+                distance = treeDistanceToPlayer,
+                position = treePos,
+                id = treeCount,
+                angle = angleToTree,    -- 保存夹角
+                behindEnemy = isBehindEnemy  -- 是否在敌人身后
+            }
+            
+            -- 如果策略是"往前弹射"且树在敌人身后
+            if self:containsStrategy(self.hero_strategy, "往前弹射") and isBehindEnemy then
+                table.insert(behindEnemyTrees, treeInfo)
+                self:log("找到敌人背后的树 ID:" .. treeCount)
+            -- 其他情况按原来的逻辑处理
+            elseif math.deg(angleToTree) < 60 then
+                table.insert(frontalTrees, treeInfo)
+            else
+                table.insert(otherTrees, treeInfo)
+            end
         end
     end
-
-    if closestTree then
-        self:log("已经为琼英碧灵找好了树木目标")
-        self.treetarget = closestTree
+    
+    self:log("前方树木数量: " .. #frontalTrees .. ", 其他方向树木数量: " .. #otherTrees .. ", 敌人身后树木数量: " .. #behindEnemyTrees)
+    
+    -- 确定使用哪组树
+    local treesToUse = nil
+    if self:containsStrategy(self.hero_strategy, "往前弹射") then
+        if #behindEnemyTrees > 0 then
+            treesToUse = behindEnemyTrees
+            self:log("使用敌人身后的树木")
+        else
+            self:log("未找到敌人身后的树木，不选择任何树木")
+            self.treetarget = nil
+            return self.target
+        end
+    else
+        treesToUse = #frontalTrees > 0 and frontalTrees or otherTrees
+    end
+    
+    if treesToUse and #treesToUse > 0 then
+        -- 排序：优先按角度排序(角度小的优先)，然后按距离排序(距离远的优先)
+        table.sort(treesToUse, function(a, b)
+            -- 如果角度差异很小，按距离排序
+            if math.abs(a.angle - b.angle) < 0.2 then  -- 约10度差异
+                if math.abs(a.distance - b.distance) < 0.1 then
+                    -- 如果距离也很接近，使用ID排序保证稳定性
+                    return a.id < b.id
+                else
+                    -- 距离远的优先
+                    return a.distance > b.distance
+                end
+            else
+                -- 角度小的优先
+                return a.angle < b.angle
+            end
+        end)
+        
+        local selectedTree = treesToUse[1]
+        local treePos = selectedTree.position
+        
+        self:log("选中树木: " .. 
+                (treesToUse == behindEnemyTrees and "敌人身后" or 
+                (treesToUse == frontalTrees and "前方" or "其他方向")) ..
+                " ID:" .. selectedTree.id .. 
+                " 距离:" .. string.format("%.2f", selectedTree.distance) .. 
+                " 角度:" .. string.format("%.2f", math.deg(selectedTree.angle)) .. "度" ..
+                " 位置:(" .. string.format("%.2f", treePos.x) .. 
+                "," .. string.format("%.2f", treePos.y) .. 
+                "," .. string.format("%.2f", treePos.z) .. ")" ..
+                (selectedTree.behindEnemy and " (在敌人身后)" or ""))
+        
+        self.treetarget = selectedTree.tree
     else
         self:log("未找到合适的树木目标")
         self.treetarget = nil
     end
+    
     return self.target
 end
 

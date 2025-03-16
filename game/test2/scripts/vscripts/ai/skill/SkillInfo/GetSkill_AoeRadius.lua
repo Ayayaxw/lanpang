@@ -47,7 +47,7 @@ function CommonAI:Ini_SkillAoeRadius()
         rattletrap_jetpack = 800,
         ursa_overpower = 2000,
         silencer_global_silence = 9999,
-        muerta_dead_shot = 1500,
+
         ember_spirit_immolation = 2000,
         phantom_lancer_juxtapose = 1000,
         pangolier_rollup = 2000,
@@ -72,6 +72,7 @@ function CommonAI:Ini_SkillAoeRadius()
         wisp_spirits_out = 9999,
         queenofpain_sonic_wave = 650,
         dazzle_nothl_projection = 9999,
+        gyrocopter_call_down =1200,
 
     }
     self.itemRadius = {
@@ -192,6 +193,9 @@ function CommonAI:GetSkillAoeRadius(ability)
     if self:containsStrategy(self.hero_strategy, "大招弹射") then
         self.specificRadius.skywrath_mage_mystic_flare = 850
     end
+    if self:containsStrategy(self.hero_strategy, "远程吼") then
+        self.specificRadius.axe_berserkers_call = 1000
+    end
 
     if self.needToDodge == true then
         self.specificRadius.zuus_heavenly_jump = 2500
@@ -238,13 +242,23 @@ function CommonAI:GetSkillAoeRadius(ability)
         mars_spear = "spear_width",
         sniper_concussive_grenade = "radius",
         visage_summon_familiars_stone_form = "stun_radius",
+        jakiro_dual_breath = "end_radius",
+        jakiro_macropyre = "path_width",
+        muerta_dead_shot = "AbilityCastRange",
+        muerta_ofrenda = "effect_radius",
+        jakiro_ice_path = "path_radius",
     }
 
 
     -- 特殊处理 templar_assassin_meld
-    if abilityName == "templar_assassin_meld" or abilityName == "sniper_take_aim" then
+    if abilityName == "templar_assassin_meld" then
         if caster then
             local attackRange = caster:Script_GetAttackRange()
+            aoeRadius = attackRange
+        end
+    elseif abilityName == "sniper_take_aim" then
+        if caster then
+            local attackRange = caster:Script_GetAttackRange() + 255
             aoeRadius = attackRange
         end
     elseif abilityName == "windrunner_windrun" then
@@ -265,9 +279,13 @@ function CommonAI:GetSkillAoeRadius(ability)
             aoeRadius = attackRange
         end
     elseif abilityName == "muerta_pierce_the_veil" then
-        if caster then
-            local attackRange = caster:Script_GetAttackRange() + 300
-            aoeRadius = attackRange
+        if self:containsStrategy(self.hero_strategy, "出门开大") then
+            aoeRadius = 0
+        else
+            if caster then
+                local attackRange = caster:Script_GetAttackRange() + 300
+                aoeRadius = attackRange
+            end
         end
 
     elseif abilityName == "slardar_slithereen_crush" then

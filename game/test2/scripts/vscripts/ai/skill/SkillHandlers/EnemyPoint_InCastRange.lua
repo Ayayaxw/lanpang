@@ -448,7 +448,14 @@ function CommonAI:HandleEnemyPoint_InCastRange(entity,target,abilityInfo,targetI
         end
         return true
 
-    
+    elseif abilityInfo.abilityName == "tusk_ice_shards" then
+            -- 计算新的目标位置，沿方向向量移动200码
+        print("敌人的位置" .. tostring(targetInfo.targetPos))
+        local newTargetPos = targetInfo.targetPos + targetInfo.targetDirection * 100
+        print("新的目标位置" .. tostring(newTargetPos))
+        entity:CastAbilityOnPosition(newTargetPos, abilityInfo.skill, 0)
+        abilityInfo.castPoint = CommonAI:calculateAdjustedCastPoint(entity,  newTargetPos, abilityInfo.castPoint)
+        return true
     
     -- elseif abilityInfo.abilityName == "pudge_meat_hook" then
     --     -- 获取角色面向的前方向量并归一化
@@ -470,7 +477,7 @@ function CommonAI:HandleEnemyPoint_InCastRange(entity,target,abilityInfo,targetI
     elseif abilityInfo.abilityName == "tidehunter_gush" then
         -- 获取角色面向的前方向量并归一化
 
-        local newTargetPos = entity:GetOrigin() + targetInfo.targetDirection * 100
+        local newTargetPos = entity:GetOrigin() + targetInfo.targetDirection * 80
     
         -- 施放技能到新的目标位置
         entity:CastAbilityOnPosition(newTargetPos, abilityInfo.skill, 0)
@@ -854,6 +861,21 @@ function CommonAI:HandleEnemyPoint_InCastRange(entity,target,abilityInfo,targetI
         
             abilityInfo.castPoint = CommonAI:calculateAdjustedCastPoint(entity,  targetInfo.targetPos, abilityInfo.castPoint)
             return true
+        end
+    elseif abilityInfo.abilityName == "sniper_shrapnel" then
+        -- 计算方向向量并归一化
+        if self:containsStrategy(self.global_strategy, "技能封走位") then
+            local castPosition = targetInfo.targetPos - targetInfo.targetDirection * abilityInfo.aoeRadius
+            entity:CastAbilityOnPosition(castPosition, abilityInfo.skill, 0)
+            abilityInfo.castPoint = CommonAI:calculateAdjustedCastPoint(entity, castPosition, abilityInfo.castPoint)
+            return true
+        else
+            entity:CastAbilityOnPosition(targetInfo.targetPos, abilityInfo.skill, 0)
+            self:log(string.format("目标是 %s ", target:GetUnitName()))
+            self:log(string.format("目标地点是 %s ", targetInfo.targetPos))
+    
+            abilityInfo.castPoint = CommonAI:calculateAdjustedCastPoint(entity, targetInfo.targetPos, abilityInfo.castPoint)
+            return true 
         end
     elseif abilityInfo.abilityName == "snapfire_mortimer_kisses" then
         local castPosition = targetInfo.targetPos - targetInfo.targetDirection * abilityInfo.aoeRadius

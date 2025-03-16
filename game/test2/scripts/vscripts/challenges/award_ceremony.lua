@@ -1,26 +1,23 @@
 function Main:Init_award_ceremony(heroName, heroFacet,playerID, heroChineseName)
     local spawnOrigin = Vector(43, -300, 256)  -- 假设的生成位置，您可以根据需要调整
-    --SpawnFourHeroes()
-    DisplayHeroes()
+    SpawnFourHeroes()
+    --DisplayHeroes()
 
 end
 
 
 function SpawnFourHeroes()
     -- 四个排名位置及其对应的英雄池
-    local rank1Heroes = {"npc_dota_hero_gyrocopter"}
+    local rank1Heroes = {"npc_dota_hero_faceless_void","npc_dota_hero_brewmaster"}
     local rank2Heroes = {    
-        "npc_dota_hero_sven",
-        "npc_dota_hero_tidehunter",
+        
 
     }
     --允许表格为空
-    local rank3Heroes = {}
+    local rank3Heroes = {"npc_dota_hero_muerta"}
     local rank4Heroes = {
-        "npc_dota_hero_witch_doctor",
-        "npc_dota_hero_spectre",
-        "npc_dota_hero_luna",
-        "npc_dota_hero_sand_king",
+        "npc_dota_hero_kez",
+
     }
     
     -- 排名位置坐标
@@ -106,6 +103,7 @@ function DisplayHeroes()
         "npc_dota_hero_brewmaster",
         "npc_dota_hero_muerta",
         "npc_dota_hero_razor",
+        "npc_dota_hero_broodmother",
 
 
     }
@@ -119,7 +117,6 @@ function DisplayHeroes()
         "npc_dota_hero_dawnbreaker",
         "npc_dota_hero_weaver",
         "npc_dota_hero_gyrocopter",
-        "npc_dota_hero_broodmother",
         "npc_dota_hero_monkey_king",
         "npc_dota_hero_shadow_shaman",
         "npc_dota_hero_jakiro",

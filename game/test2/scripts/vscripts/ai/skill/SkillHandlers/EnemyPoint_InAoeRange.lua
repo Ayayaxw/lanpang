@@ -1,5 +1,27 @@
 function CommonAI:HandleEnemyPoint_InAoeRange(entity,target,abilityInfo,targetInfo)
 
+    -- 添加新函数：检查目标是否有可驱散的增益BUFF
+    function CommonAI:HasDispellableBuff(target)
+        local hasPurgableBuff = false
+        -- 获取目标身上的所有modifier
+        local modifiers = target:GetModifiers()
+        
+        if modifiers then
+            for _, modifier in pairs(modifiers) do
+                if modifier and not modifier:IsNull() then
+                    -- 如果是增益效果(非减益)且可被驱散
+                    if not modifier:IsDebuff() and modifier:IsPurgable() then
+                        self:log(string.format("目标拥有可驱散增益: %s", modifier:GetName()))
+                        hasPurgableBuff = true
+                        break
+                    end
+                end
+            end
+        end
+        
+        return hasPurgableBuff
+    end
+
     if abilityInfo.abilityName == "XX" then
 
         local newTargetPos = entity:GetOrigin() - targetInfo.targetDirection * 350
@@ -116,7 +138,82 @@ function CommonAI:HandleEnemyPoint_InAoeRange(entity,target,abilityInfo,targetIn
     
         abilityInfo.castPoint = CommonAI:calculateAdjustedCastPoint(entity, castPosition, abilityInfo.castPoint)
         return true
+    elseif abilityInfo.abilityName == "tusk_ice_shards" then
+        -- 计算新的目标位置，沿方向向量移动200码
+        print("敌人的位置" .. tostring(targetInfo.targetPos))
+        local newTargetPos = targetInfo.targetPos + targetInfo.targetDirection * 80
+        print("新的目标位置" .. tostring(newTargetPos))
+        entity:CastAbilityOnPosition(newTargetPos, abilityInfo.skill, 0)
+        abilityInfo.castPoint = CommonAI:calculateAdjustedCastPoint(entity,  newTargetPos, abilityInfo.castPoint)
+        return true
 
+    elseif abilityInfo.abilityName == "jakiro_macropyre" then
+        -- 计算新的目标位置，沿方向向量移动200码
+        if self:containsStrategy(self.hero_strategy, "斜放大招") then
+            local entityPos = entity:GetAbsOrigin()
+            local targetPos = targetInfo.targetPos
+            local direction = (targetPos - entityPos):Normalized()
+            local distance = (targetPos - entityPos):Length2D()
+            
+            -- 圆的参数：以敌人为圆心，半径为250
+            local circleCenter = targetPos
+            local circleRadius = 220
+            
+            -- 计算切线
+            local castPosition
+            
+            -- 如果施法者在圆内，无法形成切线，直接朝目标方向施法
+            if distance <= circleRadius then
+                castPosition = entityPos + direction * abilityInfo.castRange
+                self:log("施法者在圆内，直接朝目标方向施法")
+            else
+                -- 计算从施法者到圆心的单位向量
+                local toCircleCenter = (circleCenter - entityPos):Normalized()
+                
+                -- 计算切线角度（勾股定理）
+                local sinTheta = circleRadius / distance
+                local cosTheta = math.sqrt(1 + sinTheta * sinTheta)
+                
+                -- 计算切线方向（顺时针旋转）
+                local tangentDirection = Vector(
+                    toCircleCenter.x * cosTheta - toCircleCenter.y * sinTheta,
+                    toCircleCenter.x * sinTheta + toCircleCenter.y * cosTheta,
+                    0
+                ):Normalized()
+                
+                -- 沿切线方向在最大施法距离处施法
+                castPosition = entityPos + tangentDirection * abilityInfo.castRange
+                
+                self:log(string.format("圆半径: %.2f, 到敌人距离: %.2f", circleRadius, distance))
+                self:log(string.format("切线角度: sinθ=%.2f, cosθ=%.2f", sinTheta, cosTheta))
+                self:log(string.format("切线方向: %s", tostring(tangentDirection)))
+            end
+            
+            entity:CastAbilityOnPosition(castPosition, abilityInfo.skill, 0)
+            abilityInfo.castPoint = CommonAI:calculateAdjustedCastPoint(entity, castPosition, abilityInfo.castPoint)
+            self:log(string.format("斜放大招施法位置: %s", tostring(castPosition)))
+            return true
+        else
+            entity:CastAbilityOnPosition(targetInfo.targetPos, abilityInfo.skill, 0)
+            abilityInfo.castPoint = CommonAI:calculateAdjustedCastPoint(entity,  targetInfo.targetPos, abilityInfo.castPoint)
+            return true
+        end
+
+    elseif abilityInfo.abilityName == "sniper_shrapnel" then
+        -- 计算方向向量并归一化
+        if self:containsStrategy(self.global_strategy, "技能封走位") then
+            local castPosition = targetInfo.targetPos - targetInfo.targetDirection * abilityInfo.aoeRadius
+            entity:CastAbilityOnPosition(castPosition, abilityInfo.skill, 0)
+            abilityInfo.castPoint = CommonAI:calculateAdjustedCastPoint(entity, castPosition, abilityInfo.castPoint)
+            return true
+        else
+            entity:CastAbilityOnPosition(targetInfo.targetPos, abilityInfo.skill, 0)
+            self:log(string.format("目标是 %s ", target:GetUnitName()))
+            self:log(string.format("目标地点是 %s ", targetInfo.targetPos))
+    
+            abilityInfo.castPoint = CommonAI:calculateAdjustedCastPoint(entity, targetInfo.targetPos, abilityInfo.castPoint)
+            return true     
+        end
     elseif abilityInfo.abilityName == "muerta_the_calling" then
         local targetOrigin = targetInfo.targetPos
         local casterOrigin = entity:GetOrigin()
@@ -189,6 +286,7 @@ function CommonAI:HandleEnemyPoint_InAoeRange(entity,target,abilityInfo,targetIn
             entity:CastAbilityOnPosition(castPosition, abilityInfo.skill, 0)
             abilityInfo.castPoint = CommonAI:calculateAdjustedCastPoint(entity, castPosition, abilityInfo.castPoint)
     
+            
         else
             local newTarget = self:FindUntargetedUnitInRange(entity, abilityInfo, {"modifier_death_prophet_silence"}, 0.5)
     

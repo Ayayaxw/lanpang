@@ -24,7 +24,7 @@ function CommonAI:Ini_MediumPrioritySkills()
             npc_dota_hero_storm_spirit = {"storm_spirit_electric_vortex","storm_spirit_ball_lightning"},
             npc_dota_hero_lina = {"lina_light_strike_array"},
             npc_dota_hero_skywrath_mage = {"skywrath_mage_ancient_seal"},
-            npc_dota_hero_muerta = {"muerta_pierce_the_veil","muerta_the_calling","muerta_dead_shot"},
+            npc_dota_hero_muerta = {"muerta_the_calling","muerta_dead_shot"},
             npc_dota_hero_phantom_assassin = {"phantom_assassin_fan_of_knives"},
             npc_dota_hero_witch_doctor = {"witch_doctor_voodoo_switcheroo"},
             npc_dota_hero_jakiro = {"jakiro_ice_path","jakiro_macropyre"},
@@ -40,7 +40,8 @@ function CommonAI:Ini_MediumPrioritySkills()
             npc_dota_hero_magnataur = {"magnataur_reverse_polarity","magnataur_horn_toss","magnataur_reversed_reverse_polarity"},
             npc_dota_hero_disruptor = {"disruptor_static_storm","disruptor_kinetic_field"},
             npc_dota_hero_zuus = {"zuus_heavenly_jump","zuus_cloud"},
-
+            npc_dota_hero_sniper = {"sniper_shrapnel"},
+            npc_dota_hero_brewmaster = {"brewmaster_primal_split"},
             npc_dota_hero_mirana = {"mirana_starfall"},
             npc_dota_hero_dark_seer = {"dark_seer_wall_of_replica","dark_seer_surge","dark_seer_vacuum",},
             npc_dota_hero_shadow_demon = {"shadow_demon_disruption"},
@@ -76,6 +77,8 @@ function CommonAI:Ini_MediumPrioritySkills()
             npc_dota_hero_pangolier = {"pangolier_rollup"},
             npc_dota_hero_shadow_shaman = {"shadow_shaman_voodoo"},
             npc_dota_hero_weaver = {"weaver_time_lapse"},
+            npc_dota_hero_brewmaster = {"brewmaster_storm_cyclone"},
+
             
 
 

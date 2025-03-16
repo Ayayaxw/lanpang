@@ -88,6 +88,7 @@ function CommonAI:Ini_DisabledSkills()
     end
 
     self.disabledSkills_Threshold = {
+        npc_dota_hero_muerta = {"muerta_pierce_the_veil"},
 
     }
 

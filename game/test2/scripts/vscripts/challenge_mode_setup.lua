@@ -492,17 +492,38 @@ function Main:RequestStrategyData()
             name = "谁近打谁",
             id = "who_near_attack_who"
         },
+        {
+            name = "技能封走位",
+            id = "skill_block_move"
+        },
+        {
+            name = "仅仅控制召唤物",
+            id = "help_control_minion"
+        },
     }
 
     --if self:containsStrategy(self.hero_strategy, "躲避模式") then
     local hero_strategies = {
         npc_dota_hero_dawnbreaker = {  -- 天怒法师
-        {
-            name = "满血开大",
-            id = "full_hp_ultimate"
+            {
+                name = "满血开大",
+                id = "full_hp_ultimate"
+            },
+
+        },
+        npc_dota_hero_jakiro = {  -- 天怒法师
+            {
+                name = "斜放大招",
+                id = "slant_ult"
+            },
+        },
+        npc_dota_hero_axe = {  -- 斧王
+            {
+                name = "远程吼",
+                id = "remote_roar"
+            },
         },
 
-    },
         npc_dota_hero_skywrath_mage = {  -- 天怒法师
             {
                 name = "大招弹射",
@@ -680,6 +701,10 @@ function Main:RequestStrategyData()
             {
                 name = "优先盾反",
                 id = "prioritize_shield_counter"
+            },
+            {
+                name = "无技能时保持双钗",
+                id = "keep_double_spear"
             },
         },
         npc_dota_hero_terrorblade = {  -- 熊战士
@@ -1054,6 +1079,10 @@ function Main:RequestStrategyData()
                 name = "无限灌酒",
                 id = "infinite_drink"
             },
+            {
+                name = "无脑吹风",
+                id = "no_brain_tornado"
+            },
         },
         npc_dota_hero_nyx_assassin = {  -- 司夜刺客
             {
@@ -1310,6 +1339,14 @@ function Main:RequestStrategyData()
             {
                 name = "连发",
                 id = "rapid_fire"
+            },
+            {
+                name = "出门开大",
+                id = "ult_on_spawn"
+            },
+            {
+                name = "往前弹射",
+                id = "1"
             },
         },
         npc_dota_hero_legion_commander = {  -- 军团指挥官

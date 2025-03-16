@@ -71,6 +71,25 @@ HeroSkillConditions = {
                 return false
             end
         },
+        ["broodmother_sticky_snare"] = {
+            function(self, caster, log)
+                -- 初始化上次返回true的时间
+                if not self.lastStickySnareTime then
+                    self.lastStickySnareTime = 0
+                end
+
+                local currentTime = GameRules:GetGameTime()
+                
+                -- 检查是否在3秒冷却时间内
+                if currentTime - self.lastStickySnareTime < 3 then
+                    return false
+                end
+                
+                -- 更新上次返回true的时间
+                self.lastStickySnareTime = currentTime
+                return true
+            end
+        },
     },
     ["npc_dota_hero_antimage"] = {
         ["antimage_blink"] = {
@@ -2288,46 +2307,21 @@ HeroSkillConditions = {
         ["drow_ranger_wave_of_silence"] = {
             function(self, caster, log)
                 local ability = caster:FindAbilityByName("drow_ranger_wave_of_silence")
-                if not ability then
-                    return false
-                end
-            
-                local castRange =  self:GetSkillCastRange(caster, ability)
-                local aoeRadius =  self:GetSkillAoeRadius(ability)
-                local searchRange = castRange
-            
-                if bit.band(ability:GetBehavior(), DOTA_ABILITY_BEHAVIOR_POINT) ~= 0 then
-                    searchRange = castRange + aoeRadius
-                    log("技能为点目标类型，搜索范围: " .. searchRange)
-                else
-                    log("技能非点目标类型，搜索范围: " .. searchRange)
-                end
-            
-                if self:containsStrategy(self.global_strategy, "防守策略") then
-                    searchRange = 3000
-                end
-
-                local enemies = FindUnitsInRadius(
-                    caster:GetTeamNumber(),
-                    caster:GetOrigin(),
-                    nil,
-                    searchRange,
-                    DOTA_UNIT_TARGET_TEAM_ENEMY,
-                    DOTA_UNIT_TARGET_HERO,
-                    0,
-                    FIND_ANY_ORDER,
-                    false
+                if not ability then return false end
+                
+                local potentialTarget = self:FindBestEnemyHeroTarget(
+                    caster,
+                    ability,
+                    {"modifier_drowranger_wave_of_silence"},
+                    0.5,
+                    "control" 
                 )
                 
-                for _, enemy in pairs(enemies) do
-                    if enemy:IsHero() and not enemy:IsSummoned() and self:NeedsModifierRefresh(enemy,{"modifier_drowranger_wave_of_silence"}, 0.5) then
-                        log("找到合适的英雄目标: " .. enemy:GetUnitName())
-                        return true
-                    end
+                if potentialTarget then
+                    self.target = potentialTarget
                 end
-            
-                log("没有找到合适的英雄目标")
-                return false
+
+                return potentialTarget ~= nil
             end
         },
     },
@@ -3177,11 +3171,16 @@ HeroSkillConditions = {
             function(self, caster, log)
                 -- 获取当前时间
                 local current_time = GameRules:GetGameTime()
+                local heroIndex = caster:GetEntityIndex()
+                
+                -- 获取上次释放时间
+                local last_cast_info = Main.heroLastCastAbility 
+                    and Main.heroLastCastAbility[heroIndex] 
+                    and Main.heroLastCastAbility[heroIndex]["sniper_shrapnel"]
+                local last_time = last_cast_info and last_cast_info.time or 0
                 
                 -- 如果是首次释放或者距离上次释放超过1秒
-                if not self.last_shrapnel_time or (current_time - self.last_shrapnel_time) > 1 then
-                    -- 记录这次释放的时间
-                    self.last_shrapnel_time = current_time
+                if not last_cast_info or (current_time - last_time) > 1 then
                     return true
                 end
                 
@@ -3238,6 +3237,14 @@ HeroSkillConditions = {
                 end
                 
                 if allDisabled then
+                    -- 检查是否满足"无技能时保持双钗"策略
+                    if self:containsStrategy(self.hero_strategy, "无技能时保持双钗") then
+                        -- 检查kez_falcon_rush是否处于隐藏状态
+                        local falcon_rush = caster:FindAbilityByName("kez_falcon_rush")
+                        if falcon_rush and falcon_rush:IsHidden() then
+                            return true
+                        end
+                    end
                     return false
                 end
 
@@ -4513,6 +4520,26 @@ HeroSkillConditions = {
                 return potentialTarget ~= nil
             end
         },
+        ["jakiro_ice_path_detonate"] = {
+            function(self, caster, log)
+                local ability = caster:FindAbilityByName("jakiro_ice_path_detonate")
+                if not ability then return false end
+                
+                local potentialTarget = self:FindBestEnemyHeroTarget(
+                    caster,
+                    ability,
+                    nil,
+                    nil,
+                    "control" 
+                )
+                
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+
+                return potentialTarget ~= nil
+            end
+        },
     },
     ["npc_dota_hero_leshrac"] = {
         ["leshrac_greater_lightning_storm"] = {
@@ -5394,6 +5421,45 @@ HeroSkillConditions = {
         },
 
     },
+    ["npc_dota_hero_muerta"] = {
+        ["muerta_dead_shot"] = {
+            function(self, caster, log)
+                print("正在检测技能: muerta_dead_shot")
+                self:log("正在检测技能: muerta_dead_shot")
+                local ability = caster:FindAbilityByName("muerta_dead_shot")
+                if not ability then return false end
+                
+                local potentialTarget = self:FindBestEnemyHeroTarget(
+                    caster,
+                    ability,
+                    {"modifier_muerta_dead_shot_fear"},
+                    0.5,
+                    "control" 
+                )
+                
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+
+                local current_time = GameRules:GetGameTime()
+                local heroIndex = caster:GetEntityIndex()
+                
+                -- 获取上次释放时间
+                local last_cast_info = Main.heroLastCastAbility 
+                    and Main.heroLastCastAbility[heroIndex] 
+                    and Main.heroLastCastAbility[heroIndex]["muerta_dead_shot"]
+                local last_time = last_cast_info and last_cast_info.time or 0
+                self:log("当前时间: " .. current_time)
+                self:log("上次释放时间: " .. last_time)
+                -- 如果是首次释放或者距离上次释放超过0.5秒
+                if (current_time - last_time) > 1 then
+                    return potentialTarget ~= nil
+                end
+
+                return false
+            end
+        },
+    },
 
 
     ["npc_dota_hero_elder_titan"] = {
@@ -6193,6 +6259,10 @@ HeroSkillConditions = {
         },
         ["brewmaster_storm_cyclone"] = {
             function(self, caster, log)
+
+                if self:containsStrategy(self.hero_strategy, "无脑吹风") then
+                    return true
+                end
                 local ability = caster:FindAbilityByName("brewmaster_storm_cyclone")
                 
                 -- 先找正在持续施法的目标
@@ -6263,8 +6333,11 @@ HeroSkillConditions = {
         },
         ["brewmaster_storm_dispel_magic"] = {
             function(self, caster, log)
-
-                return false
+                if self.target:HasModifier("modifier_kez_falcon_rush") then
+                    return true
+                else
+                    return false
+                end
             end
         },
         
@@ -6891,9 +6964,6 @@ function CommonAI:CheckSkillConditions(entity, heroName)
             goto continue
         end
 
-        -- 检查技能是否已在禁用列表中，如果在则直接跳过
-
-
         local isBelowThreshold = self:IsHPBelowSkillThreshold(ability, entity)
         if not self.disabledSkills_Threshold[heroName] then
             self.disabledSkills_Threshold[heroName] = {}
@@ -6902,8 +6972,6 @@ function CommonAI:CheckSkillConditions(entity, heroName)
             -- 未通过检查的日志
             local currentHp = entity:GetHealthPercent()
             -- 先检查表是否存在，如果不存在则初始化
-
-            
             if not self:tableContains(self.disabledSkills_Threshold[heroName], abilityName) then
                 table.insert(self.disabledSkills_Threshold[heroName], abilityName)
                 self:log(string.format("已将 %s 添加到 %s 的禁用列表中", abilityName, heroName))
@@ -6980,7 +7048,8 @@ function CommonAI:CheckUltimateConditions(ability, entity)
 end
 
 function CommonAI:FindConditionsForAbility(abilityName)
-
+    self:log("正在查找技能条件: " .. abilityName)
+    print("正在查找技能条件: " .. abilityName)
     for _, heroConditions in pairs(HeroSkillConditions) do
         if heroConditions[abilityName] then
             return heroConditions[abilityName]
@@ -7222,94 +7291,29 @@ function CommonAI:IsHPBelowSkillThreshold(ability, entity)
     
     -- 如果没有对应的技能阈值设置或阈值为0，不做限制
     if not self.skillThresholds or not self.skillThresholds[skillKey] then
-        self:log("技能:", abilityName, "没有设置血量阈值或阈值为0，无限制")
+
         return true
     end
     
     local healthPct = entity:GetHealthPercent()
     local hpThreshold = self.skillThresholds[skillKey].hpThreshold
     
-    self:log("检测技能:", abilityName, "血量阈值:", hpThreshold, "当前血量百分比:", healthPct)
+
     
     -- 当英雄血量低于等于阈值时，返回true，表示可以释放
     if healthPct <= hpThreshold then
-        self:log("技能:", abilityName, "血量条件满足: 当前血量", healthPct, "% <= 阈值", hpThreshold, "%")
+
         return true
     else
-        self:log("技能:", abilityName, "血量条件不满足: 当前血量", healthPct, "% > 阈值", hpThreshold, "%")
+
         return false
     end
 end
 
 
-function CommonAI:GetCalculatedSkillRange(ability, entity, range)
-    -- 如果没有目标，直接返回一个很大的值表示无限制
-    if not self.target then
-        self:log("没有目标，返回无限制范围")
-        return 99999
-    end
-
-    local abilityName = ability:GetAbilityName()
-    local skillKey = nil
-    
-    -- 判断是否是大招
-    if ability:GetAbilityType() == ABILITY_TYPE_ULTIMATE then
-        skillKey = "skill6" -- 大招对应skill6
-    else
-        -- 普通技能根据索引判断
-        local abilityIndex = ability:GetAbilityIndex() -- 从0开始的技能索引
-        
-        if abilityIndex == 0 then
-            skillKey = "skill1" -- 第一个技能
-        elseif abilityIndex == 1 then
-            skillKey = "skill2" -- 第二个技能
-        elseif abilityIndex == 2 then
-            skillKey = "skill3" -- 第三个技能
-        elseif abilityIndex == 3 then
-            skillKey = "skill4" -- 第四个技能
-        elseif abilityIndex == 4 then
-            skillKey = "skill5" -- 第五个技能
-        else
-            -- 如果索引超出范围，返回无限制范围
-            return 99999
-        end
-    end
-    
-    -- 如果没有对应的技能距离阈值设置，返回无限制范围
-    if not self.skillThresholds or not self.skillThresholds[skillKey] or not self.skillThresholds[skillKey].distThreshold then
-        self:log("技能:", abilityName, "没有设置距离阈值，返回无限制范围")
-        return 99999
-    end
-    
-    local distance = (entity:GetAbsOrigin() - self.target:GetAbsOrigin()):Length2D()
-    local distThreshold = self.skillThresholds[skillKey].distThreshold
-    
-    -- 如果距离阈值为0，认为是初始值，表示无限制
-    if distThreshold == 0 then
-        self:log("技能:", abilityName, "距离阈值为0(初始值)，返回无限制范围")
-        return 99999
-    end
-    
-    -- 如果传入了range参数，且阈值不为0，取两者中较小的值
-    -- range为0表示无限制，此时仍使用技能阈值
-    if range ~= nil then
-        if range == 0 then
-            self:log("技能:", abilityName, "传入range为0，使用原技能阈值:", distThreshold)
-        elseif distThreshold > 0 then
-            local originalThreshold = distThreshold
-            distThreshold = math.min(distThreshold, range)
-            self:log("技能:", abilityName, "原阈值:", originalThreshold, "range:", range, "最终使用阈值:", distThreshold)
-        end
-    end
-    
-    self:log("技能:", abilityName, "计算后的距离阈值:", distThreshold, "当前距离:", distance)
-    
-    -- 返回计算后的阈值
-    return distThreshold
-end
-
 function CommonAI:GetSkillRangeThreshold(ability, entity, range)
     local abilityName = ability:GetAbilityName()
+
     local skillKey = nil
     
     -- 判断是否是大招
@@ -7337,7 +7341,7 @@ function CommonAI:GetSkillRangeThreshold(ability, entity, range)
     
     -- 如果没有对应的技能距离阈值设置，返回range
     if not self.skillThresholds or not self.skillThresholds[skillKey] or not self.skillThresholds[skillKey].distThreshold then
-        self:log("技能:", abilityName, "没有设置距离阈值，返回range:", range)
+
         return range
     end
     
@@ -7346,10 +7350,10 @@ function CommonAI:GetSkillRangeThreshold(ability, entity, range)
     -- 处理range为0的情况
     if range == 0 then
         if distThreshold == 0 then
-            self:log("技能:", abilityName, "range和阈值均为0，返回0")
+
             return 0
         else
-            self:log("技能:", abilityName, "range为0，返回阈值:", distThreshold)
+
             return distThreshold
         end
     end
@@ -7358,7 +7362,7 @@ function CommonAI:GetSkillRangeThreshold(ability, entity, range)
     end
     -- 比较阈值和range，返回较小的值
     local result = math.min(distThreshold, range)
-    self:log("技能:", abilityName, "技能阈值:", distThreshold, "range:", range, "返回较小值:", result)
+
     
     return result
 end

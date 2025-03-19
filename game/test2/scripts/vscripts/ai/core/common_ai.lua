@@ -26,7 +26,6 @@ require("ai/skill/SkillHandlers/EnemyPoint_InCastRange")
 require("ai/skill/SkillHandlers/EnemyPoint_InAoeRange")
 require("ai/skill/SkillHandlers/EnemyPoint_OutOfRange")
 
-
 require("ai/skill/SkillHandlers/AllyTarget_InRange")
 require("ai/skill/SkillHandlers/AllyTarget_OutOfRange")
 

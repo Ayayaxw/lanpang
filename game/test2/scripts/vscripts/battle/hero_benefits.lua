@@ -1100,6 +1100,4 @@ function Main:HeroPreparation(heroName, hero, overallStrategy, heroStrategy)
         end
     end
 
-
-
 end

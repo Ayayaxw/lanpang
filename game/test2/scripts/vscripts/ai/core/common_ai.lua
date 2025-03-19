@@ -45,6 +45,7 @@ require("ai/skill/SkillInfo/Get_DodgableSkills")
 require("ai/skill/SkillInfo/Get_DodgeSkills")
 
 
+
 AIStates = {
     Idle = 0,
     Seek = 1,
@@ -1421,6 +1422,22 @@ function CommonAI:HandleAttack(target, abilityInfo, targetInfo)
         ExecuteOrderFromTable(order)
         self:log("有modifier_weaver_shukuchi修饰器且目标无标记，移动到目标位置")
         return self.nextThinkTime
+    elseif self.entity:HasModifier("modifier_leshrac_diabolic_edict") then
+        local myPos = self.entity:GetAbsOrigin()
+        local targetPos = target:GetAbsOrigin()
+        local distance = (targetPos - myPos):Length2D()
+        
+        if distance > 450 then
+            local order = {
+                UnitIndex = self.entity:entindex(),
+                OrderType = DOTA_UNIT_ORDER_MOVE_TO_POSITION,
+                TargetIndex = target:entindex(),
+                Position = targetPos
+            }
+            ExecuteOrderFromTable(order)
+            self:log(string.format("有modifier_leshrac_diabolic_edict修饰器，距离%.2f大于450，移动到目标位置", distance))
+            return self.nextThinkTime
+        end
     end
 
 

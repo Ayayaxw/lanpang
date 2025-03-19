@@ -152,6 +152,12 @@ function CommonAI:UpdateSkillPriorityBasedOnStrategy()
             }
         end,
         
+        ["天火优先"] = function(self)
+            self.mediumPrioritySkills.npc_dota_hero_invoker = {
+                "invoker_sun_strike"
+            }
+        end,
+
         ["天隼冲击优先"] = function(self)
             table.insert(self.mediumPrioritySkills.npc_dota_hero_kez, 1, "kez_falcon_rush")
         end

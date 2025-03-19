@@ -8,16 +8,17 @@ end
 
 function SpawnFourHeroes()
     -- 四个排名位置及其对应的英雄池
-    local rank1Heroes = {"npc_dota_hero_faceless_void","npc_dota_hero_brewmaster"}
+    local rank1Heroes = {    "npc_dota_hero_riki",
+    "npc_dota_hero_bristleback"}
     local rank2Heroes = {    
         
 
     }
     --允许表格为空
-    local rank3Heroes = {"npc_dota_hero_muerta"}
+    local rank3Heroes = {"npc_dota_hero_omniknight"}
     local rank4Heroes = {
-        "npc_dota_hero_kez",
-
+        "npc_dota_hero_ursa",
+        "npc_dota_hero_beastmaster",
     }
     
     -- 排名位置坐标

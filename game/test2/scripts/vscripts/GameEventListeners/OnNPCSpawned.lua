@@ -95,7 +95,7 @@ function Main:OnNPCSpawned(event)
             end
         
             local unitName = spawnedUnit:GetUnitName()
-            print(unitName)
+            
             if not unitName then
                 DebugPrint("函数结束：无法获取单位名称")
                 return
@@ -109,7 +109,7 @@ function Main:OnNPCSpawned(event)
             end
             if not isIllusion and spawnedUnit:IsInvulnerable() and not spawnedUnit:HasModifier("modifier_dazzle_nothl_projection_soul_debuff") then
                 if unitName and unitName ~= "" then
-                    DebugPrint("函数结束：忽略非幻象的无敌单位: " .. unitName)
+                    --DebugPrint("函数结束：忽略非幻象的无敌单位: " .. unitName)
                 end
                 return
             end

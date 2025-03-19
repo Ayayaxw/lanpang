@@ -736,7 +736,21 @@ function CommonAI:FindBestEnemyHeroTarget(entity, ability, requiredModifiers, mi
     local validHeroes = {}
     local validNonHeroes = {}
     
+    -- 检查避免重复施法策略
+    local checkDuplicateCast = self:containsStrategy(self.global_strategy, "避免重复施法") and sortBy == "control" and entity:GetHealthPercent() >10
+    
     for _, enemy in pairs(enemies) do
+        -- 检查该目标是否在短时间内已被选为目标
+        if checkDuplicateCast and Main.targetLockInfo then
+            local currentTime = GameRules:GetGameTime()
+            if Main.targetLockInfo.target == enemy and 
+               Main.targetLockInfo.caster ~= entity and
+               currentTime - Main.targetLockInfo.timestamp < 1 then
+                self:log(string.format("单位 %s 在0.5秒内已被其他单位选为目标，跳过", enemy:GetUnitName()))
+                goto continue
+            end
+        end
+    
         if #requiredModifiers > 0 then
             local hasAllModifiers = true
             for _, modifier in ipairs(requiredModifiers) do
@@ -882,6 +896,18 @@ function CommonAI:FindBestEnemyHeroTarget(entity, ability, requiredModifiers, mi
                 return nil
             end
         end
+        
+        -- 记录目标选择信息以避免重复施法
+        if checkDuplicateCast then
+            if not Main.targetLockInfo then Main.targetLockInfo = {} end
+            Main.targetLockInfo = {
+                target = target,
+                caster = entity,
+                timestamp = GameRules:GetGameTime()
+            }
+            self:log(string.format("记录施法目标: %s，施法者: %s", target:GetUnitName(), entity:GetUnitName()))
+        end
+        
         self:log(string.format("选择敌方英雄目标: %s", target:GetUnitName()))
         return target
     end
@@ -889,6 +915,18 @@ function CommonAI:FindBestEnemyHeroTarget(entity, ability, requiredModifiers, mi
     -- 如果没有英雄且允许非英雄单位，返回非英雄单位
     if not forceHero and #validNonHeroes > 0 then
         local target = validNonHeroes[1]
+        
+        -- 记录非英雄单位目标选择信息以避免重复施法
+        if checkDuplicateCast then
+            if not Main.targetLockInfo then Main.targetLockInfo = {} end
+            Main.targetLockInfo = {
+                target = target,
+                caster = entity,
+                timestamp = GameRules:GetGameTime()
+            }
+            self:log(string.format("记录施法目标(非英雄): %s，施法者: %s", target:GetUnitName(), entity:GetUnitName()))
+        end
+        
         self:log(string.format("选择敌方非英雄目标: %s", target:GetUnitName()))
         return target
     end

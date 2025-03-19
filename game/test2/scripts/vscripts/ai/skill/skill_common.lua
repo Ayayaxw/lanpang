@@ -146,7 +146,7 @@ function CommonAI:GetAbilityBehavior(skill, distance, aoeRadius)
         earthshaker_enchant_totem = DOTA_ABILITY_BEHAVIOR.POINT,
         abyssal_underlord_firestorm = DOTA_ABILITY_BEHAVIOR.POINT,
         undying_tombstone = DOTA_ABILITY_BEHAVIOR.POINT,
-        tidehunter_gush = DOTA_ABILITY_BEHAVIOR.POINT,
+
         phoenix_supernova = DOTA_ABILITY_BEHAVIOR.NO_TARGET,
         invoker_deafening_blast = DOTA_ABILITY_BEHAVIOR.NO_TARGET,
         luna_eclipse = DOTA_ABILITY_BEHAVIOR.POINT,
@@ -169,6 +169,11 @@ function CommonAI:GetAbilityBehavior(skill, distance, aoeRadius)
     if abilityName == "invoker_sun_strike" and self.entity:HasScepter() then
         finalAbilityBehavior = DOTA_ABILITY_BEHAVIOR.UNIT_TARGET
     end
+
+    if abilityName == "tidehunter_gush" and self.Ally and self.entity:HasScepter() then
+        finalAbilityBehavior = DOTA_ABILITY_BEHAVIOR.POINT
+    end
+
 
     -- 只有当前技能是ES图腾时才检查
     if abilityName == "earthshaker_enchant_totem" then
@@ -716,7 +721,7 @@ function CommonAI:FindBestAbilityToUse(entity, target)
                     goto continue
                 end
             
-                if abilityName == "enchantress_impetus" then
+                if abilityName == "enchantress_impetus" or abilityName == "doom_bringer_infernal_blade" then
                     ability:ToggleAutoCast()
                     self:log(string.format("技能 %s 已设置为自动施法", abilityName))
                 else
@@ -788,6 +793,24 @@ function CommonAI:FindBestAbilityToUse(entity, target)
                 goto continue
             end
 
+
+        -- 处理自身施法技能
+        if self:isSelfCastAbility(abilityName) and not self:isSelfCastAbilityWithRange(abilityName) then
+            if DEBUG_MODE == 1 then
+                self:log(string.format("技能 %s 是对自己释放但不需要选择范围的技能，优先选择", abilityName))
+            end
+            castRange = 9999
+            aoeRadius = 9999
+        end
+        if castRange == 0 and aoeRadius == 0 and 
+        bit.band(ability:GetBehavior(), DOTA_ABILITY_BEHAVIOR_NO_TARGET) ~= 0 then
+            aoeRadius = 9999
+            if DEBUG_MODE == 1 then
+                self:log(string.format("技能 %s 作为大招被无条件选择", abilityName))
+            end
+        end
+
+
             local isInRange = true
             local targetTeam = self:GetSkillTargetTeam(ability)
 
@@ -795,24 +818,75 @@ function CommonAI:FindBestAbilityToUse(entity, target)
             if bit.band(targetTeam, DOTA_UNIT_TARGET_TEAM_FRIENDLY) ~= 0 and self.Ally then
                 local distanceToTarget = (self.Ally:GetAbsOrigin() - entityPosition):Length2D()
                 if bit.band(ability:GetBehavior(), DOTA_ABILITY_BEHAVIOR_POINT) ~= 0 then
-                    isInRange = distanceToTarget <= (castRange + aoeRadius)
+                    local originalSum = castRange + aoeRadius
+                    local threshold = self:GetSkillRangeThreshold(ability, entity, originalSum)
+                    isInRange = distanceToTarget <= threshold
+                    
+                    -- 根据threshold调整原始参数
+                    if threshold ~= originalSum then
+                        -- 先尝试调整aoeRadius
+                        local diff = threshold - originalSum
+                        aoeRadius = math.max(0, aoeRadius + diff)
+                        -- 如果aoeRadius已经为0但阈值仍小于castRange，则调整castRange
+                        if aoeRadius == 0 and threshold < castRange then
+                            castRange = threshold
+                        end
+                    end
                 elseif bit.band(ability:GetBehavior(), DOTA_ABILITY_BEHAVIOR_UNIT_TARGET) ~= 0 then
-                    isInRange = distanceToTarget <= castRange
+                    local threshold = self:GetSkillRangeThreshold(ability, entity, castRange)
+                    isInRange = distanceToTarget <= threshold
+                    
+                    -- 根据threshold调整原始参数
+                    if threshold ~= castRange then
+                        castRange = threshold
+                    end
                 elseif bit.band(ability:GetBehavior(), DOTA_ABILITY_BEHAVIOR_NO_TARGET) ~= 0 then
-                    isInRange = distanceToTarget <= aoeRadius
+                    local threshold = self:GetSkillRangeThreshold(ability, entity, aoeRadius)
+                    isInRange = distanceToTarget <= threshold
+                    
+                    -- 根据threshold调整原始参数
+                    if threshold ~= aoeRadius then
+                        aoeRadius = threshold
+                    end
                 end
             -- 否则判断敌方目标
             elseif target then
                 local distanceToTarget = (targetPosition - entityPosition):Length2D()
                 if bit.band(ability:GetBehavior(), DOTA_ABILITY_BEHAVIOR_POINT) ~= 0 then
-                    isInRange = distanceToTarget <= (castRange + aoeRadius)
+                    local originalSum = castRange + aoeRadius
+                    local threshold = self:GetSkillRangeThreshold(ability, entity, originalSum)
+                    isInRange = distanceToTarget <= threshold
+                    
+                    -- 根据threshold调整原始参数
+                    if threshold ~= originalSum then
+                        -- 先尝试调整aoeRadius
+                        local diff = threshold - originalSum
+                        aoeRadius = math.max(0, aoeRadius + diff)
+                        -- 如果aoeRadius已经为0但阈值仍小于castRange，则调整castRange
+                        if aoeRadius == 0 and threshold < castRange then
+                            castRange = threshold
+                        end
+                        print("point技能调整threshold, castRange, aoeRadius", threshold, castRange, aoeRadius)
+                    end
                 elseif bit.band(ability:GetBehavior(), DOTA_ABILITY_BEHAVIOR_UNIT_TARGET) ~= 0 then
-                    isInRange = distanceToTarget <= castRange
+                    local threshold = self:GetSkillRangeThreshold(ability, entity, castRange)
+                    isInRange = distanceToTarget <= threshold
+                    
+                    -- 根据threshold调整原始参数
+                    if threshold ~= castRange then
+                        castRange = threshold
+                    end
                 elseif bit.band(ability:GetBehavior(), DOTA_ABILITY_BEHAVIOR_NO_TARGET) ~= 0 then
                     if castRange == 0 and aoeRadius == 0 then
                         isInRange = true
                     else
-                        isInRange = distanceToTarget <= aoeRadius
+                        local threshold = self:GetSkillRangeThreshold(ability, entity, aoeRadius)
+                        isInRange = distanceToTarget <= threshold
+                        
+                        -- 根据threshold调整原始参数
+                        if threshold ~= aoeRadius then
+                            aoeRadius = threshold
+                        end
                     end
                 end
             end
@@ -822,10 +896,7 @@ function CommonAI:FindBestAbilityToUse(entity, target)
             if skillInfo.priority < 2 and isInRange then
                 self:log(string.format("选择了最高优先级的技能 %s，施法距离为 %d", ability:GetAbilityName(), castRange))
                 return ability, castRange, aoeRadius
-            end
-
-            -- 如果是次优先级技能且在范围内，直接返回
-            if skillInfo.priority < 3 and isInRange then
+            elseif skillInfo.priority < 3 and isInRange then
                 self:log(string.format("选择了第二优先级的技能 %s，施法距离为 %d", ability:GetAbilityName(), castRange))
                 return ability, castRange, aoeRadius
             end
@@ -851,13 +922,7 @@ function CommonAI:FindBestAbilityToUse(entity, target)
         local castRange = skillData.castRange
         local aoeRadius = skillData.aoeRadius
 
-        -- 处理自身施法技能
-        if self:isSelfCastAbility(abilityName) and not self:isSelfCastAbilityWithRange(abilityName) then
-            if DEBUG_MODE == 1 then
-                self:log(string.format("技能 %s 是对自己释放但不需要选择范围的技能，优先选择", abilityName))
-            end
-            return ability, castRange, aoeRadius
-        end
+
 
         -- 特殊处理 pugna_decrepify
         if not target and abilityName == "pugna_decrepify" then
@@ -865,16 +930,7 @@ function CommonAI:FindBestAbilityToUse(entity, target)
         end
 
         -- 如果技能是大招，没有作用范围和施法范围，且是无目标施法技能，则无条件将其作为best技能
-        if castRange == 0 and aoeRadius == 0 and 
-        bit.band(ability:GetBehavior(), DOTA_ABILITY_BEHAVIOR_NO_TARGET) ~= 0 then
-            bestSkill = ability
-            maxCastRange = 0
-            bestAoERadius = 0
-            if DEBUG_MODE == 1 then
-                self:log(string.format("技能 %s 作为大招被无条件选择", abilityName))
-            end
-            return bestSkill, maxCastRange, bestAoERadius
-        end
+
 
         -- 更新最佳技能（基于施法距离）
         local combinedRange = castRange + aoeRadius

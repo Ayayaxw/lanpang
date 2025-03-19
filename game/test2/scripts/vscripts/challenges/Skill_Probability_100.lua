@@ -51,7 +51,6 @@ function Main:Init_Skill_Probability_100(event, playerID)
     }
     local ability_modifiers = {
         npc_dota_hero_pangolier = {
-
             pangolier_fortune_favors_the_bold =
             {
                 AbilityValues = {
@@ -72,9 +71,7 @@ function Main:Init_Skill_Probability_100(event, playerID)
         },
         npc_dota_hero_legion_commander = {
             legion_commander_moment_of_courage = {
-
                 AbilityValues = {
-                    
                     trigger_chance = {
                         value = 100
                     }

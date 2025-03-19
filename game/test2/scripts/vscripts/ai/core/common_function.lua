@@ -199,25 +199,25 @@ function CommonAI:IsSkillReady(skill)
 
     -- 检查技能是否隐藏（排除特定技能）
     if not isInvoker and skill:IsHidden() then
-        self:log("技能 " .. abilityName .. " 处于隐藏状态，无法使用")
+        --self:log("技能 " .. abilityName .. " 处于隐藏状态，无法使用")
         return false
     end
 
     -- 检查技能冷却
     if not skill:IsCooldownReady() then
-        self:log("技能 " .. abilityName .. " 正在冷却中，无法使用")
+        --self:log("技能 " .. abilityName .. " 正在冷却中，无法使用")
         return false
     end
 
     -- 检查技能魔法值
     if not skill:IsOwnersManaEnough() then
-        self:log("技能 " .. abilityName .. " 因魔法值不足无法施放")
+        --self:log("技能 " .. abilityName .. " 因魔法值不足无法施放")
         return false
     end
 
     -- 检查技能是否可完全施放
     if not skill:IsFullyCastable() then
-        self:log("技能 " .. abilityName .. " 无法完全施放")
+        --self:log("技能 " .. abilityName .. " 无法完全施放")
         return false
     end
 
@@ -226,7 +226,7 @@ function CommonAI:IsSkillReady(skill)
         return false
     end
 
-    self:log("技能 " .. abilityName .. " 检查通过，可以使用")
+    --self:log("技能 " .. abilityName .. " 检查通过，可以使用")
     return true
 end
 

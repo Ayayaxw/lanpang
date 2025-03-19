@@ -41,6 +41,7 @@ require("challenges/SoulOut_Sniper")
 require("challenges/Golem_100")  
 require("challenges/Mine_Challenge")
 require("challenges/Skill_Probability_100")
+require("challenges/Golem_vs_Heroes")
 
 
 Main.Challenges = {}
@@ -251,6 +252,7 @@ Main.GameModes = {
     },
 
 
+
     
 
 
@@ -358,7 +360,14 @@ Main.GameModes = {
         name = "踩雷挑战",
         menuConfig = {"SelfHeroRow"},
         category = "single"
-    }
+    },
+    {
+        id = "Golem_vs_Heroes",
+        code = 3018,
+        name = "地狱火大战英雄",
+        menuConfig = {"SelfHeroRow"},
+        category = "single"
+    },
 }
 
 -- 自动生成 Challenges 和 ModeConfig
@@ -499,6 +508,10 @@ function Main:RequestStrategyData()
         {
             name = "仅仅控制召唤物",
             id = "help_control_minion"
+        },
+        {
+            name = "避免重复施法",
+            id = "avoid_repeat_cast"
         },
     }
 
@@ -705,6 +718,14 @@ function Main:RequestStrategyData()
             {
                 name = "无技能时保持双钗",
                 id = "keep_double_spear"
+            },
+            {
+                name = "单刀出战",
+                id = "single_spear"
+            },
+            {
+                name = "双钗出战",
+                id = "double_spear"
             },
         },
         npc_dota_hero_terrorblade = {  -- 熊战士
@@ -1395,6 +1416,10 @@ function Main:RequestStrategyData()
             {
                 name = "火人-灵动迅捷-吹风-天火-磁暴",
                 id = "5"
+            },
+            {
+                name = "天火优先",
+                id = "12"
             },
             {
                 name = "极速冷却-吹风-磁暴-天火",

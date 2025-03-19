@@ -8,7 +8,7 @@
 /* 技能阈值面板样式 */
 .SkillThresholdPanel {
   flow-children: down;
-  width: 500px;
+  width: 560px;
   position: 40% 30% 0px;
   z-index: 10;
   background-color: #14141ef9;
@@ -35,24 +35,37 @@
 .SkillThresholdRow {
   flow-children: right;
   width: 100%;
-  margin-bottom: 8px;
-  padding: 6px;
+  margin-bottom: 12px;
+  padding: 8px;
   background-color: #14141e44;
   border: 1px solid #333340;
   border-radius: 3px;
 }
 
 .SkillNameLabel {
-  width: 80px;
+  width: 90px;
   color: #d5d5d5;
   font-size: 16px;
   vertical-align: center;
   margin-right: 10px;
 }
 
+.LevelSelectorRow {
+  flow-children: right;
+  width: 100%;
+  margin-bottom: 6px;
+}
+
+.ThresholdRow {
+  flow-children: right;
+  width: 100%;
+}
+
 .ThresholdContainer {
   flow-children: right;
   margin-right: 15px;
+  margin-bottom: 4px;
+  min-width: 140px;
 }
 
 .ThresholdLabel {
@@ -156,12 +169,12 @@
   }
   
   .AddItemButton{
-    width: 80px;
-    height: 30px;
+    width: 90px;
+    height: 32px;
     background-color: gradient( linear, 0% 0%, 0% 100%, from( #2a2a35 ), to( #1a1a25 ) );
     border: 1px solid #444450;
     border-radius: 4px;
-    margin-left: 10px;
+    margin-right: 10px;
     transition-property: background-color, brightness, border;
     transition-duration: 0.2s;
   }
@@ -211,12 +224,12 @@
   }
   
   .HeroAIToggle {
-    width: 80px;
-    height: 30px;
-    margin-left: 10px;
+    width: 90px;
+    height: 32px;
+    margin-right: 10px;
     border: 1px solid #444450;
     border-radius: 3px;
-    vertical-align: center; /* 添加这行 */
+    vertical-align: center;
 }
 
 .HeroAIToggleLabel {
@@ -506,4 +519,173 @@
 
 .ModifiedThresholdButton Label {
   color: #ffbbbb;
+}
+
+
+.LevelSelectorPanel {
+  flow-children: right;
+  margin-right: 10px;
+}
+
+.LevelButton {
+  width: 32px;
+  height: 32px;
+  margin-right: 8px;
+  background-color: #222233;
+  border-radius: 4px;
+  border: 1px solid #444466;
+  transition-property: background-color;
+  transition-duration: 0.1s;
+}
+
+.LevelButton:hover {
+  background-color: #333355;
+}
+
+.LevelButton.SelectedLevel {
+  background-color: #3399ff;
+  border: 1px solid #66ccff;
+}
+
+.LevelButton Label {
+  font-size: 16px;
+  color: white;
+  text-align: center;
+  vertical-align: center;
+  horizontal-align: center;
+}
+
+.SkillLevelSettingPanel {
+  flow-children: down;
+  width: 100%;
+  margin-bottom: 16px;
+  padding: 10px;
+  background-color: #14141e66;
+  border: 1px solid #333340;
+  border-radius: 4px;
+}
+
+.SkillLevelTitle {
+  width: fill-parent-flow(0.6);
+  color: #ccaa66;
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.SkillLevelRow {
+  flow-children: right;
+  width: 100%;
+  margin-bottom: 12px;
+
+}
+
+.SkillLevelLabel {
+  width: 90px;
+  color: #d5d5d5;
+  font-size: 15px;
+  vertical-align: center;
+  margin-right: 10px;
+}
+
+.SkillThresholdRow {
+  flow-children: right;
+  width: 100%;
+  margin-bottom: 12px;
+  padding: 8px;
+  background-color: #14141e44;
+  border: 1px solid #333340;
+  border-radius: 3px;
+}
+
+/* 添加主面板动画效果 */
+#GameModeSelectionPanel, #ItemSelectionDialog, #StrategySelectionPanel, #FcHeroPickPanel, .SkillThresholdPanel {
+  transition-property: opacity, transform;
+  transition-duration: 0.3s;
+  transition-timing-function: ease-in-out;
+}
+
+/* 修改隐藏类的行为，使用opacity和transform实现平滑过渡 */
+.GameSetupPanelhidden {
+  opacity: 0;
+  transform: translateY(-20px);
+  visibility: collapse;
+  transition-property: opacity, transform, visibility;
+  transition-duration: 0.3s;
+  transition-timing-function: ease-in-out;
+}
+
+.HeroControlContainer {
+  flow-children: right;
+  width: 100%;
+  margin-bottom: 8px;
+  padding: 4px;
+}
+
+/* 技能阈值面板相关样式 */
+.SkillLevelHeaderRow {
+  flow-children: right;
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.TeamModeContainer {
+  flow-children: right;
+  vertical-align: center;
+  width: fill-parent-flow(0.4);
+  horizontal-align: right;
+}
+
+.TeamModeToggle {
+  width: 24px;
+  height: 24px;
+  border: 1px solid #444450;
+  border-radius: 3px;
+  margin-right: 8px;
+  vertical-align: center;
+}
+
+.TeamModeToggle:selected {
+  background-color: #3399ff;
+  border-color: #66ccff;
+  box-shadow: 0px 0px 5px #3399ff80;
+}
+
+.TeamModeLabel {
+  color: #ccaa66;
+  font-size: 16px;
+  vertical-align: center;
+}
+
+/* 权重输入框样式 */
+.WeightContainer {
+  flow-children: right;
+  vertical-align: center;
+  background-color: #1a1a2599;
+  border-radius: 3px;
+  padding: 2px 5px;
+  horizontal-align: right;
+}
+
+.WeightLabel {
+  color: #ccaa66;
+  font-size: 14px;
+  vertical-align: center;
+  margin-right: 5px;
+}
+
+.WeightInput {
+  width: 60px;
+  height: 28px;
+  background-color: #252535;
+  border: 1px solid #444450;
+  border-radius: 3px;
+  color: white;
+  font-size: 14px;
+  vertical-align: center;
+  text-align: center;
+}
+
+.WeightInput:focus {
+  border-color: #3399ff;
+  box-shadow: 0px 0px 4px #3399ff80;
 }

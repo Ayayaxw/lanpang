@@ -57,11 +57,17 @@ function Main:Init_movie_mode(heroName, heroFacet,playerID, heroChineseName)
     -- 假设你要创建的位置
     -- CreateParentHeroesWithFacets(function(allHeroes)
     --DisplayHeroes()
-    SpawnAllNeutralCreeps1()
+    --SpawnAllNeutralCreeps1()
     --CreateOgreMagi()
     --CreateMaxLevelHeroes()
     -- end)
+
+        Main:PreSpawnGolem_Golem_vs_Heroes()
+
 end
+
+
+
 
 
 function CreateMaxLevelHeroes(axePosition, warlockPosition)

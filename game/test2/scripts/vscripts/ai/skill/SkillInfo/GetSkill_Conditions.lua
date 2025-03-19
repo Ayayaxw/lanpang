@@ -464,7 +464,7 @@ HeroSkillConditions = {
                 if modifier then
                     local stackCount = modifier:GetStackCount()
                     -- 如果层数超过两层，返回 true
-                    if stackCount > 2 then
+                    if stackCount >= 2 then
                         return true
                     end
                 end
@@ -1191,7 +1191,7 @@ HeroSkillConditions = {
         },
         ["phantom_assassin_blur"] = {
             function(self, caster, log)      
-                return caster:GetHealthPercent() < 50
+                return true
             end
         },
 
@@ -1321,8 +1321,8 @@ HeroSkillConditions = {
                     ability,
                     nil,
                     nil,
-                    "control" ,
-                    true
+                    "control" 
+
                 )
                 
                 if potentialTarget then
@@ -1365,6 +1365,33 @@ HeroSkillConditions = {
                 return potentialTarget ~= nil
             end
         },
+        ["doom_bringer_infernal_blade"] = {
+            function(self, caster, log)
+                local ability = caster:FindAbilityByName("doom_bringer_infernal_blade")
+                if not ability then return false end
+                
+                local potentialTarget = self:FindBestEnemyHeroTarget(
+                    caster,
+                    ability,
+                    nil,
+                    nil,
+                    "control" 
+                )
+                
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+
+                local isToggled = ability:GetAutoCastState()
+                if potentialTarget and not isToggled then
+                    return true
+                elseif not potentialTarget and isToggled then
+                    return true
+                end
+                return false
+            end
+        },
+
         ["centaur_khan_war_stomp"] = {
             function(self, caster, log)
                 local ability = caster:FindAbilityByName("centaur_khan_war_stomp")
@@ -1486,8 +1513,23 @@ HeroSkillConditions = {
         ["primal_beast_onslaught"] = {
             function(self, caster, log)
                 -- 只记录蓄力开始时间
+                local ability = caster:FindAbilityByName("primal_beast_onslaught")
+                if not ability then return false end
+                
+                local potentialTarget = self:FindBestEnemyHeroTarget(
+                    caster,
+                    ability,
+                    nil,
+                    nil,
+                    "control" 
+                )
+                
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
                 self.charge_start_time = GameRules:GetGameTime()
-                return true
+                return potentialTarget ~= nil
+
             end
         },
         ["primal_beast_pulverize"] = {
@@ -1838,6 +1880,26 @@ HeroSkillConditions = {
                 return false
             end
         },
+        ["bounty_hunter_wind_walk"] = {
+            function(self, caster, log)
+                local ability = caster:FindAbilityByName("bounty_hunter_wind_walk")
+                if not ability then return false end
+                
+                local potentialTarget = self:FindBestEnemyHeroTarget(
+                    caster,
+                    ability,
+                    nil,
+                    nil,
+                    "control" 
+                )
+                
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+
+                return potentialTarget ~= nil
+            end
+        },
     },
 
 
@@ -2045,6 +2107,26 @@ HeroSkillConditions = {
                     log(string.format("小小周围 %d 码范围内没有发现树木，无法使用树木抓取", searchRadius))
                     return false
                 end
+            end
+        },
+        ["tiny_avalanche"] = {
+            function(self, caster, log)
+                local ability = caster:FindAbilityByName("tiny_avalanche")
+                if not ability then return false end
+                
+                local potentialTarget = self:FindBestEnemyHeroTarget(
+                    caster,
+                    ability,
+                    nil,
+                    nil,
+                    "control" 
+                )
+                
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+
+                return potentialTarget ~= nil
             end
         },
     },
@@ -4308,6 +4390,26 @@ HeroSkillConditions = {
                     return false
                 end
             end
+        },
+        ["tusk_snowball"] = {
+            function(self, caster, log)
+                local ability = caster:FindAbilityByName("tusk_snowball")
+                if not ability then return false end
+
+                local potentialTarget = self:FindBestEnemyHeroTarget(
+                    caster,
+                    ability,
+                    nil,
+                    nil,
+                    "control" 
+                )
+                
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+
+                return potentialTarget ~= nil
+            end
         }
     },
 
@@ -5123,7 +5225,30 @@ HeroSkillConditions = {
         },
 
     },
+    ["npc_dota_hero_kunkka"] = {
+        ["kunkka_torrent"] = {
+            function(self, caster, log)
 
+                local ability = caster:FindAbilityByName("kunkka_torrent")
+                if not ability then return false end
+                
+                local potentialTarget = self:FindBestEnemyHeroTarget(
+                    caster,
+                    ability,
+                    nil,
+                    nil,
+                    "control" 
+                )
+                
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+
+                return potentialTarget ~= nil
+                
+            end
+        }
+    },
 
     ["npc_dota_hero_huskar"] = {
         ["huskar_inner_fire"] = {
@@ -5416,9 +5541,27 @@ HeroSkillConditions = {
         },
         ["brewmaster_drunken_brawler"] = {
             function(self, caster, log)
+                local modifierName = "modifier_brewmaster_drunken_brawler_passive"
+                local modifier = caster:FindModifierByName(modifierName)
+                if modifier then
+                    print("modifier存在")  -- 直接打印文本
+                    print("modifier name:", modifier:GetName())  -- 打印modifier的名称
+                    -- 使用 pcall 来安全地调用 GetTexture
+                    local success, texture = pcall(function() return modifier:GetTexture() end)
+                    if success then
+                        print("获取texture成功:", texture)
+                    else
+                        print("获取texture失败:", texture)  -- texture 此时包含错误信息
+                    end
+                    if success and texture then
+                        return texture == "brewmaster_drunken_brawler_active"
+                    end
+                else
+                    print("modifier不存在")
+                end
                 return false
             end
-        },
+        }
 
     },
     ["npc_dota_hero_muerta"] = {
@@ -5678,6 +5821,29 @@ HeroSkillConditions = {
                 return false
             end
         },
+        ["earth_spirit_rolling_boulder"] = {
+            function(self, caster, log)
+                local ability = caster:FindAbilityByName("earth_spirit_rolling_boulder")
+                if not ability then
+                    log("找不到滚动岩石技能")
+                    return false
+                end
+                
+                local potentialTarget = self:FindBestEnemyHeroTarget(
+                    caster,
+                    ability,
+                    nil,
+                    nil,
+                    "control" 
+                )
+                
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+
+                return potentialTarget ~= nil
+            end
+        },
         ["earth_spirit_stone_caller"] = {
             function(self, caster, log)
                 -- 在函数内部定义静态变量
@@ -5857,7 +6023,7 @@ HeroSkillConditions = {
                     caster,
                     ability,
                     nil,
-                    nil,
+                    0.5,
                     "control" 
                 )
                 
@@ -6948,7 +7114,8 @@ function CommonAI:CheckSkillConditions(entity, heroName)
     for i = 0, entity:GetAbilityCount() - 1 do
         local ability = entity:GetAbilityByIndex(i)
         if ability and ability:GetAbilityName() then
-            if ability:IsCooldownReady() then
+            --技能冷却好了并且已经学习过
+            if ability:IsCooldownReady() and ability:GetLevel() > 0 then
                 table.insert(abilities, ability)
             else
                 --self:log(string.format("技能 %s 在冷却中，忽略检查", ability:GetAbilityName()))

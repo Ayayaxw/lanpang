@@ -129,7 +129,7 @@ function CommonAI:IsDisabledSkill_Threshold(abilityName, heroName)
             end
         end
     else
-        print("检查IsDisabledSkill_Threshold",self.disabledSkills_Threshold[heroName])  
+
         -- 其他英雄按原来的方式检查
         for _, disabledSkill in ipairs(self.disabledSkills_Threshold[heroName]) do
             if abilityName == disabledSkill then

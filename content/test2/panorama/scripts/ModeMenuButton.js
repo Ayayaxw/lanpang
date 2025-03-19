@@ -1,6 +1,47 @@
 (function () {
     'use strict';
 
+    // 技能等级默认值常量定义
+    const DEFAULT_SKILL_LEVELS = {
+        BASIC_SKILLS: 0,      // 技能1-3的默认等级
+        ULTIMATE_SKILL: 0,    // 终极技能（技能6）的默认等级
+        OTHER_SKILLS: 0       // 其他技能（技能4-5）的默认等级
+    };
+    
+    // 技能等级最大值常量定义
+    const MAX_SKILL_LEVELS = {
+        BASIC_SKILLS: 4,      // 技能1-3的最大等级
+        ULTIMATE_SKILL: 3,    // 终极技能（技能6）的最大等级
+        OTHER_SKILLS: 0       // 其他技能（技能4-5）的最大等级
+    };
+    
+    // 判断技能是否为终极技能
+    function isUltimateSkill(skillIndex) {
+        return skillIndex === 6;
+    }
+    
+    // 获取技能的默认等级
+    function getDefaultSkillLevel(skillIndex) {
+        if (isUltimateSkill(skillIndex)) {
+            return DEFAULT_SKILL_LEVELS.ULTIMATE_SKILL;
+        } else if (skillIndex <= 3) {
+            return DEFAULT_SKILL_LEVELS.BASIC_SKILLS;
+        } else {
+            return DEFAULT_SKILL_LEVELS.OTHER_SKILLS;
+        }
+    }
+    
+    // 获取技能的最大等级
+    function getMaxSkillLevel(skillIndex) {
+        if (isUltimateSkill(skillIndex)) {
+            return MAX_SKILL_LEVELS.ULTIMATE_SKILL;
+        } else if (skillIndex <= 3) {
+            return MAX_SKILL_LEVELS.BASIC_SKILLS;
+        } else {
+            return MAX_SKILL_LEVELS.OTHER_SKILLS;
+        }
+    }
+
     let itemList = {
         NormalItems: [],
         NeutralItems: [],
@@ -167,7 +208,7 @@
     let currentHeroType = ''; // 用于记录当前是为哪个英雄添加物品
 
 
-    function closeAllPanels() {
+    function closeAllPanels(excludeHeroId) {
       // 关闭游戏模式选择面板
       $('#GameModeSelectionPanel').SetHasClass('Visible', false);
       
@@ -180,7 +221,19 @@
       // 最小化英雄选择面板
       $('#FcHeroPickPanel').AddClass('minimized');
       
-      // 注意：不要关闭技能阈值面板，它应该单独处理
+      // 关闭所有技能阈值面板，排除指定的英雄ID
+      const allHeroes = Object.keys(customHeroes);
+      allHeroes.forEach(heroId => {
+        // 如果当前英雄ID是要排除的，则跳过
+        if (excludeHeroId && heroId === excludeHeroId) {
+          return;
+        }
+        
+        const skillThresholdPanel = $(`#${heroId}SkillThresholdPanel`);
+        if (skillThresholdPanel && !skillThresholdPanel.BHasClass('GameSetupPanelhidden')) {
+          skillThresholdPanel.AddClass('GameSetupPanelhidden');
+        }
+      });
     }
 
     function clearAllItems() {
@@ -512,8 +565,11 @@
                           const currentHeroId = customHeroes[customHeroId]?.heroId || '';
                           const isHeroChanged = currentHeroId !== heroId && heroId !== '';
                           
-                          // 判断是否需要默认开启AI (非SelfHero的自定义英雄都默认开启)
-                          const shouldEnableAI = customHeroId !== 'SelfHero';
+                          // 获取当前AI状态（如果存在）
+                          const currentAiState = customHeroes[customHeroId]?.aiEnabled;
+                          
+                          // 判断是否需要默认开启AI (只有在第一次选择英雄时才使用默认值)
+                          const shouldEnableAI = currentAiState !== undefined ? currentAiState : (customHeroId !== 'SelfHero');
                           
                           // 更新自定义英雄数据 - 只更新当前选择的自定义英雄
                           if (!customHeroes[customHeroId]) {
@@ -521,16 +577,17 @@
                                   heroId: heroId,
                                   facetId: facetId,
                                   heroName: getHeroName(heroId),
-                                  aiEnabled: shouldEnableAI  // 非SelfHero默认开启AI
+                                  aiEnabled: shouldEnableAI  // 使用确定的AI状态
                               };
                           } else {
                               customHeroes[customHeroId].heroId = heroId;
                               customHeroes[customHeroId].facetId = facetId;
                               customHeroes[customHeroId].heroName = getHeroName(heroId);
-                              // 如果是首次选择英雄或者英雄发生变化，设置AI状态
-                              if (isHeroChanged || currentHeroId === '') {
+                              // 只有在首次选择英雄且AI状态未设置时才设置默认AI状态
+                              if (currentHeroId === '' && currentAiState === undefined) {
                                   customHeroes[customHeroId].aiEnabled = shouldEnableAI;
                               }
+                              // 其他情况保持原来的AI状态不变
                           }
                           
                           // 更新UI - 只更新对应面板的UI
@@ -561,7 +618,16 @@
                               if (heroRow4) {
                                   heroRow4.RemoveClass('GameSetupPanelhidden');
                               }
+                          } else {
+                              // 如果AI未开启，确保策略行隐藏
+                              const heroRow4 = $(`#${customHeroId}Row4`);
+                              if (heroRow4) {
+                                  heroRow4.AddClass('GameSetupPanelhidden');
+                              }
                           }
+                          
+                          // 无论AI是否开启，都调用updateStrategyRowVisibility来更新技能阈值按钮
+                          updateStrategyRowVisibility(customHeroId);
                           
                           // 如果英雄已更改，重置英雄特定策略
                           if (isHeroChanged) {
@@ -585,7 +651,22 @@
                                   heroStrategyLabel.text = "默认策略";
                               }
                               
-                              $.Msg(`已清空自定义英雄 ${customHeroId} 的策略，因为更换了英雄`);
+                              // 重置技能阈值设置
+                              if (customHeroes[customHeroId].skillThresholds) {
+                                  // 重置所有技能阈值为默认值
+                                  for (let i = 1; i <= 6; i++) {
+                                      customHeroes[customHeroId].skillThresholds[`skill${i}`] = {
+                                          hpThreshold: 100,
+                                          distThreshold: 0,
+                                          level: getDefaultSkillLevel(i)
+                                      };
+                                  }
+                                  
+                                  // 更新技能阈值按钮状态
+                                  updateSkillThresholdButtonState(customHeroId);
+                              }
+                              
+                              $.Msg(`已清空自定义英雄 ${customHeroId} 的策略和技能阈值设置，因为更换了英雄`);
                           }
                           
                           // 自动确认英雄选择 - 这里只关闭面板而不调用onHeroSelected防止交叉影响
@@ -668,7 +749,24 @@
             
             // 更新英雄策略标签
             $(`#${heroPrefix}HeroStrategyLabel`).text = "默认策略";
-            $.Msg(`已清空${heroPrefix === 'Self' ? '自己' : '对手'}英雄的策略，因为更换了英雄`);
+            
+            // 重置技能阈值设置
+            const heroFullId = heroPrefix + "Hero";
+            if (customHeroes[heroFullId] && customHeroes[heroFullId].skillThresholds) {
+                // 重置所有技能阈值为默认值
+                for (let i = 1; i <= 6; i++) {
+                    customHeroes[heroFullId].skillThresholds[`skill${i}`] = {
+                        hpThreshold: 100,
+                        distThreshold: 0,
+                        level: getDefaultSkillLevel(i)
+                    };
+                }
+                
+                // 更新技能阈值按钮状态
+                updateSkillThresholdButtonState(heroFullId);
+            }
+            
+            $.Msg(`已清空${heroPrefix === 'Self' ? '自己' : '对手'}英雄的策略和技能阈值设置，因为更换了英雄`);
         }
         
         // 首次选择英雄时，确保整体策略设置为默认值
@@ -773,15 +871,26 @@
     const strategyList = $('#StrategyList');
     strategyList.RemoveAndDeleteChildren();
 
+    // 处理当前策略，确保它是数组形式，方便后面比较
     const selectedStrategies = Array.isArray(currentStrategy) ? currentStrategy : [currentStrategy];
+    
+    // 如果当前策略是默认策略但ID为空，则确保使用正确的ID
+    if (selectedStrategies.length === 1 && selectedStrategies[0].name === "默认策略" && !selectedStrategies[0].id) {
+        selectedStrategies[0].id = "default_strategy";
+    }
+    
+    // 获取所有选中策略的ID
     const selectedIds = selectedStrategies.map(s => s.id);
+    
+    $.Msg(`当前选中的策略：${JSON.stringify(selectedIds)}`);
 
     // 创建策略选项
     for (let i = 0; i < strategies.length; i++) {
         const strategy = strategies[i];
-        // 只选中当前显示的策略，忽略lastSelectedStrategiesRef，因为它可能包含过时的选择
+        // 检查该策略是否应该被选中
         const isSelected = selectedIds.includes(strategy.id);
-        createStrategyToggle(strategy, strategyList, isSelected);
+        $.Msg(`创建策略选项: ${strategy.name}, ID=${strategy.id}, 是否选中=${isSelected}`);
+        const strategyToggle = createStrategyToggle(strategy, strategyList, isSelected);
     }
 
     // 确认按钮事件
@@ -790,6 +899,14 @@
         const selectedStrategies = strategies.filter((_, index) => 
             strategyList.GetChild(index).checked
         );
+        
+        // 确保至少选择了一个策略，如果没有选择，默认使用"默认策略"
+        if (selectedStrategies.length === 0) {
+            const defaultStrategy = strategies.find(s => s.id === "default_strategy") || 
+                                   { name: "默认策略", id: "default_strategy" };
+            selectedStrategies.push(defaultStrategy);
+            $.Msg(`没有选择策略，默认使用: ${defaultStrategy.name}`);
+        }
         
         // 确保lastSelectedStrategiesRef是数组
         if (!Array.isArray(lastSelectedStrategiesRef)) {
@@ -887,6 +1004,17 @@
             eventData.opponentSkillThresholds = opponentHeroData.skillThresholds;
         }
         
+        // 添加技能权重数据
+        if (selfHeroData.teamMode && selfHeroData.teamMode.enabled && selfHeroData.skillWeights) {
+            eventData.selfSkillWeights = selfHeroData.skillWeights;
+            $.Msg("添加自己英雄的技能权重数据: ", JSON.stringify(selfHeroData.skillWeights));
+        }
+        
+        if (opponentHeroData.teamMode && opponentHeroData.teamMode.enabled && opponentHeroData.skillWeights) {
+            eventData.opponentSkillWeights = opponentHeroData.skillWeights;
+            $.Msg("添加对手英雄的技能权重数据: ", JSON.stringify(opponentHeroData.skillWeights));
+        }
+        
         // 添加自定义英雄的技能阈值数据
         const customHeroIds = Object.keys(customHeroes).filter(id => id !== 'SelfHero' && id !== 'OpponentHero');
         if (customHeroIds.length > 0) {
@@ -898,6 +1026,13 @@
                     aiEnabled: Boolean(customHeroes[heroId].aiEnabled),
                     skillThresholds: customHeroes[heroId].skillThresholds || {}
                 };
+                
+                // 添加团队模式和技能权重数据
+                if (customHeroes[heroId].teamMode && customHeroes[heroId].teamMode.enabled && customHeroes[heroId].skillWeights) {
+                    eventData.customHeroData[heroId].teamMode = customHeroes[heroId].teamMode;
+                    eventData.customHeroData[heroId].skillWeights = customHeroes[heroId].skillWeights;
+                    $.Msg(`添加自定义英雄 ${heroId} 的技能权重数据: `, JSON.stringify(customHeroes[heroId].skillWeights));
+                }
                 
                 // 添加装备和策略数据
                 if (customHeroEquipment[heroId]) {
@@ -1397,6 +1532,153 @@
         skillThresholdPanel.AddClass('GameSetupPanelhidden');
     });
     
+    // 创建技能等级设置区域
+    const skillLevelSettingPanel = $.CreatePanel('Panel', skillThresholdPanel, `${heroId}SkillLevelSettingPanel`);
+    skillLevelSettingPanel.AddClass('SkillLevelSettingPanel');
+    
+    // 添加技能等级设置标题和团队模式勾选框的容器
+    const skillLevelHeaderRow = $.CreatePanel('Panel', skillLevelSettingPanel, '');
+    skillLevelHeaderRow.AddClass('SkillLevelHeaderRow');
+    
+    // 添加技能等级设置标题
+    const skillLevelTitle = $.CreatePanel('Label', skillLevelHeaderRow, '');
+    skillLevelTitle.AddClass('SkillLevelTitle');
+    skillLevelTitle.text = '技能等级设置';
+    
+    // 添加团队模式勾选框
+    const teamModeContainer = $.CreatePanel('Panel', skillLevelHeaderRow, '');
+    teamModeContainer.AddClass('TeamModeContainer');
+    
+    const teamModeToggle = $.CreatePanel('ToggleButton', teamModeContainer, `${heroId}TeamModeToggle`);
+    teamModeToggle.AddClass('TeamModeToggle');
+    
+    const teamModeLabel = $.CreatePanel('Label', teamModeContainer, '');
+    teamModeLabel.AddClass('TeamModeLabel');
+    teamModeLabel.text = '团队模式';
+    
+    // 设置团队模式勾选框的点击事件
+    teamModeToggle.SetPanelEvent('onactivate', function() {
+        // 获取当前勾选状态
+        const isTeamMode = teamModeToggle.IsSelected();
+        
+        // 更新customHeroes中的团队模式状态
+        if (!customHeroes[heroId].teamMode) {
+            customHeroes[heroId].teamMode = {};
+        }
+        customHeroes[heroId].teamMode.enabled = isTeamMode;
+        
+        // 显示或隐藏所有技能的权重输入框
+        toggleTeamModeInputs(heroId, isTeamMode);
+        
+        // 如果开启团队模式，初始化权重值
+        if (isTeamMode && (!customHeroes[heroId].skillWeights || Object.keys(customHeroes[heroId].skillWeights).length === 0)) {
+            initializeSkillWeights(heroId);
+        }
+        
+        $.Msg(`${heroId} 团队模式 ${isTeamMode ? "已开启" : "已关闭"}`);
+    });
+    
+    // 添加技能1、2、3和大招的等级设置
+    const skillsToSet = [
+      { index: 1, name: '技能1', maxLevel: MAX_SKILL_LEVELS.BASIC_SKILLS },
+      { index: 2, name: '技能2', maxLevel: MAX_SKILL_LEVELS.BASIC_SKILLS },
+      { index: 3, name: '技能3', maxLevel: MAX_SKILL_LEVELS.BASIC_SKILLS },
+      { index: 6, name: '终极技能', maxLevel: MAX_SKILL_LEVELS.ULTIMATE_SKILL }
+    ];
+    
+    // 为每个需要设置等级的技能创建一行
+    skillsToSet.forEach(skill => {
+      const skillLevelRow = $.CreatePanel('Panel', skillLevelSettingPanel, `${heroId}Skill${skill.index}LevelRow`);
+      skillLevelRow.AddClass('SkillLevelRow');
+      
+      // 技能名称标签
+      const skillLevelLabel = $.CreatePanel('Label', skillLevelRow, '');
+      skillLevelLabel.AddClass('SkillLevelLabel');
+      skillLevelLabel.text = skill.name + ':';
+      
+      // 创建等级选择器面板
+      const levelSelectorPanel = $.CreatePanel('Panel', skillLevelRow, `${heroId}Skill${skill.index}LevelSelector`);
+      levelSelectorPanel.AddClass('LevelSelectorPanel');
+      
+      // 首先创建0级按钮
+      const zeroLevelButton = $.CreatePanel('Button', levelSelectorPanel, `${heroId}Skill${skill.index}Level0`);
+      zeroLevelButton.AddClass('LevelButton');
+      
+      const zeroLevelLabel = $.CreatePanel('Label', zeroLevelButton, '');
+      zeroLevelLabel.text = '0';
+      
+      // 设置0级按钮点击事件
+      zeroLevelButton.SetPanelEvent('onactivate', function() {
+        // 移除所有按钮的选中状态
+        for (let l = 0; l <= skill.maxLevel; l++) {
+          const btn = $(`#${heroId}Skill${skill.index}Level${l}`);
+          if (btn) {
+            btn.RemoveClass('SelectedLevel');
+          }
+        }
+        
+        // 添加当前按钮的选中状态
+        zeroLevelButton.AddClass('SelectedLevel');
+        
+        // 记录选中的等级到按钮的父面板上
+        levelSelectorPanel.selectedLevel = 0;
+        
+        $.Msg(`设置${heroId}${skill.name}等级为0`);
+      });
+      
+      // 为每个可能的等级创建一个按钮
+      for (let level = 1; level <= skill.maxLevel; level++) {
+        const levelButton = $.CreatePanel('Button', levelSelectorPanel, `${heroId}Skill${skill.index}Level${level}`);
+        levelButton.AddClass('LevelButton');
+        
+        const levelLabel = $.CreatePanel('Label', levelButton, '');
+        levelLabel.text = level.toString();
+        
+        // 默认选中的等级
+        const defaultLevel = getDefaultSkillLevel(skill.index);
+        if (level === defaultLevel) {
+          levelButton.AddClass('SelectedLevel');
+        }
+        
+        // 设置点击事件
+        levelButton.SetPanelEvent('onactivate', function() {
+          // 移除所有按钮的选中状态
+          for (let l = 0; l <= skill.maxLevel; l++) {
+            const btn = $(`#${heroId}Skill${skill.index}Level${l}`);
+            if (btn) {
+              btn.RemoveClass('SelectedLevel');
+            }
+          }
+          
+          // 添加当前按钮的选中状态
+          levelButton.AddClass('SelectedLevel');
+          
+          // 记录选中的等级到按钮的父面板上，方便之后获取
+          levelSelectorPanel.selectedLevel = level;
+          
+          $.Msg(`设置${heroId}${skill.name}等级为${level}`);
+        });
+      }
+      
+      // 初始化选中的等级
+      levelSelectorPanel.selectedLevel = getDefaultSkillLevel(skill.index);
+      
+      // 添加权重输入框
+      const weightContainer = $.CreatePanel('Panel', skillLevelRow, `${heroId}Skill${skill.index}WeightContainer`);
+      weightContainer.AddClass('WeightContainer');
+      weightContainer.style.visibility = 'collapse'; // 初始隐藏
+      
+      const weightLabel = $.CreatePanel('Label', weightContainer, '');
+      weightLabel.AddClass('WeightLabel');
+      weightLabel.text = '权重:';
+      
+      const weightInput = $.CreatePanel('TextEntry', weightContainer, `${heroId}Skill${skill.index}Weight`);
+      weightInput.AddClass('WeightInput');
+      weightInput.text = 0; // 初始默认值: 大招40，普通技能15
+      
+
+    });
+    
     // 创建6个技能的阈值设置
     for (let i = 1; i <= 6; i++) {
       const skillRow = $.CreatePanel('Panel', skillThresholdPanel, `${heroId}Skill${i}Row`);
@@ -1455,14 +1737,50 @@
       for (let i = 1; i <= 6; i++) {
         const hpThresholdInput = $(`#${heroId}Skill${i}HpThreshold`);
         const distThresholdInput = $(`#${heroId}Skill${i}DistThreshold`);
+        const weightInput = $(`#${heroId}Skill${i}Weight`);
         
         if (hpThresholdInput && distThresholdInput) {
           // 重置为初始值
           hpThresholdInput.text = '100';
           distThresholdInput.text = '0';
           
-          $.Msg(`重置 ${heroId} 技能${i} 阈值: HP=100, 距离=0`);
+          // 重置权重值
+          if (weightInput) {
+              weightInput.text = 0
+          }
+          
+          // 重置技能等级
+          if (i <= 3 || i === 6) {
+            const levelSelector = $(`#${heroId}Skill${i}LevelSelector`);
+            if (levelSelector) {
+              const defaultLevel = getDefaultSkillLevel(i);
+              
+              // 更新选中状态
+              const maxLevel = getMaxSkillLevel(i);
+              for (let l = 0; l <= maxLevel; l++) {
+                const btn = $(`#${heroId}Skill${i}Level${l}`);
+                if (btn) {
+                  if (l === defaultLevel) {
+                    btn.AddClass('SelectedLevel');
+                  } else {
+                    btn.RemoveClass('SelectedLevel');
+                  }
+                }
+              }
+              
+              // 保存当前选中的等级
+              levelSelector.selectedLevel = defaultLevel;
+            }
+          }
+          
+          $.Msg(`重置 ${heroId} 技能${i} 阈值: HP=100, 距离=0, 等级=${getDefaultSkillLevel(i)}`);
         }
+      }
+      
+      // 如果处于团队模式，重新初始化权重值
+      const teamModeToggle = $(`#${heroId}TeamModeToggle`);
+      if (teamModeToggle && teamModeToggle.IsSelected()) {
+          initializeSkillWeights(heroId);
       }
       
       // 更新技能阈值按钮状态
@@ -1471,13 +1789,13 @@
     
     // 设置技能阈值按钮点击事件
     skillThresholdButton.SetPanelEvent('onactivate', function() {
-      // 不再关闭其他面板，仅切换技能阈值面板的可见性
-      // closeAllPanels();
+      // 先关闭其他所有面板，但排除当前英雄的技能阈值面板
+      closeAllPanels(heroId);
       
       // 加载技能阈值数据
       loadSkillThresholdData(heroId);
       
-      // 切换技能阈值面板的可见性
+      // 切换当前技能阈值面板的可见性
       if (skillThresholdPanel.BHasClass('GameSetupPanelhidden')) {
         // 确保面板在最上层显示
         skillThresholdPanel.RemoveClass('GameSetupPanelhidden');
@@ -1496,6 +1814,23 @@
         customHeroes[heroId].skillThresholds = {};
       }
       
+      // 获取团队模式状态
+      const teamModeToggle = $(`#${heroId}TeamModeToggle`);
+      const isTeamMode = teamModeToggle && teamModeToggle.IsSelected();
+      
+      // 确保teamMode对象存在
+      if (!customHeroes[heroId].teamMode) {
+        customHeroes[heroId].teamMode = {};
+      }
+      
+      // 保存团队模式状态
+      customHeroes[heroId].teamMode.enabled = isTeamMode;
+      
+      // 确保skillWeights对象存在
+      if (!customHeroes[heroId].skillWeights) {
+        customHeroes[heroId].skillWeights = {};
+      }
+      
       // 遍历所有技能，读取并保存阈值设置
       for (let i = 1; i <= 6; i++) {
         const hpThresholdInput = $(`#${heroId}Skill${i}HpThreshold`);
@@ -1506,13 +1841,32 @@
           const hpThreshold = parseInt(hpThresholdInput.text) || 100;
           const distThreshold = parseInt(distThresholdInput.text) || 0;
           
+          // 读取技能等级
+          let level = getDefaultSkillLevel(i); // 默认值
+          if (i <= 3 || i === 6) {
+            const levelSelector = $(`#${heroId}Skill${i}LevelSelector`);
+            if (levelSelector) {
+              level = typeof levelSelector.selectedLevel === 'number' ? levelSelector.selectedLevel : getDefaultSkillLevel(i);
+            }
+          }
+          
           // 保存到customHeroes对象中
           customHeroes[heroId].skillThresholds[`skill${i}`] = {
             hpThreshold: hpThreshold,
-            distThreshold: distThreshold
+            distThreshold: distThreshold,
+            level: level
           };
           
-          $.Msg(`保存 ${heroId} 技能${i} 阈值: HP=${hpThreshold}, 距离=${distThreshold}`);
+          // 如果开启了团队模式，保存权重
+          if (isTeamMode) {
+            const weightInput = $(`#${heroId}Skill${i}Weight`);
+            if (weightInput) {
+              const weight = parseInt(weightInput.text) || 0;
+              customHeroes[heroId].skillWeights[`skill${i}`] = weight;
+            }
+          }
+          
+          $.Msg(`保存 ${heroId} 技能${i} 阈值: HP=${hpThreshold}, 距离=${distThreshold}, 等级=${level}${isTeamMode ? `, 权重=${customHeroes[heroId].skillWeights[`skill${i}`]}` : ''}`);
         }
       }
       
@@ -1541,7 +1895,7 @@
     
     const overallStrategyValue = $.CreatePanel('Label', overallStrategyRow, `${heroId}OverallStrategyLabel`);
     overallStrategyValue.AddClass('StrategyValue');
-    overallStrategyValue.text = '未选择';
+    overallStrategyValue.text = '默认策略';
     
     const modifyOverallStrategyButton = $.CreatePanel('Button', overallStrategyRow, `Modify${heroId}OverallStrategyButton`);
     modifyOverallStrategyButton.AddClass('ModifyButton');
@@ -1574,15 +1928,21 @@
         facetId: -1,
         heroName: '未选择英雄',
         aiEnabled: aiEnabled,  // 使用前面决定的AI状态
-        skillThresholds: {} // 添加技能阈值数据存储
+        skillThresholds: {}, // 添加技能阈值数据存储
+        teamMode: { enabled: false }, // 添加团队模式状态
+        skillWeights: {} // 添加技能权重数据存储
       };
       
       // 初始化技能阈值数据
       for (let i = 1; i <= 6; i++) {
         customHeroes[heroId].skillThresholds[`skill${i}`] = {
           hpThreshold: 100,
-          distThreshold: 0
+          distThreshold: 0,
+          level: getDefaultSkillLevel(i)
         };
+        
+        // 初始化权重值
+        customHeroes[heroId].skillWeights[`skill${i}`] = 0
       }
     }
     
@@ -1619,7 +1979,7 @@
       // 更新AI状态
       customHeroes[heroId].aiEnabled = aiToggle.IsSelected();
       
-      // 根据AI状态显示或隐藏策略行 - 但还需要检查是否已选择英雄
+      // 根据AI状态显示或隐藏策略行和技能阈值按钮
       updateStrategyRowVisibility(heroId);
       
       $.Msg(`${heroId} AI ${customHeroes[heroId].aiEnabled ? "已开启" : "已关闭"}`);
@@ -1772,21 +2132,81 @@
       for (let i = 1; i <= 6; i++) {
         customHeroes[heroId].skillThresholds[`skill${i}`] = {
           hpThreshold: 100,
-          distThreshold: 0
+          distThreshold: 0,
+          level: getDefaultSkillLevel(i)
         };
       }
     }
     
+    // 确保teamMode对象存在
+    if (!customHeroes[heroId].teamMode) {
+      customHeroes[heroId].teamMode = { enabled: false };
+    }
+    
+    // 确保skillWeights对象存在
+    if (!customHeroes[heroId].skillWeights) {
+      customHeroes[heroId].skillWeights = {};
+      // 初始化权重值
+      for (let i = 1; i <= 6; i++) {
+        customHeroes[heroId].skillWeights[`skill${i}`] = 0
+      }
+    }
+    
+    // 设置团队模式勾选框状态
+    const teamModeToggle = $(`#${heroId}TeamModeToggle`);
+    if (teamModeToggle) {
+      teamModeToggle.checked = customHeroes[heroId].teamMode.enabled;
+      // 显示或隐藏权重输入框
+      toggleTeamModeInputs(heroId, customHeroes[heroId].teamMode.enabled);
+    }
+    
     // 遍历所有技能，加载阈值数据到输入框
     for (let i = 1; i <= 6; i++) {
-      const skillData = customHeroes[heroId].skillThresholds[`skill${i}`] || { hpThreshold: 100, distThreshold: 0 };
+      const skillData = customHeroes[heroId].skillThresholds[`skill${i}`] || { 
+        hpThreshold: 100, 
+        distThreshold: 0, 
+        level: getDefaultSkillLevel(i)
+      };
+      
       const hpThresholdInput = $(`#${heroId}Skill${i}HpThreshold`);
       const distThresholdInput = $(`#${heroId}Skill${i}DistThreshold`);
       
       if (hpThresholdInput && distThresholdInput) {
         hpThresholdInput.text = skillData.hpThreshold.toString();
         distThresholdInput.text = skillData.distThreshold.toString();
-        $.Msg(`已加载技能${i}的阈值: HP=${skillData.hpThreshold}, 距离=${skillData.distThreshold}`);
+        
+        // 加载技能等级 - 仅针对技能1-3和大招
+        if (i <= 3 || i === 6) {
+          const levelSelector = $(`#${heroId}Skill${i}LevelSelector`);
+          if (levelSelector) {
+            const level = typeof skillData.level === 'number' ? skillData.level : getDefaultSkillLevel(i);
+            
+            // 更新选中状态
+            const maxLevel = getMaxSkillLevel(i);
+            for (let l = 0; l <= maxLevel; l++) {
+              const btn = $(`#${heroId}Skill${i}Level${l}`);
+              if (btn) {
+                if (l === level) {
+                  btn.AddClass('SelectedLevel');
+                } else {
+                  btn.RemoveClass('SelectedLevel');
+                }
+              }
+            }
+            
+            // 保存当前选中的等级
+            levelSelector.selectedLevel = level;
+          }
+        }
+        
+        // 加载权重数据 - 对所有技能
+        const weightInput = $(`#${heroId}Skill${i}Weight`);
+        if (weightInput) {
+          const weight = customHeroes[heroId].skillWeights[`skill${i}`] || 0;
+          weightInput.text = weight.toString();
+        }
+        
+        $.Msg(`已加载技能${i}的阈值: HP=${skillData.hpThreshold}, 距离=${skillData.distThreshold}, 等级=${skillData.level !== undefined ? skillData.level : '未设置'}, 权重=${customHeroes[heroId].skillWeights[`skill${i}`] || '未设置'}`);
       } else {
         $.Msg(`警告: 无法找到技能${i}的输入框`);
       }
@@ -1807,9 +2227,20 @@
     let isModified = false;
     for (let i = 1; i <= 6; i++) {
         const skillData = customHeroes[heroId].skillThresholds[`skill${i}`];
+        
+        // 检查生命值阈值和距离阈值是否被修改
         if (skillData && (skillData.hpThreshold !== 100 || skillData.distThreshold !== 0)) {
             isModified = true;
             break;
+        }
+        
+        // 检查技能等级是否被修改（针对技能1-3和大招）
+        if ((i <= 3 || i === 6) && skillData) {
+            const defaultLevel = getDefaultSkillLevel(i);
+            if (skillData.level !== defaultLevel) {
+                isModified = true;
+                break;
+            }
         }
     }
     
@@ -1825,6 +2256,59 @@
             $.Msg(`${heroId} 的技能阈值是默认值，移除高亮样式`);
         }
     }
+  }
+
+  // 添加新函数：显示或隐藏团队模式下的权重输入框
+  function toggleTeamModeInputs(heroId, show) {
+      // 只针对有等级设置的技能（技能1、2、3和终极技能/技能6）
+      const skillsWithLevel = [1, 2, 3, 6];
+      
+      // 遍历这些技能，显示或隐藏权重输入框
+      skillsWithLevel.forEach(skillIndex => {
+          const weightContainer = $(`#${heroId}Skill${skillIndex}WeightContainer`);
+          if (weightContainer) {
+              weightContainer.style.visibility = show ? 'visible' : 'collapse';
+          }
+      });
+  }
+
+  // 添加新函数：初始化技能权重值
+  function initializeSkillWeights(heroId) {
+      // 只针对有等级设置的技能（技能1、2、3和终极技能/技能6）
+      const skillsWithLevel = [1, 2, 3, 6];
+      
+      // 默认权重设置：大招40，其他技能每个20
+      const defaultWeights = {};
+      let totalWeight = 0;
+      
+      // 为每个技能设置默认权重
+      skillsWithLevel.forEach(skillIndex => {
+          const weight = skillIndex === 6 ? 0 : 0; // 大招40，普通技能20
+          defaultWeights[`skill${skillIndex}`] = weight;
+          totalWeight += weight;
+          
+          // 更新UI
+          const weightInput = $(`#${heroId}Skill${skillIndex}Weight`);
+          if (weightInput) {
+              weightInput.text = weight.toString();
+          }
+      });
+      
+      // 保存权重值
+      if (!customHeroes[heroId].skillWeights) {
+          customHeroes[heroId].skillWeights = {};
+      }
+      
+      // 将权重保存到customHeroes对象中
+      skillsWithLevel.forEach(skillIndex => {
+          customHeroes[heroId].skillWeights[`skill${skillIndex}`] = defaultWeights[`skill${skillIndex}`];
+      });
+      
+      // 为技能4和5设置默认权重为0（因为它们没有等级设置）
+      customHeroes[heroId].skillWeights[`skill4`] = 0;
+      customHeroes[heroId].skillWeights[`skill5`] = 0;
+      
+      $.Msg(`已初始化 ${heroId} 的技能权重值: ${JSON.stringify(defaultWeights)}`);
   }
 
 })();

@@ -8,7 +8,7 @@ function Main:HeroBenefits(heroName, hero, overallStrategy, heroStrategy)
         end
         Timers:CreateTimer(0.1, function()
             local meepos = FindUnitsInRadius(
-                hero:GetTeamNumber(), -- 使用hero的队伍编号
+                hero:GetTeamNumber(),
                 hero:GetAbsOrigin(),
                 nil,
                 FIND_UNITS_EVERYWHERE,
@@ -22,9 +22,36 @@ function Main:HeroBenefits(heroName, hero, overallStrategy, heroStrategy)
                 if meepo:HasModifier("modifier_meepo_divided_we_stand") and 
                 meepo:IsRealHero() and 
                 meepo ~= hero and
-                not AIs[meepo] then  -- 使用AIs表来检查
-                 CreateAIForHero(meepo, overallStrategy, heroStrategy, "meepo_clone")
-             end
+                not AIs[meepo] then
+                    -- 创建AI
+                    CreateAIForHero(meepo, overallStrategy, heroStrategy, "meepo_clone")
+                    
+                    -- 同步朝向
+                    meepo:SetForwardVector(hero:GetForwardVector())
+                    
+                    -- 同步控制状态
+                    local controlModifiers = {
+
+                        "modifier_rooted",
+                        "modifier_silenced",
+
+                    }
+                    
+                    for _, modName in pairs(controlModifiers) do
+                        local mod = hero:FindModifierByName(modName)
+                        if mod then
+                            local duration = mod:GetRemainingTime()
+                            if duration > 0 then
+                                meepo:AddNewModifier(
+                                    mod:GetCaster(), -- 原始施法者
+                                    mod:GetAbility(), -- 原始技能
+                                    modName,
+                                    {duration = duration}
+                                )
+                            end
+                        end
+                    end
+                end
             end
         end)
     end
@@ -39,6 +66,9 @@ function Main:HeroBenefits(heroName, hero, overallStrategy, heroStrategy)
         end
     end
 
+
+
+
     if heroName == "npc_dota_hero_tiny" or 
         heroName == "npc_dota_hero_furion" or 
         heroName == "npc_dota_hero_treant" or 
@@ -49,6 +79,13 @@ function Main:HeroBenefits(heroName, hero, overallStrategy, heroStrategy)
         heroName == "npc_dota_hero_windrunner"  then
         
         print("正在生成树木环绕阵型")
+        
+        -- 检查1000码范围内的树木数量
+        local nearbyTrees = GridNav:GetAllTreesAroundPoint(hero:GetAbsOrigin(), 1000, true)
+        if #nearbyTrees >= 20 then
+            print("周围已有" .. #nearbyTrees .. "颗树木，不再生成新的树木")
+            return
+        end
         
         -- 获取英雄朝向角度（弧度）
         local heroForwardVector = hero:GetForwardVector()
@@ -96,14 +133,14 @@ function Main:HeroBenefits(heroName, hero, overallStrategy, heroStrategy)
                 local units = FindUnitsInRadius(hero:GetTeamNumber(),
                     position,
                     nil,
-                    50,
+                    80,
                     DOTA_UNIT_TARGET_TEAM_BOTH,
                     DOTA_UNIT_TARGET_ALL,
                     DOTA_UNIT_TARGET_FLAG_NONE,
                     FIND_ANY_ORDER,
                     false)
                     
-                local trees = GridNav:GetAllTreesAroundPoint(position, 50, true)
+                local trees = GridNav:GetAllTreesAroundPoint(position, 80, true)
                 
                 if #units == 0 and #trees == 0 then
                     CreateTempTree(position, 30)
@@ -126,14 +163,14 @@ function Main:HeroBenefits(heroName, hero, overallStrategy, heroStrategy)
                 local units = FindUnitsInRadius(hero:GetTeamNumber(),
                     position,
                     nil,
-                    50,
+                    80,
                     DOTA_UNIT_TARGET_TEAM_BOTH,
                     DOTA_UNIT_TARGET_ALL,
                     DOTA_UNIT_TARGET_FLAG_NONE,
                     FIND_ANY_ORDER,
                     false)
                     
-                local trees = GridNav:GetAllTreesAroundPoint(position, 50, true)
+                local trees = GridNav:GetAllTreesAroundPoint(position, 80, true)
                 
                 if #units == 0 and #trees == 0 then
                     CreateTempTree(position, 30)
@@ -504,6 +541,18 @@ function Main:HeroBenefits(heroName, hero, overallStrategy, heroStrategy)
         createUnitAndCastSpell(unitName)
     end
 
+    if heroName == "npc_dota_hero_centaur" then
+        local ability = hero:FindAbilityByName("centaur_rawhide")
+        if ability then
+            hero:RemoveAbility("centaur_rawhide")
+            local level = hero:GetLevel()
+            -- 给予等级*30的生命值加成
+            local bonus_health = level * 30
+            hero:AddNewModifier(hero, nil, "modifier_extra_health_bonus", {bonus_health = bonus_health})
+        end
+    end
+
+
     if heroName == "npc_dota_hero_visage" then
         local ability = hero:FindAbilityByName("visage_summon_familiars")
         if ability then
@@ -660,7 +709,7 @@ function Main:HeroBenefits(heroName, hero, overallStrategy, heroStrategy)
             
             -- 给予88层计数器和攻击力buff
             hero:AddNewModifier(hero, ability, "modifier_abyssal_underlord_atrophy_aura_dmg_buff_counter", {duration = duration})
-            hero:SetModifierStackCount("modifier_abyssal_underlord_atrophy_aura_dmg_buff_counter", hero, 88)
+            hero:SetModifierStackCount("modifier_abyssal_underlord_atrophy_aura_dmg_buff_counter", hero, 2 * ability:GetLevel() * 10)
         else
             print("错误：未能找到孽主的衰败光环技能或技能未升级！")
         end
@@ -997,36 +1046,60 @@ function Main:HeroPreparation(heroName, hero, overallStrategy, heroStrategy)
         local facet = hero:GetHeroFacetID()
         
         if wex and quas and exort and invoke then
+            -- 预先检查所有技能等级，避免重复获取
+            local wexLevel = wex:GetLevel()
+            local quasLevel = quas:GetLevel()
+            local exortLevel = exort:GetLevel()
+            local invokeLevel = invoke:GetLevel()
+            
+            -- 定义一个辅助函数，仅当技能等级>1时才释放技能
+            local function castIfHigherLevel(ability, level)
+                if level >= 1 then 
+                    ability:OnSpellStart() 
+                end
+            end
+            
             if facet == 4 then
                 -- 原有的facet 4逻辑
                 print("释放3次wex和1次invoke")
-                wex:OnSpellStart()
-                wex:OnSpellStart() 
-                wex:OnSpellStart()
-                invoke:OnSpellStart()
+                castIfHigherLevel(wex, wexLevel)
+                castIfHigherLevel(wex, wexLevel)
+                castIfHigherLevel(wex, wexLevel)
+                castIfHigherLevel(invoke, invokeLevel)
 
                 print("释放2次wex,1次quas和1次invoke")
-                wex:OnSpellStart()
-                wex:OnSpellStart()
-                quas:OnSpellStart()
-                invoke:OnSpellStart()
+                castIfHigherLevel(wex, wexLevel)
+                castIfHigherLevel(wex, wexLevel)
+                castIfHigherLevel(quas, quasLevel)
+                castIfHigherLevel(invoke, invokeLevel)
                 
             elseif facet == 5 then
                 -- 新增的facet 5逻辑
                 print("释放3次exort和1次invoke")
-                exort:OnSpellStart()
-                exort:OnSpellStart()
-                exort:OnSpellStart()
-                invoke:OnSpellStart()
+                castIfHigherLevel(exort, exortLevel)
+                castIfHigherLevel(exort, exortLevel)
+                castIfHigherLevel(exort, exortLevel)
+                castIfHigherLevel(invoke, invokeLevel)
                 
                 print("释放2次exort,1次quas和1次invoke")
-                exort:OnSpellStart()
-                exort:OnSpellStart()
-                wex:OnSpellStart()
-                invoke:OnSpellStart()
+                castIfHigherLevel(exort, exortLevel)
+                castIfHigherLevel(exort, exortLevel)
+                castIfHigherLevel(wex, wexLevel)
+                castIfHigherLevel(invoke, invokeLevel)
             end
         end
     end
+    if heroName == "npc_dota_hero_kez" then
+        print("给与凯兹小礼物")
+        if CommonAI:containsStrategy(heroStrategy, "双钗出战") then
+            print("双钗出战")
+            local ability = hero:FindAbilityByName("kez_switch_weapons")
+            if ability then
+                ability:OnSpellStart()
+            end
+        end
+    end
+
 
 
 end

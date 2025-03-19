@@ -32,27 +32,23 @@ function renderMessage(messageParts) {
         }
 
         if (part.facetInfo) {
-            let localizedText = "Unknown Facet";
-            const facetToken = "#DOTA_Tooltip_Facet_" + part.facetInfo.facetName;
+            
             if (part.facetInfo.facetName) {
-                // 优先尝试Facet本地化
-
-                localizedText = $.Localize(facetToken);
+                const facetToken = "#DOTA_Tooltip_Facet_" + part.facetInfo.facetName;
+                const facetLocalized = $.Localize(facetToken);
                 
-                // 其次尝试用facetName进行Ability本地化
-                if (localizedText === facetToken) {
-                    const abilityTokenWithName = "#DOTA_Tooltip_Ability_" + part.facetInfo.facetName;
-                    localizedText = $.Localize(abilityTokenWithName);
+                if (facetLocalized !== facetToken) {
+                    return facetLocalized;
                 }
             }
             
-            // 最后尝试用abilityName进行Ability本地化
-            if ((localizedText === facetToken || !part.facetInfo.facetName) && part.facetInfo.abilityName) {
-                const abilityTokenWithAbilityName = "#DOTA_Tooltip_Ability_" + part.facetInfo.abilityName;
-                localizedText = $.Localize(abilityTokenWithAbilityName);
+            if (part.facetInfo.abilityName) {
+                const abilityToken = "#DOTA_Tooltip_Ability_" + part.facetInfo.abilityName;
+                const abilityLocalized = $.Localize(abilityToken);
+                return abilityLocalized;
             }
             
-            return localizedText;
+            return "Unknown Facet";
         }
 
         const localizedText = $.Localize('#' + part.text);

@@ -86,3 +86,4 @@ LinkLuaModifier("modifier_attack_damage_percentage", "modifier/modifier_attack_d
 LinkLuaModifier("modifier_anti_invisible", "modifier/modifier_anti_invisible.lua", LUA_MODIFIER_MOTION_NONE)
 LinkLuaModifier("modifier_attack_auto_cast_ability", "modifier/modifier_attack_auto_cast_ability.lua", LUA_MODIFIER_MOTION_NONE)
 LinkLuaModifier("modifier_reset_passive_ability_cooldown", "modifier/modifier_reset_passive_ability_cooldown.lua", LUA_MODIFIER_MOTION_NONE)
+LinkLuaModifier("modifier_extra_health_bonus", "modifier/modifier_extra_health_bonus.lua", LUA_MODIFIER_MOTION_NONE)

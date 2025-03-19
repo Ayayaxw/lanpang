@@ -395,7 +395,7 @@ function Main:OnUnitKilled_Golem_100(killedUnit, args)
         })
         
         -- 播放失败动画
-        self:PlayDefeatAnimation(self.leftTeamHero1)
+        self:PlayDefeatAnimation(killer)
         
         -- 记录比赛结果
         self:createLocalizedMessage(

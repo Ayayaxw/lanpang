@@ -148,7 +148,9 @@ else
 
 end
 
-
+print("开始打印npc_abilities表...")
+PrintAbilitiesTable(Main.heroAbilities)
+print("npc_abilities表打印完成")
 
 
 function Main:GetOriginalAbilityValue(hero_name, ability_name)
@@ -226,7 +228,7 @@ function Main:UpdateAbilityModifiers(ability_modifiers, debug_print)
                         print(string.format("更新英雄技能: %s", ability_key))
                         DeepPrintTable(ability_data.AbilityValues)
                     end
-                    CustomNetTables:SetTableValue("edit_kv", ability_key, ability_data.AbilityValues)
+                    CustomNetTables:SetTableValue("edit_kv", ability_key, { AbilityValues = ability_data.AbilityValues })
                 end
             end
         else
@@ -246,7 +248,7 @@ function Main:UpdateAbilityModifiers(ability_modifiers, debug_print)
                     print(string.format("设置全局技能: %s", global_key))
                     DeepPrintTable(data.AbilityValues)
                 end
-                CustomNetTables:SetTableValue("edit_kv", global_key, data.AbilityValues)
+                CustomNetTables:SetTableValue("edit_kv", global_key, { AbilityValues = data.AbilityValues })
             end
         end
     end

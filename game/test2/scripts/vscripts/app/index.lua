@@ -776,6 +776,10 @@ function Main:OnFogToggled(keys)
         -- 关闭迷雾
         SendToServerConsole("fog_override_enable 1")
     end
+
+
+    --'SendToServerConsole', command: 'fog_enable 0' })
+    --'SendToServerConsole', command: 'r_farz '+ v * 2 })
 end
 
 

@@ -24,6 +24,13 @@ function Main:Init_Skill_Probability_100(event, playerID)
                 --如果英雄是npc_dota_hero_doom_bringer，给他modifier
                 if hero:GetUnitName() == "npc_dota_hero_doom_bringer" then
                     hero:AddNewModifier(hero, nil, "modifier_reset_passive_ability_cooldown", {})
+                end
+
+                --如果英雄是npc_dota_hero_naga_siren，给他modifier
+                if hero:GetUnitName() == "npc_dota_hero_naga_siren" then
+                    hero:RemoveAbility("naga_siren_eelskin")
+
+                    hero:AddAbility("naga_siren_eelskin")
 
                 end
             end,
@@ -45,7 +52,14 @@ function Main:Init_Skill_Probability_100(event, playerID)
         BATTLEFIELD = {
             function(hero)
                 hero:AddNewModifier(hero, nil, "modifier_auto_elevation_small", {})
+                
                 hero:AddNewModifier(hero, nil, "modifier_kv_editor", {})
+                if hero:GetUnitName() == "npc_dota_hero_naga_siren" then
+                    hero:RemoveAbility("naga_siren_eelskin")
+
+                    hero:AddAbility("naga_siren_eelskin")
+
+                end
             end,
         }
     }
@@ -78,6 +92,20 @@ function Main:Init_Skill_Probability_100(event, playerID)
                 }
             },
         },
+        npc_dota_hero_troll_warlord = {
+            troll_warlord_berserkers_rage  = {
+                AbilityValues = {
+                    ensnare_chance = 100,
+                    maim_chance = 100
+                }
+            },
+            troll_warlord_whirling_axes_melee = {
+                AbilityValues = {
+                    blind_pct = 100
+                }
+            },
+        },
+
         npc_dota_hero_skeleton_king = {
             skeleton_king_mortal_strike = {
                 AbilityValues = {
@@ -258,6 +286,13 @@ function Main:Init_Skill_Probability_100(event, playerID)
                 AbilityValues = {
                     hits = {
                         value = 0
+                    }
+                }
+            },
+            naga_siren_eelskin = {
+                AbilityValues = {
+                    evasion_per_naga = {
+                        value = 100
                     }
                 }
             },
@@ -490,6 +525,7 @@ function Main:Init_Skill_Probability_100(event, playerID)
         },
 
     }
+
 
     self:UpdateAbilityModifiers(ability_modifiers)
 

@@ -1,84 +1,82 @@
 PLAYERTABLES_VERSION = "0.90"
 
 --[[
-  PlayerTables: Player-specific shared state/nettable Library by BMD
+  PlayerTables: 玩家特定共享状态/网络表库 由BMD开发
 
-  PlayerTables sets up a table that is shared between server (lua) and client (javascript) between specific (but changeable) clients.
-  It is very similar in concept to nettables, but is built on being player-specific state (not sent to all players).
-  Like nettables, PlayerTable state adjustments are mirrored to clients (that are currently subscribed).
-  If players disconnect and then reconnect, PlayerTables automatically transmits their subscribed table states to them when they connect.
-  PlayerTables only support sending numbers, strings, and tables of numbers/strings/tables to clients.
+  PlayerTables设置一个在服务器(lua)和客户端(javascript)之间共享的表，可以在特定（但可更改）的客户端之间共享
+  这在概念上与网络表非常相似，但构建在玩家特定状态上（不发送给所有玩家）
+  与网络表一样，PlayerTable状态调整会镜像到客户端（当前已订阅的客户端）
+  如果玩家断开连接然后重新连接，PlayerTables会在他们连接时自动传输他们订阅的表状态
+  PlayerTables仅支持向客户端发送数字、字符串和数字/字符串/表的表
 
-  Installation
-  -"require" this file inside your code in order to gain access to the PlayerTables global table.
-  -Ensure that you have the playertables/playertables_base.js in your panorama content scripts folder.
-  -Ensure that playertables/playertables_base.js script is included in your custom_ui_manifest.xml with
+  安装方法
+  -在您的代码中"require"此文件以访问PlayerTables全局表
+  -确保您的全景UI内容脚本文件夹中有playertables/playertables_base.js
+  -确保playertables/playertables_base.js脚本在您的custom_ui_manifest.xml中包含
     <scripts>
       <include src="file://{resources}/scripts/playertables/playertables_base.js" />
     </scripts>
 
-  Library Usage
+  库使用方法
   -Lua
     -void PlayerTables:CreateTable(tableName, tableContents, pids)
-      Creates a new PlayerTable with the given name, default table contents, and automatically sets up a subscription
-      for all playerIDs in the "pids" object.
+      创建一个新的PlayerTable，具有给定的名称、默认表内容，并自动设置"pids"对象中所有playerID的订阅
     -void PlayerTables:DeleteTable(tableName)
-      Deletes a table by the given name, alerting any subscribed clients.
+      删除给定名称的表，通知所有已订阅的客户端
     -bool PlayerTables:TableExists(tableName)
-      Returns whether a table currently exists with the given name
+      返回给定名称的表是否当前存在
     -void PlayerTables:SetPlayerSubscriptions(tableName, pids)
-      Clear and reset all player subscriptions based on the "pids" object.
+      基于"pids"对象清除并重置所有玩家订阅
     -void PlayerTables:AddPlayerSubscription(tableName, pid)
-      Adds a subscription for the given player ID.
+      为给定的玩家ID添加订阅
     -void PlayerTables:RemovePlayerSubscription(tableName, pid)
-      Removes a subscription for the given player ID.
+      移除给定玩家ID的订阅
     -<> PlayerTables:GetTableValue(tableName, key)
-      Returns the current value for this PlayerTable for the given "key", or nil if the key doesn't exist.
+      返回给定"key"的PlayerTable当前值，如果键不存在则返回nil
     -<> PlayerTables:GetAllTableValues(tableName)
-      Returns the current keys and values for the given table.
+      返回给定表的当前键和值
     -void PlayerTables:DeleteTableValue(tableName, key)
-      Delete a key from a playertable.
+      从playertable删除一个键
     -void PlayerTables:DeleteTableValues(tableName, keys)
-      Delete the keys from a playertable given in the keys object.
+      从playertable删除keys对象中给定的键
     -void PlayerTables:SetTableValue(tableName, key, value)
-      Set a value for the given key.
+      为给定的键设置一个值
     -void PlayerTables:SetTableValues(tableName, changes)
-      Set a all of the given key-value pairs in the changes object.
+      设置changes对象中给定的所有键值对
 
-
-  -Javascript: include the javascript API with "var PlayerTables = GameUI.CustomUIConfig().PlayerTables" at the top of your file.
+  -Javascript: 通过在文件顶部包含"var PlayerTables = GameUI.CustomUIConfig().PlayerTables"来包含javascript API
     -void PlayerTables.GetAllTableValues(tableName)
-      Returns the current keys and values of all keys within the table "tableName".
-      Returns null if no table exists with that name.
+      返回表"tableName"中所有键的当前键和值
+      如果不存在该名称的表，则返回null
     -void PlayerTables.GetTableValue(tableName, keyName)
-      Returns the current value for the key given by "keyName" if it exists on the table given by "tableName".
-      Returns null if no table exists, or undefined if the key does not exist.
+      返回表"tableName"中"keyName"给定键的当前值（如果存在）
+      如果表不存在则返回null，如果键不存在则返回undefined
     -int PlayerTables.SubscribeNetTableListener(tableName, callback) 
-      Sets up a callback for when this playertable is changed.  The callback is of the form:
-        function(tableName, changesObject, deletionsObject).
-          changesObject contains the key-value pairs that were changed
-          deletionsObject contains the keys that were deleted.
-          If changesObject and deletionsObject are both null, then the entire table was deleted.
+      设置此playertable更改时的回调，回调格式为:
+        function(tableName, changesObject, deletionsObject)
+          changesObject包含被更改的键值对
+          deletionsObject包含被删除的键
+          如果changesObject和deletionsObject都为null，则整个表被删除
 
-      Returns an integer value representing this subscription.
+      返回表示此订阅的整数值
     -void PlayerTables.UnsubscribeNetTableListener(callbackID)
-      Remvoes the existing subscription as given by the callbackID (the integer returned from SubscribeNetTableListener)
+      移除由callbackID（从SubscribeNetTableListener返回的整数）给定的现有订阅
 
-  Examples:
-    --Create a Table and set a few values.
+  示例:
+    --创建一个表并设置几个值
       PlayerTables:CreateTable("new_table", {initial="initial value"}, {0})
       PlayerTables:SetTableValue("new_table", "count", 0)
       PlayerTables:SetTableValues("new_table", {val1=1, val2=2})
 
-    --Change player subscriptions
+    --更改玩家订阅
       PlayerTables:RemovePlayerSubscription("new_table", 0)
-      PlayerTables:SetPlayerSubscriptions("new_table", {[1]=true,[3]=true})  -- the pids object can be a map or array type table
+      PlayerTables:SetPlayerSubscriptions("new_table", {[1]=true,[3]=true})  -- pids对象可以是map或数组类型表
 
-    --Retrieve values on the client
+    --在客户端检索值
       var PlayerTables = GameUI.CustomUIConfig().PlayerTables;
       $.Msg(PlayerTables.GetTableVaue("new_table", "count"));
 
-    --Subscribe to changes on the client
+    --在客户端订阅更改
       var PlayerTables = GameUI.CustomUIConfig().PlayerTables;
       PlayerTables.SubscribeNetTableListener("new_table", function(tableName, changes, deletions){
         $.Msg(tableName + " changed: " + changes + " -- " + deletions);

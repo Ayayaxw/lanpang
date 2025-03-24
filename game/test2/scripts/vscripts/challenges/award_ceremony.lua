@@ -1,7 +1,7 @@
 function Main:Init_award_ceremony(heroName, heroFacet,playerID, heroChineseName)
     local spawnOrigin = Vector(43, -300, 256)  -- 假设的生成位置，您可以根据需要调整
-    SpawnFourHeroes()
-    --DisplayHeroes()
+    --SpawnFourHeroes()
+    DisplayHeroes()
 
 end
 
@@ -87,44 +87,57 @@ end
 
 function DisplayHeroes()
     local heroesGroup1 = {
-        "npc_dota_hero_tusk",
-        "npc_dota_hero_spirit_breaker",
+
         "npc_dota_hero_chaos_knight",
-        "npc_dota_hero_tidehunter",
-        "npc_dota_hero_pangolier",
-        "npc_dota_hero_juggernaut",
-        "npc_dota_hero_ogre_magi",
-        "npc_dota_hero_kez",
-        "npc_dota_hero_drow_ranger",
-        "npc_dota_hero_phantom_assassin",
-        "npc_dota_hero_phantom_lancer",
-        "npc_dota_hero_sniper",
-        "npc_dota_hero_faceless_void",
-        "npc_dota_hero_obsidian_destroyer",
-        "npc_dota_hero_brewmaster",
-        "npc_dota_hero_muerta",
-        "npc_dota_hero_razor",
-        "npc_dota_hero_broodmother",
-
-
-    }
+        "npc_dota_hero_omniknight", 
+        "npc_dota_hero_doom_bringer", 
     
-    local heroesGroup2 = {
-        "npc_dota_hero_legion_commander",
-        "npc_dota_hero_skeleton_king",
-        "npc_dota_hero_axe",
-        "npc_dota_hero_slardar",
-        "npc_dota_hero_doom_bringer",
+        "npc_dota_hero_spirit_breaker", 
+        "npc_dota_hero_slardar", 
         "npc_dota_hero_dawnbreaker",
-        "npc_dota_hero_weaver",
-        "npc_dota_hero_gyrocopter",
+        "npc_dota_hero_dark_seer",
+        "npc_dota_hero_obsidian_destroyer", 
+        "npc_dota_hero_jakiro", 
+        "npc_dota_hero_muerta",
+    
+        "npc_dota_hero_tidehunter",
+        "npc_dota_hero_skeleton_king",
+        "npc_dota_hero_ogre_magi",
+        "npc_dota_hero_axe",
+        "npc_dota_hero_legion_commander", 
+        "npc_dota_hero_tusk",
+    
+        "npc_dota_hero_kunkka"
+    
+    
+    
+        }
+        
+        local heroesGroup2 = {
+        "npc_dota_hero_sniper", 
+    
+        "npc_dota_hero_gyrocopter", 
+    
+        "npc_dota_hero_juggernaut", 
+        "npc_dota_hero_weaver", 
+    
+        "npc_dota_hero_shadow_shaman", 
+        "npc_dota_hero_faceless_void", 
+        "npc_dota_hero_drow_ranger", 
+        "npc_dota_hero_razor",
+        "npc_dota_hero_phantom_assassin",
+        "npc_dota_hero_naga_siren", 
+        "npc_dota_hero_broodmother", 
+        "npc_dota_hero_kez",
         "npc_dota_hero_monkey_king",
-        "npc_dota_hero_shadow_shaman",
-        "npc_dota_hero_jakiro",
-        "npc_dota_hero_kunkka",
-        "npc_dota_hero_naga_siren",
-        "npc_dota_hero_omniknight",
-    }
+        "npc_dota_hero_phantom_lancer", 
+        "npc_dota_hero_hoodwink",
+        "npc_dota_hero_pangolier", 
+        "npc_dota_hero_brewmaster", 
+    
+    
+        }
+        
     
     -- 动态计算河道宽度（基础500，人数差每多1个减少50，最小200）
     local diff = math.abs(#heroesGroup1 - #heroesGroup2)

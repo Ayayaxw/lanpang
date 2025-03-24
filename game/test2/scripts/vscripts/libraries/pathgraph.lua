@@ -1,30 +1,30 @@
 PATHGRAPH_VERSION = "0.80"
 
 --[[
-  Path Graph Instantiation Library by BMD
+  路径图实例化库 由BMD开发
 
-  Installation
-  -"require" this file inside your code in order to gain access to the PathGraph global and functions.
+  安装方法
+  -在您的代码中"require"此文件以访问PathGraph全局变量和函数
 
-  Usage
-  -PathGraph:Initialize() should be called sometime during your game mode's initialization.
-  -The Initialize function will find all of the connecting "path_corner" entities as placed on your map via hammer and connect them.
-  -Each "path_corner" entity after Initialize will have a "edges" property containing a full edge graph for that node to all other connected nodes.
-  -PathGraph:DrawPaths(pathCorner, duration, color) should be called for debugging purposes in order to show the path graph connections.
-    -pathCorner is the path_corner entity to display the connected graph for.
-    -duration is the duration to display the graph
-    -color is the color to use for the graph lines and nodes
-  Notes
-  -Currently only supports path_corner and not path_track
+  使用方法
+  -应在游戏模式初始化期间调用PathGraph:Initialize()
+  -Initialize函数将查找所有通过hammer放置在地图上的相连"path_corner"实体并将它们连接起来
+  -Initialize后，每个"path_corner"实体都将有一个"edges"属性，包含该节点到所有其他连接节点的完整边图
+  -应调用PathGraph:DrawPaths(pathCorner, duration, color)进行调试，以显示路径图连接
+    -pathCorner是要显示连接图的path_corner实体
+    -duration是显示图形的持续时间
+    -color是用于图形线条和节点的颜色
+  注意
+  -目前仅支持path_corner而不支持path_track
 
-  Examples:
-  --Initialize the graph
+  示例:
+  --初始化图形
     PathGraph:Initialize()
 
-  --Iterate through all connected edges starting from a path_corner node named "start_node"
+  --从名为"start_node"的path_corner节点开始遍历所有连接的边
     local node = Entities:FindByName(nil, "start_node")
     for _,edge in pairs(node.edges) do
-      print("'start_node' is connected to '" .. edge:GetName() .. "'")
+      print("'start_node'与'"..edge:GetName().."'相连")
     end
 
 ]]

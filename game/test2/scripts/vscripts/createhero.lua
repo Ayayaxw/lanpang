@@ -123,7 +123,7 @@ end
 
 function CreateParentHeroesWithFacets(callback)
     local playerId = 0
-    local spawnPosition = Main.largeSpawnCenter
+    local spawnPosition = Main.SPAWN_POINT_FAR
     
     local teams = {
         DOTA_TEAM_GOODGUYS,

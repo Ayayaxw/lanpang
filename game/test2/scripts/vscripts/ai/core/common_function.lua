@@ -500,6 +500,7 @@ end
 function CommonAI:IsUnableToAttack(entity, target)
 
     if self:containsStrategy(self.global_strategy, "禁用普攻") then
+
         return true
     end
 	

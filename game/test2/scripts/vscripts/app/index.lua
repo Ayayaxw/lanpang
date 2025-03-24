@@ -1,4 +1,3 @@
-
 if Main == nil then
 	Main = class({})
     Main.challengeActive = false
@@ -163,37 +162,6 @@ function Main:InitGameMode()
     self.caipan = self:CreateReferee(Main.largeSpawnArea_Caipan)
     self.caipan_waterfall = self:CreateReferee(Main.waterFall_Caipan)
     
-	-- Setting the forward direction to face towards a specific point, e.g., facing downwards on the map
-	
-	-- self.caipan:AddItemByName("item_gem")
-    -- --unit:AddItemByName("item_roshans_banner")
-    -- self.caipan:AddItemByName("item_sphere")
-
-
-
-
-
-
-    -- local unit = CreateUnitByName("caipan", Vector(-4000, 5000, 0), true, nil, nil, DOTA_TEAM_GOODGUYS)
-
-
-
-	-- -- --unit:AddNewModifier(unit, nil, "modifier_invulnerable", {})
-	-- -- -- Setting the forward direction to face towards a specific point, e.g., facing downwards on the map
-	-- -- unit:SetForwardVector(Vector(0, -1, 0))
-	-- unit:AddItemByName("item_gem")
-    -- --unit:AddItemByName("item_roshans_banner")
-    -- unit:AddItemByName("item_sphere")
-    -- unit:AddNewModifier(unit, nil, "modifier_invulnerable", {})
-    -- Timers:CreateTimer(10, function()
-    --     item = unit:GetItemInSlot(0)
-    --     caipanitem = self.caipan:GetItemInSlot(0)
-    --     if item then
-    --         unit:CastAbilityOnPosition(unit:GetOrigin(), item,unit:GetPlayerOwnerID())
-    --         self.caipan:CastAbilityOnPosition(self.caipan:GetOrigin(),caipanitem, self.caipan:GetPlayerOwnerID())
-    --     end
-
-    -- end)
     self.currentHeroName = nil  -- 初始化时没有英雄被选中
     if not IsInToolsMode() then
         local message = "游戏的菜单在左上角，把鼠标移过去就可以看见！有任何BUG欢迎加群反馈！Q群：934026049"
@@ -212,19 +180,23 @@ function Main:InitGameMode()
 
 end
 
--- 使用示例：
--- Main:MultiplyAOEValues("npc_dota_hero_antimage")
-
 function Main:CreateReferee(position)
     local referee = CreateUnitByName("caipan", position, true, nil, nil, DOTA_TEAM_BADGUYS)
     referee:AddNewModifier(referee, nil, "modifier_global_ability_listener", {})
     referee:AddNewModifier(referee, nil, "modifier_caipan", {})
     referee:AddNewModifier(referee, nil, "modifier_wearable", {})
     referee:AddNewModifier(referee, nil, "modifier_phased", {})
-    referee:AddNewModifier(referee, nil, "modifier_disarmed", {})  -- 添加缴械效果
+    referee:AddNewModifier(referee, nil, "modifier_disarmed", {})
     referee:SetForwardVector(Vector(0, -1, 0))
+    
 
-    --最后再次把单位传送到目标位置
+    StartAnimation(referee, {
+        duration = 99999999999999,
+        activity = ACT_DOTA_VICTORY,
+        rate = 1.0,
+        translate = "happy_dance"  -- 使用快乐舞蹈修饰符
+    })
+
     FindClearSpaceForUnit(referee, position, true)
     return referee
 end
@@ -770,16 +742,13 @@ end
 function Main:OnFogToggled(keys)
     local enable = keys.enable
     if enable == 1 then
-        -- 开启迷雾
-        SendToServerConsole("fog_override_enable 0")
+        SendToServerConsole("fog_enable 1")
     else
         -- 关闭迷雾
-        SendToServerConsole("fog_override_enable 1")
+        SendToServerConsole("fog_enable 0")
+        SendToServerConsole("r_farz 10000")
     end
 
-
-    --'SendToServerConsole', command: 'fog_enable 0' })
-    --'SendToServerConsole', command: 'r_farz '+ v * 2 })
 end
 
 

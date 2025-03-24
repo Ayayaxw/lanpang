@@ -952,8 +952,20 @@ function CommonAI:HandleUnitTargetAbility(entity, abilityInfo, target, targetInf
                     end
                 end
             else
-                entity:CastAbilityOnTarget(entity, abilityInfo.skill, 0)
-                self:OnSpellCast(entity, abilityInfo.skill, abilityInfo.castPoint, abilityInfo.channelTime, entity)
+                local totalRange = self:GetSkillRangeThreshold(abilityInfo.skill, entity, 0)
+                if totalRange == 0 then
+                    entity:CastAbilityOnTarget(entity, abilityInfo.skill, 0)
+                    self:OnSpellCast(entity, abilityInfo.skill, abilityInfo.castPoint, abilityInfo.channelTime, entity)
+                else
+                    if self:IsInRange(self.target, totalRange) then
+                        entity:CastAbilityOnTarget(entity, abilityInfo.skill, 0)
+                        self:OnSpellCast(entity, abilityInfo.skill, abilityInfo.castPoint, abilityInfo.channelTime, entity)
+                    else
+                        self:MoveToRange(targetInfo.targetPos, totalRange)
+                        self:SetState(AIStates.Seek)
+                        self:log(string.format("不在施法范围内，移动到施法范围，进入Seek状态，目标距离: %.2f，施法距离: %.2f", targetInfo.distance, abilityInfo.castRange))
+                    end
+                end
             end
         end
 

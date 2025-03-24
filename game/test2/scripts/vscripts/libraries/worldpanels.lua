@@ -1,38 +1,37 @@
 WORLDPANELS_VERSION = "0.81"
 
 --[[
-  Lua-controlled Frankenstein WorldPanels Library by BMD
+  Lua控制的弗兰肯斯坦世界面板库 由BMD开发
 
-  Installation
-  -"require" this file inside your code in order to make the WorldPanels API availble
-  -Ensure that this file is placed in the vscripts/libraries path along with timers.lua and playertables.lua
-  -Ensure that you have the barebones_worldpanels.xml in your panorama content layout folder.
-  -Ensure that you have the barebones_worldpanels.js in your panorama content scripts folder.
-  -Ensure that barebones_worldpanels.xml is included in your custom_ui_manifest.xml with
+  安装方法
+  -在您的代码中"require"此文件以使WorldPanels API可用
+  -确保此文件与timers.lua和playertables.lua一起放置在vscripts/libraries路径中
+  -确保您的全景UI内容布局文件夹中有barebones_worldpanels.xml
+  -确保您的全景UI内容脚本文件夹中有barebones_worldpanels.js
+  -确保barebones_worldpanels.xml在您的custom_ui_manifest.xml中包含
     <CustomUIElement type="Hud" layoutfile="file://{resources}/layout/custom_game/barebones_worldpanels.xml" />
 
-  Library Usage
-  -WorldPanels are a means of displaying panorama layout files to individuals which act as though they are positioned at a specific point in the world
-    or on a specific entity.
-  -WorldPanels can be shared with an individual player, a whole team, or all clients at once via
-    WorldPanels:CreateWorldPanel(playerID, configTable) -- 1 player or array of playerIDs like {3,5,8}
-    WorldPanels:CreateWorldPanelForTeam(teamID, configTable) -- 1 team
-    WorldPanels:CreateWorldPanelForAll(configTable) -- All players
-  -WorldPanels are specified by a configuration table which has several potential parameters:
-    -layout: The panorama layout file to display in this worldpanel.
-    -position: Mutually exclusive with "entity".  Position is the world vector position to display the worldpanel at.
-    -entity: Mutually exclusive with "position".  Entity is the entity (hscript or index) which the worldpanel will track for its position.
-    -offsetX: An optional (default is 0) screen pixel offset to apply to the worldpanel (in the x direction)
-    -offsetY: An optional (default is 0) screen pixel offset to apply to the worldpanel (in the y direction)
-    -horizontalAlign: An optional (default is "center") alignment for the worldpanel to use when adjusting the panel size. "center", "left", "right" are valid options
-    -verticalAlign: An optional (default is "bottom") alignment for the worldpanel to use when adjusting the panel size. "bottom", "center", "top" are valid options
-    -entityHeight: An optional (default is 0) height offset to use for the entity world panel (see: "HealthBarOffset" in unit KV definition)
-    -edgePadding: An optional (default is to not lock to screen edge) padding percentage of the screen to limit the worldpanel to.
-    -duration: An optional (default is infinite) duration in GameTime seconds that the panel will exist for and then be automatically destroyed.
-    -data: An optional table of data which will be attached to the worldpanel so that valeus can be used in javascript through $.GetContextPanel().Data
-      This table should only contain numeric, string, or table values (no entities/hscripts)
+  库使用方法
+  -WorldPanels是一种向个人显示全景UI布局文件的方式，这些文件看起来像是位于世界特定点或特定实体上
+  -WorldPanels可以通过以下方式与单个玩家、整个团队或所有客户端共享
+    WorldPanels:CreateWorldPanel(playerID, configTable) -- 1个玩家或玩家ID数组，如{3,5,8}
+    WorldPanels:CreateWorldPanelForTeam(teamID, configTable) -- 1个团队
+    WorldPanels:CreateWorldPanelForAll(configTable) -- 所有玩家
+  -WorldPanels由一个配置表指定，该表有几个潜在参数:
+    -layout: 在此worldpanel中显示的全景UI布局文件
+    -position: 与"entity"互斥。Position是显示worldpanel的世界向量位置
+    -entity: 与"position"互斥。Entity是worldpanel将跟踪其位置的实体（hscript或索引）
+    -offsetX: 可选参数（默认为0）应用于worldpanel的屏幕像素偏移（x方向）
+    -offsetY: 可选参数（默认为0）应用于worldpanel的屏幕像素偏移（y方向）
+    -horizontalAlign: 可选参数（默认为"center"）worldpanel在调整面板大小时使用的对齐方式。有效选项为"center"、"left"、"right"
+    -verticalAlign: 可选参数（默认为"bottom"）worldpanel在调整面板大小时使用的对齐方式。有效选项为"bottom"、"center"、"top"
+    -entityHeight: 可选参数（默认为0）用于实体世界面板的高度偏移（参见：单位KV定义中的"HealthBarOffset"）
+    -edgePadding: 可选参数（默认不锁定到屏幕边缘）限制worldpanel的屏幕百分比填充
+    -duration: 可选参数（默认无限）面板将存在的GameTime秒数，之后将自动销毁
+    -data: 可选的数据表，将附加到worldpanel，使值可以在javascript中通过$.GetContextPanel().Data使用
+      此表应只包含数字、字符串或表值（没有实体/hscripts）
 
-  -WorldPanels returned by the Create methods have the following methods:
+  -Create方法返回的WorldPanels具有以下方法:
     wp:SetPosition(position)
     wp:SetEntity(entity)
     wp:SetHorizontalAlign(hAlign)
@@ -44,30 +43,30 @@ WORLDPANELS_VERSION = "0.81"
     wp:SetData(data)
     wp:Delete()
 
-  -See examples/worldpanelsExample.lua for usage examples.
+  -示例/worldpanelsExample.lua中有使用示例
 
 
-  Notes
-  -WorldPanel panorama performance can still be an issue (depending on layout).  Use sparingly.
-  -A WorldPanel attached to an entity will only show when the player has vision of that entity
-  -A WorldPanel is automatically deleted if the entity it is attached to dies (and is not a hero type unit)
-  -Edge tracking is currently inaccurate in certain sitautions due to a valve bug with Game.WorldToScreenX/Y
-  -The WorldPanel library provides a few helpful properties for use in your layout file's javascript.
-    $.GetContextPanel().WorldPanel      contains the WorldPanel configuration in the following table format:
+  注意
+  -WorldPanel全景UI性能仍可能是个问题（取决于布局）。谨慎使用
+  -附加到实体的WorldPanel只在玩家对该实体有视野时才会显示
+  -如果附加的实体死亡（且不是英雄类型单位），WorldPanel会自动删除
+  -由于Valve的Game.WorldToScreenX/Y存在bug，某些情况下边缘跟踪目前不准确
+  -WorldPanel库为您的布局文件的javascript提供了一些有用的属性
+    $.GetContextPanel().WorldPanel      包含以下表格式的WorldPanel配置:
       {layout, offsetX, offsetY, position, entity, entityHeight, hAlign, vAlign, edge}
-    $.GetContextPanel().OnEdge          true if this worldpanel has edgelocking/padding and is touching the edge/padded edge of the screen.  false otherwise.  Updates every frame.
-    $.GetContextPanel().OffScreen       true if this worldpanel has no edgelocking/padding and is completely off screen.  false otherwise.  Updates every frame.
-    $.GetContextPanel().Data            the "data" object passed in to CreateWorldPanel.
+    $.GetContextPanel().OnEdge          如果此worldpanel有边缘锁定/填充并触及屏幕边缘/填充边缘，则为true。否则为false。每帧更新
+    $.GetContextPanel().OffScreen       如果此worldpanel没有边缘锁定/填充并完全在屏幕外，则为true。否则为false。每帧更新
+    $.GetContextPanel().Data            传递给CreateWorldPanel的"data"对象
 
-  Examples
-  -Create a special worldpanel for the hero entity of player 0, only visible to player 0. Adds 210 to the unit position for the height of the panel.
+  示例
+  -为玩家0的英雄实体创建一个特殊的worldpanel，只对玩家0可见。为面板的高度给单位位置添加210
     WorldPanels:CreateWorldPanel(0, 
       {layout = "file://{resources}/layout/custom_game/worldpanels/healthbar.xml",
         entity = PlayerResource:GetSelectedHeroEntity(0),
         entityHeight = 210,
       })
 
-  -Create a worldpanel for all players that displays at 200 height above the ground at Vector(0,0,0) and locks to 5% of the dge of the screen 
+  -为所有玩家创建一个worldpanel，在Vector(0,0,0)的地面上方200高度显示，并锁定到屏幕边缘的5%
     WorldPanels:CreateWorldPanelForAll(
       {layout = "file://{resources}/layout/custom_game/worldpanels/arrow.xml",
         position = GetGroundPosition(Vector(0,0,0), nil) + Vector(0,0,200),

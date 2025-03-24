@@ -73,6 +73,7 @@ function CommonAI:Ini_SkillAoeRadius()
         queenofpain_sonic_wave = 650,
         dazzle_nothl_projection = 9999,
         gyrocopter_call_down =1200,
+        dark_seer_ion_shell = 2000,
 
     }
     self.itemRadius = {

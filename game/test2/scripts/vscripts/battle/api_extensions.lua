@@ -49,6 +49,63 @@ function CDOTA_BaseNPC:IsLeashed()
     return false
 end
 
+CDOTA_BaseNPC.GetPurgableDebuffsCount = function(self)
+    -- 直接获取单位身上所有的modifier对象
+    local allModifiers = self:FindAllModifiers()
+    local count = 0
+    
+    -- 遍历检查每个modifier
+    for _, modifier in ipairs(allModifiers) do
+        -- 检查是否是debuff
+        if modifier and modifier:IsDebuff() then
+            -- 获取创建该modifier的技能
+            local ability = modifier:GetAbility()
+            
+            -- 如果能获取到技能，检查其可驱散性
+            if ability then
+                local abilityName = ability:GetAbilityName()
+                local keyValues = GetAbilityKeyValuesByName(abilityName)
+                
+                -- 检查是否可驱散
+                if keyValues and keyValues["SpellDispellableType"] == "SPELL_DISPELLABLE_YES" then
+                    count = count + 1
+                end
+            end
+        end
+    end
+    
+    -- 始终返回数字
+    return count
+end
+
+CDOTA_BaseNPC.GetPurgableBuffsCount = function(self)
+    -- 直接获取单位身上所有的modifier对象
+    local allModifiers = self:FindAllModifiers()
+    local count = 0
+    
+    -- 遍历检查每个modifier
+    for _, modifier in ipairs(allModifiers) do
+        -- 检查是否是增益buff（非debuff）
+        if modifier and not modifier:IsDebuff() then
+            -- 获取创建该modifier的技能
+            local ability = modifier:GetAbility()
+            
+            -- 如果能获取到技能，检查其可驱散性
+            if ability then
+                local abilityName = ability:GetAbilityName()
+                local keyValues = GetAbilityKeyValuesByName(abilityName)
+                
+                -- 检查是否可驱散
+                if keyValues and keyValues["SpellDispellableType"] == "SPELL_DISPELLABLE_YES" then
+                    count = count + 1
+                end
+            end
+        end
+    end
+    
+    -- 始终返回数字
+    return count
+end
 
 --使用说明
 --获取单位的真实所有者

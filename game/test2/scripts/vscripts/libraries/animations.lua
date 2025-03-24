@@ -1,61 +1,61 @@
 ANIMATIONS_VERSION = "1.00"
 
 --[[
-  Lua-controlled Animations Library by BMD
+  由BMD开发的Lua控制动画库
 
-  Installation
-  -"require" this file inside your code in order to gain access to the StartAnmiation and EndAnimation global.
-  -Additionally, ensure that this file is placed in the vscripts/libraries path and that the vscripts/libraries/modifiers/modifier_animation.lua, modifier_animation_translate.lua, modifier_animation_translate_permanent.lua, and modifier_animation_freeze.lua files exist and are in the correct path
+  安装方法
+  -在你的代码中"require"这个文件以获取StartAnmiation和EndAnimation全局函数的访问权限。
+  -另外，确保该文件放置在vscripts/libraries路径下，且vscripts/libraries/modifiers/modifier_animation.lua、modifier_animation_translate.lua、modifier_animation_translate_permanent.lua和modifier_animation_freeze.lua文件存在并位于正确的路径中
 
-  Usage
-  -Animations can be started for any unit and are provided as a table of information to the StartAnimation call
-  -Repeated calls to StartAnimation for a single unit will cancel any running animation and begin the new animation
-  -EndAnimation can be called in order to cancel a running animation
-  -Animations are specified by a table which has as potential parameters:
-    -duration: The duration to play the animation.  The animation will be cancelled regardless of how far along it is at the end fo the duration.
-    -activity: An activity code which will be used as the base activity for the animation i.e. DOTA_ACT_RUN, DOTA_ACT_ATTACK, etc.
-    -rate: An optional (will be 1.0 if unspecified) animation rate to be used when playing this animation.
-    -translate: An optional translate activity modifier string which can be used to modify the animation sequence.
-      Example: For ACT_DOTA_RUN+haste, this should be "haste"
-    -translate2: A second optional translate activity modifier string which can be used to modify the animation sequence further.
-      Example: For ACT_DOTA_ATTACK+sven_warcry+sven_shield, this should be "sven_warcry" or "sven_shield" while the translate property is the other translate modifier
-  -A permanent activity translate can be applied to a unit by calling AddAnimationTranslate for that unit.  This allows for a permanent "injured" or "aggressive" animation stance.
-  -Permanent activity translate modifiers can be removed with RemoveAnimationTranslate.
-  -Animations can be frozen in place at any time by calling FreezeAnimation(unit[, duration]).  Leaving the duration off will cause the animation to be frozen until UnfreezeAnimation is called.
-  -Animations can be unfrozen at any time by calling UnfreezeAnimation(unit)
+  使用方法
+  -可以为任何单位启动动画，通过向StartAnimation调用提供信息表
+  -对同一单位重复调用StartAnimation将取消正在运行的动画并开始新动画
+  -可以调用EndAnimation取消正在运行的动画
+  -动画由一个表指定，该表具有以下潜在参数：
+    -duration: 播放动画的持续时间。无论动画进行到哪，在持续时间结束时都会取消。
+    -activity: 作为动画基础活动的活动代码，例如DOTA_ACT_RUN、DOTA_ACT_ATTACK等。
+    -rate: 可选参数（如未指定则为1.0），用于播放此动画的动画速率。
+    -translate: 可选的转换活动修饰符字符串，可用于修改动画序列。
+      示例：对于ACT_DOTA_RUN+haste，这应该是"haste"
+    -translate2: 第二个可选的转换活动修饰符字符串，可用于进一步修改动画序列。
+      示例：对于ACT_DOTA_ATTACK+sven_warcry+sven_shield，这应该是"sven_warcry"或"sven_shield"，而translate属性则是另一个转换修饰符
+  -可以通过为单位调用AddAnimationTranslate应用永久活动转换。这允许永久性的"受伤"或"攻击性"动画姿态。
+  -可以使用RemoveAnimationTranslate移除永久活动转换修饰符。
+  -可以随时通过调用FreezeAnimation(unit[, duration])冻结动画。不指定持续时间将导致动画冻结，直到调用UnfreezeAnimation。
+  -可以随时通过调用UnfreezeAnimation(unit)解冻动画。
 
-  Notes
-  -Animations can only play for valid activities/sequences possessed by the model the unit is using.
-  -Sequences requiring 3+ activity modifier translates (i.e "stun+fear+loadout" or similar) are not possible currently in this library.
-  -Calling EndAnimation and attempting to StartAnimation a new animation for the same unit withing ~2 server frames of the animation end will likely fail to play the new animation.  
-    Calling StartAnimation directly without ending the previous animation will automatically add in this delay and cancel the previous animation.
-  -The maximum animation rate which can be used is 12.75, and animation rates can only exist at a 0.05 resolution (i.e. 1.0, 1.05, 1.1 and not 1.06)
-  -StartAnimation and EndAnimation functions can also be accessed through GameRules as GameRules.StartAnimation and GameRules.EndAnimation for use in scoped lua files (triggers, vscript ai, etc)
-  -This library requires that the "libraries/timers.lua" be present in your vscripts directory.
+  注意事项
+  -动画只能为单位使用的模型所拥有的有效活动/序列播放。
+  -目前此库不支持需要3个以上活动修饰符转换的序列（如"stun+fear+loadout"或类似）。
+  -调用EndAnimation并尝试在动画结束后约2个服务器帧内为同一单位StartAnimation新动画可能会失败。
+    在不结束前一个动画的情况下直接调用StartAnimation将自动添加此延迟并取消前一个动画。
+  -可以使用的最大动画速率为12.75，且动画速率只能以0.05为分辨率存在（即1.0、1.05、1.1，而不是1.06）
+  -StartAnimation和EndAnimation函数也可以通过GameRules作为GameRules.StartAnimation和GameRules.EndAnimation访问，以在作用域Lua文件中使用（触发器、vscript ai等）
+  -该库要求"libraries/timers.lua"存在于您的vscripts目录中。
 
-  Examples:
-  --Start a running animation at 2.5 rate for 2.5 seconds
+  示例：
+  --以2.5速率开始一个运行动画，持续2.5秒
     StartAnimation(unit, {duration=2.5, activity=ACT_DOTA_RUN, rate=2.5})
 
-  --End a running animation
+  --结束一个运行动画
     EndAnimation(unit)
 
-  --Start a running + hasted animation at .8 rate for 5 seconds
+  --以0.8速率开始一个奔跑+急速动画，持续5秒
     StartAnimation(unit, {duration=5, activity=ACT_DOTA_RUN, rate=0.8, translate="haste"})
 
-  --Start a shield-bash animation for sven with variable rate
+  --为斯温开始一个带变速的盾牌猛击动画
     StartAnimation(unit, {duration=1.5, activity=ACT_DOTA_ATTACK, rate=RandomFloat(.5, 1.5), translate="sven_warcry", translate2="sven_shield"})
 
-  --Start a permanent injured translate modifier
+  --添加一个永久受伤转换修饰符
     AddAnimationTranslate(unit, "injured")
 
-  --Remove a permanent activity translate modifier
+  --移除一个永久活动转换修饰符
     RemoveAnimationTranslate(unit)
 
-  --Freeze an animation for 4 seconds
+  --冻结动画4秒
     FreezeAnimation(unit, 4)
 
-  --Unfreeze an animation
+  --解冻动画
     UnfreezeAnimation(unit)
 
 ]]

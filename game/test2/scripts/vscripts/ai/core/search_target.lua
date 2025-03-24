@@ -599,6 +599,9 @@ function CommonAI:FindBestAllyHeroTarget(entity, ability, requiredModifiers, min
                 end
                 
                 return minDistA, minDistB
+            elseif sortBy == "dispellable_debuffs" then
+                -- 使用GetPurgableDebuffsCount函数计算可驱散的debuff数量
+                return a:GetPurgableDebuffsCount(), b:GetPurgableDebuffsCount()
             end
             return 0, 0
         end
@@ -616,8 +619,8 @@ function CommonAI:FindBestAllyHeroTarget(entity, ability, requiredModifiers, min
             return a:GetEntityIndex() < b:GetEntityIndex()
         end
         
-        -- attack比较是从大到小,其他都是从小到大
-        if sortBy == "attack" then
+        -- attack和dispellable_debuffs比较是从大到小,其他都是从小到大
+        if sortBy == "attack" or sortBy == "dispellable_debuffs" then
             return valueA > valueB
         else
             return valueA < valueB
@@ -787,9 +790,67 @@ function CommonAI:FindBestEnemyHeroTarget(entity, ability, requiredModifiers, mi
         ::continue::
     end
 
+    -- 函数用于计算单位冷却中的技能数量
+    local function CountCooldownAbilities(unit)
+        local count = 0
+        for i = 0, unit:GetAbilityCount() - 1 do
+            local ability = unit:GetAbilityByIndex(i)
+            if ability and ability:GetCooldownTimeRemaining() > 0 then
+                count = count + 1
+            end
+        end
+        return count
+    end
+
+    -- 检查是否有单位有冷却中的技能
+    local hasCooldownAbilities = false
+    if sortBy == "cooldown_abilities" then
+        for _, hero in pairs(validHeroes) do
+            if CountCooldownAbilities(hero) > 0 then
+                hasCooldownAbilities = true
+                break
+            end
+        end
+        
+        if not hasCooldownAbilities and not forceHero then
+            for _, nonHero in pairs(validNonHeroes) do
+                if CountCooldownAbilities(nonHero) > 0 then
+                    hasCooldownAbilities = true
+                    break
+                end
+            end
+        end
+        
+        -- 如果没有单位有冷却中的技能，直接返回nil
+        if not hasCooldownAbilities then
+            self:log("没有敌方单位有冷却中的技能")
+            return nil
+        end
+    end
+
     -- 排序函数
     local sortFunction = function(a, b)
-        if sortBy == "control" then
+        if sortBy == "cooldown_abilities" then
+            local aCount = CountCooldownAbilities(a)
+            local bCount = CountCooldownAbilities(b)
+            
+            -- 如果两者都没有冷却中的技能，按距离排序
+            if aCount == 0 and bCount == 0 then
+                local distA = (a:GetOrigin() - entity:GetOrigin()):Length2D()
+                local distB = (b:GetOrigin() - entity:GetOrigin()):Length2D()
+                return distA < distB
+            end
+            
+            -- 冷却技能数量多的排在前面
+            if aCount ~= bCount then
+                return aCount > bCount
+            end
+            
+            -- 如果冷却技能数量相同，按距离排序
+            local distA = (a:GetOrigin() - entity:GetOrigin()):Length2D()
+            local distB = (b:GetOrigin() - entity:GetOrigin()):Length2D()
+            return distA < distB
+        elseif sortBy == "control" then
             local castPoint = self:GetRealCastPoint(ability) + 0.2 + minRemainingTime 
             local modifierA, durationA = self:GetLongestControlDebuff(a)
             local modifierB, durationB = self:GetLongestControlDebuff(b)
@@ -838,23 +899,12 @@ function CommonAI:FindBestEnemyHeroTarget(entity, ability, requiredModifiers, mi
             local distB = (b:GetOrigin() - entity:GetOrigin()):Length2D()
             return distA < distB
         elseif sortBy == "dispellable_buffs" then
-            -- 计算增益BUFF数量
-            local function CountBuffs(unit)
-                local count = 0
-                local modifiers = unit:FindAllModifiers()
-                for _, modifier in pairs(modifiers) do
-                    if modifier and not modifier:IsDebuff() then
-                        count = count + 1
-                    end
-                end
-                return count
-            end
-            
-            local aBuffCount = CountBuffs(a)
-            local bBuffCount = CountBuffs(b)
+            -- 使用GetPurgableBuffsCount函数计算可驱散的增益BUFF数量
+            local aBuffCount = a:GetPurgableBuffsCount()
+            local bBuffCount = b:GetPurgableBuffsCount()
             
             if aBuffCount ~= bBuffCount then
-                return aBuffCount > bBuffCount  -- BUFF数量多的排在前面
+                return aBuffCount > bBuffCount  -- 可驱散BUFF数量多的排在前面
             end
             
             -- 如果BUFF数量相同，按距离排序
@@ -897,6 +947,12 @@ function CommonAI:FindBestEnemyHeroTarget(entity, ability, requiredModifiers, mi
             end
         end
         
+        -- 确保第一个目标在"cooldown_abilities"模式下有冷却技能
+        if sortBy == "cooldown_abilities" and CountCooldownAbilities(target) == 0 then
+            self:log("排序后的第一个英雄目标没有冷却中的技能，放弃选择")
+            return nil
+        end
+        
         -- 记录目标选择信息以避免重复施法
         if checkDuplicateCast then
             if not Main.targetLockInfo then Main.targetLockInfo = {} end
@@ -915,6 +971,12 @@ function CommonAI:FindBestEnemyHeroTarget(entity, ability, requiredModifiers, mi
     -- 如果没有英雄且允许非英雄单位，返回非英雄单位
     if not forceHero and #validNonHeroes > 0 then
         local target = validNonHeroes[1]
+        
+        -- 确保第一个非英雄目标在"cooldown_abilities"模式下有冷却技能
+        if sortBy == "cooldown_abilities" and CountCooldownAbilities(target) == 0 then
+            self:log("排序后的第一个非英雄目标没有冷却中的技能，放弃选择")
+            return nil
+        end
         
         -- 记录非英雄单位目标选择信息以避免重复施法
         if checkDuplicateCast then

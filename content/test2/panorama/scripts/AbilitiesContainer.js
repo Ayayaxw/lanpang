@@ -1,7 +1,7 @@
 (function() {
     let trackedHeroes = new Map(); // {entityId: panelId}
-    let isAvoiding = false;
-    let enableOverlapDetection = false; // 新增：控制是否开启重叠检测的全局变量
+    let isAvoiding = true;
+    let enableOverlapDetection = true; // 新增：控制是否开启重叠检测的全局变量
 
     const PANEL_CONFIG = {
         ICON_WIDTH: 20,
@@ -322,12 +322,9 @@
     }
 
     function OnUpdateAbilitiesStatus(data) {
-        // 修改判断逻辑，使用严格的布尔值判断
-        enableOverlapDetection = data.enableOverlapDetection === true || data.enableOverlapDetection === undefined;
-        
-        // 或者更简单的方式
-        // enableOverlapDetection = Boolean(data.enableOverlapDetection);
-        
+
+        // 修改这行，使用非严格相等或直接检查值是否为1或true
+        enableOverlapDetection = data.enableOverlapDetection == true || data.enableOverlapDetection === 1 || data.enableOverlapDetection === undefined;
         UpdateHeroAbilities(data);
         $('#AbilitiesContainer').RemoveClass('AbilitiesContainerhidden');
     }

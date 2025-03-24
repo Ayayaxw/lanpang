@@ -19,6 +19,10 @@ function VectorTarget:Init()
 	CustomGameEventManager:RegisterListener("check_ability", Dynamic_Wrap(VectorTarget, "OnAbilityCheck"))
 end
 
+-- 这个库提供了向量目标定位的功能，允许技能指定起点和方向
+-- 实现了类似于月之暗面破碎飞弧等向量目标技能的功能
+
+
 function VectorTarget:OrderFilter(event)
 	if not event.units["0"] then return true end
 	local unit = EntIndexToHScript(event.units["0"])

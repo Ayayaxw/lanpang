@@ -1,48 +1,4 @@
 
-    // GameEvents.Subscribe("show_hero", function(event) {
-    //     // 添加日志以查看接收到的数据
-    //     $.Msg("Received event data: ", JSON.stringify(event, null, 2));
-    //     showHeroVersus(selfHeroId, opponentHeroId, event.selfFacets, event.opponentFacets);
-    // });
-/*         function changeHeroToAxe() {
-            $.Msg("准备更换英雄为Axe");
-            $.Schedule(3, function() {
-            var scene = $('#Greenpanel_1');  // 获取实际的DOTAScenePanel元素
-        
-            // 执行Lua脚本
-            
-
-            scene.SetScenePanelToLocalHero(131);
-
-
-
-            //     $.Schedule(1, function() {
-            //     scene.ReloadScene()
-            // });
-            $.Schedule(1, function() {
-
-            scene.FireEntityInput("*",'StartGestureOverride',"ACT_DOTA_SPAWN")
-            });
-            // scene.FireEntityInput(
-            //     "*",
-            //     "RunScriptCode",
-            //     `
-            //     if thisEntity:GetClassname() == 'dota_item_wearable' then
-            //         thisEntity:SetContextThink('delete',function() UTIL_Remove(thisEntity)  end,0)
-            //     end
-            // `)
-
-
-            $.Msg("已尝试更换英雄为Axe");
-            });
-        }
-        // 调用函数
-        // changeHeroToAxe();*/
-        // $.Schedule(0, function() {
-        //     showHeroVersus(75, 106,leftHeroFacet,rightHeroFacet)
-        //   }); 
-
-// 在文件顶部添加这个辅助函数
 function reverseString(str) {
   return str.split('').reverse().join('');
 }

@@ -247,7 +247,7 @@ function Main:StartAbilitiesMonitor(hero,enableOverlapDetection)
         endTime = 0.1,
         callback = function()
             if not hero or hero:IsNull() then return nil end
-            self:MonitorAbilitiesStatus(hero,false)
+            self:MonitorAbilitiesStatus(hero,enableOverlapDetection)
             return 0.1
         end
     })

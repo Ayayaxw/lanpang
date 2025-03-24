@@ -25,7 +25,7 @@ function CommonAI:Ini_MediumPrioritySkills()
             npc_dota_hero_lina = {"lina_light_strike_array"},
             npc_dota_hero_skywrath_mage = {"skywrath_mage_ancient_seal"},
             npc_dota_hero_muerta = {"muerta_the_calling","muerta_dead_shot"},
-            npc_dota_hero_phantom_assassin = {"phantom_assassin_fan_of_knives"},
+            npc_dota_hero_phantom_assassin = {"phantom_assassin_phantom_strike","phantom_assassin_fan_of_knives"},
             npc_dota_hero_witch_doctor = {"witch_doctor_voodoo_switcheroo"},
             npc_dota_hero_jakiro = {"jakiro_ice_path","jakiro_macropyre"},
             npc_dota_hero_death_prophet = {"death_prophet_silence"},

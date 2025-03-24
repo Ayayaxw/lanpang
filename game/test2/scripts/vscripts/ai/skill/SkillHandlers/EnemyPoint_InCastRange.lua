@@ -960,6 +960,32 @@ function CommonAI:HandleEnemyPoint_InCastRange(entity,target,abilityInfo,targetI
         abilityInfo.castPoint = CommonAI:calculateAdjustedCastPoint(entity, castPosition, abilityInfo.castPoint)
         return true
 
+    elseif abilityInfo.abilityName == "faceless_void_time_walk" then
+        -- 计算从自己到敌人的方向
+        local selfPos = entity:GetOrigin()
+        local enemyPos = targetInfo.targetPos
+        local directionToEnemy = (enemyPos - selfPos):Normalized()
+        
+        -- 计算敌人身后150单位的位置
+        local behindEnemyPos = enemyPos + directionToEnemy * abilityInfo.aoeRadius
+        
+        -- 计算从自己到敌人身后位置的距离
+        local distanceToBehindPos = (behindEnemyPos - selfPos):Length2D()
+        
+        -- 确定最终施法位置
+        local castPosition
+        if distanceToBehindPos <= abilityInfo.castRange then
+            -- 如果施法距离允许到达敌人身后的位置
+            castPosition = behindEnemyPos
+        else
+            -- 如果施法距离不够，就定在敌人脚下
+            castPosition = enemyPos
+        end
+        
+        entity:CastAbilityOnPosition(castPosition, abilityInfo.skill, 0)
+        abilityInfo.castPoint = CommonAI:calculateAdjustedCastPoint(entity, castPosition, abilityInfo.castPoint)
+        return true
+
     elseif abilityInfo.abilityName == "storm_spirit_ball_lightning" then
         if self:containsStrategy(self.hero_strategy, "折叠飞") then
             if not self.foldingFlyCount then

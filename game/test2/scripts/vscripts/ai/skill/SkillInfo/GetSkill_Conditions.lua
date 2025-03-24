@@ -1127,8 +1127,39 @@ HeroSkillConditions = {
 
     ["npc_dota_hero_faceless_void"] = {
         ["faceless_void_time_dilation"] = {
-            function(self, caster, log)      
-                return self:NeedsModifierRefresh(self.target ,{"modifier_faceless_void_time_dilation_distortion"}, 0.5)
+            function(self, caster, log)
+                local ability = caster:FindAbilityByName("faceless_void_time_dilation")
+                if not ability then return false end
+                
+                local potentialTarget = self:FindBestEnemyHeroTarget(
+                    caster,
+                    ability,
+                    nil,
+                    nil,
+                    "cooldown_abilities" 
+                )
+                
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+
+                return potentialTarget ~= nil
+            end
+        },
+        ["faceless_void_time_walk_reverse"] = {
+            function(self, caster, log)
+                -- 计算与目标的距离
+                local distance = (caster:GetAbsOrigin() - self.target:GetAbsOrigin()):Length2D()
+                local isTargetClose = distance <= 200
+                
+                if caster:HasModifier("modifier_faceless_void_time_walk_shardbuff") and 
+                   self:NeedsModifierRefresh(caster,{"modifier_faceless_void_time_walk_shardbuff"}, 0.8) and 
+                   self:NeedsModifierRefresh(self.target,{"modifier_faceless_void_timelock_freeze"}, 0) and
+                   isTargetClose then
+                    return true
+                else
+                    return false
+                end
             end
         },
         ["faceless_void_time_walk"] = {
@@ -1136,12 +1167,86 @@ HeroSkillConditions = {
                 if self:containsStrategy(self.hero_strategy, "满血跳") then
                     return true
                 else
-                    return caster:GetHealthPercent() < 99
+                    -- 当血量低于30%时直接返回true(紧急情况)
+                    local current_health = caster:GetHealthPercent()
+                    if current_health < 25 then
+                        if log then
+                            self:log("血量低于30%，立即释放时间漫步，当前血量: " .. current_health .. "%")
+                        end
+                        return true
+                    end
+                    
+                    -- 初始化需要的变量
+                    if not self.void_time_walk_data then
+                        self.void_time_walk_data = {
+                            last_health_percent = caster:GetHealthPercent(),
+                            damage_detected = false,
+                            damage_time = 0,
+                            original_health = 0,
+                            skill_triggered = false
+                        }
+                        return false
+                    end
+                    
+                    local current_time = GameRules:GetGameTime()
+                    
+                    -- 如果技能已触发，需要等待一段时间再重新检测
+                    if self.void_time_walk_data.skill_triggered then
+                        if current_time - self.void_time_walk_data.damage_time > 3 then
+                            -- 重置状态，准备下一次检测
+                            self.void_time_walk_data = {
+                                last_health_percent = current_health,
+                                damage_detected = false,
+                                damage_time = 0,
+                                original_health = 0,
+                                skill_triggered = false
+                            }
+                        end
+                        return false
+                    end
+                    
+                    -- 检测到掉血
+                    if current_health < self.void_time_walk_data.last_health_percent and not self.void_time_walk_data.damage_detected then
+                        self.void_time_walk_data.damage_detected = true
+                        self.void_time_walk_data.damage_time = current_time
+                        self.void_time_walk_data.original_health = self.void_time_walk_data.last_health_percent
+                        if log then
+                            self:log("检测到掉血，原始血量: " .. self.void_time_walk_data.original_health .. "，现在血量: " .. current_health)
+                        end
+                    end
+                    
+                    -- 更新上次血量记录
+                    self.void_time_walk_data.last_health_percent = current_health
+                    
+                    -- 如果已检测到掉血，且已经过了2秒，则触发技能
+                    if self.void_time_walk_data.damage_detected and current_time - self.void_time_walk_data.damage_time >= 1.5 then
+                        local health_drop = self.void_time_walk_data.original_health - current_health
+                        if health_drop > 5 then  -- 掉血超过5%才触发
+                            self.void_time_walk_data.skill_triggered = true
+                            if log then
+                                self:log("准备释放时间漫步，掉血量: " .. health_drop .. "%，经过时间: " .. (current_time - self.void_time_walk_data.damage_time))
+                            end
+                            return true
+                        else
+                            -- 掉血不足以触发技能，重置检测
+                            self.void_time_walk_data.damage_detected = false
+                        end
+                    end
+                    
+                    return false
                 end
             end
         },
         ["faceless_void_chronosphere"] = {
             function(self, caster, log)
+
+                if self:containsStrategy(self.global_strategy, "卡时间") then
+                    if (hero_duel.start_time + Main.limitTime + Main.duration) - GameRules:GetGameTime()  > 5 then
+                        return false
+                    end
+                end
+
+
                 local ability = caster:FindAbilityByName("faceless_void_chronosphere")
                 if not ability then return false end
                 
@@ -1173,25 +1278,100 @@ HeroSkillConditions = {
     ["npc_dota_hero_phantom_assassin"] = {
         ["phantom_assassin_phantom_strike"] = {
             function(self, caster, log)
-                -- 检查是否有目标
-                if not self.target then
-                    return true
+                -- 检查是否有"模糊好了才放技能"策略
+                if self:containsStrategy(self.hero_strategy, "模糊好了才放技能") then
+                    -- 检查模糊技能是否冷却好
+                    local blurAbility = caster:FindAbilityByName("phantom_assassin_blur")
+                    if not (blurAbility and blurAbility:IsFullyCastable()) then
+                        return false
+                    end
                 end
-        
+                
+                -- 检查目标是否需要刷新扇形刀刃modifier
+                local needsTargetModifierRefresh = self.target:HasModifier("modifier_phantom_assassin_fan_of_knives")
+                
+                -- 检查施法者是否需要刷新幻影突袭modifier
+                local needsCasterModifierRefresh = self:NeedsModifierRefresh(caster, {"modifier_phantom_assassin_phantom_strike"}, 0.2)
+                
                 -- 计算与目标的距离
                 local distance = (caster:GetAbsOrigin() - self.target:GetAbsOrigin()):Length2D()
+                local isTooFar = distance > 150
                 
-                -- 如果距离大于200，或者需要刷新modifier，返回true
-                if distance > 200 or self:NeedsModifierRefresh(caster,{"modifier_phantom_assassin_phantom_strike"}, 0.5) then
-                    return true
+                -- 根据策略决定返回结果
+                if self:containsStrategy(self.hero_strategy, "先破被动再行动") then
+                    -- 检查英雄是否拥有扇形刀刃技能并且不在冷却中
+                    local hasReadyFanOfKnives = false
+                    local fanOfKnivesAbility = caster:FindAbilityByName("phantom_assassin_fan_of_knives")
+                    if fanOfKnivesAbility and fanOfKnivesAbility:IsFullyCastable() then
+                        hasReadyFanOfKnives = true
+                    end
+                    
+                    return (needsTargetModifierRefresh or hasReadyFanOfKnives) and (isTooFar or needsCasterModifierRefresh)
+                else
+                    return isTooFar or needsCasterModifierRefresh
                 end
-        
-                return false
             end
         },
+        ["phantom_assassin_stifling_dagger"] = {
+            function(self, caster, log)
+
+                
+                -- 检查是否有"远距离才放镖"策略
+                if self:containsStrategy(self.hero_strategy, "远距离才放镖") then
+                    -- 计算与目标的距离
+                    local distance = (caster:GetAbsOrigin() - self.target:GetAbsOrigin()):Length2D()
+                    if distance <= 200 then
+                        -- 距离太近，不释放匕首
+                        return false
+                    end
+                end
+
+                -- "先破被动再行动"策略的原有判断
+                if self:containsStrategy(self.hero_strategy, "先破被动再行动") then
+                    -- 检查目标是否有扇形刀刃modifier
+                    if self.target:HasModifier("modifier_phantom_assassin_fan_of_knives") then
+                        return true
+                    else
+                        -- 检查英雄是否拥有扇形刀刃技能并且不在冷却中
+                        local fanOfKnivesAbility = caster:FindAbilityByName("phantom_assassin_fan_of_knives")
+                        if fanOfKnivesAbility and fanOfKnivesAbility:IsFullyCastable() then
+                            return true
+                        else
+                            return false
+                        end
+                    end
+                else
+                    return true
+                end
+            end
+        },
+        ["phantom_assassin_fan_of_knives"] = {
+            function(self, caster, log)
+                if self:containsStrategy(self.hero_strategy, "模糊好了才放技能") then
+                    -- 检查模糊技能是否冷却好
+                    local blurAbility = caster:FindAbilityByName("phantom_assassin_blur")
+                    if blurAbility and blurAbility:IsFullyCastable() then
+                        return true
+                    else
+                        return false
+                    end
+                else
+                    return true
+                end
+            end
+        },
+
+
+
+
         ["phantom_assassin_blur"] = {
-            function(self, caster, log)      
-                return true
+            function(self, caster, log)    
+                if caster:HasScepter() and caster:GetPurgableDebuffsCount() > 0 then
+                    return true
+                elseif caster:GetHealthPercent() < 50 then
+                    return true
+                end 
+                return false
             end
         },
 
@@ -1410,6 +1590,68 @@ HeroSkillConditions = {
                 end
 
                 return potentialTarget ~= nil
+            end
+        },
+        ["ogre_magi_frost_armor"] = {
+            function(self, caster, log)
+                local ability = caster:FindAbilityByName("ogre_magi_frost_armor")
+                if not ability then return false end
+        
+                self.Ally = self:FindBestAllyHeroTarget(
+                    caster,
+                    ability,
+                    {"modifier_ogre_magi_frost_armor"},  -- 不需要检查buff
+                    0.5,  -- 不需要检查剩余时间
+                    "nearest_to_enemy",  -- 优先给离敌人最近的友军释放
+                    false,
+                    true
+                )
+                
+                return self.Ally ~= nil
+            end
+        },
+        ["satyr_trickster_purge"] = {
+            function(self, caster, log)
+                local ability = caster:FindAbilityByName("satyr_trickster_purge")
+                if not ability then return false end
+
+                -- 先查找友方单位
+                local potentialAlly = self:FindBestAllyHeroTarget(
+                    caster,
+                    ability,
+                    nil,
+                    nil,
+                    "dispellable_debuffs",  -- 优先给有可驱散debuff最多的友军释放
+                    false,
+                    true
+                )
+                
+                -- 检查友方目标是否存在，并且身上有可驱散的debuff
+                if potentialAlly and potentialAlly:GetPurgableDebuffsCount() > 0 then
+                    self.Ally = potentialAlly
+                    self.skillTargetTeam["satyr_trickster_purge"] = DOTA_UNIT_TARGET_TEAM.FRIENDLY  
+                    return true
+                end
+                
+                -- 如果没有合适的友方单位，则查找敌方单位
+                local potentialEnemy = self:FindBestEnemyHeroTarget(
+                    caster,
+                    ability,
+                    nil,
+                    nil,
+                    "dispellable_buffs",  -- 优先选择有可驱散buff最多的敌人
+                    false
+                )
+                
+                -- 检查敌方目标是否存在，并且身上有可驱散的buff
+                if potentialEnemy and potentialEnemy:GetPurgableBuffsCount() > 0 then
+                    self.target = potentialEnemy
+                    self.skillTargetTeam["satyr_trickster_purge"] = DOTA_UNIT_TARGET_TEAM.ENEMY  
+                    return true
+                end
+                
+                -- 没有找到合适的目标，返回false
+                return false
             end
         },
     },
@@ -4954,6 +5196,7 @@ HeroSkillConditions = {
                 -- 获取当前时间
                 local current_time = GameRules:GetGameTime()
                 
+                
                 -- 计算从释放化合物到投掷的时间
                 local brew_time = current_time - self.concoction_start_time
                 
@@ -7193,26 +7436,26 @@ function CommonAI:CheckSkillConditions(entity, heroName)
     end
 end
 
-function CommonAI:CheckUltimateConditions(ability, entity)
-    if not ability:GetAbilityType() == ABILITY_TYPE_ULTIMATE then
-        return true -- 不是大招直接返回true，不参与检查
-    end
+-- function CommonAI:CheckUltimateConditions(ability, entity)
+--     if not ability:GetAbilityType() == ABILITY_TYPE_ULTIMATE then
+--         return true -- 不是大招直接返回true，不参与检查
+--     end
 
-    local healthPct = entity:GetHealthPercent()
-    self:log("检测到大招:", ability:GetAbilityName(), "当前血量百分比:", healthPct)
+--     local healthPct = entity:GetHealthPercent()
+--     self:log("检测到大招:", ability:GetAbilityName(), "当前血量百分比:", healthPct)
     
-    if self:containsStrategy(self.global_strategy, "不到半血绝不放大") and healthPct > 50 then
-        self:log("启用策略:不到半血绝不放大,血量大于50%,禁止释放大招")
-        return false
-    end
+--     if self:containsStrategy(self.global_strategy, "不到半血绝不放大") and healthPct > 50 then
+--         self:log("启用策略:不到半血绝不放大,血量大于50%,禁止释放大招")
+--         return false
+--     end
     
-    if self:containsStrategy(self.global_strategy, "不到80%血绝不放大") and healthPct > 80 then
-        self:log("启用策略:不到80%血绝不放大,血量大于80%,禁止释放大招") 
-        return false
-    end
-    self:log("可以放大了")
-    return true
-end
+--     if self:containsStrategy(self.global_strategy, "不到80%血绝不放大") and healthPct > 80 then
+--         self:log("启用策略:不到80%血绝不放大,血量大于80%,禁止释放大招") 
+--         return false
+--     end
+--     self:log("可以放大了")
+--     return true
+-- end
 
 function CommonAI:FindConditionsForAbility(abilityName)
     self:log("正在查找技能条件: " .. abilityName)
@@ -7533,6 +7776,10 @@ function CommonAI:GetSkillRangeThreshold(ability, entity, range)
     
     return result
 end
+
+
+
+
 
 
 

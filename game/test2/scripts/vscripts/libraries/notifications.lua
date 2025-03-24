@@ -1,79 +1,79 @@
 NOTIFICATIONS_VERSION = "1.00"
 
 --[[
-  Sample Panorama Notifications Library by BMD
+  样本全景UI通知库 由BMD开发
 
-  Installation
-  -"require" this file inside your code in order to gain access to the Notifications class for sending notifications to players, teams, or all clients.
-  -Ensure that you have the barebones_notifications.xml, barebones_notifications.js, and barebones_notifications.css files in your panorama content folder.
-  -Ensure that barebones_notifications.xml is included in your custom_ui_manifest.xml with
+  安装方法
+  -在您的代码中"require"此文件以访问Notifications类，用于向玩家、团队或所有客户端发送通知
+  -确保您的全景UI内容文件夹中有barebones_notifications.xml、barebones_notifications.js和barebones_notifications.css文件
+  -确保在custom_ui_manifest.xml中包含barebones_notifications.xml
     <CustomUIElement type="Hud" layoutfile="file://{resources}/layout/custom_game/barebones_notifications.xml" />
 
-  Usage
-  -Notifications can be sent to the Top or Bottom notification panel of an individual player, a whole team, or all clients at once.
-  -Notifications can be sent in pieces consisting of Labels, Images, HeroImages, and AbilityImages.
-  -Notifications are specified by a table which has 4 potential parameters:
-    -duration: The duration to display the notification for on screen.  Ignored for a notification which "continues" a previous notification line.
-    -class: An optional (leave as nil for default) string which will be used as the class to add to the notification piece.
-    -style: An optional (leave as nil for default) table of css properties to add to this notification, such as {["font-size"]="60px", color="green"}.
-    -continue: An optional (leave as nil for false) boolean which tells the notification system to add this notification to the current notification line if 'true'.  
-      This lets you place multiple individual notification pieces on the same overall notification.
-  -For Labels, there is one additional mandatory parameter:
-    -text:  The text to display in the notification.  Can provide localization tokens ("#addonname") or non-localized text.
-  -For HeroImages, there is two additional parameters:
-    -hero:  (Mandatory) The hero name, e.g. "npc_dota_hero_axe".
-    -imagestyle:  (Optional)  The image style to display for this hero image.  Default when 'nil' is 'icon'.  'portrait' and 'landscape' are two other options.
-  -For AboilityImages, there is one additional mandatory parameter:
-    -ability:  The ability name, e.g. "lina_fiery_soul".
-  -For Images, there is one additional mandatory parameter:
-    -image:  The image src string, e.g. "file://{images}/status_icons/dota_generic.psd".
-  -For ItemImages, there is one additional mandatory parameter:
-    -item:  The item name, e.g. "item_force_staff".
+  使用方法
+  -通知可以发送到单个玩家、整个团队或所有客户端的顶部或底部通知面板
+  -通知可以由标签、图像、英雄图像和技能图像等部分组成
+  -通知由一个表指定，该表有4个潜在参数:
+    -duration: 屏幕上显示通知的持续时间。对于"继续"之前通知行的通知会忽略此参数
+    -class: 可选参数（默认为nil），将作为添加到通知部分的类名
+    -style: 可选参数（默认为nil），添加到此通知的css属性表，如{["font-size"]="60px", color="green"}
+    -continue: 可选布尔值（默认为false），如果为'true'则告诉通知系统将此通知添加到当前通知行
+      这允许您在同一个整体通知中放置多个单独的通知部分
+  -对于标签，还有一个必填参数:
+    -text: 在通知中显示的文本。可以提供本地化令牌("#addonname")或非本地化文本
+  -对于英雄图像，有两个额外参数:
+    -hero: (必填)英雄名称，如"npc_dota_hero_axe"
+    -imagestyle: (可选)此英雄图像的显示风格。默认为'icon'。'portrait'和'landscape'是其他两个选项
+  -对于技能图像，有一个额外必填参数:
+    -ability: 技能名称，如"lina_fiery_soul"
+  -对于图像，有一个额外必填参数:
+    -image: 图像src字符串，如"file://{images}/status_icons/dota_generic.psd"
+  -对于物品图像，有一个额外必填参数:
+    -item: 物品名称，如"item_force_staff"
 
-  -Notifications can be removed from the Top/Bottom or cleared
+  -通知可以从顶部/底部移除或清除
 
-  -Call the Notifications:Top, Notifications:TopToAll, or Notifications:TopToTeam to send a top-area notification to the appropriate players 
-  -Call the Notifications:Bottom, Notifications:BottomToAll, or Notifications:BottomToTeam to send a bottom-area notifications to the appropriate players 
-  -Call the Notifications:ClearTop, Notifications:ClearTopFromAll, or Notifications:ClearTopFromTeam to clear all existing top-area notifications from appropriate players
-  -Call the Notifications:ClearBottom, Notifications:ClearBottomFromAll, or Notifications:ClearBottomFromTeam to clear all existing bottom-area notifications from appropriate players
-  -Call the Notifications:RemoveTop, Notifications:RemoveTopFromAll, or Notifications:RemoveTopFromTeam to remove all existing top-area notifications from appropriate players up to the provided count of notifications
-  -Call the Notifications:RemoveBottom, Notifications:RemoveBottomFromAll, or Notifications:RemoveBottomFromTeam to remove all existing bottom-area notifications from appropriate players up to the provided count of notifications
+  -调用Notifications:Top、Notifications:TopToAll或Notifications:TopToTeam向相应玩家发送顶部区域通知
+  -调用Notifications:Bottom、Notifications:BottomToAll或Notifications:BottomToTeam向相应玩家发送底部区域通知
+  -调用Notifications:ClearTop、Notifications:ClearTopFromAll或Notifications:ClearTopFromTeam清除相应玩家的所有现有顶部区域通知
+  -调用Notifications:ClearBottom、Notifications:ClearBottomFromAll或Notifications:ClearBottomFromTeam清除相应玩家的所有现有底部区域通知
+  -调用Notifications:RemoveTop、Notifications:RemoveTopFromAll或Notifications:RemoveTopFromTeam移除相应玩家的所有现有顶部区域通知，最多提供的通知计数
+  -调用Notifications:RemoveBottom、Notifications:RemoveBottomFromAll或Notifications:RemoveBottomFromTeam移除相应玩家的所有现有底部区域通知，最多提供的通知计数
   
-  Examples:
+  示例:
 
-  -- Send a notification to all players that displays up top for 5 seconds
-  Notifications:TopToAll({text="Top Notification for 5 seconds ", duration=5.0})
-  -- Send a notification to playerID 0 which will display up top for 9 seconds and be green, on the same line as the previous notification
-  Notifications:Top(0, {text="GREEEENNNN", duration=9, style={color="green"}, continue=true})
+  -- 向所有玩家发送一个在顶部显示5秒钟的通知
+  Notifications:TopToAll({text="顶部通知，持续5秒", duration=5.0})
+  -- 向玩家ID为0的玩家发送一个在顶部显示9秒钟的绿色通知，与前一通知在同一行
+  Notifications:Top(0, {text="绿色文本", duration=9, style={color="green"}, continue=true})
 
-  -- Display 3 styles of hero icons on the same line for 5 seconds.
+  -- 在同一行显示3种风格的英雄图标，持续5秒钟
   Notifications:TopToAll({hero="npc_dota_hero_axe", duration=5.0})
   Notifications:TopToAll({hero="npc_dota_hero_axe", imagestyle="landscape", continue=true})
   Notifications:TopToAll({hero="npc_dota_hero_axe", imagestyle="portrait", continue=true})
 
-  -- Display a generic image and then 2 ability icons and an item on the same line for 5 seconds
+  -- 显示一个通用图像，然后在同一行显示2个技能图标和一个物品，持续5秒钟
   Notifications:TopToAll({image="file://{images}/status_icons/dota_generic.psd", duration=5.0})
   Notifications:TopToAll({ability="nyx_assassin_mana_burn", continue=true})
   Notifications:TopToAll({ability="lina_fiery_soul", continue=true})
   Notifications:TopToAll({item="item_force_staff", continue=true})
 
 
-  -- Send a notification to all players on radiant (GOODGUYS) that displays near the bottom of the screen for 10 seconds to be displayed with the NotificationMessage class added
+  -- 向天辉队(GOODGUYS)所有玩家发送一个在屏幕底部显示10秒钟的通知，使用NotificationMessage类显示
   Notifications:BottomToTeam(DOTA_TEAM_GOODGUYS, {text="AAAAAAAAAAAAAA", duration=10, class="NotificationMessage"})
-  -- Send a notification to player 0 which will display near the bottom a large red notification with a solid blue border for 5 seconds
-  Notifications:Bottom(PlayerResource:GetPlayer(0), {text="Super Size Red", duration=5, style={color="red", ["font-size"]="110px", border="10px solid blue"}})
+  -- 向玩家0发送一个在底部显示的大红色通知，带有蓝色实线边框，持续5秒钟
+  Notifications:Bottom(PlayerResource:GetPlayer(0), {text="超大红色文本", duration=5, style={color="red", ["font-size"]="110px", border="10px solid blue"}})
 
 
-  -- Remove 1 bottom and 2 top notifications 2 seconds later
+  -- 2秒后移除1个底部和2个顶部通知
   Timers:CreateTimer(2,function()
     Notifications:RemoveTop(0, 2)
     Notifications:RemoveBottomFromTeam(DOTA_TEAM_GOODGUYS, 1)
 
-    -- Add 1 more notification to the bottom
-    Notifications:BottomToAll({text="GREEEENNNN again", duration=9, style={color="green"}})
+    -- 在底部添加1个新通知
+    Notifications:BottomToAll({text="再次显示绿色文本", duration=9, style={color="green"}})
   end)
 
-  -- Clear all notifications from the bottom
+  -- 清除底部的所有通知
   Timers:CreateTimer(7, function()
     Notifications:ClearBottomFromAll()
   end)

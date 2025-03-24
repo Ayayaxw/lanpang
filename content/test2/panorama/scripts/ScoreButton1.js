@@ -141,7 +141,7 @@
                         timerLabel.text = "0:00." + "0".repeat(decimalPlaces);
                     } else {
                         // 对于不带冒号的格式，使用原来的输出方式
-                        timerLabel.text = "0." + "0".repeat(decimalPlaces);
+                        timerLabel.text = "0" + "0".repeat(decimalPlaces);
                     }
                     $.Msg("时间接近0，设置为0");
                 } else {
@@ -160,10 +160,9 @@
         var timeCountdown = $('#TimeCountdown');
         if (timeCountdown && timeCountdown.text) {
             var currentCount = timeCountdown.text;
-            var decimalPlaces = (currentCount.split('.')[1] || '').length;
             var countNumber = parseFloat(currentCount);
-            if (countNumber < 0.05) {
-                timeCountdown.text = "0." + "0".repeat(decimalPlaces);
+            if (countNumber <= 1) {
+                timeCountdown.text = "0";
             } else {
                 timeCountdown.text = currentCount;
             }
@@ -501,9 +500,9 @@
                 } else {
                     timerLabel.text = formatTime(remainingTime);
                     
-                    // 计算向上取整的秒数
-                    var ceilingSeconds = Math.ceil(remainingTime);
-                    $('#TimeCountdown').text = ceilingSeconds.toString();
+                    // 使用Math.floor而不是Math.ceil，确保不会过早显示1
+                    var floorSeconds = Math.floor(remainingTime);
+                    $('#TimeCountdown').text = floorSeconds.toString();
                     
                     // 获取当前整数秒，用于检测变化
                     var intSeconds = Math.floor(remainingTime);

@@ -6,7 +6,6 @@ function CommonAI:Ini_DisabledSkills()
         npc_dota_hero_treant = {"treant_eyes_in_the_forest"},
         npc_dota_hero_monkey_king = {"monkey_king_primal_spring", "monkey_king_tree_dance", "monkey_king_primal_spring_early", "monkey_king_untransform", "monkey_king_mischiefs","monkey_king_jingu_mastery"},
         npc_dota_hero_hoodwink = {""},
-        npc_dota_hero_faceless_void = {"faceless_void_time_walk_reverse"},
         npc_dota_hero_elder_titan = {""},
         npc_dota_hero_tusk = {""},
         npc_dota_hero_pudge = {"pudge_eject"},

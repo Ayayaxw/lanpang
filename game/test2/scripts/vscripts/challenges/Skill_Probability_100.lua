@@ -8,13 +8,9 @@ function Main:Init_Skill_Probability_100(event, playerID)
             function(hero)
 
                 hero:AddNewModifier(hero, nil, "modifier_rooted", {duration = 5})
-                
                 HeroMaxLevel(hero)
                 hero:AddNewModifier(hero, nil, "modifier_item_aghanims_shard", {})
                 hero:AddNewModifier(hero, nil, "modifier_item_ultimate_scepter_consumed", {})
-
-
-
                 --如果英雄是npc_dota_hero_tidehunter，给他modifier
                 if hero:GetUnitName() == "npc_dota_hero_tidehunter" then
                     hero:AddNewModifier(hero, nil, "modifier_attack_auto_cast_ability", {ability_index = 2})
@@ -83,6 +79,25 @@ function Main:Init_Skill_Probability_100(event, playerID)
                 }
             },
         },
+        npc_dota_hero_hoodwink = {
+            hoodwink_mistwoods_wayfarer = {
+                AbilityValues = {
+                    redirect_chance = {
+                        value = 100
+                    }
+                }
+            },
+        },
+        npc_dota_hero_dark_seer = {
+            dark_seer_normal_punch = {
+                AbilityValues = {
+                    AbilityCooldown = {
+                        value = 0
+                    }
+                }
+            },
+        },
+
         npc_dota_hero_legion_commander = {
             legion_commander_moment_of_courage = {
                 AbilityValues = {
@@ -525,13 +540,7 @@ function Main:Init_Skill_Probability_100(event, playerID)
         },
 
     }
-
-
     self:UpdateAbilityModifiers(ability_modifiers)
-
-
-
-
 
     -- 从 event 中获取新的数据
     local selfHeroId = event.selfHeroId or -1
@@ -718,8 +727,8 @@ function Main:Init_Skill_Probability_100(event, playerID)
         self.startTime = GameRules:GetGameTime() -- 记录开始时间
         CustomGameEventManager:Send_ServerToAllClients("start_timer", {})
         self:MonitorUnitsStatus()
-        self:StartAbilitiesMonitor(self.rightTeamHero1)
-        self:StartAbilitiesMonitor(self.leftTeamHero1)
+        self:StartAbilitiesMonitor(self.rightTeamHero1,true)
+        self:StartAbilitiesMonitor(self.leftTeamHero1,true)
         self:createLocalizedMessage(
             "[LanPang_RECORD][",
             self.currentMatchID,

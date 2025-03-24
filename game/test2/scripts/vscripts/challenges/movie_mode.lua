@@ -61,11 +61,35 @@ function Main:Init_movie_mode(heroName, heroFacet,playerID, heroChineseName)
     --CreateOgreMagi()
     --CreateMaxLevelHeroes()
     -- end)
-
-        Main:PreSpawnGolem_Golem_vs_Heroes()
+-- 使用函数
+local referee = CreateUnitByName("caipan", Vector(0, 0, 0), true, nil, nil, DOTA_TEAM_BADGUYS)
+ShowAnimations(referee)
+        --Main:PreSpawnGolem_Golem_vs_Heroes()
 
 end
 
+
+-- 创建一个函数来顺序展示多个动作
+function ShowAnimations(unit)
+    local animations = {
+        {duration = 2.0, activity = ACT_DOTA_RUN, translate = "haste"},
+        {duration = 2.0, activity = ACT_DOTA_ATTACK, translate = "dominator"},
+        {duration = 2.0, activity = ACT_DOTA_VICTORY, translate = "happy_dance"},
+        {duration = 2.0, activity = ACT_DOTA_CAST_ABILITY_1, translate = "overpower"},
+        {duration = 2.0, activity = ACT_DOTA_SPAWN, translate = "loadout"},
+        {duration = 2.0, activity = ACT_DOTA_IDLE, translate = "injured"},
+        {duration = 2.0, activity = ACT_DOTA_TELEPORT, translate = "portrait_fogheart"}
+    }
+    
+    local currentTime = 0
+    for i, anim in ipairs(animations) do
+        Timers:CreateTimer(currentTime, function()
+            StartAnimation(unit, anim)
+            return nil
+        end)
+        currentTime = currentTime + anim.duration + 0.5
+    end
+end
 
 
 

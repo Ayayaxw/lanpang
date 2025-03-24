@@ -14,6 +14,490 @@ function Main:Init_waterfall_hero_chaos(event, playerID)
     self:CreateTrueSightWards(teams)
     self:SendCameraPositionToJS(self.ARENA_CENTER, 1)
 
+
+    local ability_modifiers = {
+        npc_dota_hero_pangolier = {
+            pangolier_fortune_favors_the_bold =
+            {
+                AbilityValues = {
+                    chance_reduce = {
+                        value = -100
+                    }
+                }
+            },
+
+            pangolier_lucky_shot =
+            {
+                AbilityValues = {
+                    chance_pct = {
+                        value = 100
+                    }
+                }
+            },
+        },
+        npc_dota_hero_hoodwink = {
+            hoodwink_mistwoods_wayfarer = {
+                AbilityValues = {
+                    redirect_chance = {
+                        value = 100
+                    }
+                }
+            },
+        },
+        npc_dota_hero_dark_seer = {
+            dark_seer_normal_punch = {
+                AbilityValues = {
+                    AbilityCooldown = {
+                        value = 0
+                    }
+                }
+            },
+        },
+
+        npc_dota_hero_legion_commander = {
+            legion_commander_moment_of_courage = {
+                AbilityValues = {
+                    trigger_chance = {
+                        value = 100
+                    }
+                }
+            },
+        },
+        npc_dota_hero_troll_warlord = {
+            troll_warlord_berserkers_rage  = {
+                AbilityValues = {
+                    ensnare_chance = 100,
+                    maim_chance = 100
+                }
+            },
+            troll_warlord_whirling_axes_melee = {
+                AbilityValues = {
+                    blind_pct = 100
+                }
+            },
+        },
+
+        npc_dota_hero_skeleton_king = {
+            skeleton_king_mortal_strike = {
+                AbilityValues = {
+                    AbilityCooldown = 0 ,
+                }
+            },
+            skeleton_king_spectral_blade = {
+                AbilityValues = {
+                    curse_cooldown = {
+                        value = 0,
+                    },
+                    curse_delay = {
+                        value = 0,
+                    },
+                }
+            },
+        },
+        npc_dota_hero_tusk = {
+            special_bonus_unique_tusk_4 = {
+                AbilityValues = {
+                    value = {
+                        value = 100
+                    }
+                }
+            }
+        },
+        npc_dota_hero_axe = {
+            axe_counter_helix = {
+                AbilityValues = {
+                    AbilityCooldown = {
+                        value = 0
+                    },
+                    trigger_attacks = {
+                        value = 0
+                    },
+                }
+            },
+        },
+        npc_dota_hero_slardar = {
+            slardar_bash = {
+                AbilityValues = {
+                    attack_count = {
+                        value = 0
+                    }
+                }
+            },
+        },
+        npc_dota_hero_kunkka = {
+            kunkka_tidebringer = {
+                AbilityValues = {
+                    AbilityCooldown = 0,
+                }
+            },
+        },
+        npc_dota_hero_doom_bringer = {
+            doom_bringer_infernal_blade = {
+                AbilityValues = {
+                    AbilityCooldown = 0,
+                }
+            },
+            berserker_troll_break = {
+                AbilityValues = {
+                    AbilityCooldown = 0,
+                }
+            },
+            spawnlord_master_freeze = {
+                AbilityValues = {
+                    AbilityCooldown = 0,
+                }
+            },
+
+            big_thunder_lizard_wardrums_aura =
+            {
+                AbilityValues = {
+                    accuracy =  {
+                        value = 100,
+                    }
+                }
+            },
+            alpha_wolf_critical_strike={
+                AbilityValues = {
+                    crit_chance = {
+                        value = 100,
+                    }
+                }
+            },
+            
+        },
+        npc_dota_hero_chaos_knight = {
+            chaos_knight_reins_of_chaos = {
+                AbilityValues = {
+                    bonus_illusion_chance = {
+                        value = 100
+                    }
+                }
+            },
+            chaos_knight_chaos_strike = {
+                AbilityValues = {
+                    chance = {
+                        value = 100
+                    }
+                }
+            },
+        },
+        npc_dota_hero_dawnbreaker = {
+            dawnbreaker_luminosity = {
+                AbilityValues = {
+                    attack_count = {
+                        value = 0
+                    }
+                }
+            },
+        },
+        npc_dota_hero_spirit_breaker = {
+            spirit_breaker_greater_bash = {
+                AbilityValues = {
+                    AbilityCooldown ={
+                        value = 0
+                    },
+                    chance_pct = {
+                        value = 100
+                    }
+                }
+            },
+        },
+        npc_dota_hero_ogre_magi = {
+            ogre_magi_multicast = {
+                AbilityValues = {
+                    multicast_4_times = {
+                        value = 100
+                    }
+                }
+            },
+            special_bonus_unique_ogre_magi_3 = {
+                AbilityValues = {
+                    value = {
+                        value = 100
+                    }
+                }
+            },
+        },
+        npc_dota_hero_juggernaut = {
+            juggernaut_blade_dance = {
+                AbilityValues = {
+                    blade_dance_crit_chance = {
+                        value = 100
+                    }
+                }
+            },
+        },
+        npc_dota_hero_kez = {
+            kez_shodo_sai = {
+                AbilityValues = {
+                    sai_proc_vuln_chance = {
+                        value = 100
+                    }
+                }
+            },
+            kez_falcon_rush = {
+                AbilityValues = {
+                    buff_evasion_pct = {
+                        value = 100
+                    }
+                }
+            },
+        },
+        npc_dota_hero_drow_ranger = {
+            drow_ranger_marksmanship = {
+                AbilityValues = {
+                    chance = {
+                        value = 100
+                    }
+                }
+            },
+        },
+        npc_dota_hero_naga_siren = {
+            naga_siren_rip_tide = {
+                AbilityValues = {
+                    hits = {
+                        value = 0
+                    }
+                }
+            },
+            naga_siren_eelskin = {
+                AbilityValues = {
+                    evasion_per_naga = {
+                        value = 100
+                    }
+                }
+            },
+        },
+        npc_dota_hero_sniper = {
+            sniper_headshot = {
+                AbilityValues = {
+                    proc_chance = {
+                        value = 100
+                    }
+                }
+            },
+        },
+        npc_dota_hero_broodmother = {
+            broodmother_incapacitating_bite = {
+                AbilityValues = {
+                    miss_chance = {
+                        value = 100
+                    }
+                }
+            },
+        },
+        npc_dota_hero_faceless_void = {
+            special_bonus_unique_faceless_void_4 = {
+                AbilityValues = {
+                    dodge_chance_pct = {
+                        value = 100
+                    }
+                }
+            },
+            faceless_void_time_lock = {
+                AbilityValues = {
+                    chance_pct = {
+                        value = 100
+                    }
+                }
+            },
+
+        },
+        npc_dota_hero_monkey_king = {
+            monkey_king_jingu_mastery = {
+                AbilityValues = {
+                    required_hits = {
+                        value = 0
+                    }
+                }
+            },
+        },
+
+        npc_dota_hero_shadow_shaman = {
+            shadow_shaman_voodoo_hands = {
+                AbilityValues = {
+                    AbilityCooldown = {
+                        value = 0
+                    }
+                }
+            },
+        },
+        npc_dota_hero_disruptor = { 
+            disruptor_electromagnetic_repulsion = {
+                AbilityValues = {
+                    damage_threshold = 1,
+                    AbilityCooldown = {
+                        value = 0
+                    }
+                }
+            },
+        },
+        npc_dota_hero_jakiro = {
+            jakiro_liquid_fire = {
+                AbilityValues = {
+                    AbilityCooldown = {
+                        value = 0
+                    }
+                }
+            },
+            jakiro_liquid_ice = {
+                AbilityValues = {
+                    AbilityCooldown = {
+                        value = 0
+                    }
+                }
+            },  
+        },
+        npc_dota_hero_obsidian_destroyer = {
+            obsidian_destroyer_equilibrium = {
+                AbilityValues = {
+                    proc_chance = {
+                        value = 100
+                    }
+                }
+            },
+        },
+        npc_dota_hero_snapfire = {
+            snapfire_buckshot = {
+                AbilityValues = {
+                    miss_chance = {
+                        value = 100
+                    }
+                }
+            },
+        },
+        npc_dota_hero_phantom_assassin = {
+            phantom_assassin_immaterial = {
+                AbilityValues = {
+                    evasion_base = {
+                        value = 100
+                    }
+                }
+            },
+            phantom_assassin_coup_de_grace = {
+                AbilityValues = {
+                    crit_chance = {
+                        value = 100
+                    },
+                    dagger_crit_chance = {
+                        value = 100
+                    },
+                    attacks_to_proc = {
+                        value = 0
+                    },
+                    attacks_to_proc_creeps = {
+                        value = 0
+                    },
+                }
+            },
+        },
+        npc_dota_hero_weaver = {
+            weaver_geminate_attack = {
+                AbilityValues = {
+                    AbilityCooldown = {
+                        value = 0
+                    }
+                }
+            },
+        },
+        npc_dota_hero_gyrocopter = {
+            gyrocopter_flak_cannon = {
+                AbilityValues = {
+                    sidegunner_fire_rate = {
+                        value = 0
+                    }
+                }
+            },
+        },
+        npc_dota_hero_muerta = {
+            muerta_gunslinger = {
+                AbilityValues = {
+                    double_shot_chance = {
+                        value = 100
+                    }
+                }
+            },
+        },
+        npc_dota_hero_enigma = {
+            enigma_splitting_image = {
+                AbilityValues = {
+                    damage_threshold = 0 ,
+                    eidolon_spawns = 999,
+                }
+            },
+        },
+        npc_dota_hero_phantom_lancer = {
+            phantom_lancer_phantom_edge = {
+                AbilityValues = {
+                    min_distance = {
+                        value = 0
+                    },
+                    AbilityCooldown = {
+                        value = 0
+                    }
+                }
+            },
+            phantom_lancer_juxtapose = {
+                AbilityValues = {
+                    proc_chance_pct = {
+                        value = 100
+                    },
+                    illusion_proc_chance_pct = {
+                        value = 100
+                    }
+                }
+            },
+        },
+        npc_dota_hero_treant = {
+            treant_natures_guise = {
+                AbilityValues = {
+                    shard_cooldown ={
+                        value = 0
+                    },
+                    cooldown_time = {
+                        value = 0
+                    }
+                }
+            },
+        },
+        npc_dota_hero_brewmaster = {
+            brewmaster_drunken_brawler = {
+                AbilityValues = {
+                    dodge_chance = {
+                        value = 100
+                    },
+                    crit_chance = {
+                        value = 100
+                    }
+                }
+            },
+        },
+        npc_dota_hero_omniknight = {
+            omniknight_hammer_of_purity = {
+                AbilityValues = {
+                    AbilityCooldown = {
+                        value = 0
+                    }
+                }
+
+            },
+        },
+        npc_dota_hero_razor = {
+            razor_storm_surge = {
+                AbilityValues = {
+                    strike_pct_chance = {
+                        value = 100
+                    },
+                    strike_internal_cd = {
+                        value = 0
+                    }
+                }
+            },
+        },
+
+    }
+    self:UpdateAbilityModifiers(ability_modifiers)
+
     -- 定义不同的队伍类型配置
     local TEAM_CONFIGS = {
         ATTRIBUTE = {
@@ -145,6 +629,21 @@ function Main:SetupWaterFallCombatBuffs(hero)
     hero:AddNewModifier(hero, nil, "modifier_item_ultimate_scepter_consumed", {})
     hero:AddNewModifier(hero, nil, "modifier_auto_elevation_waterfall", {})
 
+    if hero:GetUnitName() == "npc_dota_hero_naga_siren" then
+        hero:RemoveAbility("naga_siren_eelskin")
+
+        hero:AddAbility("naga_siren_eelskin")
+
+    end
+    if hero:GetUnitName() == "npc_dota_hero_tidehunter" then
+        hero:AddNewModifier(hero, nil, "modifier_attack_auto_cast_ability", {ability_index = 2})
+        hero:RemoveAbility("special_bonus_unique_tidehunter_8")
+    end
+
+    --如果英雄是npc_dota_hero_doom_bringer，给他modifier
+    if hero:GetUnitName() == "npc_dota_hero_doom_bringer" then
+        hero:AddNewModifier(hero, nil, "modifier_reset_passive_ability_cooldown", {})
+    end
     -- 查找英雄type
     local heroName = hero:GetUnitName()
     local heroType = nil
@@ -164,7 +663,7 @@ function Main:SetupInitialBuffs(hero)
         print("错误：SetupInitialBuffs收到了空的英雄实体")
         return false
     end
-    
+
     hero:AddNewModifier(hero, nil, "modifier_invulnerable", {})
     hero:AddNewModifier(hero, nil, "modifier_wearable", {})
 end
@@ -234,6 +733,12 @@ function Main:CleanupWaterFallHeroAndSummons(heroType, heroIndex, callback)
         local targetPos = Vector(10000, 10000, 0)
         hero:SetAbsOrigin(targetPos)
         
+        -- 移除AI
+        hero:SetContextThink("AIThink", nil, 0)
+        if AIs and AIs[hero] then
+            AIs[hero] = nil
+        end
+        
         -- 使用FindUnitsInRadius搜索整个地图的单位
         local allUnits = FindUnitsInRadius(
             hero:GetTeamNumber(),
@@ -275,7 +780,7 @@ function Main:CleanupWaterFallHeroAndSummons(heroType, heroIndex, callback)
             if not hero:IsAlive() then
                 hero:RespawnHero(false, false)
             end
-            UTIL_Remove(hero)
+            --UTIL_Remove(hero)
         end
     end)
 
@@ -500,66 +1005,55 @@ end
 
 function Main:InitializeWaterfallHeroSequence()
     local heroesGroup1 = {
-        "npc_dota_hero_gyrocopter",
-        "npc_dota_hero_sven",
-        "npc_dota_hero_tidehunter",
-        "npc_dota_hero_witch_doctor",
-        "npc_dota_hero_spectre",
-        "npc_dota_hero_luna",
-        "npc_dota_hero_sand_king",
-        "npc_dota_hero_magnataur",
-        "npc_dota_hero_dragon_knight",
-        "npc_dota_hero_queenofpain",
-        "npc_dota_hero_earthshaker",
-        "npc_dota_hero_bristleback",
-        "npc_dota_hero_axe",
-        "npc_dota_hero_kunkka",
-        "npc_dota_hero_dawnbreaker",
-        "npc_dota_hero_abyssal_underlord",
-        "npc_dota_hero_marci",
-        "npc_dota_hero_lion",
-        "npc_dota_hero_tiny",
-        "npc_dota_hero_medusa",
-        "npc_dota_hero_kez",
-        "npc_dota_hero_templar_assassin",
-        "npc_dota_hero_mars",
-        "npc_dota_hero_obsidian_destroyer",
-        "npc_dota_hero_storm_spirit",
-        "npc_dota_hero_meepo",
-        "npc_dota_hero_weaver",
-        "npc_dota_hero_morphling"
+
+    "npc_dota_hero_chaos_knight",
+    "npc_dota_hero_omniknight", 
+    "npc_dota_hero_doom_bringer", 
+
+    "npc_dota_hero_spirit_breaker", 
+    "npc_dota_hero_slardar", 
+    "npc_dota_hero_dawnbreaker",
+    "npc_dota_hero_dark_seer",
+    "npc_dota_hero_obsidian_destroyer", 
+    "npc_dota_hero_jakiro", 
+    "npc_dota_hero_muerta",
+
+    "npc_dota_hero_tidehunter",
+    "npc_dota_hero_skeleton_king",
+    "npc_dota_hero_ogre_magi",
+    "npc_dota_hero_axe",
+    "npc_dota_hero_legion_commander", 
+    "npc_dota_hero_tusk",
+
+    "npc_dota_hero_kunkka"
+
+
+
     }
     
     local heroesGroup2 = {
-        "npc_dota_hero_elder_titan",
-        "npc_dota_hero_warlock",
-        "npc_dota_hero_juggernaut",
-        "npc_dota_hero_abaddon",
-        "npc_dota_hero_drow_ranger",
-        "npc_dota_hero_huskar",
-        "npc_dota_hero_warlock",
-        "npc_dota_hero_life_stealer",
-        "npc_dota_hero_naga_siren",
-        "npc_dota_hero_troll_warlord",
+    "npc_dota_hero_sniper", 
 
-        "npc_dota_hero_phantom_assassin",
-        "npc_dota_hero_tusk",
-        "npc_dota_hero_pudge",
-        "npc_dota_hero_phantom_lancer",
-        "npc_dota_hero_warlock",    
-        "npc_dota_hero_nevermore",
-        "npc_dota_hero_pangolier",
-        "npc_dota_hero_ember_spirit",
+    "npc_dota_hero_gyrocopter", 
 
-        "npc_dota_hero_silencer",
-        "npc_dota_hero_enigma",
-        "npc_dota_hero_necrolyte",
-        "npc_dota_hero_faceless_void",
+    "npc_dota_hero_juggernaut", 
+    "npc_dota_hero_weaver", 
 
-        "npc_dota_hero_bloodseeker",
-        "npc_dota_hero_ogre_magi",
-        "npc_dota_hero_monkey_king",
-        "npc_dota_hero_crystal_maiden"
+    "npc_dota_hero_shadow_shaman", 
+    "npc_dota_hero_faceless_void", 
+    "npc_dota_hero_drow_ranger", 
+    "npc_dota_hero_razor",
+    "npc_dota_hero_phantom_assassin",
+    "npc_dota_hero_naga_siren", 
+    "npc_dota_hero_broodmother", 
+    "npc_dota_hero_kez",
+    "npc_dota_hero_monkey_king",
+    "npc_dota_hero_phantom_lancer", 
+    "npc_dota_hero_hoodwink",
+    "npc_dota_hero_pangolier", 
+    "npc_dota_hero_brewmaster", 
+
+
     }
     
     -- 创建一个查找表来确定英雄类型
@@ -717,8 +1211,8 @@ function Main:InitializeWaterfallHeroSequence()
             self.heroSequence[heroType].sequence = sequence
         else
             -- 非测试模式，直接随机打乱所有英雄
-            --self.heroSequence[heroType].sequence = table.shuffle(heroPool)
-            self.heroSequence[heroType].sequence = heroPool
+            self.heroSequence[heroType].sequence = table.shuffle(heroPool)
+            --self.heroSequence[heroType].sequence = heroPool
         end
         
         -- 设置总数和初始索引
@@ -949,7 +1443,7 @@ function Main:DeployWaterFallHero(heroType, isInitialSpawn)
             -- 执行英雄特殊效果
             local heroStrategy = hero.ai and hero.ai.heroStrategy or nil
             self:HeroBenefits(hero:GetUnitName(), hero, heroStrategy)
-            self:StartAbilitiesMonitor(hero)
+            self:StartAbilitiesMonitor(hero,false)
 
         end)
 
@@ -1190,9 +1684,27 @@ function Main:Start_waterfall_hero_chaos_ScoreBoardMonitor()
     end)
 end
 
+function Main:OnAbilityUsed_waterfall_hero_chaos(event)
+    print("技能释放事件")
+    local caster = EntIndexToHScript(event.caster_entindex)
+    local target = caster:GetCursorCastTarget()
+    --如果英雄释放的技能是chaos_knight_reality_rift，让英雄对目标施加持续三秒的缴械、沉默和破坏效果
+    if event.abilityname == "chaos_knight_reality_rift" then
+        target:AddNewModifier(caster, nil, "modifier_break", {duration = 3})
+        target:AddNewModifier(caster, nil, "modifier_silence", {duration = 3})
+        target:AddNewModifier(caster, nil, "modifier_disarmed", {duration = 3})
+    end
+    
+
+end
+
+
+
+
 
 
 function Main:OnNPCSpawned_waterfall_hero_chaos(spawnedUnit, event)
+    spawnedUnit:AddNewModifier(spawnedUnit, nil, "modifier_kv_editor", {})
     local minX = -7023.13
     local maxX = -4999.12
     local minY = -876.53

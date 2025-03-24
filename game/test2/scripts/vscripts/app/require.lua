@@ -15,7 +15,7 @@ require("battle/coordinates")           --放置重要的地图坐标
 require("battle/hero_kv_overrides")           --处理英雄kv覆盖
 require("battle/api_extensions")           --自己实现的一些API没有的功能
 require("battle/ui_event_manager")           --前端信息展示的一些功能
-
+require("battle/camera_focus_manager")           --相机视角管理
 
 require("ai/core/ai_core")
 require("ai/core/AIstrategies")
@@ -23,10 +23,14 @@ require("ai/core/common_ai")
 require("hero_duel")
 
 require("game_setup")
-require("libraries/timers")
+
 require('modifier/modifier_global_ability_listener')
 require('print_manager')
+
 require('libraries/vector_targeting')
+require("libraries/timers")
+require("libraries/animations")
+
 --require('ai_script')
 require("trigger/quanshui")
 require("spawn_manager") 

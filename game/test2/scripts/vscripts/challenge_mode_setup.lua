@@ -477,14 +477,14 @@ function Main:RequestStrategyData()
             name = "禁用大招",
             id = "ultimate_disable"
         },
-        {
-            name = "不到半血绝不放大",
-            id = "half_hp_ultimate_lock"
-        },
-        {
-            name = "不到80%血绝不放大",
-            id = "hp_80_ultimate_lock"
-        },
+        -- {
+        --     name = "不到半血绝不放大",
+        --     id = "half_hp_ultimate_lock"
+        -- },
+        -- {
+        --     name = "不到80%血绝不放大",
+        --     id = "hp_80_ultimate_lock"
+        -- },
         {
             name = "不在骨法棒子里放技能",
             id = "no_skill_in_death_ward"
@@ -512,6 +512,10 @@ function Main:RequestStrategyData()
         {
             name = "避免重复施法",
             id = "avoid_repeat_cast"
+        },
+        {
+            name = "卡时间",
+            id = "time_limit"
         },
     }
 
@@ -911,6 +915,20 @@ function Main:RequestStrategyData()
             {
                 name = "飞脸前",
                 id = "storm_initiate"
+            },
+        },
+        npc_dota_hero_phantom_assassin = {  -- 幻影刺客
+            {
+                name = "先破被动再行动",
+                id = "break_passive_first"
+            },
+            {
+                name = "模糊好了才放技能",
+                id = "blur_ready_to_use"
+            },
+            {
+                name = "远距离才放镖",
+                id = "dagger_with_distance"
             },
         },
         npc_dota_hero_doom_bringer = {  -- 末日使者

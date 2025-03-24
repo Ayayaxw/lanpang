@@ -3,23 +3,22 @@ MODMAKER_VERSION = "0.80"
 require('libraries/timers')
 
 --[[
-  ModMaker Library by BMD
+  ModMaker库 由BMD开发
 
-  Installation
-  -"require" this file inside your code in order to make the ModMaker API available in game
-  -Ensure that this file is placed in the vscripts/libraries path
-  -Ensure that you have the modmaker/modmaker.xml, modmaker/modmaker_api_category.xml, and modmaker/modmaker_api_property.xml in your panorama content layout folder.
-  -Ensure that you have the modmaker/modmaker.js, modmaker/modmaker_api_category.js, and modmaker/modmaker_api_property.js in your panorama content scripts folder.
-  -Ensure that you have the modmaker/modmaker.css in your panorama content styles folder.
-  -Ensure that modmaker/modmaker.xml is included in your custom_ui_manifest.xml with
+  安装方法
+  -在您的代码中"require"此文件以便在游戏中使用ModMaker API
+  -确保该文件放置在vscripts/libraries路径中
+  -确保您在全景UI内容布局文件夹中有modmaker/modmaker.xml、modmaker/modmaker_api_category.xml和modmaker/modmaker_api_property.xml文件
+  -确保您在全景UI内容脚本文件夹中有modmaker/modmaker.js、modmaker/modmaker_api_category.js和modmaker/modmaker_api_property.js文件
+  -确保您在全景UI内容样式文件夹中有modmaker/modmaker.css文件
+  -确保modmaker/modmaker.xml在您的custom_ui_manifest.xml中包含
     <CustomUIElement type="Hud" layoutfile="file://{resources}/layout/custom_game/modmaker/modmaker.xml" />
 
-  Library Usage
-  -The library when required in registers the "modmaker_api" console command (if in tools mode)
-  -Executing the "modmakers_api" console command will display the modmaker API UI in the game window, which allows for searching and exploring of the lua API.
-  -This API is based on the actual server vscript itself, and as such is always up to date and accurate (to the Valve docs).
-  -Each function has a "Search GitHub" button which will open the default browser on your system to search github for uses of the function in question.
-  
+  库使用方法
+  -该库在被引入后会注册"modmaker_api"控制台命令（如果在工具模式下）
+  -执行"modmakers_api"控制台命令将在游戏窗口中显示modmaker API界面，允许搜索和探索lua API
+  -此API基于实际的服务器vscript本身，因此始终是最新且准确的（与Valve文档一致）
+  -每个函数都有一个"Search GitHub"按钮，点击后会在您的系统默认浏览器中搜索相关函数的用法
 ]]
 
 if not ModMaker then

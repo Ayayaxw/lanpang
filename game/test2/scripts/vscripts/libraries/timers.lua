@@ -2,71 +2,70 @@ TIMERS_VERSION = "1.05"
 
 --[[
 
-  -- A timer running every second that starts immediately on the next frame, respects pauses
+  -- 一个立即在下一帧开始运行的计时器，每秒运行一次，尊重暂停
   Timers:CreateTimer(function()
-      print ("Hello. I'm running immediately and then every second thereafter.")
+      print ("你好。我立即运行，然后每秒运行一次。")
       return 1.0
     end
   )
 
-  -- The same timer as above with a shorthand call 
+  -- 使用简写调用的相同计时器
   Timers(function()
-    print ("Hello. I'm running immediately and then every second thereafter.")
+    print ("你好。我立即运行，然后每秒运行一次。")
     return 1.0
   end)
   
 
-  -- A timer which calls a function with a table context
+  -- 带有表上下文的函数调用计时器
   Timers:CreateTimer(GameMode.someFunction, GameMode)
 
-  -- A timer running every second that starts 5 seconds in the future, respects pauses
+  -- 5秒后开始运行的计时器，每秒运行一次，尊重暂停
   Timers:CreateTimer(5, function()
-      print ("Hello. I'm running 5 seconds after you called me and then every second thereafter.")
+      print ("你好。我在你调用我5秒后运行，然后每秒运行一次。")
       return 1.0
     end
   )
 
-  -- 10 second delayed, run once using gametime (respect pauses)
+  -- 10秒延迟，使用游戏时间运行一次（尊重暂停）
   Timers:CreateTimer({
-    endTime = 10, -- when this timer should first execute, you can omit this if you want it to run first on the next frame
+    endTime = 10, -- 此计时器首次执行的时间，如果您希望它在下一帧首先运行，可以省略此项
     callback = function()
-      print ("Hello. I'm running 10 seconds after when I was started.")
+      print ("你好。我在开始后10秒运行。")
     end
   })
 
-  -- 10 second delayed, run once regardless of pauses
+  -- 10秒延迟，无论暂停与否都只运行一次
   Timers:CreateTimer({
     useGameTime = false,
-    endTime = 10, -- when this timer should first execute, you can omit this if you want it to run first on the next frame
+    endTime = 10, -- 此计时器首次执行的时间，如果您希望它在下一帧首先运行，可以省略此项
     callback = function()
-      print ("Hello. I'm running 10 seconds after I was started even if someone paused the game.")
+      print ("你好。即使有人暂停游戏，我也会在开始后10秒运行。")
     end
   })
 
 
-  -- A timer running every second that starts after 2 minutes regardless of pauses
+  -- 一个无论暂停与否都在2分钟后开始每秒运行一次的计时器
   Timers:CreateTimer("uniqueTimerString3", {
     useGameTime = false,
     endTime = 120,
     callback = function()
-      print ("Hello. I'm running after 2 minutes and then every second thereafter.")
+      print ("你好。我在2分钟后运行，然后每秒运行一次。")
       return 1
     end
   })
 
 
-  -- A timer using the old style to repeat every second starting 5 seconds ahead
+  -- 使用旧风格的计时器，从5秒后开始每秒重复一次
   Timers:CreateTimer("uniqueTimerString3", {
     useOldStyle = true,
     endTime = GameRules:GetGameTime() + 5,
     callback = function()
-      print ("Hello. I'm running after 5 seconds and then every second thereafter.")
+      print ("你好。我在5秒后运行，然后每秒运行一次。")
       return GameRules:GetGameTime() + 1
     end
   })
 
 ]]
-
 
 
 TIMERS_THINK = 0.01

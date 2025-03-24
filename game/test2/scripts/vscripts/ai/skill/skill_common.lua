@@ -793,7 +793,8 @@ function CommonAI:FindBestAbilityToUse(entity, target)
                 goto continue
             end
 
-
+        local isInRange = true
+        local distanceToTarget = (targetPosition - entityPosition):Length2D()
         -- 处理自身施法技能
         if self:isSelfCastAbility(abilityName) and not self:isSelfCastAbilityWithRange(abilityName) then
             if DEBUG_MODE == 1 then
@@ -801,22 +802,45 @@ function CommonAI:FindBestAbilityToUse(entity, target)
             end
             castRange = 9999
             aoeRadius = 9999
+            local originalSum = castRange + aoeRadius
+            local threshold = self:GetSkillRangeThreshold(ability, entity, originalSum)
+            isInRange = distanceToTarget <= threshold
+            
+            -- 根据threshold调整原始参数
+            if threshold ~= originalSum then
+                -- 先尝试调整aoeRadius
+                local diff = threshold - originalSum
+                aoeRadius = math.max(0, aoeRadius + diff)
+                -- 如果aoeRadius已经为0但阈值仍小于castRange，则调整castRange
+                if aoeRadius == 0 and threshold < castRange then
+                    castRange = threshold
+                end
+            end
         end
         if castRange == 0 and aoeRadius == 0 and 
         bit.band(ability:GetBehavior(), DOTA_ABILITY_BEHAVIOR_NO_TARGET) ~= 0 then
             aoeRadius = 9999
+
+            local threshold = self:GetSkillRangeThreshold(ability, entity, aoeRadius)
+            isInRange = distanceToTarget <= threshold
+            
+            -- 根据threshold调整原始参数
+            if threshold ~= aoeRadius then
+                aoeRadius = threshold
+            end
+
             if DEBUG_MODE == 1 then
                 self:log(string.format("技能 %s 作为大招被无条件选择", abilityName))
             end
         end
 
 
-            local isInRange = true
+
             local targetTeam = self:GetSkillTargetTeam(ability)
 
             -- 如果是友方技能且有队友，用队友位置
             if bit.band(targetTeam, DOTA_UNIT_TARGET_TEAM_FRIENDLY) ~= 0 and self.Ally then
-                local distanceToTarget = (self.Ally:GetAbsOrigin() - entityPosition):Length2D()
+                --local distanceToTarget = (self.Ally:GetAbsOrigin() - entityPosition):Length2D()
                 if bit.band(ability:GetBehavior(), DOTA_ABILITY_BEHAVIOR_POINT) ~= 0 then
                     local originalSum = castRange + aoeRadius
                     local threshold = self:GetSkillRangeThreshold(ability, entity, originalSum)
@@ -851,7 +875,7 @@ function CommonAI:FindBestAbilityToUse(entity, target)
                 end
             -- 否则判断敌方目标
             elseif target then
-                local distanceToTarget = (targetPosition - entityPosition):Length2D()
+                
                 if bit.band(ability:GetBehavior(), DOTA_ABILITY_BEHAVIOR_POINT) ~= 0 then
                     local originalSum = castRange + aoeRadius
                     local threshold = self:GetSkillRangeThreshold(ability, entity, originalSum)

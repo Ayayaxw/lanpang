@@ -148,9 +148,9 @@ else
 
 end
 
-print("开始打印npc_abilities表...")
-PrintAbilitiesTable(Main.heroAbilities)
-print("npc_abilities表打印完成")
+-- print("开始打印npc_abilities表...")
+-- PrintAbilitiesTable(Main.heroAbilities)
+-- print("npc_abilities表打印完成")
 
 
 function Main:GetOriginalAbilityValue(hero_name, ability_name)

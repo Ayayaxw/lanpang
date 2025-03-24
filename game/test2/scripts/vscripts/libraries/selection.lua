@@ -1,56 +1,56 @@
 SELECTION_VERSION = "1.00"
 
 --[[
-    Lua-controlled Selection Library by Noya
+    Lua控制的选择库 由Noya开发
     
-    Installation:
-    - "require" this file inside your code in order to add the new API functions to the PlayerResource global
-    - Additionally, ensure your game scripts custom_net_tables.txt has a "selection" entry
-    - Finally, ensure that you have the following files correctly added and included in your panorama content folder
-        selection.xml, and include line on custom_ui_manifest.xml, on layout/custom_game/ folder
-        selection folder containing selection.js and selection_filter.js, on /scripts/ folder
+    安装方法:
+    - 在您的代码中"require"此文件，以将新的API函数添加到PlayerResource全局变量
+    - 另外，确保您的游戏脚本custom_net_tables.txt有一个"selection"条目
+    - 最后，确保您的全景UI内容文件夹中正确添加和包含以下文件:
+        selection.xml，以及custom_ui_manifest.xml中的include行，位于layout/custom_game/文件夹
+        selection文件夹，包含selection.js和selection_filter.js，位于/scripts/文件夹
 
-    Usage:
-    - Functions with unit_args can recieve an Entity Index, a NPC Handle, or a table of each type.
-    - Functions with unit can recieve an Entity Index or NPC Handle
+    使用方法:
+    - 带unit_args的函数可以接收实体索引、NPC句柄或每种类型的表
+    - 带unit的函数可以接收实体索引或NPC句柄
 
-    * Create a new selection for the player
+    * 为玩家创建新的选择
         PlayerResource:NewSelection(playerID, unit_args)
 
-    * Add units to the current selection of the player
+    * 向玩家当前选择添加单位
         PlayerResource:AddToSelection(playerID, unit_args)
     
-    * Remove units by index from the player selection group
+    * 从玩家选择组中按索引移除单位
         PlayerResource:RemoveFromSelection(playerID, unit_args)
     
-    * Returns the list of units by entity index that are selected by the player
+    * 返回玩家选择的单位实体索引列表
         PlayerResource:GetSelectedEntities(playerID)
 
-    * Deselect everything, selecting the main hero (which can be redirected to another entity)
+    * 取消选择所有内容，选择主英雄（可以重定向到另一个实体）
         PlayerResource:ResetSelection(playerID)
 
-    * Get the index of the first selected unit of the player
+    * 获取玩家选择的第一个单位的索引
         PlayerResource:GetMainSelectedEntity(playerID)
     
-    * Check if a unit is selected or not by a player, returns bool
+    * 检查单位是否被玩家选择，返回布尔值
         PlayerResource:IsUnitSelected(playerID, unit_args)
 
-    * Force a refresh of the current selection on all players, useful after abilities are removed
+    * 强制刷新所有玩家的当前选择，在移除技能后很有用
         PlayerResource:RefreshSelection()
     
-    * Redirects the selection of the main hero to another entity of choice
+    * 将主英雄的选择重定向到另一个选择的实体
         PlayerResource:SetDefaultSelectionEntity(playerID, unit)
     
-    * Redirects the selection of any entity to another entity of choice
+    * 将任何实体的选择重定向到另一个选择的实体
         hero:SetSelectionOverride(unit)
 
-    * Use -1 to reset to default
+    * 使用-1重置为默认
         PlayerResource:SetDefaultSelectionEntity(playerID, -1)
         hero:SetSelectionOverride(-1)
 
-    Notes:
-    - Enemy units that you don't control can't be added to the selection group of a player
-    - This library requires "libraries/timers.lua" to be present in your vscripts directory.
+    注意:
+    - 您无法控制的敌方单位不能添加到玩家的选择组中
+    - 此库需要"libraries/timers.lua"存在于您的vscripts目录中
 
 --]]
 

@@ -522,10 +522,21 @@ function CommonAI:HandleEnemyPoint_InAoeRange(entity,target,abilityInfo,targetIn
         abilityInfo.castPoint = CommonAI:calculateAdjustedCastPoint(entity, castPosition, abilityInfo.castPoint)
 
     elseif abilityInfo.abilityName == "morphling_waveform" then
-        castPosition = targetInfo.targetPos + targetInfo.targetDirection * 50
-        entity:CastAbilityOnPosition(castPosition, abilityInfo.skill, 0)
-        abilityInfo.castPoint = CommonAI:calculateAdjustedCastPoint(entity, castPosition, abilityInfo.castPoint)
-
+        if self:containsStrategy(self.hero_strategy, "波最远") then
+            local direction = (targetInfo.target:GetOrigin() - entity:GetOrigin()):Normalized()
+            
+            -- 直接朝目标方向施放最大距离
+            local newTargetPos = entity:GetOrigin() + direction * abilityInfo.castRange
+                        
+            entity:CastAbilityOnPosition(newTargetPos, abilityInfo.skill, 0)
+            abilityInfo.castPoint = CommonAI:calculateAdjustedCastPoint(entity, newTargetPos, abilityInfo.castPoint)
+            return true
+        else
+            castPosition = targetInfo.targetPos + targetInfo.targetDirection * 50
+            entity:CastAbilityOnPosition(castPosition, abilityInfo.skill, 0)
+            abilityInfo.castPoint = CommonAI:calculateAdjustedCastPoint(entity, castPosition, abilityInfo.castPoint)
+            return true
+        end
 
     elseif abilityInfo.abilityName == "earth_spirit_stone_caller" then
         local entityPos = entity:GetAbsOrigin()

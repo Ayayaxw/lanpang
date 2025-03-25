@@ -67,6 +67,20 @@ function Precache(context)
     PrecacheResource("particle", "particles/red/teleport_start_ti6_lvl2.vpcf", context)
     PrecacheResource("particle", "particles/econ/items/omniknight/hammer_ti6_immortal/omniknight_purification_ti6_immortal.vpcf", context)
     PrecacheResource("particle", "particles/units/heroes/hero_ringmaster/ringmaster_unicycle_spawn.vpcf", context)
+    PrecacheResource("particle", "particles/neutral_fx/miniboss_shield_dire.vpcf", context)
+    PrecacheResource("particle", "particles/neutral_fx/miniboss_damage_reflect_dire.vpcf", context)
+    PrecacheResource("particle", "particles/neutral_fx/miniboss_dire_damage_impact.vpcf", context)
+    PrecacheResource("particle", "particles/neutral_fx/miniboss_death_dire.vpcf", context)
+
+    PrecacheResource("particle", "particles/neutral_fx/miniboss_shield_radiant.vpcf", context)
+    PrecacheResource("particle", "particles/neutral_fx/miniboss_damage_reflect_radiant.vpcf", context)
+    PrecacheResource("particle", "particles/neutral_fx/miniboss_radiant_damage_impact.vpcf", context)
+    PrecacheResource("particle", "particles/neutral_fx/miniboss_death_radiant.vpcf", context)
+
+    PrecacheResource("model", "models/props_gameplay/divine_sentinel/divine_sentinel_cube.vmdl", context)
+
+
+
     -- 预加载一些基础英雄模型
     PrecacheResource("model", "models/heroes/axe/axe.vmdl", context)
     PrecacheResource("model", "models/heroes/crystal_maiden/crystal_maiden.vmdl", context)

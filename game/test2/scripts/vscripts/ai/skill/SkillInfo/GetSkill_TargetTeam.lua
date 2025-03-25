@@ -26,11 +26,6 @@ end
 
 function CommonAI:GetSkillTargetTeam(skill)
     local abilityName = skill:GetAbilityName()
-    if abilityName == "invoker_sun_strike" then
-        if self.entity:HasScepter() then
-            self.skillTargetTeam["invoker_sun_strike"] = DOTA_UNIT_TARGET_TEAM.FRIENDLY
-        end
-    end
 
     return self.skillTargetTeam[abilityName] or skill:GetAbilityTargetTeam()
 end

@@ -1,0 +1,69 @@
+"DOTAAbilities"
+{
+	"miniboss_unyielding_shield_custom"
+	{
+		// General
+		//-------------------------------------------------------------------------------------------------------------
+		"BaseClass"						"ability_lua"
+		"ScriptFile"					"components/tormentor/abilities/miniboss_unyielding_shield.lua"
+		"AbilityTextureName"			"miniboss_unyielding_shield"
+		"MaxLevel"						"1"
+		"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_PASSIVE"
+		"AbilityType"					"DOTA_ABILITY_TYPE_BASIC"
+
+		// Special
+		//-------------------------------------------------------------------------------------------------------------
+		"AbilityValues"
+		{
+			"damage_absorb"				"3100"
+			"absorb_bonus_per_death"	"0"
+			"regen_per_second"			"330"
+			"regen_bonus_per_death"		"0"
+			"min_armor"                 "0"
+		}
+	}
+
+	"miniboss_reflect_custom"
+	{
+		// General
+		//-------------------------------------------------------------------------------------------------------------
+		"BaseClass"						"ability_lua"
+		"ScriptFile"					"components/tormentor/abilities/miniboss_reflect.lua"
+		"AbilityTextureName"			"miniboss_reflect"
+		"MaxLevel"						"1"
+		"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_PASSIVE"
+		"AbilityType"					"DOTA_ABILITY_TYPE_BASIC"
+
+		// Special
+		//-------------------------------------------------------------------------------------------------------------
+		"AbilityValues"
+		{
+			"passive_reflection_pct"				"170"
+			"passive_reflection_bonus_per_death"	"0"
+
+			"radius"								"9999" // This for some reason is not in the original ability
+			"illusion_damage_pct"					"200" // This for some reason is not in the original ability
+		}
+	}
+
+	"miniboss_radiance_custom"
+	{
+		// General
+		//-------------------------------------------------------------------------------------------------------------
+		"BaseClass"                     "ability_lua"
+		"ScriptFile"                    "components/tormentor/abilities/miniboss_radiance.lua"
+		"AbilityTextureName"            "miniboss_radiance"
+		"MaxLevel"                      "1"
+		"AbilityBehavior"               "DOTA_ABILITY_BEHAVIOR_PASSIVE"
+		"AbilityType"                   "DOTA_ABILITY_TYPE_BASIC"
+
+		// Special
+		//-------------------------------------------------------------------------------------------------------------
+		"AbilityValues"
+		{
+			"aura_radius"			"1000"
+			"aura_damage"			"60"
+			"aura_interval"			"0.2"
+		}
+	}
+}

@@ -340,6 +340,15 @@ function table.deepcopy(orig)
     end
     return copy
 end
+-- 辅助函数：检查技能是否在表中
+function table.contains(table, element)
+    for _, value in pairs(table) do
+        if value == element then
+            return true
+        end
+    end
+    return false
+end
 
 
 
@@ -599,6 +608,8 @@ function Main:OnRequestUnitInfo(event)
     local unitEntIndex = event.unit_ent_index
     local unit = EntIndexToHScript(unitEntIndex)
 
+    --打印坐标
+    print(string.format("【单位坐标】%s 当前坐标：X=%.2f, Y=%.2f, Z=%.2f", unit:GetUnitName(), unit:GetAbsOrigin().x, unit:GetAbsOrigin().y, unit:GetAbsOrigin().z))
     --打印是否是幻象
     if unit:IsIllusion() then
         print(string.format("【单位】%s 是幻象", unit:GetUnitName()))
@@ -751,7 +762,42 @@ function Main:OnFogToggled(keys)
 
 end
 
+function Main:UpgradeNeutralCreep(unit, stack_count)
+    if not unit or not IsValidEntity(unit) then
+        return
+    end
 
+    -- 移除原有的Neutral Upgrade技能
+    if unit:HasAbility("neutral_upgrade") then
+        unit:RemoveAbility("neutral_upgrade")
+    end
+
+    -- 添加自定义升级修饰符
+    unit:AddNewModifier(unit, nil, "modifier_custom_neutral_upgrade", {stack_count = stack_count})
+
+    -- 计算应该提升的技能等级
+    local ability_level_increase = 0
+    if stack_count >= 4 then
+        ability_level_increase = 2      -- 升至3级
+    elseif stack_count >= 2 then
+        ability_level_increase = 1      -- 升至2级
+    end
+
+    -- 如果需要提升等级
+    if ability_level_increase > 0 then
+        -- 遍历单位的所有技能
+        for i = 0, unit:GetAbilityCount() - 1 do
+            local ability = unit:GetAbilityByIndex(i)
+            if ability and not ability:IsHidden() then
+                -- 获取当前等级
+                local current_level = ability:GetLevel()
+                -- 设置新等级（最高3级）
+                local new_level = math.min(current_level + ability_level_increase, 3)
+                ability:SetLevel(new_level)
+            end
+        end
+    end
+end
 
 function Main:ExecuteOrderFilter(filterTable)
     print("\n========== 指令执行开始 ==========")

@@ -3102,7 +3102,19 @@ HeroSkillConditions = {
         },
         ["invoker_sun_strike"] = {
             function(self, caster, log)
-                return self:NeedsModifierRefresh(self.target, {"modifier_invoker_deafening_blast_knockback"}, 1.2) and self:NeedsModifierRefresh(self.target, {"modifier_invoker_tornado"}, 1.6)
+                -- 默认行为（非英雄目标）
+                if not self.target:IsHero() then
+                    self.skillBehavior["invoker_sun_strike"] = DOTA_ABILITY_BEHAVIOR.POINT
+                    self.skillTargetTeam["invoker_sun_strike"] = DOTA_UNIT_TARGET_TEAM.ENEMY
+                -- 英雄目标且拥有神杖
+                elseif self.target:IsHero() and caster:HasScepter() then
+                    self.skillBehavior["invoker_sun_strike"] = DOTA_ABILITY_BEHAVIOR.UNIT_TARGET
+                    self.skillTargetTeam["invoker_sun_strike"] = DOTA_UNIT_TARGET_TEAM.FRIENDLY
+                end
+                
+                -- 原有的 modifier 刷新检查
+                return self:NeedsModifierRefresh(self.target, {"modifier_invoker_deafening_blast_knockback"}, 1.2) 
+                       and self:NeedsModifierRefresh(self.target, {"modifier_invoker_tornado"}, 1.6)
             end
         },
     },
@@ -3514,6 +3526,13 @@ HeroSkillConditions = {
     },
 
     ["npc_dota_hero_kez"] = {
+        ["kez_falcon_rush"] = {
+            function(self, caster, log)
+                return self:NeedsModifierRefresh(caster, {"modifier_kez_falcon_rush"}, 0.5)
+            end
+        },
+
+
         ["kez_echo_slash"] = {
             function(self, caster, log)
                 -- 获取施法者到目标的方向向量
@@ -3533,6 +3552,9 @@ HeroSkillConditions = {
         },
         ["kez_shodo_sai_parry_cancel"] = {
             function(self, caster, log)
+                if self:containsStrategy(self.hero_strategy, "招架秒取消") then
+                    return true
+                end
                 return not self:IsNotUnderModifiers(self.target,{"modifier_bashed"}, log)
             end
         },
@@ -5172,6 +5194,11 @@ HeroSkillConditions = {
     ["npc_dota_hero_alchemist"] = {
         ["alchemist_chemical_rage"] = {
             function(self, caster, log)
+
+                if not self:NeedsModifierRefresh(caster, {"modifier_alchemist_chemical_rage"}, 0.5) then
+                    return false
+                end
+
                 if self:containsStrategy(self.hero_strategy, "半血开大") then
                     return caster:GetHealthPercent()<50
                 elseif self:containsStrategy(self.hero_strategy, "残血开大") then
@@ -5184,7 +5211,12 @@ HeroSkillConditions = {
         ["alchemist_unstable_concoction"] = {
             function(self, caster, log)
                 -- 记录技能释放时间
+                --对手不是英雄单位，直接false
+
                 self.concoction_start_time = GameRules:GetGameTime()
+                if not self.target:IsHero() then
+                    return false
+                end
                 return true
             end
         },

@@ -12,7 +12,7 @@ function Main:Init_TestMode(event, playerID)
                 hero:AddNewModifier(hero, nil, "modifier_item_aghanims_shard", {})
                 hero:AddNewModifier(hero, nil, "modifier_item_ultimate_scepter_consumed", {})
                 HeroMaxLevel(hero)
-                
+
                 -- -- 添加投影技能
                 -- hero:AddAbility("dazzle_nothl_projection")
                 -- -- 获取技能引用

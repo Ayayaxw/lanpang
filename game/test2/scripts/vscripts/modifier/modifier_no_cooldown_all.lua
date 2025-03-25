@@ -67,12 +67,3 @@ end
 
 
 
--- 辅助函数：检查技能是否在表中
-function table.contains(table, element)
-    for _, value in pairs(table) do
-        if value == element then
-            return true
-        end
-    end
-    return false
-end

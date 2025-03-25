@@ -40,6 +40,8 @@ require("ai/skill/SkillInfo/GetSkill_HighPrioritySkills")
 require("ai/skill/SkillInfo/GetSkill_MediumPrioritySkills")
 require("ai/skill/SkillInfo/GetSkill_TargetTeam")
 require("ai/skill/SkillInfo/GetSkill_SelfCastSkill")
+require("ai/skill/SkillInfo/GetSkill_Behavior")
+
 require("ai/skill/SkillInfo/Get_DodgableSkills")
 require("ai/skill/SkillInfo/Get_DodgeSkills")
 
@@ -70,6 +72,7 @@ function CommonAI:constructor(entity, overallStrategy, heroStrategy, thinkInterv
     self:Ini_SkillTargetTeam()
     self:Init_DodgableSkills()
     self:Init_DodgeSkills()
+    self:Ini_SkillBehavior()
     self.toggleItems = {}
     self.autoCastItems = {}
     self.autoCastSkills = {}
@@ -136,7 +139,7 @@ function CommonAI:Think(entity)
     -- 英雄死亡继续循环，但不执行后续AI逻辑
     if not entity:IsAlive() then
         self:log("[AI] 英雄已死亡，等待复活 - 英雄: " .. entity:GetName())
-        return 1  -- 1秒后继续检查
+        return 0.5  -- 1秒后继续检查
     end
 
     self.shouldturn = nil
@@ -1010,7 +1013,7 @@ end
 
 function CommonAI:HandlePointTargetAbility(entity, abilityInfo, target, targetInfo)
     if abilityInfo.targetTeam ~= DOTA_UNIT_TARGET_TEAM_FRIENDLY then
-        local totalRange = self:GetSkillRangeThreshold(abilityInfo.skill, entity, abilityInfo.aoeRadius)
+        local totalRange = self:GetSkillRangeThreshold(abilityInfo.skill, entity, abilityInfo.castRange)
         if self:IsInRange(target, totalRange) then
             -- 敌人在施法范围内
             self:HandleEnemyPoint_InCastRange(entity, target, abilityInfo, targetInfo)
@@ -1338,6 +1341,8 @@ function CommonAI:HandleAttack(target, abilityInfo, targetInfo)
         return self.nextThinkTime
     end
 
+
+    
 
     -- 检查是否是维萨吉魔像且启用了小鸟挡箭策略
     if string.find(self.entity:GetUnitName(), "npc_dota_visage_familiar") and 

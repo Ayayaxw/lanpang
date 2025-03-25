@@ -77,7 +77,7 @@ function CommonAI:HandleEnemyPoint_InCastRange(entity,target,abilityInfo,targetI
                 castPosition = targetInfo.targetPos
             end
             
-            self:log(string.format("在施法距离+作用范围内，准备施放技能: %s，目标距离: %.2f，施法距离: %.2f，作用范围: %.2f", abilityInfo.abilityName, targetInfo.distance, abilityInfo.castRange, abilityInfo.aoeRadius))
+            self:log(string.format("在施法距离+作用范围内，3准备施放技能: %s，目标距离: %.2f，施法距离: %.2f，作用范围: %.2f", abilityInfo.abilityName, targetInfo.distance, abilityInfo.castRange, abilityInfo.aoeRadius))
             self:log(string.format("施法位置: %s", tostring(castPosition)))
             
             -- 施放技能
@@ -135,7 +135,7 @@ function CommonAI:HandleEnemyPoint_InCastRange(entity,target,abilityInfo,targetI
                 
                 local castPosition = targetInfo.targetPos + targetInfo.targetDirection * distance
                         
-                self:log(string.format("在施法距离+作用范围内，准备施放技能: %s，目标距离: %.2f，施法距离: %.2f，作用范围: %.2f", abilityInfo.abilityName, targetInfo.distance, abilityInfo.castRange, abilityInfo.aoeRadius))
+                self:log(string.format("在施法距离+作用范围内，2准备施放技能: %s，目标距离: %.2f，施法距离: %.2f，作用范围: %.2f", abilityInfo.abilityName, targetInfo.distance, abilityInfo.castRange, abilityInfo.aoeRadius))
                 self:log(string.format("施法位置: %s", tostring(castPosition)))
                             
                 -- 施放技能
@@ -770,7 +770,7 @@ function CommonAI:HandleEnemyPoint_InCastRange(entity,target,abilityInfo,targetI
             end
         end
     
-        self:log(string.format("在施法距离+作用范围内，准备施放技能: %s，目标距离: %.2f，施法距离: %.2f，作用范围: %.2f", 
+        self:log(string.format("在施法距离+作用范围内，1准备施放技能: %s，目标距离: %.2f，施法距离: %.2f，作用范围: %.2f", 
             abilityInfo.abilityName, targetInfo.distance, abilityInfo.castRange, abilityInfo.aoeRadius))
         self:log(string.format("施法位置: %s", tostring(castPosition)))
     

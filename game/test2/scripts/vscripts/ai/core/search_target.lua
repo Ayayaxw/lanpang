@@ -467,7 +467,7 @@ function CommonAI:FindBestAllyHeroTarget(entity, ability, requiredModifiers, min
     allowIllusions = allowIllusions or false  -- 新增参数默认值
 
     -- 获取技能行为和施法距离
-    local behavior = self:GetAbilityBehavior(ability, 0, 0)
+    local behavior = self:GetSkill_Behavior(ability, 0, 0)
     local isTargetAbility = (bit.band(behavior, DOTA_ABILITY_BEHAVIOR.UNIT_TARGET) ~= 0)
     local castRange = self:GetSkillCastRange(entity, ability)
     local searchRadius = 0
@@ -700,7 +700,7 @@ function CommonAI:FindBestEnemyHeroTarget(entity, ability, requiredModifiers, mi
     end
 
     -- 获取技能行为和施法距离
-    local behavior = self:GetAbilityBehavior(ability, 0, 0)
+    local behavior = self:GetSkill_Behavior(ability, 0, 0)
     local isTargetAbility = (bit.band(behavior, DOTA_ABILITY_BEHAVIOR.UNIT_TARGET) ~= 0)
     local castRange = self:GetSkillCastRange(entity, ability)
     local searchRadius = 0

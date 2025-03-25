@@ -1,6 +1,8 @@
 // Dota Heroes File
 
 #base "abilities/roshan.txt"
+#base "abilities/tormentor.txt"
+
 
 "DOTAAbilities"
 {

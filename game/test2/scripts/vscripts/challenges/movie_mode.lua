@@ -58,15 +58,112 @@ function Main:Init_movie_mode(heroName, heroFacet,playerID, heroChineseName)
     -- CreateParentHeroesWithFacets(function(allHeroes)
     --DisplayHeroes()
     --SpawnAllNeutralCreeps1()
+    SpawnMultipleMinibosses()
+    local creepUnit = CreateUnitByName("npc_dota_miniboss_custom", Main.largeSpawnCenter, true, nil, nil, DOTA_TEAM_BADGUYS)
+    --玩家控制
+    creepUnit:SetControllableByPlayer(0, true)
     --CreateOgreMagi()
     --CreateMaxLevelHeroes()
     -- end)
 -- 使用函数
-local referee = CreateUnitByName("caipan", Vector(0, 0, 0), true, nil, nil, DOTA_TEAM_BADGUYS)
-ShowAnimations(referee)
+    -- local referee = CreateUnitByName("caipan", Vector(0, 0, 0), true, nil, nil, DOTA_TEAM_BADGUYS)
+    -- ShowAnimations(referee)
         --Main:PreSpawnGolem_Golem_vs_Heroes()
 
 end
+function SpawnMultipleMinibosses()
+    -- 专注于受击和闲置动画的列表，使用字符串名称来避免nil索引问题
+    local animations = {
+        { id = ACT_DOTA_IDLE, name = "基础闲置" },
+        { id = ACT_DOTA_IDLE_RARE, name = "稀有闲置动作" },
+        { id = ACT_DOTA_IDLE_IMPATIENT, name = "不耐烦闲置" },
+        { id = ACT_DOTA_STUN, name = "眩晕" },
+        { id = ACT_DOTA_DISABLED, name = "被禁用状态" },
+        { id = ACT_DOTA_HURT, name = "受伤" },
+        { id = ACT_DOTA_FLINCH, name = "畏缩" },
+        { id = ACT_DOTA_FLAIL, name = "剧烈挣扎" },
+        { id = ACT_DOTA_STUNNED, name = "被眩晕" },
+        { id = ACT_DOTA_DEFEAT, name = "战败" }
+    }
+    
+    -- 位置名称
+    local positionNames = {
+        "位置1(最左)",
+        "位置2",
+        "位置3",
+        "位置4",
+        "位置5(中间)",
+        "位置6",
+        "位置7",
+        "位置8",
+        "位置9",
+        "位置10(最右)"
+    }
+    
+    local minibosses = {}
+    local spawnCount = #animations  -- 生成和动画数量一样多的单位
+    
+    print("\n========== 动画测试单位分布 ==========")
+    print("基准位置: X=" .. Main.largeSpawnCenter.x .. ", Y=" .. Main.largeSpawnCenter.y)
+    print("从左到右一字排开，每个单位执行不同动画:\n")
+    
+    -- 计算整个队列的总宽度
+    local totalWidth = 150 * (spawnCount - 1)  -- 单位间距为150
+    local startX = Main.largeSpawnCenter.x - totalWidth / 2  -- 最左侧的X坐标
+    
+    -- 创建与动画数量相同的单位，每个单位播放一个固定动画
+    for i = 1, spawnCount do
+        -- 从左到右排列单位
+        local posX = startX + (i-1) * 150  -- 每个单位间隔150单位
+        local posY = Main.largeSpawnCenter.y
+        local spawnPos = Vector(posX, posY, Main.largeSpawnCenter.z)
+        
+        -- 获取当前动画信息
+        local currentAnimation = animations[i]
+        local animID = currentAnimation.id or 0
+        local animName = currentAnimation.name or "未知动画"
+        local position = positionNames[i] or "未知位置"
+        
+        -- 打印详细的位置和动画信息
+        print(i .. ". " .. position .. ": 动画=" .. animName .. " (ID=" .. tostring(animID) .. ")")
+        
+        local creepUnit = CreateUnitByName("npc_dota_miniboss_custom", spawnPos, true, nil, nil, DOTA_TEAM_BADGUYS)
+        if creepUnit then
+            -- 存储单位引用
+            minibosses[i] = creepUnit
+            
+            -- 指定该单位固定播放哪个动画
+            creepUnit.animationToPlay = animID
+            creepUnit.position = position
+            creepUnit.animName = animName
+            
+            -- 让所有单位面向同一方向
+            creepUnit:SetForwardVector(Vector(0, 1, 0))  -- 面向Y轴正方向
+        else
+            print("警告: 在 " .. position .. " 创建单位失败")
+        end
+    end
+    
+    print("\n========================================\n")
+    
+    -- 设置一个定时器，让这些单位不断重复播放各自的动画
+    Timers:CreateTimer(function()
+        for i, miniboss in pairs(minibosses) do
+            if miniboss and not miniboss:IsNull() and miniboss:IsAlive() then
+                -- 先移除之前的动画
+                if miniboss.animationToPlay and miniboss.animationToPlay ~= 0 then
+                    miniboss:RemoveGesture(miniboss.animationToPlay)
+                    -- 重新播放该单位的固定动画
+                    miniboss:StartGesture(miniboss.animationToPlay)
+                end
+            end
+        end
+        
+        -- 每3秒重新播放一次动画
+        return 3.0
+    end)
+end
+
 
 
 -- 创建一个函数来顺序展示多个动作

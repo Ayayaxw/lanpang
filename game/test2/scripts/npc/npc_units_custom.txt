@@ -1,4 +1,7 @@
 // 单位文件
+
+#base "units/npc_dota_miniboss_custom.txt"
+
 "DOTAUnits"
 {
 	"Version"	"1"

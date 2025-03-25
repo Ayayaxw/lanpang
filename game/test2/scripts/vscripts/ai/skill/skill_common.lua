@@ -1,4 +1,4 @@
-local DOTA_UNIT_TARGET = {
+DOTA_UNIT_TARGET = {
     NONE = 0,
     HERO = 1,
     CREEP = 2,
@@ -20,7 +20,7 @@ DOTA_UNIT_TARGET_TEAM = {
     BOTH = 3,
     CUSTOM = 4
 }
-local DOTA_ABILITY_BEHAVIOR = {
+DOTA_ABILITY_BEHAVIOR = {
     LAST_RESORT_POINT = -2147483648,
     NONE = 0,
     HIDDEN = 1,
@@ -62,7 +62,7 @@ function CommonAI:GetAbilityInfo(skill, castRange, aoeRadius)
     
     local targetTeam = self:GetSkillTargetTeam(skill)
     local distance = self.target and (self.target:GetAbsOrigin() - self.entity:GetAbsOrigin()):Length2D() or 0
-    local finalAbilityBehavior = self:GetAbilityBehavior(skill, distance, aoeRadius)
+    local finalAbilityBehavior = self:GetSkill_Behavior(skill, distance, aoeRadius)
 
     -- 获取正确的channelTime
     local channelTime = self:getChannelTime(skill)
@@ -132,95 +132,6 @@ function CommonAI:GetAbilityInfo(skill, castRange, aoeRadius)
     return info
 end
 
-function CommonAI:GetAbilityBehavior(skill, distance, aoeRadius)
-    local abilityName = skill:GetAbilityName()
-    local abilityBehavior = skill:GetBehavior()
-
-    -- 定义常量
-    local abilityBehaviorOverrides = {
-        riki_tricks_of_the_trade = DOTA_ABILITY_BEHAVIOR.POINT,
-        warlock_upheaval = DOTA_ABILITY_BEHAVIOR.POINT,
-        death_prophet_carrion_swarm = DOTA_ABILITY_BEHAVIOR.POINT,
-        sandking_burrowstrike = DOTA_ABILITY_BEHAVIOR.POINT,
-        venomancer_plague_ward = DOTA_ABILITY_BEHAVIOR.POINT,
-        earthshaker_enchant_totem = DOTA_ABILITY_BEHAVIOR.POINT,
-        abyssal_underlord_firestorm = DOTA_ABILITY_BEHAVIOR.POINT,
-        undying_tombstone = DOTA_ABILITY_BEHAVIOR.POINT,
-
-        phoenix_supernova = DOTA_ABILITY_BEHAVIOR.NO_TARGET,
-        invoker_deafening_blast = DOTA_ABILITY_BEHAVIOR.NO_TARGET,
-        luna_eclipse = DOTA_ABILITY_BEHAVIOR.POINT,
-        earth_spirit_geomagnetic_grip = DOTA_ABILITY_BEHAVIOR.POINT,
-        phoenix_icarus_dive = DOTA_ABILITY_BEHAVIOR.POINT,
-        dragon_knight_breathe_fire = DOTA_ABILITY_BEHAVIOR.POINT,
-        jakiro_dual_breath = DOTA_ABILITY_BEHAVIOR.POINT,
-
-        furion_wrath_of_nature = DOTA_ABILITY_BEHAVIOR.UNIT_TARGET,
-        dawnbreaker_solar_guardian = DOTA_ABILITY_BEHAVIOR.UNIT_TARGET,
-    }
-
-    -- 检查ES跳距离并修改behavior
-    local finalAbilityBehavior = abilityBehaviorOverrides[abilityName] or abilityBehavior
-
-    if abilityName == "phoenix_supernova" and self.Ally and self.entity:HasScepter() then
-        finalAbilityBehavior = DOTA_ABILITY_BEHAVIOR.UNIT_TARGET
-    end
-
-    if abilityName == "invoker_sun_strike" and self.entity:HasScepter() then
-        finalAbilityBehavior = DOTA_ABILITY_BEHAVIOR.UNIT_TARGET
-    end
-
-    if abilityName == "tidehunter_gush" and self.Ally and self.entity:HasScepter() then
-        finalAbilityBehavior = DOTA_ABILITY_BEHAVIOR.POINT
-    end
-
-
-    -- 只有当前技能是ES图腾时才检查
-    if abilityName == "earthshaker_enchant_totem" then
-
-        if distance < aoeRadius or self:containsStrategy(self.hero_strategy, "边走边图腾") then
-            print("施法距离够了")
-            finalAbilityBehavior = DOTA_ABILITY_BEHAVIOR.UNIT_TARGET
-        elseif self:containsStrategy(self.hero_strategy, "原地图腾") then
-            finalAbilityBehavior = DOTA_ABILITY_BEHAVIOR.UNIT_TARGET
-        else
-            print("图腾起飞")
-            finalAbilityBehavior = DOTA_ABILITY_BEHAVIOR.POINT
-        end
-
-    end
-
-    -- 只有当前技能是火雨时才检查
-    if abilityName == "abyssal_underlord_firestorm" then
-        if self:containsStrategy(self.hero_strategy, "对自己放火雨") then
-            finalAbilityBehavior = DOTA_ABILITY_BEHAVIOR.TARGET
-        end
-    end
-
-    -- 只有当前技能是松鼠技能时才检查
-    if abilityName == "hoodwink_acorn_shot" then
-        if self:containsStrategy(self.hero_strategy, "对地板放栗子") then
-            finalAbilityBehavior = DOTA_ABILITY_BEHAVIOR.POINT
-        end
-    end
-
-    -- 只有当前技能是树人技能时才检查
-    if abilityName == "treant_leech_seed" then
-        if self:containsStrategy(self.global_strategy, "防守策略") then
-            finalAbilityBehavior = DOTA_ABILITY_BEHAVIOR.POINT
-        end
-    end
-
-    -- 检查是否为 disruptor_thunder_strike
-    if abilityName == "disruptor_thunder_strike" then
-        local caster = skill:GetCaster()
-        if caster:HasModifier("modifier_item_aghanims_shard") then
-            finalAbilityBehavior = DOTA_ABILITY_BEHAVIOR.POINT
-        end
-    end
-
-    return finalAbilityBehavior
-end
 
 function CommonAI:getChannelTime(skill)
     local channelTime = skill:GetChannelTime()

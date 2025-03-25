@@ -55,6 +55,9 @@ function modifier_kv_editor:GetModifierOverrideAbilitySpecial(params)
     if hero_name:find("npc_dota_brewmaster_") then
         hero_name = "npc_dota_hero_brewmaster" -- 使用熊猫酒仙的英雄名
     end
+    if hero_name:find("caipan") then
+        hero_name = "npc_dota_hero_faceless_void" -- 使用熊猫酒仙的英雄名
+    end
     
     local ability_index = hero_name .. "_" .. ability_name
     
@@ -94,6 +97,10 @@ function modifier_kv_editor:GetModifierOverrideAbilitySpecialValue(params)
     if hero_name:find("npc_dota_brewmaster_") then
         is_brew_spirit = true
         hero_name = "npc_dota_hero_brewmaster" -- 使用熊猫酒仙的英雄名
+    end
+    if hero_name:find("caipan") then
+        is_brew_spirit = true
+        hero_name = "npc_dota_hero_faceless_void" -- 使用熊猫酒仙的英雄名
     end
 
     local ability_index = hero_name .. "_" .. ability_name

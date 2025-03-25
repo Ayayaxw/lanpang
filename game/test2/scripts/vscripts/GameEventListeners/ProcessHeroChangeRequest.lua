@@ -146,7 +146,7 @@ function Main:DeleteCurrentArenaHeroes()
             end
             Timers:CreateTimer(0.1, function()
                 if hero:IsHero() and not hero:IsClone() and hero:GetPlayerOwner() then
-                    UTIL_Remove(hero)
+                    
                     DisconnectClient(playerID, true)
                 else
                     UTIL_Remove(hero)
@@ -275,8 +275,8 @@ end
 
 
 function Main:ClearAllUnitsExcept()
-    local exceptName = "caipan"
-    print("开始清理全图所有单位和物品，除了名字为 '" .. exceptName .. "' 的单位")
+    local exceptModifier = "modifier_caipan"
+    print("开始清理全图所有单位和物品，除了拥有 '" .. exceptModifier .. "' 修饰器的单位")
 
     local allFlags = DOTA_UNIT_TARGET_FLAG_NONE + 
                      DOTA_UNIT_TARGET_FLAG_DEAD +
@@ -310,7 +310,7 @@ function Main:ClearAllUnitsExcept()
     )
 
     for _, unit in pairs(allUnits) do
-        if unit and IsValidEntity(unit) and unit:GetUnitName() ~= exceptName then
+        if unit and IsValidEntity(unit) and not unit:HasModifier(exceptModifier) then
             print("正在移除单位: " .. unit:GetUnitName())
             
             if unit:IsHero() then

@@ -42,6 +42,7 @@ require("challenges/Golem_100")
 require("challenges/Mine_Challenge")
 require("challenges/Skill_Probability_100")
 require("challenges/Golem_vs_Heroes")
+require("challenges/Creep_10_Wave")
 
 
 Main.Challenges = {}
@@ -130,7 +131,7 @@ Main.GameModes = {
         code = 0012,
         name = "灵魂出窍生存",
         menuConfig = {"SelfHeroRow"},
-        category = "single"
+        category = "test"
     },
 
     -- Creep Challenge modes (1000-1999)
@@ -365,6 +366,14 @@ Main.GameModes = {
         id = "Golem_vs_Heroes",
         code = 3018,
         name = "地狱火大战英雄",
+        menuConfig = {"SelfHeroRow"},
+        category = "single"
+    },
+
+    {
+        id = "Creep_10_Wave",
+        code = 3019,
+        name = "拉了10波野",
         menuConfig = {"SelfHeroRow"},
         category = "single"
     },
@@ -663,6 +672,10 @@ function Main:RequestStrategyData()
             },
         },
         npc_dota_hero_kez = {  -- 凯
+            {
+                name = "招架秒取消",
+                id = "parry_cancel"
+            },
             {
                 name = "禁用隐身大招",
                 id = "disable_invisible_ultimate"

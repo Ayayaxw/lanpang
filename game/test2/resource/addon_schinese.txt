@@ -1,6 +1,7 @@
 "lang" {
 	"Language" "SChinese"
 	"Tokens" {
+		"npc_dota_miniboss_custom" "自定义魔方"
 		"caipan" "裁判"
 		"luosi" "螺丝"
 		"sniper" "狙击手"

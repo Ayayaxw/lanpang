@@ -39,6 +39,9 @@ require("hero_chaos")
 require("sandbox") 
 
 
+require('components/tormentor/init')
+
+
 LinkLuaModifier("modifier_judu", "modifier/judu.lua", LUA_MODIFIER_MOTION_NONE)
 LinkLuaModifier("modifier_full_restore", "modifier/modifier_full_restore.lua", LUA_MODIFIER_MOTION_NONE)
 LinkLuaModifier("modifier_naibangren", "modifier/naibangren.lua", LUA_MODIFIER_MOTION_NONE)
@@ -91,3 +94,4 @@ LinkLuaModifier("modifier_anti_invisible", "modifier/modifier_anti_invisible.lua
 LinkLuaModifier("modifier_attack_auto_cast_ability", "modifier/modifier_attack_auto_cast_ability.lua", LUA_MODIFIER_MOTION_NONE)
 LinkLuaModifier("modifier_reset_passive_ability_cooldown", "modifier/modifier_reset_passive_ability_cooldown.lua", LUA_MODIFIER_MOTION_NONE)
 LinkLuaModifier("modifier_extra_health_bonus", "modifier/modifier_extra_health_bonus.lua", LUA_MODIFIER_MOTION_NONE)
+LinkLuaModifier("modifier_custom_neutral_upgrade", "modifier/modifier_custom_neutral_upgrade.lua", LUA_MODIFIER_MOTION_NONE)

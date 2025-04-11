@@ -153,6 +153,15 @@ Main.GameModes = {
         menuConfig = {"SelfHeroRow", "OpponentHeroRow"},
         category = "test"
     },
+    
+    {
+        id = "Escape_Bandits",
+        code = 0022,
+        name = "逃离强盗",
+        menuConfig = {"SelfHeroRow"},
+        category = "test"
+    },
+
 
 
 
@@ -415,14 +424,6 @@ Main.GameModes = {
         id = "CreepChallenge_100percent",
         code = 3021,
         name = "技能百分百大战熊猫",
-        menuConfig = {"SelfHeroRow"},
-        category = "single"
-    },
-
-    {
-        id = "Escape_Bandits",
-        code = 3022,
-        name = "逃离强盗",
         menuConfig = {"SelfHeroRow"},
         category = "single"
     },

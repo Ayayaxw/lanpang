@@ -1,4 +1,3 @@
-
 function Main:Init_TestMode(event, playerID)
     -- 技能修改器
 
@@ -7,35 +6,31 @@ function Main:Init_TestMode(event, playerID)
     self.HERO_CONFIG = {
         ALL = {
             function(hero)
-                hero:AddNewModifier(hero, nil, "modifier_kv_editor", {})
-                hero:AddNewModifier(hero, nil, "modifier_rooted", {duration = 5})
+
+                HeroMaxLevel(hero)
                 hero:AddNewModifier(hero, nil, "modifier_item_aghanims_shard", {})
                 hero:AddNewModifier(hero, nil, "modifier_item_ultimate_scepter_consumed", {})
-                HeroMaxLevel(hero)
+                
+                --如果英雄是npc_dota_hero_tidehunter，给他modifier
+                -- if hero:GetUnitName() == "npc_dota_hero_tidehunter" then
+                --     hero:AddNewModifier(hero, nil, "modifier_attack_auto_cast_ability", {ability_index = 2})
+                --     hero:RemoveAbility("special_bonus_unique_tidehunter_8")
+                -- end
 
-                -- -- 添加投影技能
-                -- hero:AddAbility("dazzle_nothl_projection")
-                -- -- 获取技能引用
-                -- local ability = hero:FindAbilityByName("dazzle_nothl_projection")
-                -- -- 升级到3级
-                -- ability:SetLevel(3)
-            
-                -- -- 创建定时器每秒释放技能
-                -- Timers:CreateTimer(function()
-                --     if not hero:IsAlive() then return nil end
-                    
-                --     -- 获取英雄朝向的前方500码位置
-                --     local forward = hero:GetForwardVector()
-                --     local target_pos = hero:GetAbsOrigin() + forward * 500
-                    
-                --     -- 设置施法位置并释放技能
-                --     hero:SetCursorPosition(target_pos)
-                --     ability:OnSpellStart()
-                    
-                --     return 1.0 -- 1秒后重复
-                -- end)
+                -- --如果英雄是npc_dota_hero_doom_bringer，给他modifier
+                -- if hero:GetUnitName() == "npc_dota_hero_doom_bringer" then
+                --     hero:AddNewModifier(hero, nil, "modifier_reset_passive_ability_cooldown", {})
+                -- end
+
+                -- --如果英雄是npc_dota_hero_naga_siren，给他modifier
+                -- if hero:GetUnitName() == "npc_dota_hero_naga_siren" then
+                --     hero:RemoveAbility("naga_siren_eelskin")
+
+                --     hero:AddAbility("naga_siren_eelskin")
+
+                -- end
             end,
-        },
+        },  
         FRIENDLY = {
             function(hero)
                 hero:SetForwardVector(Vector(1, 0, 0))
@@ -52,10 +47,106 @@ function Main:Init_TestMode(event, playerID)
         ,
         BATTLEFIELD = {
             function(hero)
-                --hero:AddNewModifier(hero, nil, "modifier_auto_elevation_small", {})
+
+                
+
+                if hero:GetUnitName() == "npc_dota_hero_naga_siren" then
+                    hero:RemoveAbility("naga_siren_eelskin")
+
+                    hero:AddAbility("naga_siren_eelskin")
+
+                end
             end,
         }
     }
+    self:StandardizeAbilityPercentages()
+    local ability_modifiers = {
+        npc_dota_hero_phantom_assassin = {
+            phantom_assassin_coup_de_grace = {
+                AbilityValues = {
+                    crit_chance = {
+                        value = 100
+                    },
+                    dagger_crit_chance = {
+                        value = 100
+                    },
+                    attacks_to_proc = {
+                        value = 0
+                    },
+                    attacks_to_proc_creeps = {
+                        value = 0
+                    },
+                    crit_bonus = {
+                        value = 1000
+                    },
+
+                }
+            },
+        },
+
+        npc_dota_hero_omniknight = {
+            omniknight_purification = {
+                AbilityValues = {
+                    recast_effectiveness_pct = {
+                        special_bonus_shard = 100
+                    }
+                }
+            },
+            omniknight_degen_aura = {
+                AbilityValues = {
+                    bonus_damage_per_stack = {
+                        special_bonus_facet_omniknight_omnipresent = 100
+                    }
+                }
+            }
+        },
+
+
+        npc_dota_hero_magnataur = {
+            magnataur_empower = {
+                AbilityValues = {
+                    bonus_damage_pct=
+                    {
+                        value = 100,
+                        special_bonus_unique_magnus_2 = 100
+                    },
+                    cleave_damage_pct=
+                    {
+                        value = 100,
+                        special_bonus_unique_magnus_2 = 100
+                    },
+
+
+                    self_multiplier_bonus_max_stacks = {
+                        value = 100
+                    },
+                    self_multiplier_bonus_per_stack = {
+                        value = 100
+                    }
+                }
+            }
+        },
+
+        -- npc_dota_hero_shredder = {
+        --     shredder_whirling_death = {
+        --         AbilityValues = {
+        --             stat_loss_universal =
+        --             {
+        --                 value = 100,
+        --                 special_bonus_unique_timbersaw_5 = 100
+        --             },
+        --             stat_loss_pct=
+        --             {
+        --                 value = 100,
+        --                 special_bonus_unique_timbersaw_5 = 100
+        --             }
+        --         }
+        --     }
+        -- }
+
+
+    }
+    self:UpdateAbilityModifiers(ability_modifiers)
 
     -- 从 event 中获取新的数据
     local selfHeroId = event.selfHeroId or -1
@@ -70,6 +161,8 @@ function Main:Init_TestMode(event, playerID)
     local selfHeroStrategy = self:getDefaultIfEmpty(event.selfHeroStrategies)
     local opponentOverallStrategy = self:getDefaultIfEmpty(event.opponentOverallStrategies)
     local opponentHeroStrategy = self:getDefaultIfEmpty(event.opponentHeroStrategies)
+    local selfSkillThresholds = event.selfSkillThresholds or {}
+    local opponentSkillThresholds = event.opponentSkillThresholds or {}
 
     -- 获取玩家和对手的英雄名称及中文名称
     local heroName, heroChineseName = self:GetHeroNames(selfHeroId)
@@ -83,9 +176,9 @@ function Main:Init_TestMode(event, playerID)
     PlayerResource:SetGold(playerID, 0, false)
 
     -- 定义时间参数
-    self.duration = 10         -- 赛前准备时间
+    self.duration = 2         -- 赛前准备时间
     self.endduration = 10      -- 赛后庆祝时间
-    self.limitTime = 60        -- 限定时间为准备时间结束后的一分钟
+    self.limitTime = 100        -- 限定时间为准备时间结束后的一分钟
 
 
     self:createLocalizedMessage(
@@ -123,7 +216,7 @@ function Main:Init_TestMode(event, playerID)
     }
     local order = {"挑战英雄", "对手英雄", "剩余时间"}
     SendInitializationMessage(data, order)
-    --self:UpdateAbilityModifiers(ability_modifiers)
+
     -- 创建玩家英雄
     CreateHero(playerID, heroName, selfFacetId, self.smallDuelAreaLeft, DOTA_TEAM_GOODGUYS, false, function(playerHero)
         self:ConfigureHero(playerHero, true, playerID)
@@ -131,15 +224,23 @@ function Main:Init_TestMode(event, playerID)
         
         self.leftTeamHero1 = playerHero
         self.currentArenaHeroes[1] = playerHero
+        self:StartTextMonitor(self.leftTeamHero1, "杀敌数:", 20, "#FFFFFF")
         -- 如果启用了AI，为玩家英雄创建AI
         if selfAIEnabled then
             Timers:CreateTimer(self.duration - 0.7, function()
                 if self.currentTimer ~= timerId or hero_duel.EndDuel then return end
-                CreateAIForHero(self.leftTeamHero1, selfOverallStrategy, selfHeroStrategy,"leftTeamHero1")
+                local otherSettings = {skillThresholds = selfSkillThresholds}
+                CreateAIForHero(self.leftTeamHero1, selfOverallStrategy, selfHeroStrategy,"leftTeamHero1",0.01, otherSettings)
                 return nil
             end)
         end
     end)
+
+    ember_spirit = CreateUnitByName("custom_ember_spirit", self.smallDuelAreaLeft, true, nil, nil, DOTA_TEAM_BADGUYS)
+    storm_spirit = CreateUnitByName("custom_storm_spirit", self.smallDuelAreaLeft, true, nil, nil, DOTA_TEAM_BADGUYS)
+    earth_spirit = CreateUnitByName("custom_earth_spirit", self.smallDuelAreaLeft, true, nil, nil, DOTA_TEAM_BADGUYS)
+
+
 
     -- 创建对手英雄
     CreateHero(playerID, opponentHeroName, opponentFacetId, self.smallDuelAreaRight, DOTA_TEAM_BADGUYS, false, function(opponentHero)
@@ -152,21 +253,13 @@ function Main:Init_TestMode(event, playerID)
         if opponentAIEnabled then
             Timers:CreateTimer(self.duration - 0.7, function()
                 if self.currentTimer ~= timerId or hero_duel.EndDuel then return end
-                CreateAIForHero(self.rightTeamHero1, opponentOverallStrategy, opponentHeroStrategy,"rightTeamHero1")
+                local otherSettings = {skillThresholds = opponentSkillThresholds}
+                CreateAIForHero(self.rightTeamHero1, opponentOverallStrategy, opponentHeroStrategy,"rightTeamHero1",0.01, otherSettings)
                 return nil
             end)
         end
     end)
 
-    -- 赛前准备
-    Timers:CreateTimer(2, function()
-        if self.currentTimer ~= timerId or hero_duel.EndDuel then return end
-        self.leftTeam = {self.leftTeamHero1}
-        self.rightTeam = {self.rightTeamHero1}
-        if self.leftTeamHero1 and not self.leftTeamHero1:IsNull() then
-            self.leftTeamHero1:AddNewModifier(self.leftTeamHero1, nil, "modifier_no_cooldown_all", { duration = 3 })
-        end
-    end)
 
 
     Timers:CreateTimer(2, function()
@@ -179,49 +272,15 @@ function Main:Init_TestMode(event, playerID)
         if self.currentTimer ~= timerId or hero_duel.EndDuel then return end
         self:HeroBenefits(heroName, self.leftTeamHero1, selfOverallStrategy,selfHeroStrategy)
         self:HeroBenefits(opponentHeroName, self.rightTeamHero1, opponentOverallStrategy,opponentHeroStrategy)
-        
+
     end)
 
-    -- 赛前限制
-    Timers:CreateTimer(5, function()
-        if self.currentTimer ~= timerId or hero_duel.EndDuel then return end
 
-        -- 给双方英雄添加禁用效果
-        local modifiers = {"modifier_disarmed", "modifier_silence", "modifier_rooted", "modifier_break"}
-        for _, modifier in ipairs(modifiers) do
-            if self.leftTeamHero1 and not self.leftTeamHero1:IsNull() then
-                self.leftTeamHero1:AddNewModifier(self.leftTeamHero1, nil, modifier, { duration = self.duration - 5 })
-            end
-            if self.rightTeamHero1 and not self.rightTeamHero1:IsNull() then
-                self.rightTeamHero1:AddNewModifier(self.rightTeamHero1, nil, modifier, { duration = self.duration - 5 })
-            end
-        end
-    end)
 
     -- 发送摄像机位置给前端
     self:SendCameraPositionToJS(Main.smallDuelArea, 1)
 
 
-    -- 监视战斗状态并开始计时
-    Timers:CreateTimer(self.duration - 6, function()
-        if self.currentTimer ~= timerId or hero_duel.EndDuel then return end
-
-        Timers:CreateTimer(0.1, function()
-            if self.currentTimer ~= timerId or hero_duel.EndDuel then return end
-            self:MonitorUnitsStatus()
-            return 0.01
-        end)
-
-        self:SendHeroAndFacetData(heroName, opponentHeroName, selfFacetId, opponentFacetId, self.limitTime)
-        Timers:CreateTimer(2, function()
-            if self.currentTimer ~= timerId or hero_duel.EndDuel then return end
-            SendToServerConsole("host_timescale 0.5")
-        end)
-        Timers:CreateTimer(3, function()
-            if self.currentTimer ~= timerId or hero_duel.EndDuel then return end
-            SendToServerConsole("host_timescale 1")
-        end)
-    end)
 
     -- 比赛即将开始
     Timers:CreateTimer(self.duration - 1, function()
@@ -235,6 +294,8 @@ function Main:Init_TestMode(event, playerID)
         self.startTime = GameRules:GetGameTime() -- 记录开始时间
         CustomGameEventManager:Send_ServerToAllClients("start_timer", {})
         self:MonitorUnitsStatus()
+        self:StartAbilitiesMonitor(self.rightTeamHero1,true)
+        self:StartAbilitiesMonitor(self.leftTeamHero1,true)
         self:createLocalizedMessage(
             "[LanPang_RECORD][",
             self.currentMatchID,
@@ -251,16 +312,8 @@ function Main:Init_TestMode(event, playerID)
         -- 停止计时
         CustomGameEventManager:Send_ServerToAllClients("stop_timer", {})
 
-        -- 对英雄再次施加禁用效果
-        local modifiers = {"modifier_disarmed", "modifier_silence", "modifier_rooted", "modifier_break"}
-        for _, modifier in ipairs(modifiers) do
-            if self.leftTeamHero1 and not self.leftTeamHero1:IsNull() then
-                self.leftTeamHero1:AddNewModifier(self.leftTeamHero1, nil, modifier, { duration = self.endduration })
-            end
-            if self.rightTeamHero1 and not self.rightTeamHero1:IsNull() then
-                self.rightTeamHero1:AddNewModifier(self.rightTeamHero1, nil, modifier, { duration = self.endduration })
-            end
-        end
+        self:DisableHeroWithModifiers(self.leftTeamHero1, self.endduration)
+        self:DisableHeroWithModifiers(self.rightTeamHero1, self.endduration)
     end)
 end
 
@@ -278,8 +331,34 @@ end
 
 
 function Main:OnNPCSpawned_TestMode(spawnedUnit, event)
-    --过两秒打印单位身上的modifier名字
     if not self:isExcludedUnit(spawnedUnit) then
         self:ApplyConfig(spawnedUnit, "BATTLEFIELD")
     end
 end
+
+function Main:OnAbilityUsed_TestMode(event)
+    print("技能释放事件")
+    -- local caster = EntIndexToHScript(event.caster_entindex)
+    -- --详细打印event的所有信息，event是表
+    -- for k, v in pairs(event) do
+    --     print(k, v)
+    -- end
+    
+
+
+    -- local target = caster:GetCursorCastTarget()
+    -- if target then
+    --     print("目标实体:", target:GetName(), "实体索引:", target:GetEntityIndex())
+    -- end
+
+    -- --如果英雄释放的技能是chaos_knight_reality_rift，让英雄对目标施加持续三秒的缴械、沉默和破坏效果
+    -- if event.abilityname == "chaos_knight_reality_rift" then
+    --     target:AddNewModifier(caster, nil, "modifier_break", {duration = 3})
+    --     target:AddNewModifier(caster, nil, "modifier_silence", {duration = 3})
+    --     target:AddNewModifier(caster, nil, "modifier_disarmed", {duration = 3})
+    -- end
+    
+
+end
+
+

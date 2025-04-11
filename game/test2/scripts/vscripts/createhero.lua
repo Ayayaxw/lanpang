@@ -217,13 +217,13 @@ function CreateParentHeroesWithFacets(callback)
     end
 end
 
-function CreateAIForHero(heroEntity, overallStrategy, heroStrategy, aiName, thinkInterval,SkillThresholds)
+function CreateAIForHero(heroEntity, overallStrategy, heroStrategy, aiName, thinkInterval,otherSettings)
 
     local heroName = heroEntity:GetUnitName()
     local heroAI
     
 
-    heroAI = CommonAI.new(heroEntity, overallStrategy or {"默认策略"}, heroStrategy or {"默认策略"}, thinkInterval, SkillThresholds)
+    heroAI = CommonAI.new(heroEntity, overallStrategy or {"默认策略"}, heroStrategy or {"默认策略"}, thinkInterval, otherSettings)
 
     
     if heroAI then

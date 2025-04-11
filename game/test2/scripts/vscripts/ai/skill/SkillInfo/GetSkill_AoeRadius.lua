@@ -1,7 +1,7 @@
 
 function CommonAI:Ini_SkillAoeRadius()
     self.specificRadius = {
-        razor_plasma_field = 1800,
+
         meepo_megameepo = 0,
         shredder_reactive_armor = 9999,
         ursa_enrage = 1200,

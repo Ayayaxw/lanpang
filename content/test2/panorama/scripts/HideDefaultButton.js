@@ -10,7 +10,8 @@
         var hud = GetHud();
         var panelsToToggle = [
             "ButtonBar",
-            "lower_hud"
+            "lower_hud",
+
         ];
 
         // 切换主面板的可见性

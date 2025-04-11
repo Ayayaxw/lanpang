@@ -46,6 +46,102 @@ ItemConditions = {
             return self.Ally ~= nil
         end
     },
+    ["item_refresher"] = {
+        function(self, caster, item, log)
+            if not item then 
+                log("刷新球: 物品不存在")
+                return false 
+            end
+            
+            -- 检查蓝量是否足够
+            if caster:GetMana() <= 700 then
+                log(string.format("刷新球: 蓝量不足（当前: %d，需要: 700）", caster:GetMana()))
+                return false
+            end
+            
+            -- 存储所有符合条件的技能
+            local validAbilities = {}
+            local foundValidAbility = false
+            
+            -- 获取单位所有技能
+            for i = 0, caster:GetAbilityCount() - 1 do
+                local ability = caster:GetAbilityByIndex(i)
+                
+                if not ability then
+                    log("刷新球: 技能槽位为空")
+                    goto continue
+                end
+                
+                -- 检查技能名称是否包含special_bonus
+                local abilityName = ability:GetName()
+                if string.find(abilityName, "special_bonus") then
+                    log(string.format("刷新球: 技能 %s 是天赋技能，忽略", abilityName))
+                    goto continue
+                end
+                
+                -- 检查技能是否隐藏
+                if ability:IsHidden() and not caster:GetUnitName() == "npc_dota_hero_invoker" then
+                    log(string.format("刷新球: 技能 %s 被隐藏", ability:GetName()))
+                    goto continue
+                end
+                
+                -- 检查技能冷却时间是否大于5秒
+                local cooldown = ability:GetCooldown(ability:GetLevel())
+                if cooldown <= 5 then
+                    log(string.format("刷新球: 技能 %s 冷却时间不足5秒（当前: %.1f）", ability:GetName(), cooldown))
+                    goto continue
+                end
+                
+                -- 检查是否是开关类技能
+                if ability:IsToggle() then
+                    log(string.format("刷新球: 技能 %s 是开关类技能", ability:GetName()))
+                    goto continue
+                end
+                
+                
+                -- 检查是否是被禁用的技能
+                if self.disabledSkills[caster:GetUnitName()] and self:IsDisabledSkill(ability:GetAbilityName(), caster:GetUnitName()) then
+                    log(string.format("刷新球: 技能 %s 被禁用", ability:GetName()))
+                    goto continue
+                end
+                
+                -- 检查是否是被动技能
+                if ability:IsPassive() then
+                    log(string.format("刷新球: 技能 %s 是被动技能", ability:GetName()))
+                    goto continue
+                end
+                
+                -- 如果所有条件都满足，加入 validAbilities
+                table.insert(validAbilities, ability)
+                foundValidAbility = true
+                
+                ::continue::
+            end
+            
+            -- 如果没有符合条件的技能，返回false
+            if #validAbilities == 0 then
+                log("刷新球: 没有符合条件的技能")
+                return false
+            end
+            
+            -- 检查是否所有符合条件的技能都在冷却中
+            local allOnCooldown = true
+            for _, ability in ipairs(validAbilities) do
+                if ability:IsCooldownReady() then
+                    log(string.format("刷新球: 技能 %s 不在冷却中", ability:GetName()))
+                    allOnCooldown = false
+                end
+            end
+            
+            if allOnCooldown then
+                log("刷新球: 所有技能都在冷却中，可以使用")
+                return true
+            else
+                log("刷新球: 有技能不在冷却中，不满足使用条件")
+                return false
+            end
+        end
+    },
 }
 
 function CommonAI:FindConditionsForItem(itemName)

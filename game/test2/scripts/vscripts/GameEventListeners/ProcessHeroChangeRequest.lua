@@ -88,12 +88,24 @@ function Main:GetChallengeNameById(challengeId)
     return nil
 end
 
+function Main:GetChallengeNameByCode(challengeCode)
+    for name, code in pairs(Main.Challenges) do
+        if code == challengeCode then
+            return name
+        end
+    end
+    return nil
+end
+
+
+
 -- 设置新英雄
 function Main:SetupNewHero(event, playerID)
     -- 根据配置的挑战类型执行相应的初始化
     Timers:CreateTimer(2, function()
         -- 获取当前的挑战模式ID
         local challengeId = self.currentChallenge
+        print("当前挑战模式ID: " .. challengeId)
         local challengeName = self:GetChallengeNameById(challengeId)
 
         

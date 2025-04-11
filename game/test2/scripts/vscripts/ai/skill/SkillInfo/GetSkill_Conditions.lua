@@ -1991,7 +1991,7 @@ HeroSkillConditions = {
         },
         ["tidehunter_dead_in_the_water"] = {
             function(self, caster, log)
-                return true
+                return false
             end
         },
     },
@@ -3117,6 +3117,28 @@ HeroSkillConditions = {
                        and self:NeedsModifierRefresh(self.target, {"modifier_invoker_tornado"}, 1.6)
             end
         },
+
+        ["invoker_emp"] = {
+            function(self, caster, log)
+                local ability = caster:FindAbilityByName("invoker_emp")
+                if not ability then return false end
+                local potentialTarget = self:FindBestEnemyHeroTarget(
+                    caster,
+                    ability,
+                    nil,
+                    nil,
+                    "distance",
+                    true
+                )
+                
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+
+                return potentialTarget ~= nil
+            end
+        },
+        
     },
     ["npc_dota_hero_slardar"] = {
         ["slardar_amplify_damage"] = {
@@ -3570,6 +3592,13 @@ HeroSkillConditions = {
                     "kez_shodo_sai",
                     "kez_ravens_veil"
                 }
+
+                if self:containsStrategy(self.hero_strategy, "禁用单刀三技能") then
+                    table.remove(abilities, 3)
+                end
+
+
+
                 
                 local allDisabled = true
                 for _, abilityName in ipairs(abilities) do
@@ -3706,6 +3735,9 @@ HeroSkillConditions = {
                     else
                         return false
                     end
+                end
+                if self:containsStrategy(self.hero_strategy, "禁用单刀三技能") then
+                    return false
                 end
                 return true
             end
@@ -4339,10 +4371,27 @@ HeroSkillConditions = {
         },
         ["nyx_assassin_jolt"] = {
             function(self, caster, log)
+                local ability = caster:FindAbilityByName("nyx_assassin_jolt")
+                if not ability then return false end
+
+
+                local potentialTarget = self:FindBestEnemyHeroTarget(
+                    caster,    -- 施法者
+                    ability,   -- 技能
+                    nil,       -- 无需检查特定状态
+                    0,         -- 无需检查状态剩余时间
+                    "max_mana" -- 按最大魔法值排序
+                )
+
+                if potentialTarget and potentialTarget:GetMaxMana() > 0 then
+                    self.target = potentialTarget
+                end
+
                 local forbiddenModifiers = {
                     "modifier_nyx_assassin_vendetta"
                 }
-                return self:IsNotUnderModifiers(caster, forbiddenModifiers, log)
+                return potentialTarget and self:IsNotUnderModifiers(caster, forbiddenModifiers, log)
+
             end
         },
         ["nyx_assassin_unburrow"] = {
@@ -6348,6 +6397,7 @@ HeroSkillConditions = {
 
             end
         },
+
     },
     ["npc_dota_hero_batrider"] = {
         ["batrider_flaming_lasso"] = {
@@ -6941,6 +6991,30 @@ HeroSkillConditions = {
                 end
 
                 return true
+            end
+        }
+    },
+
+    ["custom_roshan"] = {
+        ["roshan_grab_and_throw"] = {
+            function(self, caster, log)
+                local ability = caster:FindAbilityByName("roshan_grab_and_throw")
+                if not ability then return false end
+                
+                local potentialTarget = self:FindBestEnemyHeroTarget(
+                    caster,
+                    ability,
+                    nil,
+                    nil,
+                    "distance",
+                    true
+                )
+                
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+
+                return potentialTarget ~= nil
             end
         }
     },
@@ -7704,12 +7778,12 @@ function CommonAI:IsHPBelowSkillThreshold(ability, entity)
     
 
     --打印ability的技能名
-    print("技能名："..abilityName)
+    --print("技能名："..abilityName)
 
 
     -- 判断是否是大招
     if ability:GetAbilityType() == ABILITY_TYPE_ULTIMATE then
-        print("大招")
+        --print("大招")
         skillKey = "skill6" -- 大招对应skill6
     else
         -- 普通技能根据索引判断

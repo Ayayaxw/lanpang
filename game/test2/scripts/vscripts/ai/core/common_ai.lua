@@ -17,8 +17,9 @@ require("ai/core/common_function")
 require("ai/skill/skill_common")
 require("ai/skill/ConditionFunctions")
 require("ai/hero_ai/visage")
-
+require("ai/skill/AutoUpgradeHeroAbilities")
 require("ai/skill/OnSpellCast")
+
 require("ai/skill/SkillHandlers/EnemyTarget_InRange")
 require("ai/skill/SkillHandlers/EnemyTarget_OutOfRange")
 
@@ -41,6 +42,7 @@ require("ai/skill/SkillInfo/GetSkill_MediumPrioritySkills")
 require("ai/skill/SkillInfo/GetSkill_TargetTeam")
 require("ai/skill/SkillInfo/GetSkill_SelfCastSkill")
 require("ai/skill/SkillInfo/GetSkill_Behavior")
+require("ai/skill/SkillInfo/GetSkill_TargetType")
 
 require("ai/skill/SkillInfo/Get_DodgableSkills")
 require("ai/skill/SkillInfo/Get_DodgeSkills")
@@ -58,11 +60,13 @@ AIStates = {
 
 }
 
-function CommonAI:constructor(entity, overallStrategy, heroStrategy, thinkInterval, skillThresholds)
+function CommonAI:constructor(entity, overallStrategy, heroStrategy, thinkInterval, otherSettings)
     -- 初始化策略
     self.global_strategy = overallStrategy or {"默认策略"}
     self.hero_strategy = heroStrategy or {"默认策略"}
-    self.skillThresholds = skillThresholds or {}
+    if otherSettings then
+        self.skillThresholds = otherSettings.skillThresholds or {}
+    end
     self.canReleaseIceBlast = false
     self:Ini_MediumPrioritySkills()
     self:Ini_DisabledSkills()
@@ -73,6 +77,7 @@ function CommonAI:constructor(entity, overallStrategy, heroStrategy, thinkInterv
     self:Init_DodgableSkills()
     self:Init_DodgeSkills()
     self:Ini_SkillBehavior()
+    self:Ini_SkillTargetType()
     self.toggleItems = {}
     self.autoCastItems = {}
     self.autoCastSkills = {}
@@ -91,9 +96,9 @@ function CommonAI:constructor(entity, overallStrategy, heroStrategy, thinkInterv
     self.needToDodge = false
 end
 
-function CommonAI.new(entity, overallStrategy, heroStrategy, thinkInterval,skillThresholds)
+function CommonAI.new(entity, overallStrategy, heroStrategy, thinkInterval,otherSettings)
     local instance = setmetatable({}, CommonAI)  -- 直接使用 CommonAI 作为元表
-    instance:constructor(entity, overallStrategy, heroStrategy, thinkInterval,skillThresholds)
+    instance:constructor(entity, overallStrategy, heroStrategy, thinkInterval,otherSettings)
     return instance
 end
 
@@ -105,6 +110,12 @@ function CommonAI:Think(entity)
     if not entity or entity:IsNull() then
         self:log("[AI] 实体不存在，终止AI - Entity: " .. (entity and entity:GetName() or "nil"))
         return nil  -- 彻底停止AI循环
+    end
+
+    if entity:IsHero() then
+        if entity:GetAbilityPoints() > 0 then
+            Main:AutoUpgradeHeroAbilities(entity)
+        end
     end
 
 

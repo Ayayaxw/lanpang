@@ -28,6 +28,7 @@
     <include src="file://{resources}/styles/hero_chaos_score.css" />
     <include src="file://{resources}/styles/hero_chaos_killboard.css" />
     <include src="file://{resources}/styles/floating_text.css" />
+    <include src="file://{resources}/styles/HorrorMessage.css" />
     <!-- <include src="file://{resources}/styles/custom_ability_display.css" /> -->
 
 
@@ -69,7 +70,7 @@
     <include src="file://{resources}/scripts/OnReceive/send_item_list.js" />
     <include src="file://{resources}/scripts/OnReceive/show_hero.js" />
     <include src="file://{resources}/scripts/OnReceive/show_left_hero.js" />
-
+    <include src="file://{resources}/scripts/HorrorMessage.js" />
 
   </scripts>
     <!-- 主面板 -->
@@ -814,6 +815,11 @@
         <Panel id="blurOverlay" class="BlurOverlayStyle" hittest="false"/>
       </Panel>
 
+<Panel id="HorrorMessageContainer" hittest="false">
+  <Label id="HorrorMessageText" class="HorrorMessageText" text="" />
+  <Panel id="vignette" class="VignetteStyle" hittest="false"/>
+  <Panel id="blurOverlay" class="BlurOverlayStyle" hittest="false"/>
+</Panel>
 
     <Panel class="LeftHeroAttackPanel">
         <Panel id="MessageContainer">

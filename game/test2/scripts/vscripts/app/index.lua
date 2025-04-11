@@ -609,7 +609,48 @@ function Main:OnRequestUnitInfo(event)
     local unit = EntIndexToHScript(unitEntIndex)
 
     --打印坐标
-    print(string.format("【单位坐标】%s 当前坐标：X=%.2f, Y=%.2f, Z=%.2f", unit:GetUnitName(), unit:GetAbsOrigin().x, unit:GetAbsOrigin().y, unit:GetAbsOrigin().z))
+
+    --打印该单位是不是守卫
+    if unit:IsBarracks() then
+        print(string.format("【单位】%s 是守卫", unit:GetUnitName()))
+    else
+        print(string.format("【单位】%s 不是守卫", unit:GetUnitName()))
+    end
+
+    --打印该单位是不是守卫IsWard
+    if unit:IsWard() then
+        print(string.format("【单位】%s 是ward", unit:GetUnitName()))
+    else
+        print(string.format("【单位】%s 不是ward", unit:GetUnitName()))
+    end
+
+    if unit:IsZombie() then
+        print(string.format("【单位】%s 是zombie", unit:GetUnitName()))
+    else
+        print(string.format("【单位】%s 不是zombie", unit:GetUnitName()))
+    end
+    
+    if unit:IsOther() then
+        print(string.format("【单位】%s 是other", unit:GetUnitName()))
+    else
+        print(string.format("【单位】%s 不是other", unit:GetUnitName()))
+    end
+    
+    if unit:IsHero() then
+        print(string.format("【单位】%s 是英雄", unit:GetUnitName()))
+    else
+        print(string.format("【单位】%s 不是英雄", unit:GetUnitName()))
+    end
+
+    if unit:IsConsideredHero() then
+        print(string.format("【单位】%s 是ConsideredHero", unit:GetUnitName()))
+    else
+        print(string.format("【单位】%s 不是ConsideredHero", unit:GetUnitName()))
+    end
+    
+    
+
+    print(string.format("【单位坐标】%s 当前坐标：X=%.2f, Y=%.2f, Z=%.2f", unit:GetUnitName(), unit:GetOrigin().x, unit:GetOrigin().y, unit:GetOrigin().z))
     --打印是否是幻象
     if unit:IsIllusion() then
         print(string.format("【单位】%s 是幻象", unit:GetUnitName()))
@@ -629,25 +670,107 @@ function Main:OnRequestUnitInfo(event)
             end
         end
 
-        -- 打印所有技能
+        -- 打印所有技能，按类别分类
         print(string.format("【单位技能】%s 的所有技能：", unit:GetUnitName()))
+        
+        -- 创建三个分类数组
+        local normalAbilities = {}
+        local hiddenAbilities = {}
+        local talentAbilities = {}
+        
+        -- 遍历所有技能并分类
         for i = 0, unit:GetAbilityCount() - 1 do
             local ability = unit:GetAbilityByIndex(i)
             if ability then
+                local abilityName = ability:GetAbilityName()
                 local activeStatus = ability:GetToggleState() and "[已激活]" or ""
-                print(string.format("    - %s %s", ability:GetAbilityName(), activeStatus))
+                local targetType = ability:GetAbilityTargetType()
+                local targetTypeStr = ""
+                
+                -- 转换数字目标类型为可读字符串
+                if bit.band(targetType, DOTA_UNIT_TARGET_HERO) ~= 0 then
+                    targetTypeStr = targetTypeStr .. "HERO "
+                end
+                if bit.band(targetType, DOTA_UNIT_TARGET_CREEP) ~= 0 then
+                    targetTypeStr = targetTypeStr .. "CREEP "
+                end
+                if bit.band(targetType, DOTA_UNIT_TARGET_BUILDING) ~= 0 then
+                    targetTypeStr = targetTypeStr .. "BUILDING "
+                end
+                if bit.band(targetType, DOTA_UNIT_TARGET_COURIER) ~= 0 then
+                    targetTypeStr = targetTypeStr .. "COURIER "
+                end
+                if bit.band(targetType, DOTA_UNIT_TARGET_BASIC) ~= 0 then
+                    targetTypeStr = targetTypeStr .. "BASIC "
+                end
+                if bit.band(targetType, DOTA_UNIT_TARGET_OTHER) ~= 0 then
+                    targetTypeStr = targetTypeStr .. "OTHER "
+                end
+                if bit.band(targetType, DOTA_UNIT_TARGET_TREE) ~= 0 then
+                    targetTypeStr = targetTypeStr .. "TREE "
+                end
+                if bit.band(targetType, DOTA_UNIT_TARGET_CUSTOM) ~= 0 then
+                    targetTypeStr = targetTypeStr .. "CUSTOM "
+                end
+                if bit.band(targetType, DOTA_UNIT_TARGET_SELF) ~= 0 then
+                    targetTypeStr = targetTypeStr .. "SELF "
+                end
+                
+                if targetTypeStr == "" then
+                    targetTypeStr = "NONE"
+                end
+                
+                local abilityInfo = {
+                    index = i,
+                    name = abilityName,
+                    activeStatus = activeStatus,
+                    targetTypeStr = targetTypeStr,
+                    targetType = targetType
+                }
+                
+                -- 根据类别分组
+                if string.find(abilityName, "special_bonus_") == 1 then
+                    table.insert(talentAbilities, abilityInfo)
+                elseif ability:IsHidden() then
+                    table.insert(hiddenAbilities, abilityInfo)
+                else
+                    table.insert(normalAbilities, abilityInfo)
+                end
             end
         end
-
-        -- 单独列出激活的技能
-        print(string.format("【激活技能】%s 当前激活的技能：", unit:GetUnitName()))
-        for i = 0, unit:GetAbilityCount() - 1 do
-            local ability = unit:GetAbilityByIndex(i)
-            if ability and ability:GetToggleState() then
-                print(string.format("    - %s", ability:GetAbilityName()))
-            end
+        
+        -- 打印非隐藏技能
+        print("  [非隐藏技能]")
+        for _, abilityInfo in ipairs(normalAbilities) do
+            print(string.format("    - %d:%s %s [目标类型: %s (%d)]", 
+                abilityInfo.index,
+                abilityInfo.name, 
+                abilityInfo.activeStatus, 
+                abilityInfo.targetTypeStr, 
+                abilityInfo.targetType))
         end
-
+        
+        -- 打印隐藏技能
+        print("  [隐藏技能]")
+        for _, abilityInfo in ipairs(hiddenAbilities) do
+            print(string.format("    - %d:%s %s [目标类型: %s (%d)]", 
+                abilityInfo.index,
+                abilityInfo.name, 
+                abilityInfo.activeStatus, 
+                abilityInfo.targetTypeStr, 
+                abilityInfo.targetType))
+        end
+        
+        -- 打印天赋技能
+        print("  [天赋技能]")
+        for _, abilityInfo in ipairs(talentAbilities) do
+            print(string.format("    - %d:%s %s [目标类型: %s (%d)]", 
+                abilityInfo.index,
+                abilityInfo.name, 
+                abilityInfo.activeStatus, 
+                abilityInfo.targetTypeStr, 
+                abilityInfo.targetType))
+        end
 
         -- 查找最近的单位
         local nearbyUnits = FindUnitsInRadius(

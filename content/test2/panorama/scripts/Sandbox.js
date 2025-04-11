@@ -34,13 +34,25 @@ let heroSelectionTriggerCount = 0;
     // 设置按钮事件
     sandboxModeButton.SetPanelEvent('onactivate', toggleSandboxModePanel);
 
-    // 然后注册新的事件处理程序 - 使用独特的函数名
+    // 注册英雄选择事件
     const debouncedSandboxHandler = debounce(onSandboxHeroSelected, 0.1); // 0.1秒防抖
     $.RegisterEventHandler('DOTAUIHeroPickerHeroSelected', $('#HeroPicker'), debouncedSandboxHandler);
 
-
-    $.Msg("沙盒模式脚本初始化完成");
+    // 尝试使用一个简单的命令绑定
+    const sandbox_toggle = "sandbox_toggle" + Math.floor(Math.random() * 99999999);
+    Game.AddCommand(sandbox_toggle, toggleSandboxOnKeyPress, "打开/关闭沙盒模式面板", 0);
+    
+    // 尝试将F8键绑定到这个命令
+    Game.CreateCustomKeyBind("F8", sandbox_toggle);
+    
+    $.Msg("沙盒模式脚本初始化完成，F8键绑定已设置");
 })();
+
+// 简化的键盘快捷键处理函数
+function toggleSandboxOnKeyPress() {
+    $.Msg("快捷键已触发，正在切换沙盒面板");
+    toggleSandboxModePanel();
+}
 
 // 防抖函数，限制函数调用频率
 function debounce(func, wait) {
@@ -471,6 +483,13 @@ function executeSandboxFunction(functionId) {
             // 打开英雄选择面板
             openHeroSelectionPanel('SandboxHeroSelect');
         } else {
+            // 获取当前选中的单位（如果是需要操作选中英雄的功能）
+            let selectedEntityId = -1;
+            if (["delete_hero", "level_up_hero", "get_all_skills", "reset_cooldowns", "get_items", "infinite_mana", "add_ai", "max_level"].includes(functionId)) {
+                selectedEntityId = Players.GetLocalPlayerPortraitUnit();
+                $.Msg("获取当前选中单位ID: " + selectedEntityId);
+            }
+            
             // 准备发送给服务器的数据（新增队伍和坐标）
             const data = { 
                 functionId: functionId,
@@ -479,12 +498,13 @@ function executeSandboxFunction(functionId) {
                 teamId: userSelections.teamId,    // 新增队伍ID
                 positionX: userSelections.position.x,  // 拆分坐标
                 positionY: userSelections.position.y,
-                positionZ: userSelections.position.z
+                positionZ: userSelections.position.z,
+                selectedEntityId: selectedEntityId   // 新增选中的实体ID
             };
             
             // 发送请求到服务器
             GameEvents.SendCustomGameEventToServer("sandbox_custom_event", data);
-            $.Msg("执行沙盒功能: " + functionId + "，使用用户选择的数据");
+            $.Msg("执行沙盒功能: " + functionId + "，使用用户选择的数据，选中单位ID: " + selectedEntityId);
         }
     }
 }

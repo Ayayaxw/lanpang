@@ -103,7 +103,7 @@
         }
         
         // 更新魔法条
-        if (!isNaN(manaPercentage) && manaPercentage >= 0) {
+        if (!isNaN(manaPercentage) && manaPercentage > 0) {
             $('#ShieldBar' + side).style.width = manaPercentage + '%';
         } else {
             $('#ShieldBar' + side).style.width = '0%';

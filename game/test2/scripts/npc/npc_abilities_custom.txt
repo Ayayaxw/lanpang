@@ -11,7 +11,179 @@
 	//=================================================================================================================
 	// Templar Assassin: Refraction Holdout
 	//=================================================================================================================
-	
+	// "zuus_static_field"
+	// {
+	// 	// General
+	// 	//-------------------------------------------------------------------------------------------------------------
+	// 	"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_PASSIVE | DOTA_ABILITY_BEHAVIOR_HIDDEN | DOTA_ABILITY_BEHAVIOR_SHOW_IN_GUIDES | DOTA_ABILITY_BEHAVIOR_INNATE_UI"
+	// 	"AbilityUnitDamageType"			"DAMAGE_TYPE_MAGICAL"
+	// 	"SpellImmunityType"				"SPELL_IMMUNITY_ENEMIES_NO"	
+	// 	"AbilitySound"					"Hero_Zuus.StaticField"
+	// 	"MaxLevel"						"4"
+	// 	"Innate"						"1"
+	// 	"DependentOnAbility"			"zuus_thundergods_wrath"
+	// 	"IsBreakable"					"1"
+		
+
+	// 	// Special
+	// 	//-------------------------------------------------------------------------------------------------------------
+	// 	"AbilityValues"
+	// 	{
+	// 			"damage_health_pct"
+	// 			{
+	// 				"value"								"200"
+	// 				"special_bonus_unique_zeus_static_field_dmg"		"+0"	
+	// 				"special_bonus_facet_zuus_livewire"	"=0"
+	// 			}
+
+	// 			"damage_health_pct_max_close"
+	// 			{
+	// 				"value"		"0"					
+	// 				"special_bonus_facet_zuus_livewire"	"=5 =6 =7 =100"
+	// 				"special_bonus_unique_zeus_static_field_dmg"		"+1"
+	// 				"RequiresFacet"			"zuus_livewire"
+	// 			}
+	// 			"damage_health_pct_min_close"
+	// 			{
+	// 				"value"		"0"					
+	// 				"special_bonus_facet_zuus_livewire"	"=2.5 =3.0 =3.5 =100"
+	// 				"special_bonus_unique_zeus_static_field_dmg"		"+1"
+	// 				"RequiresFacet"			"zuus_livewire"
+	// 			}
+	// 			"distance_threshold_min"
+	// 			{
+	// 				"value"		"0"					
+	// 				"special_bonus_facet_zuus_livewire"	"200"
+	// 				"affected_by_aoe_increase"	"1"
+	// 			}
+	// 			"distance_threshold_max"
+	// 			{
+	// 				"value"		"0"					
+	// 				"special_bonus_facet_zuus_livewire"	"1200"
+	// 				"affected_by_aoe_increase"	"1"
+	// 			}
+				
+	// 	}
+	// }
+
+
+	// "shredder_whirling_death"
+	// {
+	// 	// General
+	// 	//-------------------------------------------------------------------------------------------------------------
+	// 	"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_NO_TARGET | DOTA_ABILITY_BEHAVIOR_IMMEDIATE | DOTA_ABILITY_BEHAVIOR_IGNORE_BACKSWING"
+	// 	"AbilityUnitDamageType"			"DAMAGE_TYPE_PURE"	
+	// 	"SpellImmunityType"				"SPELL_IMMUNITY_ENEMIES_NO"
+	// 	"SpellDispellableType"			"SPELL_DISPELLABLE_YES"
+	// 	"FightRecapLevel"				"1"
+	// 	"AbilitySound"					"Hero_Shredder.WhirlingDeath.Cast"
+
+	// 	// Casting
+	// 	//-------------------------------------------------------------------------------------------------------------
+	// 	"AbilityCastPoint"				"0.0 0.0 0.0 0.0"
+
+	// 	// Time		
+	// 	//-------------------------------------------------------------------------------------------------------------
+	// 	"AbilityCooldown"				"7.5 7 6.5 6"
+
+	// 	// Cost
+	// 	//-------------------------------------------------------------------------------------------------------------
+	// 	"AbilityManaCost"				"100"		
+
+	// 	// Special
+	// 	//-------------------------------------------------------------------------------------------------------------
+	// 	"AbilityValues"
+	// 	{
+	// 			"whirling_radius"			
+	// 			{
+	// 				"value"		"325"
+	// 				"affected_by_aoe_increase"	"1"
+	// 			}
+	// 			"whirling_damage"			"85 130 175 220"
+	// 			"tree_damage_scale"
+	// 			{
+	// 				"value"								"11 18 25 32"
+	// 				"special_bonus_unique_timbersaw"	"+75"
+	// 			}
+	// 			"whirling_tick"				"0.3"
+	// 			"stat_loss_pct"				
+	// 			{
+	// 				"value"			"100"
+	// 				"special_bonus_unique_timbersaw_5"	"+100"
+
+	// 			}
+	// 			"stat_loss_univ"
+	// 			{
+	// 				"value"			"100"
+	// 				"special_bonus_unique_timbersaw_5"	"+100"
+	// 			}
+	// 			"duration"
+	// 			{
+	// 				"value"				"12 13 14 15"
+					
+	// 			}
+	// 	}
+	// 	"AbilityCastAnimation"		"ACT_DOTA_CAST_ABILITY_1"
+	// }
+
+	// 	"phantom_assassin_stifling_dagger"
+	// {
+
+	// 	"AbilityValues"
+	// 	{
+
+	// 		"dagger_secondary_reduce"
+	// 		{
+	// 			"special_bonus_facet_phantom_assassin_sweet_release" "100"
+	// 		}
+
+	// 	}
+
+	// }
+
+
+	// "magnataur_empower"
+	// {
+
+	// 	"AbilityValues"
+	// 	{
+
+	// 		"self_multiplier"		"100"
+	// 		"bonus_damage_pct"
+	// 		{
+	// 			"value"							"16 24 32 100"
+	// 			"special_bonus_unique_magnus_2"	"+100"
+	// 		}
+	// 		"cleave_damage_pct"
+	// 		{
+	// 			"value"						"16 24 32 100"
+	// 			"special_bonus_unique_magnus_2"	"+100"
+	// 		}			
+	// 		"self_multiplier_bonus_max_stacks"		
+	// 		{
+	// 			"value"															"0"
+	// 			"special_bonus_facet_magnataur_eternal_empowerment"				"8 12 16 100"
+	// 		}
+	// 		"self_multiplier_bonus_per_stack"		
+	// 		{
+	// 			"value"															"0"
+	// 			"special_bonus_facet_magnataur_eternal_empowerment"				"2 3 4 100"
+	// 		}
+	// 	}
+	// 	"AbilityCastAnimation"		"ACT_DOTA_CAST_ABILITY_2"
+	// }
+
+
+	// "elder_titan_momentum"
+	// {
+
+	// 	"AbilityValues"
+	// 	{
+	// 		"attack_speed_from_movespeed"			"100"
+	// 		"attack_speed_penalty"					"85"
+	// 	}
+	// }	
+
 
 	"stack_heroes"
     {
@@ -42,7 +214,8 @@
         }
     }
 
-	
+
+
 	"stack_units"
 	{
 		"BaseClass"                     "ability_lua"
@@ -115,7 +288,7 @@
 				"duration"					"17.0 17.0 17.0 17.0"
 			}
 		}
-		}
+	}
 	
 	"divide_on_death"
 	{

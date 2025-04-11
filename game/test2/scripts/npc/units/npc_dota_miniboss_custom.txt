@@ -12,6 +12,14 @@
 		"IsAncient"					"1"
 		"CanBeDominated"			"0"
 		
+
+		"RenderablePortrait"
+		{
+			"Particles"
+			{
+				"particles/neutral_fx/miniboss_shield.vpcf"		"loadout"
+			}
+		}
 		
 		// Abilities
 		//----------------------------------------------------------------

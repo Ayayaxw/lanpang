@@ -34,13 +34,16 @@ function OnPrintMousePosPressed() {
 }
 
 function OnPrintUnitInfoPressed() {
-    var selectedEntities = Players.GetSelectedEntities(Players.GetLocalPlayer());
+    var selectedEntities = Players.GetLocalPlayerPortraitUnit()
     if (selectedEntities.length === 0) {
         $.Msg("没有选中任何单位。");
         return;
     }
+    else{
+        $.Msg("选中单位：" + selectedEntities);
+    }
 
-    var unitEntIndex = selectedEntities[0];
+    var unitEntIndex = selectedEntities;
     GameEvents.SendCustomGameEventToServer("request_unit_info", { unit_ent_index: unitEntIndex });
 }
 

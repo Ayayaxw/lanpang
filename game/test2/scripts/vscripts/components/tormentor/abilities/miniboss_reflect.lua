@@ -115,126 +115,177 @@ function modifier_miniboss_reflect_custom:HandleCustomTransmitterData(data)
 end
 
 function modifier_miniboss_reflect_custom:OnTakeDamage(keys)
-	if not IsServer() then return end
+    if not IsServer() then return end
 
-	local damage = keys.original_damage
-	local damageType = keys.damage_type
-	local damageFlags = keys.damage_flags
-	local attacker = keys.attacker
+    local damage = keys.original_damage
+    local damageType = keys.damage_type
+    local damageFlags = keys.damage_flags
+    local attacker = keys.attacker
 
-	if keys.unit ~= self.parent then return end
-	
-	-- Ignore damage that has the no-reflect flag
-	if bit.band(damageFlags, DOTA_DAMAGE_FLAG_REFLECTION) > 0 then
-		return
-	end
+    if keys.unit ~= self.parent then return end
+    
+    -- 忽略带有反射标记的伤害
+    if bit.band(damageFlags, DOTA_DAMAGE_FLAG_REFLECTION) > 0 then
+        return
+    end
 
-	-- Ignore damage that has the no-spell-lifesteal flag
-	if bit.band(damageFlags, DOTA_DAMAGE_FLAG_NO_SPELL_LIFESTEAL) > 0 then
-		return
-	end
+    -- -- 忽略无法法术吸血的伤害
+    -- if bit.band(damageFlags, DOTA_DAMAGE_FLAG_NO_SPELL_LIFESTEAL) > 0 then
+    --     print("忽略无法法术吸血的伤害")
+    --     return
+    -- end
 
-	-- Ignore damage that has the no-spell-amplification flag
-	if bit.band(damageFlags, DOTA_DAMAGE_FLAG_NO_SPELL_AMPLIFICATION) > 0 then
-		return
-	end
+    -- 忽略无法法术增幅的伤害
+    -- if bit.band(damageFlags, DOTA_DAMAGE_FLAG_NO_SPELL_AMPLIFICATION) > 0 then
+    --     print("忽略无法法术增幅的伤害")
+    --     return
+    -- end
 
-	local enemies = FindUnitsInRadius(
-		self.parent:GetTeamNumber(),
-		self.parent:GetAbsOrigin(),
-		nil,
-		self.radius,
-		DOTA_UNIT_TARGET_TEAM_ENEMY,
-		DOTA_UNIT_TARGET_HERO,
-		DOTA_UNIT_TARGET_FLAG_MAGIC_IMMUNE_ENEMIES,
-		FIND_ANY_ORDER,
-		false
-	)
-	self.parent:RemoveGesture(ACT_DOTA_FLINCH)
-	self.parent:StartGesture(ACT_DOTA_FLINCH)
+    -- 检查攻击者是否为普通单位
+    local isAttackerBasicUnit = attacker and not attacker:IsHero() and not attacker:IsBuilding() and not attacker:IsAncient() and not attacker:IsCourier() and not attacker:IsZombie() and not attacker:IsOther()
+    
+    -- 查找范围内的敌方英雄
+    local enemies = FindUnitsInRadius(
+        self.parent:GetTeamNumber(),
+        self.parent:GetAbsOrigin(),
+        nil,
+        self.radius,
+        DOTA_UNIT_TARGET_TEAM_ENEMY,
+        DOTA_UNIT_TARGET_HERO,
+        DOTA_UNIT_TARGET_FLAG_MAGIC_IMMUNE_ENEMIES,
+        FIND_ANY_ORDER,
+        false
+    )
+    self.parent:RemoveGesture(ACT_DOTA_FLINCH)
+    self.parent:StartGesture(ACT_DOTA_FLINCH)
 
+    -- 通用伤害参数
+    local damageTable = {
+        attacker = self.parent,
+        damage_type = damageType,
+        ability = self.ability,
+        damage_flags = bit.bor(DOTA_DAMAGE_FLAG_REFLECTION, DOTA_DAMAGE_FLAG_ATTACK_MODIFIER),
+    }
 
-	-- Parts of damage table that are always the same
-	local damageTable = {
-		attacker = self.parent,
-		damage_type = damageType,
-		ability = self.ability,
-	}
+    -- 创建有效目标列表
+    local valid_targets = {}
+    
+    -- 筛选有效英雄目标
+    for _, enemy in pairs(enemies) do
+        if enemy and not enemy:IsNull() and IsValidEntity(enemy) and enemy:IsAlive() and 
+           not enemy:IsIllusion() and 
+           not enemy:IsOther() and not enemy:IsZombie() then
+            print("添加有效目标",enemy:GetUnitName())
+            table.insert(valid_targets, enemy)
+        else
+            print("无效目标")
+        end
+    end
+    
+    -- 添加符合条件的普通单位攻击者
+    local attackerAdded = false
+    if isAttackerBasicUnit and attacker and not attacker:IsNull() and not attacker:IsZombie() and not attacker:IsOther() and IsValidEntity(attacker) and 
+       attacker:IsAlive() then
+        print("攻击者不是zombie")
+        table.insert(valid_targets, attacker)
+        attackerAdded = true
+    end
 
-	if #enemies == 0 then
-		-- Always affect the attacker, doesn't matter where it is even if there are no enemies around
-		damageTable.victim = attacker
-		damageTable.damage = damage * self.reflection / 100
+    -- 没有有效目标时的处理
+    if #valid_targets == 0 then
+        --
+        print("没有有效目标")
+        if attacker and not attacker:IsNull() and IsValidEntity(attacker) and attacker:IsAlive() and not attacker:IsDebuffImmune() then
+            -- 如果攻击者是非英雄单位，直接击杀
+            if not attacker:IsHero() then
+                attacker:Kill(self.ability, self.parent)
+                
+                -- 播放特效和音效
+                local pfx = ParticleManager:CreateParticle(self.pfx_name[self.tormentorTeam].reflect, PATTACH_ABSORIGIN_FOLLOW, self.parent)
+                ParticleManager:SetParticleControl(pfx, 0, self.parent:GetAbsOrigin())
+                ParticleManager:SetParticleControlEnt(pfx, 1, attacker, PATTACH_POINT_FOLLOW, "attach_hitloc", attacker:GetAbsOrigin(), true)
+                ParticleManager:ReleaseParticleIndex(pfx)
+                attacker:EmitSound("Miniboss.Tormenter.Reflect")
+            else
+                -- 对英雄单位正常反弹伤害
+                damageTable.victim = attacker
+                damageTable.damage = damage * self.reflection / 100
 
-		ApplyDamage(damageTable)
+                if attacker:IsIllusion() then
+                    damageTable.damage = damageTable.damage * self.illusion_damage_pct / 100
+                end
 
-		local pfx = ParticleManager:CreateParticle(self.pfx_name[self.tormentorTeam].reflect, PATTACH_ABSORIGIN_FOLLOW, self.parent)
-		ParticleManager:SetParticleControl(pfx, 0, self.parent:GetAbsOrigin())
-		ParticleManager:SetParticleControlEnt(pfx, 1, attacker, PATTACH_POINT_FOLLOW, "attach_hitloc", attacker:GetAbsOrigin(), true)
-		-- ParticleManager:SetParticleControl(pfx, 1, attacker:GetAbsOrigin())
-		ParticleManager:ReleaseParticleIndex(pfx)
+                ApplyDamage(damageTable)
 
-		-- EmitSoundOnClient("Miniboss.Tormenter.Reflect", attacker)
-		attacker:EmitSound("Miniboss.Tormenter.Reflect")
-		return
-	end
-	
-	-- Count non-illusion enemies
-	local number_of_valid_enemies = 0
-	for _, enemy in pairs(enemies) do
-		if enemy and not enemy:IsNull() and IsValidEntity(enemy) and enemy:IsAlive() and not enemy:IsIllusion() then
-			number_of_valid_enemies = number_of_valid_enemies + 1
-		end
-	end
-	
-	-- When attacker is damaging Tormentor from far away and only ilussions are around
-	-- to prevent division by 0
-	if number_of_valid_enemies == 0 then
-		number_of_valid_enemies = 1
-	end
-	
-	-- Distribute the damage among the present units
-	local reflectedDamage = (damage * self.reflection / 100) / number_of_valid_enemies
-	for _, enemy in pairs(enemies) do
-		if enemy and not enemy:IsNull() and IsValidEntity(enemy) and enemy:IsAlive() and enemy ~= attacker then
-			damageTable.victim = enemy
-			damageTable.damage = reflectedDamage
-
-			if enemy:IsIllusion() then
-				damageTable.damage = reflectedDamage * self.illusion_damage_pct / 100
-			end
-
-			ApplyDamage(damageTable)
-
-			local pfx = ParticleManager:CreateParticle(self.pfx_name[self.tormentorTeam].reflect, PATTACH_ABSORIGIN_FOLLOW, self.parent)
-			ParticleManager:SetParticleControl(pfx, 0, self.parent:GetAbsOrigin())
-			ParticleManager:SetParticleControlEnt(pfx, 1, enemy, PATTACH_POINT_FOLLOW, "attach_hitloc", enemy:GetAbsOrigin(), true)
-			-- ParticleManager:SetParticleControl(pfx, 1, enemy:GetAbsOrigin())
-			ParticleManager:ReleaseParticleIndex(pfx)
-
-			-- EmitSoundOnClient("Miniboss.Tormenter.Reflect", enemy)
-			enemy:EmitSound("Miniboss.Tormenter.Reflect")
-		end
-	end
-
-	-- Always affect the attacker, doesn't matter where it is
-	damageTable.victim = attacker
-	damageTable.damage = reflectedDamage
-
-	if attacker:IsIllusion() then
-		damageTable.damage = reflectedDamage * self.illusion_damage_pct / 100
-	end
-
-	ApplyDamage(damageTable)
-
-	local pfx = ParticleManager:CreateParticle(self.pfx_name[self.tormentorTeam].reflect, PATTACH_ABSORIGIN_FOLLOW, self.parent)
-	ParticleManager:SetParticleControl(pfx, 0, self.parent:GetAbsOrigin())
-	ParticleManager:SetParticleControlEnt(pfx, 1, attacker, PATTACH_POINT_FOLLOW, "attach_hitloc", attacker:GetAbsOrigin(), true)
-	-- ParticleManager:SetParticleControl(pfx, 1, attacker:GetAbsOrigin())
-	ParticleManager:ReleaseParticleIndex(pfx)
-
-	-- EmitSoundOnClient("Miniboss.Tormenter.Reflect", attacker)
-	attacker:EmitSound("Miniboss.Tormenter.Reflect")
+                local pfx = ParticleManager:CreateParticle(self.pfx_name[self.tormentorTeam].reflect, PATTACH_ABSORIGIN_FOLLOW, self.parent)
+                ParticleManager:SetParticleControl(pfx, 0, self.parent:GetAbsOrigin())
+                ParticleManager:SetParticleControlEnt(pfx, 1, attacker, PATTACH_POINT_FOLLOW, "attach_hitloc", attacker:GetAbsOrigin(), true)
+                ParticleManager:ReleaseParticleIndex(pfx)
+                attacker:EmitSound("Miniboss.Tormenter.Reflect")
+            end
+        end
+        return
+    end
+    
+    -- 计算分摊伤害
+    local reflectedDamage = (damage * self.reflection / 100) / #valid_targets
+    
+    -- 对每个目标造成伤害
+    for _, target in pairs(valid_targets) do
+        -- 跳过减益免疫的单位
+        if target:IsDebuffImmune() then
+            -- 只播放特效和音效，不造成伤害
+            local pfx = ParticleManager:CreateParticle(self.pfx_name[self.tormentorTeam].reflect, PATTACH_ABSORIGIN_FOLLOW, self.parent)
+            ParticleManager:SetParticleControl(pfx, 0, self.parent:GetAbsOrigin())
+            ParticleManager:SetParticleControlEnt(pfx, 1, target, PATTACH_POINT_FOLLOW, "attach_hitloc", target:GetAbsOrigin(), true)
+            ParticleManager:ReleaseParticleIndex(pfx)
+            target:EmitSound("Miniboss.Tormenter.Reflect")
+        else
+            damageTable.victim = target
+            damageTable.damage = reflectedDamage
+            
+            if target:IsIllusion() then
+                damageTable.damage = reflectedDamage * self.illusion_damage_pct / 100
+            end
+            
+            ApplyDamage(damageTable)
+            
+            local pfx = ParticleManager:CreateParticle(self.pfx_name[self.tormentorTeam].reflect, PATTACH_ABSORIGIN_FOLLOW, self.parent)
+            ParticleManager:SetParticleControl(pfx, 0, self.parent:GetAbsOrigin())
+            ParticleManager:SetParticleControlEnt(pfx, 1, target, PATTACH_POINT_FOLLOW, "attach_hitloc", target:GetAbsOrigin(), true)
+            ParticleManager:ReleaseParticleIndex(pfx)
+            target:EmitSound("Miniboss.Tormenter.Reflect")
+        end
+    end
+    
+    -- 处理未加入列表的攻击者
+    if attacker and not attacker:IsNull() and IsValidEntity(attacker) and attacker:IsAlive() 
+    and not attacker:IsOther() and not attacker:IsZombie() 
+    and not attackerAdded and not table.contains(valid_targets, attacker) then 
+        if attacker:IsDebuffImmune() then
+            -- 只播放特效和音效，不造成伤害
+            local pfx = ParticleManager:CreateParticle(self.pfx_name[self.tormentorTeam].reflect, PATTACH_ABSORIGIN_FOLLOW, self.parent)
+            ParticleManager:SetParticleControl(pfx, 0, self.parent:GetAbsOrigin())
+            ParticleManager:SetParticleControlEnt(pfx, 1, attacker, PATTACH_POINT_FOLLOW, "attach_hitloc", attacker:GetAbsOrigin(), true)
+            ParticleManager:ReleaseParticleIndex(pfx)
+            attacker:EmitSound("Miniboss.Tormenter.Reflect")
+        else
+            damageTable.victim = attacker
+            damageTable.damage = reflectedDamage
+            
+            if attacker:IsIllusion() then
+                damageTable.damage = reflectedDamage * self.illusion_damage_pct / 100
+            end
+            
+            ApplyDamage(damageTable)
+            
+            local pfx = ParticleManager:CreateParticle(self.pfx_name[self.tormentorTeam].reflect, PATTACH_ABSORIGIN_FOLLOW, self.parent)
+            ParticleManager:SetParticleControl(pfx, 0, self.parent:GetAbsOrigin())
+            ParticleManager:SetParticleControlEnt(pfx, 1, attacker, PATTACH_POINT_FOLLOW, "attach_hitloc", attacker:GetAbsOrigin(), true)
+            ParticleManager:ReleaseParticleIndex(pfx)
+            attacker:EmitSound("Miniboss.Tormenter.Reflect")
+        end
+    end
 end
 
 function modifier_miniboss_reflect_custom:OnTooltip()

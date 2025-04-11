@@ -57,6 +57,7 @@ function Main:HandleSandboxEvent(data)
             local position = Vector(tonumber(data.positionX) or 0, 
                                    tonumber(data.positionY) or 0, 
                                    tonumber(data.positionZ) or 0)
+            local selectedEntityId = data.selectedEntityId -- 获取前端传递的选中单位ID
             
             -- 根据功能类型传递参数
             if targetFunction.requiresSelection and targetFunction.selectionType == "hero" then
@@ -64,7 +65,7 @@ function Main:HandleSandboxEvent(data)
                 local facetId = data.facetId
                 Main[functionName](Main, playerId, heroId, facetId, teamId, position)  -- 新增参数
             else
-                Main[functionName](Main, playerId, teamId, position)  -- 新增参数
+                Main[functionName](Main, playerId, teamId, position, selectedEntityId)  -- 新增选中单位ID参数
             end
         else
             print("Function not found: " .. functionName)
@@ -106,6 +107,18 @@ Main.SandboxFunctions = {
         id = "get_all_skills",
         name = "获得全部技能",
         functionName = "GetAllSkills",
+        category = "hero"
+    },
+    {
+        id = "add_ai",
+        name = "添加AI",
+        functionName = "AddAIToHero",
+        category = "hero"
+    },
+    {
+        id = "max_level",
+        name = "升至满级",
+        functionName = "MaxLevelHero",
         category = "hero"
     },
     
@@ -191,14 +204,22 @@ Main.SandboxFunctions = {
 
 -- 英雄操作类功能
 function Main:CreateHero_Sandbox(playerId, heroId, facetId, teamId, position)
-    print(string.format("Creating hero for player %d, heroId: %s, team: %d, position: (%d,%d,%d)",
-                      playerId, tostring(heroId), teamId, position.x, position.y, position.z))
+    print(string.format("Creating hero for player %d, heroId: %s, team: %d",
+                      playerId, tostring(heroId), teamId))
     
     if heroId then
-        -- 使用前端传递的参数
-        local spawnPosition = position
-        local isControllableByPlayer = true
+        -- 根据队伍决定生成位置
+        local spawnPosition
+        if teamId == DOTA_TEAM_GOODGUYS then
+            spawnPosition = Vector(-5600, -1720, 128.00)  -- 天辉（Good）基地
+        elseif teamId == DOTA_TEAM_BADGUYS then
+            spawnPosition = Vector(5600, -1720, 128.00)    -- 夜魇（Bad）基地
+        else
+            spawnPosition = Vector(0, 0, 128.00)           -- 默认位置（中立）
+            print("Warning: Unknown teamId, spawning at default position")
+        end
         
+        local isControllableByPlayer = true
         local heroName = DOTAGameManager:GetHeroUnitNameByID(heroId)
         
         if heroName then
@@ -207,10 +228,11 @@ function Main:CreateHero_Sandbox(playerId, heroId, facetId, teamId, position)
                 heroName,
                 facetId or 0,
                 spawnPosition,
-                teamId,  -- 使用前端选择的队伍
+                teamId,
                 isControllableByPlayer,
                 function(hero)
                     -- 可以在这里添加额外的英雄设置
+
                 end
             )
         else
@@ -222,11 +244,17 @@ function Main:CreateHero_Sandbox(playerId, heroId, facetId, teamId, position)
 end
 
 -- 英雄删除函数修改
-function Main:DeleteHero(playerId)
-    print("尝试删除玩家 " .. playerId .. " 选中的英雄")
+function Main:DeleteHero(playerId, teamId, position, selectedEntityId)
+    print("尝试删除玩家 " .. playerId .. " 选中的英雄，选中单位ID: " .. (selectedEntityId or "无"))
     
-    -- 直接获取玩家选择的英雄
-    local selectedHero = PlayerResource:GetSelectedHeroEntity(playerId)
+    -- 使用前端传递的选中单位ID
+    local selectedHero = nil
+    if selectedEntityId and selectedEntityId ~= -1 then
+        selectedHero = EntIndexToHScript(selectedEntityId)
+    else
+        -- 兼容旧方式，如果没有传递选中单位ID
+        selectedHero = PlayerResource:GetSelectedHeroEntity(playerId)
+    end
     
     if selectedHero then
         -- 获取英雄位置以显示特效
@@ -260,29 +288,23 @@ function Main:DeleteHero(playerId)
 end
 
 -- 英雄升级函数修复
-function Main:LevelUpHero(playerId)
-    print("尝试升级玩家 " .. playerId .. " 选中的英雄")
+function Main:LevelUpHero(playerId, teamId, position, selectedEntityId)
+    print("尝试升级玩家 " .. playerId .. " 选中的英雄，选中单位ID: " .. (selectedEntityId or "无"))
     
-    -- 直接获取玩家选择的英雄
-    local selectedHero = PlayerResource:GetSelectedHeroEntity(0)    
-    self:PrintAllPlayersAndHeroes()
+    -- 使用前端传递的选中单位ID
+    local selectedHero = nil
+    if selectedEntityId and selectedEntityId ~= -1 then
+        selectedHero = EntIndexToHScript(selectedEntityId)
+    else
+        -- 兼容旧方式，如果没有传递选中单位ID
+        selectedHero = PlayerResource:GetSelectedHeroEntity(playerId)
+    end
     
     if selectedHero then
         print("升级英雄: " .. selectedHero:GetUnitName())
         
-        HeroMaxLevel(selectedHero)
-        
-        -- 获取英雄位置以显示特效
-        local heroPos = selectedHero:GetAbsOrigin()
-        local particleID = ParticleManager:CreateParticle("particles/units/heroes/hero_invoker/invoker_sun_strike.vpcf", PATTACH_CUSTOMORIGIN, nil)
-        ParticleManager:SetParticleControl(particleID, 0, heroPos)
-        ParticleManager:SetParticleControl(particleID, 1, Vector(100, 0, 0))
-        ParticleManager:ReleaseParticleIndex(particleID)
-        
-        -- 播放音效
-        EmitSoundOnLocationWithCaster(heroPos, "Hero_Invoker.SunStrike.Ignite", selectedHero)
-        
-        print("英雄已升级到 " .. selectedHero:GetLevel() .. " 级")
+       selectedHero:HeroLevelUp(true)
+
     else
         print("未选中英雄单位")
     end
@@ -365,9 +387,24 @@ function Main:PrintAllPlayersAndHeroes()
     end
 end
 
-function Main:GetAllSkills(playerId)
-    print("Getting all skills for player " .. playerId)
-    -- 实现获取全部技能的代码
+function Main:GetAllSkills(playerId, teamId, position, selectedEntityId)
+    print("为玩家 " .. playerId .. " 选中的英雄获取全部技能，选中单位ID: " .. (selectedEntityId or "无"))
+    
+    -- 使用前端传递的选中单位ID
+    local selectedHero = nil
+    if selectedEntityId and selectedEntityId ~= -1 then
+        selectedHero = EntIndexToHScript(selectedEntityId)
+    else
+        -- 兼容旧方式，如果没有传递选中单位ID
+        selectedHero = PlayerResource:GetSelectedHeroEntity(playerId)
+    end
+    
+    if selectedHero then
+        print("为英雄获取全部技能: " .. selectedHero:GetUnitName())
+        -- 这里实现获取全部技能的逻辑
+    else
+        print("未选中英雄单位")
+    end
 end
 
 -- 游戏资源类功能
@@ -376,19 +413,191 @@ function Main:SetInfiniteGold(playerId)
     -- 实现无限金钱的代码
 end
 
-function Main:SetInfiniteMana(playerId)
-    print("Setting infinite mana for player " .. playerId)
-    -- 实现无限魔法的代码
+function Main:SetInfiniteMana(playerId, teamId, position, selectedEntityId)
+    print("为玩家 " .. playerId .. " 选中的英雄设置无限魔法，选中单位ID: " .. (selectedEntityId or "无"))
+    
+    -- 使用前端传递的选中单位ID
+    local selectedHero = nil
+    if selectedEntityId and selectedEntityId ~= -1 then
+        selectedHero = EntIndexToHScript(selectedEntityId)
+    else
+        -- 兼容旧方式，如果没有传递选中单位ID
+        selectedHero = PlayerResource:GetSelectedHeroEntity(playerId)
+    end
+    
+    if selectedHero then
+        print("为英雄设置无限魔法: " .. selectedHero:GetUnitName())
+        
+        -- 创建一个循环定时器，不断恢复魔法值
+        local infiniteManaTimerName = "infinite_mana_" .. selectedHero:GetEntityIndex()
+        
+        -- 先取消可能已存在的定时器
+        if Timers.timers[infiniteManaTimerName] then
+            Timers:RemoveTimer(infiniteManaTimerName)
+            print("已移除英雄的无限魔法效果")
+            
+            -- 显示特效，表示取消效果
+            local heroPos = selectedHero:GetAbsOrigin()
+            local particleID = ParticleManager:CreateParticle("particles/units/heroes/hero_keeper_of_the_light/keeper_chakra_magic.vpcf", PATTACH_CUSTOMORIGIN, nil)
+            ParticleManager:SetParticleControl(particleID, 0, heroPos)
+            ParticleManager:ReleaseParticleIndex(particleID)
+            
+            EmitSoundOnLocationWithCaster(heroPos, "Hero_KeeperOfTheLight.ChakraMagic.Target", selectedHero)
+            
+            -- 显示消息给玩家
+            local notification = {
+                message = "无限魔法状态已关闭",
+                duration = 3.0,
+                style = { color = "red" }
+            }
+            CustomGameEventManager:Send_ServerToPlayer(PlayerResource:GetPlayer(playerId), "game_notification", notification)
+            
+            return
+        end
+        
+        -- 设置无限魔法
+        Timers:CreateTimer(infiniteManaTimerName, {
+            endTime = 0.1,
+            callback = function()
+                if IsValidEntity(selectedHero) and selectedHero:IsAlive() then
+                    selectedHero:SetMana(selectedHero:GetMaxMana())
+                    
+                    -- 是否需要显示特效
+                    if GameRules:GetGameTime() % 5 < 0.1 then
+                        local heroPos = selectedHero:GetAbsOrigin()
+                        local particleID = ParticleManager:CreateParticle("particles/units/heroes/hero_keeper_of_the_light/keeper_chakra_magic.vpcf", PATTACH_CUSTOMORIGIN, nil)
+                        ParticleManager:SetParticleControl(particleID, 0, heroPos)
+                        ParticleManager:ReleaseParticleIndex(particleID)
+                    end
+                    
+                    return 0.1
+                else
+                    return nil -- 如果英雄无效或已死亡，停止定时器
+                end
+            end
+        })
+        
+        -- 显示特效
+        local heroPos = selectedHero:GetAbsOrigin()
+        local particleID = ParticleManager:CreateParticle("particles/units/heroes/hero_keeper_of_the_light/keeper_chakra_magic.vpcf", PATTACH_CUSTOMORIGIN, nil)
+        ParticleManager:SetParticleControl(particleID, 0, heroPos)
+        ParticleManager:ReleaseParticleIndex(particleID)
+        
+        EmitSoundOnLocationWithCaster(heroPos, "Hero_KeeperOfTheLight.ChakraMagic.Target", selectedHero)
+        
+        -- 显示消息给玩家
+        local notification = {
+            message = "无限魔法状态已启动",
+            duration = 3.0,
+            style = { color = "blue" }
+        }
+        CustomGameEventManager:Send_ServerToPlayer(PlayerResource:GetPlayer(playerId), "game_notification", notification)
+        
+        print("已为英雄 " .. selectedHero:GetUnitName() .. " 设置无限魔法")
+    else
+        print("未选中英雄单位")
+    end
 end
 
-function Main:ResetCooldowns(playerId)
-    print("Resetting cooldowns for player " .. playerId)
-    -- 实现清除冷却的代码
+function Main:ResetCooldowns(playerId, teamId, position, selectedEntityId)
+    print("为玩家 " .. playerId .. " 选中的英雄重置技能冷却，选中单位ID: " .. (selectedEntityId or "无"))
+    
+    -- 使用前端传递的选中单位ID
+    local selectedHero = nil
+    if selectedEntityId and selectedEntityId ~= -1 then
+        selectedHero = EntIndexToHScript(selectedEntityId)
+    else
+        -- 兼容旧方式，如果没有传递选中单位ID
+        selectedHero = PlayerResource:GetSelectedHeroEntity(playerId)
+    end
+    
+    if selectedHero then
+        print("为英雄重置技能冷却: " .. selectedHero:GetUnitName())
+        
+        -- 重置所有技能冷却
+        for i = 0, selectedHero:GetAbilityCount() - 1 do
+            local ability = selectedHero:GetAbilityByIndex(i)
+            if ability and not ability:IsNull() then
+                ability:EndCooldown()
+            end
+        end
+        
+        -- 重置所有物品冷却
+        for i = 0, 8 do
+            local item = selectedHero:GetItemInSlot(i)
+            if item and not item:IsNull() then
+                item:EndCooldown()
+            end
+        end
+        
+        -- 显示特效
+        local heroPos = selectedHero:GetAbsOrigin()
+        local particleID = ParticleManager:CreateParticle("particles/units/heroes/hero_keeper_of_the_light/keeper_chakra_magic.vpcf", PATTACH_CUSTOMORIGIN, nil)
+        ParticleManager:SetParticleControl(particleID, 0, heroPos)
+        ParticleManager:ReleaseParticleIndex(particleID)
+        
+        -- 播放音效
+        EmitSoundOnLocationWithCaster(heroPos, "Hero_KeeperOfTheLight.ChakraMagic.Target", selectedHero)
+        
+        print("已重置英雄 " .. selectedHero:GetUnitName() .. " 的所有技能和物品冷却")
+    else
+        print("未选中英雄单位")
+    end
 end
 
-function Main:GetItems(playerId)
-    print("Getting items for player " .. playerId)
-    -- 实现获取装备的代码
+function Main:GetItems(playerId, teamId, position, selectedEntityId)
+    print("为玩家 " .. playerId .. " 选中的英雄获取装备，选中单位ID: " .. (selectedEntityId or "无"))
+    
+    -- 使用前端传递的选中单位ID
+    local selectedHero = nil
+    if selectedEntityId and selectedEntityId ~= -1 then
+        selectedHero = EntIndexToHScript(selectedEntityId)
+    else
+        -- 兼容旧方式，如果没有传递选中单位ID
+        selectedHero = PlayerResource:GetSelectedHeroEntity(playerId)
+    end
+    
+    if selectedHero then
+        print("为英雄获取装备: " .. selectedHero:GetUnitName())
+        
+        -- 示例装备列表
+        local itemList = {
+            "item_blink",
+            "item_black_king_bar",
+            "item_assault",
+            "item_heart",
+            "item_satanic",
+            "item_refresher"
+        }
+        
+        -- 先清空英雄的物品栏
+        for i = 0, 8 do
+            local item = selectedHero:GetItemInSlot(i)
+            if item then
+                selectedHero:RemoveItem(item)
+            end
+        end
+        
+        -- 添加示例装备
+        for _, itemName in ipairs(itemList) do
+            local item = CreateItem(itemName, selectedHero, selectedHero)
+            selectedHero:AddItem(item)
+        end
+        
+        -- 显示特效
+        local heroPos = selectedHero:GetAbsOrigin()
+        local particleID = ParticleManager:CreateParticle("particles/units/heroes/hero_alchemist/alchemist_lasthit_coins.vpcf", PATTACH_CUSTOMORIGIN, nil)
+        ParticleManager:SetParticleControl(particleID, 0, heroPos)
+        ParticleManager:SetParticleControl(particleID, 1, Vector(100, 0, 0))
+        ParticleManager:ReleaseParticleIndex(particleID)
+        
+        -- 播放音效
+        EmitSoundOnLocationWithCaster(heroPos, "General.CoinsBig", selectedHero)
+        
+        print("已为英雄 " .. selectedHero:GetUnitName() .. " 添加标准装备")
+    else
+        print("未选中英雄单位")
+    end
 end
 
 -- 小兵控制类功能
@@ -431,4 +640,95 @@ end
 function Main:ResetMap(playerId)
     print("Resetting map for player " .. playerId)
     -- 实现重置地图的代码
+end
+
+-- 添加AI到英雄
+function Main:AddAIToHero(playerId, teamId, position, selectedEntityId)
+    print("为玩家 " .. playerId .. " 选中的英雄添加AI，选中单位ID: " .. (selectedEntityId or "无"))
+    
+    -- 使用前端传递的选中单位ID
+    local selectedHero = nil
+    if selectedEntityId and selectedEntityId ~= -1 then
+        selectedHero = EntIndexToHScript(selectedEntityId)
+    else
+        -- 兼容旧方式，如果没有传递选中单位ID
+        selectedHero = PlayerResource:GetSelectedHeroEntity(playerId)
+    end
+    
+    if selectedHero then
+        print("为英雄添加AI: " .. selectedHero:GetUnitName())
+        
+        -- 添加AI控制
+        CreateAIForHero(selectedHero, {"不允许对非英雄释放控制","避免重复施法"}, nil, "", 0.1, nil)
+        
+        -- 显示特效
+        local heroPos = selectedHero:GetAbsOrigin()
+        local particleID = ParticleManager:CreateParticle("particles/units/heroes/hero_wisp/wisp_guardian_ambient.vpcf", PATTACH_CUSTOMORIGIN, nil)
+        ParticleManager:SetParticleControl(particleID, 0, heroPos)
+        ParticleManager:ReleaseParticleIndex(particleID)
+        
+        -- 播放音效
+        EmitSoundOnLocationWithCaster(heroPos, "Hero_Wisp.Spirits.Create", selectedHero)
+        
+        -- 显示消息给玩家
+        local notification = {
+            message = "已为英雄添加AI控制",
+            duration = 3.0,
+            style = { color = "green" }
+        }
+        CustomGameEventManager:Send_ServerToPlayer(PlayerResource:GetPlayer(playerId), "game_notification", notification)
+        
+        print("已为英雄 " .. selectedHero:GetUnitName() .. " 添加AI控制")
+    else
+        print("未选中英雄单位")
+    end
+end
+
+-- 将英雄升至满级
+function Main:MaxLevelHero(playerId, teamId, position, selectedEntityId)
+    print("为玩家 " .. playerId .. " 选中的英雄升至满级，选中单位ID: " .. (selectedEntityId or "无"))
+    
+    -- 使用前端传递的选中单位ID
+    local selectedHero = nil
+    if selectedEntityId and selectedEntityId ~= -1 then
+        selectedHero = EntIndexToHScript(selectedEntityId)
+    else
+        -- 兼容旧方式，如果没有传递选中单位ID
+        selectedHero = PlayerResource:GetSelectedHeroEntity(playerId)
+    end
+    
+    if selectedHero then
+        print("将英雄升至满级: " .. selectedHero:GetUnitName())
+        
+        -- 保存升级前的等级
+        local oldLevel = selectedHero:GetLevel()
+        
+        -- 将英雄升至满级
+        HeroMaxLevel(selectedHero)
+        
+        -- 获取升级后的等级
+        local newLevel = selectedHero:GetLevel()
+        
+        -- 显示特效
+        local heroPos = selectedHero:GetAbsOrigin()
+        local particleID = ParticleManager:CreateParticle("particles/units/heroes/hero_ogre_magi/ogre_magi_multicast.vpcf", PATTACH_CUSTOMORIGIN, nil)
+        ParticleManager:SetParticleControl(particleID, 0, heroPos)
+        ParticleManager:SetParticleControl(particleID, 1, Vector(4, 0, 0))  -- 使用4级多重施法的效果
+        ParticleManager:ReleaseParticleIndex(particleID)
+        
+        -- 播放音效
+        EmitSoundOnLocationWithCaster(heroPos, "Hero_OgreMagi.Fireblast.x3", selectedHero)
+        
+        -- 显示消息给玩家
+        local notification = {
+            message = "英雄从 " .. oldLevel .. " 级升至 " .. newLevel .. " 级",
+            duration = 3.0,
+            style = { color = "yellow" }
+        }
+        CustomGameEventManager:Send_ServerToPlayer(PlayerResource:GetPlayer(playerId), "game_notification", notification)
+        
+        print("已将英雄 " .. selectedHero:GetUnitName() .. " 从 " .. oldLevel .. " 级升至 " .. newLevel .. " 级")
+    else
+        print("未选中英雄单位")
+    end
 end

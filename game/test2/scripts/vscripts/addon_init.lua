@@ -50,3 +50,6 @@ LinkLuaModifier("modifier_attack_auto_cast_ability", "modifier/modifier_attack_a
 LinkLuaModifier("modifier_reset_passive_ability_cooldown", "modifier/modifier_reset_passive_ability_cooldown.lua", LUA_MODIFIER_MOTION_NONE)
 LinkLuaModifier("modifier_extra_health_bonus", "modifier/modifier_extra_health_bonus.lua", LUA_MODIFIER_MOTION_NONE)
 LinkLuaModifier("modifier_custom_neutral_upgrade", "modifier/modifier_custom_neutral_upgrade.lua", LUA_MODIFIER_MOTION_NONE)
+LinkLuaModifier("modifier_hidden_break", "modifier/modifier_hidden_break.lua", LUA_MODIFIER_MOTION_NONE)
+LinkLuaModifier("modifier_slark_shadow_dance_persistent", "modifier/modifier_slark_shadow_dance_persistent.lua", LUA_MODIFIER_MOTION_NONE)
+LinkLuaModifier("modifier_attribute_boost", "modifier/modifier_attribute_boost.lua", LUA_MODIFIER_MOTION_NONE)

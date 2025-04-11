@@ -1,8 +1,3 @@
-function Main:Cleanup_Duel_1VS30()
-
-
-end
-
 function Main:Init_Duel_1VS30(event, playerID)
     -- 技能修改器
     self.currentMatchID = self:GenerateUniqueID()    --比赛ID

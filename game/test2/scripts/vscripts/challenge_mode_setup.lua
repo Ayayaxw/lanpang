@@ -42,8 +42,11 @@ require("challenges/Golem_100")
 require("challenges/Mine_Challenge")
 require("challenges/Skill_Probability_100")
 require("challenges/Golem_vs_Heroes")
-require("challenges/Creep_10_Wave")
-
+require("challenges/Time_Acceleration_Tormentor")
+require("challenges/Fishing_Master")
+require("challenges/Skill_Value_100")
+require("challenges/SoloMode")
+require("challenges/CreepChallenge_100percent")
 
 Main.Challenges = {}
 Main.ModeConfig = {}
@@ -134,6 +137,24 @@ Main.GameModes = {
         category = "test"
     },
 
+    {
+        id = "MeepoChaos",
+        code = 0013,
+        name = "超级米波大乱斗",
+        menuConfig = {"SelfHeroRow", "OpponentHeroRow"},
+        category = "test"
+    },
+
+    {
+        id = "TestMode",
+        code = 0014,
+        name = "测试模式",
+        menuConfig = {"SelfHeroRow", "OpponentHeroRow"},
+        category = "test"
+    },
+
+
+
     -- Creep Challenge modes (1000-1999)
     {
         id = "CreepChallenge_100Creeps",
@@ -173,7 +194,7 @@ Main.GameModes = {
         category = "multiplayer"
     },
     {
-        id = "TestMode",
+        id = "SoloMode",
         code = 2005,
         name = "单挑",
         menuConfig = {"SelfHeroRow", "OpponentHeroRow"},
@@ -228,13 +249,7 @@ Main.GameModes = {
         menuConfig = {"SelfHeroRow", "OpponentHeroRow"},
         category = "multiplayer"
     },
-    {
-        id = "MeepoChaos",
-        code = 2013,
-        name = "超级米波大乱斗",
-        menuConfig = {"SelfHeroRow", "OpponentHeroRow"},
-        category = "multiplayer"
-    },
+
 
     {
         id = "Level7Dazzle",
@@ -251,6 +266,14 @@ Main.GameModes = {
         menuConfig = {"SelfHeroRow", "OpponentHeroRow"},
         category = "multiplayer"
     },
+    -- {
+    --     id = "Skill_Value_100",
+    --     code = 2016,
+    --     name = "技能数值百分之100",
+    --     menuConfig = {"SelfHeroRow", "OpponentHeroRow"},
+    --     category = "multiplayer"
+    -- },
+
 
 
 
@@ -371,9 +394,25 @@ Main.GameModes = {
     },
 
     {
-        id = "Creep_10_Wave",
+        id = "Time_Acceleration_Tormentor",
         code = 3019,
-        name = "拉了10波野",
+        name = "时间加速-魔方",
+        menuConfig = {"SelfHeroRow"},
+        category = "single"
+    },
+
+    {
+        id = "Fishing_Master",
+        code = 3020,
+        name = "捕鱼达人",
+        menuConfig = {"SelfHeroRow"},
+        category = "single"
+    },
+
+    {
+        id = "CreepChallenge_100percent",
+        code = 3021,
+        name = "技能百分百大战熊猫",
         menuConfig = {"SelfHeroRow"},
         category = "single"
     },
@@ -525,6 +564,10 @@ function Main:RequestStrategyData()
         {
             name = "卡时间",
             id = "time_limit"
+        },
+        {
+            name = "禁用物品",
+            id = "disable_item"
         },
     }
 
@@ -743,6 +786,10 @@ function Main:RequestStrategyData()
             {
                 name = "双钗出战",
                 id = "double_spear"
+            },
+            {
+                name = "禁用单刀三技能",
+                id = "disable_single_spear"
             },
         },
         npc_dota_hero_terrorblade = {  -- 熊战士

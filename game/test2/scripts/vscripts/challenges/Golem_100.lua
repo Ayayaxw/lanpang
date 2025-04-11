@@ -51,6 +51,8 @@ function Main:Init_Golem_100(event, playerID)
     local selfEquipment = event.selfEquipment or {}
     local selfOverallStrategy = self:getDefaultIfEmpty(event.selfOverallStrategies)
     local selfHeroStrategy = self:getDefaultIfEmpty(event.selfHeroStrategies)
+    local selfSkillThresholds = self:getDefaultIfEmpty(event.selfSkillThresholds)
+    local otherSettings = {skillThresholds = selfSkillThresholds}
 
     local heroName = self:GetHeroNames(selfHeroId)
 
@@ -108,7 +110,7 @@ function Main:Init_Golem_100(event, playerID)
         if selfAIEnabled then
             Timers:CreateTimer(self.duration - 0.7, function()
                 if self.currentTimer ~= timerId or hero_duel.EndDuel then return end
-                CreateAIForHero(self.leftTeamHero1, selfOverallStrategy, selfHeroStrategy,"leftTeamHero1")
+                CreateAIForHero(self.leftTeamHero1, selfOverallStrategy, selfHeroStrategy,"leftTeamHero1",0.01, otherSettings)
 
                 return nil
             end)

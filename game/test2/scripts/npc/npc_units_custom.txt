@@ -513,6 +513,390 @@
 		//Inventory
 	}
 
+	"slark"
+	{
+		"BaseClass"                    "npc_dota_hero"   // 实体链接的类
+		"Model"                        "models/heroes/slark/slark.vmdl"   // 模型
+		"SoundSet"                    "Hero_Slark"                    // 声音设置名称
+		"ModelScale"                "0.900000"
+		"Level"                        "1"
+		"AttributeBaseStrength"        "20"
+		"AttributeBaseAgility"        "21"
+		"AttributeBaseIntelligence"    "16"
+		
+		// 护甲
+		//----------------------------------------------------------------
+		"ArmorPhysical"                "0"            // 物理防御
+		"MagicalResistance"            "25"            // 魔法抗性
+
+		// 攻击
+		//----------------------------------------------------------------
+		"AttackCapabilities"        "DOTA_UNIT_CAP_MELEE_ATTACK"
+		"AttackDamageMin"        "37"
+		"AttackDamageMax"        "43"
+		"AttackDamageType"            "DAMAGE_TYPE_ArmorPhysical"
+		"AttackRate"        "1.700000"
+		"AttackAnimationPoint"        "0.500000"
+		"AttackAcquisitionRange"    "600"        // 可获取目标的范围
+		"AttackRange"                "150"        // 攻击范围
+		"ProjectileSpeed"        "0"
+		"BaseAttackSpeed"  "120"
+		"particle_folder"        "particles/units/heroes/hero_slark"
+		
+		// 属性
+		//----------------------------------------------------------------
+		"AttributePrimary"        "DOTA_ATTRIBUTE_AGILITY"
+		"AttributeStrengthGain"        "2.100000"
+		"AttributeAgilityGain"        "1.500000"
+		"AttributeIntelligenceGain"    "1.900000"
+
+		// 技能
+		"Ability1"        "slark_barracuda"
+		"Ability2"        "slark_pounce"
+		"Ability3"        "slark_essence_shift"
+		"Ability4"        "life_stealer_rage"
+		"Ability6"        "slark_shadow_dance"
+
+		// 赏金
+		//----------------------------------------------------------------
+		"BountyXP"                    "25"        // 经验值
+		"BountyGoldMin"                "20"        // 最小金币
+		"BountyGoldMax"                "26"        // 最大金币
+
+		// 边界
+		//----------------------------------------------------------------
+		"BoundsHullName"            "DOTA_HULL_SIZE_HERO"            // 导航/移动使用的船体类型
+		"RingRadius"                "45"
+		"HealthBarOffset"            "150"
+
+		// 移动
+		//----------------------------------------------------------------
+		"MovementCapabilities"        "DOTA_UNIT_CAP_MOVE_GROUND"            // 移动类型 - 地面, 空中
+		"MovementSpeed"                "300"        // 速度
+		"MovementTurnRate"            "0.700000"        // 转身速率
+
+		// 状态
+		//----------------------------------------------------------------
+		"StatusHealth"                "200"        // 基础生命值
+		"StatusHealthRegen"            "0.25"        // 生命恢复速率
+		"StatusMana"                "75"            // 基础法力值
+		"StatusManaRegen"            "0.5"            // 法力恢复速率
+
+		// 团队
+		//----------------------------------------------------------------
+		"TeamName"                    "DOTA_TEAM_BADGUYS"            // 团队名称
+		
+		// 视野
+		//----------------------------------------------------------------
+		"VisionDaytimeRange"        "1800"        // 白天视野范围
+		"VisionNighttimeRange"        "1800"        // 夜晚视野范围
+	}
+
+
+	"custom_ember_spirit"
+	{
+		"BaseClass"                    "npc_dota_hero"   // 实体链接的类
+		"Model"                        "models/heroes/brewmaster/brewmaster_firespirit.vmdl"   // 模型
+		"SoundSet"                    "Brewmaster_Fire"                    // 声音设置名称
+		"ModelScale"                "1"
+		"Level"                        "1"
+		"AttributeBaseStrength"        "100"
+		"AttributeBaseAgility"        "100"
+		"AttributeBaseIntelligence"    "100"
+		
+		// 护甲
+		//----------------------------------------------------------------
+		"ArmorPhysical"                "50"            // 物理防御
+		"MagicalResistance"            "0"            // 魔法抗性
+
+		// 攻击
+		//----------------------------------------------------------------
+		"AttackCapabilities"        "DOTA_UNIT_CAP_MELEE_ATTACK"
+		"AttackDamageMin"        "0"
+		"AttackDamageMax"        "0"
+		"AttackDamageType"            "DAMAGE_TYPE_ArmorPhysical"
+		"AttackRate"        "1.7"
+		"AttackAnimationPoint"        "0.500000"
+		"AttackAcquisitionRange"    "9999"        // 可获取目标的范围
+		"AttackRange"                "150"        // 攻击范围
+		"ProjectileSpeed"        "0"
+		"BaseAttackSpeed"  "100"
+		"particle_folder"        "particles/units/heroes/hero_ember_spirit"
+				"precache"
+		{
+			"particle"			"particles/econ/events/anniversary_10th/anniversary_10th_hat_ambient_npc_dota_hero_brewmaster.vpcf"
+		}
+		"party_hat_effects"
+		{
+			"party_hat_effect_0"			"particles/econ/events/anniversary_10th/anniversary_10th_hat_ambient_npc_dota_hero_brewmaster.vpcf"
+		}
+		// 属性
+		//----------------------------------------------------------------
+		"AttributePrimary"        "DOTA_ATTRIBUTE_AGILITY"
+		"AttributeStrengthGain"        "0"
+		"AttributeAgilityGain"        "0"
+		"AttributeIntelligenceGain"    "0"
+		// 边界
+		//----------------------------------------------------------------
+		"BoundsHullName"            "DOTA_HULL_SIZE_HERO"            // 导航/移动使用的船体类型
+		"RingRadius"                "45"
+		"HealthBarOffset"            "150"
+
+		// 移动
+		//----------------------------------------------------------------
+		"MovementCapabilities"        "DOTA_UNIT_CAP_MOVE_GROUND"            // 移动类型 - 地面, 空中
+		"MovementSpeed"                "300"        // 速度
+		"MovementTurnRate"            "0.700000"        // 转身速率
+
+		// 状态
+		//----------------------------------------------------------------
+		"StatusHealth"                "200"        // 基础生命值
+		"StatusHealthRegen"            "0"        // 生命恢复速率
+		"StatusMana"                "0"            // 基础法力值
+		"StatusManaRegen"            "0"            // 法力恢复速率
+
+		// 团队
+		//----------------------------------------------------------------
+		"TeamName"                    "DOTA_TEAM_BADGUYS"            // 团队名称
+		
+		// 视野
+		//----------------------------------------------------------------
+		"VisionDaytimeRange"        "1800"        // 白天视野范围
+		"VisionNighttimeRange"        "1800"        // 夜晚视野范围
+	}
+
+
+	"custom_storm_spirit"
+	{
+		"BaseClass"                    "npc_dota_hero"   // 实体链接的类
+		"Model"                        "models/heroes/brewmaster/brewmaster_windspirit.vmdl"   // 模型
+		"SoundSet"                    "Brewmaster_Storm"                    // 声音设置名称
+		"ModelScale"                "1"
+		"Level"                        "1"
+		"AttributeBaseStrength"        "100"
+		"AttributeBaseAgility"        "100"
+		"AttributeBaseIntelligence"    "100"
+		
+		// 护甲
+		//----------------------------------------------------------------
+		"ArmorPhysical"                "0"            // 物理防御
+		"MagicalResistance"            "50"            // 魔法抗性
+
+		// 攻击
+		//----------------------------------------------------------------
+		"AttackCapabilities"        "DOTA_UNIT_CAP_RANGED_ATTACK"
+		"AttackDamageMin"        "0"
+		"AttackDamageMax"        "0"
+		"AttackDamageType"            "DAMAGE_TYPE_ArmorPhysical"
+		"AttackRate"        "1.7"
+		"AttackAnimationPoint"        "0.500000"
+		"AttackAcquisitionRange"    "9999"        // 可获取目标的范围
+		"AttackRange"                "550"        // 攻击范围
+		"ProjectileModel"			"particles/units/heroes/hero_brewmaster/brewmaster_storm_attack.vpcf" // Particle system model for projectile.
+		"ProjectileSpeed"			"1200"		// Speed of projectile.
+		"BaseAttackSpeed"  "100"
+
+		"precache"
+		{
+			"particle"			"particles/econ/events/anniversary_10th/anniversary_10th_hat_ambient_npc_dota_hero_brewmaster.vpcf"
+		}
+		"party_hat_effects"
+		{
+			"party_hat_effect_0"			"particles/econ/events/anniversary_10th/anniversary_10th_hat_ambient_npc_dota_hero_brewmaster.vpcf"
+		}
+		// 属性
+		//----------------------------------------------------------------
+		"AttributePrimary"        "DOTA_ATTRIBUTE_INTELLECT"
+		"AttributeStrengthGain"        "0"
+		"AttributeAgilityGain"        "0"
+		"AttributeIntelligenceGain"    "0"
+		// 边界
+		//----------------------------------------------------------------
+		"BoundsHullName"            "DOTA_HULL_SIZE_HERO"            // 导航/移动使用的船体类型
+		"RingRadius"                "45"
+		"HealthBarOffset"            "150"
+
+		// 移动
+		//----------------------------------------------------------------
+		"MovementCapabilities"        "DOTA_UNIT_CAP_MOVE_GROUND"            // 移动类型 - 地面, 空中
+		"MovementSpeed"                "300"        // 速度
+		"MovementTurnRate"            "0.700000"        // 转身速率
+
+		// 状态
+		//----------------------------------------------------------------
+		"StatusHealth"                "200"        // 基础生命值
+		"StatusHealthRegen"            "0"        // 生命恢复速率
+		"StatusMana"                "0"            // 基础法力值
+		"StatusManaRegen"            "0"            // 法力恢复速率
+
+		// 团队
+		//----------------------------------------------------------------
+		"TeamName"                    "DOTA_TEAM_BADGUYS"            // 团队名称
+		
+		// 视野
+		//----------------------------------------------------------------
+		"VisionDaytimeRange"        "1800"        // 白天视野范围
+		"VisionNighttimeRange"        "1800"        // 夜晚视野范围
+	}
+
+	"custom_earth_spirit"
+	{
+		"BaseClass"                    "npc_dota_hero"   // 实体链接的类
+		"Model"                        "models/heroes/brewmaster/brewmaster_earthspirit.vmdl"   // 模型
+		"SoundSet"                    "Brewmaster_Earth"                    // 声音设置名称
+		"ModelScale"                "1"
+		"Level"                        "1"
+		"AttributeBaseStrength"        "100"
+		"AttributeBaseAgility"        "100"
+		"AttributeBaseIntelligence"    "100"
+		
+		// 护甲
+		//----------------------------------------------------------------
+		"ArmorPhysical"                "0"            // 物理防御
+		"MagicalResistance"            "0"            // 魔法抗性
+
+		// 攻击
+		//----------------------------------------------------------------
+		"AttackCapabilities"        "DOTA_UNIT_CAP_MELEE_ATTACK"
+		"AttackDamageMin"        "0"
+		"AttackDamageMax"        "0"
+		"AttackDamageType"            "DAMAGE_TYPE_ArmorPhysical"
+		"AttackRate"        "1.7"
+		"AttackAnimationPoint"        "0.500000"
+		"AttackAcquisitionRange"    "9999"        // 可获取目标的范围
+		"AttackRange"                "150"        // 攻击范围
+		"ProjectileSpeed"        "0"
+		"BaseAttackSpeed"  "100"
+
+				"precache"
+		{
+			"particle"			"particles/econ/events/anniversary_10th/anniversary_10th_hat_ambient_npc_dota_hero_brewmaster.vpcf"
+		}
+		"party_hat_effects"
+		{
+			"party_hat_effect_0"			"particles/econ/events/anniversary_10th/anniversary_10th_hat_ambient_npc_dota_hero_brewmaster.vpcf"
+		}
+		// 属性
+		//----------------------------------------------------------------
+		"AttributePrimary"        "DOTA_ATTRIBUTE_STRENGTH"
+		"AttributeStrengthGain"        "0"
+		"AttributeAgilityGain"        "0"
+		"AttributeIntelligenceGain"    "0"
+		// 边界
+		//----------------------------------------------------------------
+		"BoundsHullName"            "DOTA_HULL_SIZE_HERO"            // 导航/移动使用的船体类型
+		"RingRadius"                "45"
+		"HealthBarOffset"            "150"
+
+		// 移动
+		//----------------------------------------------------------------
+		"MovementCapabilities"        "DOTA_UNIT_CAP_MOVE_GROUND"            // 移动类型 - 地面, 空中
+		"MovementSpeed"                "300"        // 速度
+		"MovementTurnRate"            "0.700000"        // 转身速率
+
+		// 状态
+		//----------------------------------------------------------------
+		"StatusHealth"                "200"        // 基础生命值
+		"StatusHealthRegen"            "0"        // 生命恢复速率
+		"StatusMana"                "0"            // 基础法力值
+		"StatusManaRegen"            "0"            // 法力恢复速率
+
+		// 团队
+		//----------------------------------------------------------------
+		"TeamName"                    "DOTA_TEAM_BADGUYS"            // 团队名称
+		
+		// 视野
+		//----------------------------------------------------------------
+		"VisionDaytimeRange"        "1800"        // 白天视野范围
+		"VisionNighttimeRange"        "1800"        // 夜晚视野范围
+	}
+
+	"custom_roshan" //肉山
+	{
+		// Armor
+		//----------------------------------------------------------------
+		"ArmorPhysical"				"30"			// 护甲
+		"MagicalResistance"				"55"			// 魔抗
+		"StatusHealth"				"6000"		// 生命值
+		"StatusHealthRegen"			"20"		// 生命恢复速度
+		"StatusMana"				"0"		// 魔法值
+		"StatusManaRegen"			"0"		// 魔法恢复速度
+
+		// Attack
+		//----------------------------------------------------------------
+		"AttackCapabilities"		"DOTA_UNIT_CAP_MELEE_ATTACK"		// 攻击能力
+		"AttackDamageMin"			"75"		// 最小攻击力
+		"AttackDamageMax"			"75"		// 最大攻击力
+		"AttackDamageType"			"DAMAGE_TYPE_ArmorPhysical"		// 攻击伤害类型
+		"AttackRate"				"2"			// 攻击速度
+		"AttackAnimationPoint"		"0.6"		// 攻击动画点
+		"AttackAcquisitionRange"	"150"		// 获取目标范围
+		"AttackRange"				"150"		// 攻击范围
+		"ProjectileModel"			"particles/base_attacks/ranged_goodguy.vpcf" // 投射物模型
+		"ProjectileSpeed"			"1000"		// 投射物速度
+
+		// General
+		//
+		"BaseClass"					"npc_dota_creature"	// Class of entity of link to.
+		"Model"						"models/creeps/roshan/roshan.vmdl"	// Model.
+		"SoundSet"					"Roshan"					// Name of sound set.
+		"ModelScale"				"1"
+		"Level"						"30"
+		"IsAncient"					"1"
+				
+		// Abilities
+		//----------------------------------------------------------------
+		"Ability1"					"roshan_revengeroar"	// Ability 1.
+		"Ability2"					"roshan_slam"			// Ability 2.
+		"Ability3"					"roshan_inherent_buffs"			// Ability 3.
+		"Ability4"					"roshan_devotion"	// Ability 4.
+		"Ability5"					"roshan_bash"		// Ability 5.
+		"Ability6"					"roshan_spell_block"		// Ability 6 - Extra.
+		"Ability7"					"roshan_grab_and_throw"						// Ability 7 - Extra.
+		"Ability8"					""						// Ability 8 - Extra.
+
+		// Bounty
+		//----------------------------------------------------------------
+		"BountyXP"					"400"		// Experience earn.
+		"BountyGoldMin"				"200"		// Gold earned min.
+		"BountyGoldMax"				"290"		// Gold earned max.
+
+		// Bounds
+		//----------------------------------------------------------------
+		"BoundsHullName"			"DOTA_HULL_SIZE_HERO"			// Hull type used for navigation/locomotion.
+		"RingRadius"				"110"
+		"HealthBarOffset"			"400"
+
+		// Movement
+		//----------------------------------------------------------------
+		"MovementCapabilities"		"DOTA_UNIT_CAP_MOVE_GROUND"			// Type of locomotion - ground, air
+		"MovementSpeed"				"270"		// Speed
+		"MovementTurnRate"			"1.0"		// Turning rate.
+
+		// Team
+		//----------------------------------------------------------------
+		"TeamName"					"DOTA_TEAM_BADGUYS"			// Team name.
+		"UnitRelationshipClass"		"DOTA_NPC_UNIT_RELATIONSHIP_TYPE_DEFAULT"
+		
+		// Vision
+		//----------------------------------------------------------------
+		"VisionDaytimeRange"		"1400"		// Range of vision during day light.
+		"VisionNighttimeRange"		"1400"		// Range of vision at night time.
+
+		// Inventory
+		//----------------------------------------------------------------
+		"HasInventory"				"1"
+		"precache"
+		{
+			"particle"			"particles/econ/events/frostivus_2024/frostivus_2024_hat_ambient_npc_dota_roshan.vpcf"
+		}
+		"party_hat_effects"
+		{
+			"party_hat_effect_0"			"particles/econ/events/frostivus_2024/frostivus_2024_hat_ambient_npc_dota_roshan.vpcf"
+		}
+	}	
+
+
 	"double_on_death_mega"
 	{
 		// General
@@ -539,7 +923,7 @@
 		"AttackDamageType"			"DAMAGE_TYPE_ArmorPhysical"
 		"AttackRate"				"1"			// Speed of attack.
 		"AttackAnimationPoint"		"0.467"		// Normalized time in animation cycle to attack.
-		"AttackAcquisitionRange"	"500"		// Range within a target can be acquired.
+		"AttackAcquisitionRange"	"9999"		// Range within a target can be acquired.
 		"AttackRange"				"150"		// Range within a target can be attacked.
 		"ProjectileModel"			""			// Particle system model for projectile.
 		"ProjectileSpeed"			""			// Speed of projectile.

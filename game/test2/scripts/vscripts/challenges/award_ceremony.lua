@@ -1,24 +1,24 @@
 function Main:Init_award_ceremony(heroName, heroFacet,playerID, heroChineseName)
     local spawnOrigin = Vector(43, -300, 256)  -- 假设的生成位置，您可以根据需要调整
-    --SpawnFourHeroes()
-    DisplayHeroes()
+    SpawnFourHeroes()
+    --DisplayHeroes()
 
 end
 
 
 function SpawnFourHeroes()
     -- 四个排名位置及其对应的英雄池
-    local rank1Heroes = {    "npc_dota_hero_riki",
-    "npc_dota_hero_bristleback"}
+
+    local rank1Heroes = {    "npc_dota_hero_necrolyte",
+    }
     local rank2Heroes = {    
-        
+        "npc_dota_hero_abyssal_underlord",
 
     }
     --允许表格为空
-    local rank3Heroes = {"npc_dota_hero_omniknight"}
-    local rank4Heroes = {
-        "npc_dota_hero_ursa",
-        "npc_dota_hero_beastmaster",
+    local rank3Heroes = { "npc_dota_hero_spectre",}
+    local rank4Heroes = {"npc_dota_hero_drow_ranger",
+
     }
     
     -- 排名位置坐标
@@ -31,48 +31,129 @@ function SpawnFourHeroes()
     
     -- 英雄池列表
     local heroPoolsByRank = {rank1Heroes, rank2Heroes, rank3Heroes, rank4Heroes}
+    
+    -- 查找米波所在的位置
+    local meepoRank = nil
+    local meepoIndex = nil
+    
+    for rankIndex, heroPool in ipairs(heroPoolsByRank) do
+        for heroIdx, heroName in ipairs(heroPool) do
+            if heroName == "npc_dota_hero_meepo" then
+                meepoRank = rankIndex
+                meepoIndex = heroIdx
+                break
+            end
+        end
+        if meepoRank then break end
+    end
 
-    local function SetupHero(newHero, isFirst)
-        newHero:SetControllableByPlayer(0, true)
-        newHero:StartGesture(ACT_DOTA_VICTORY)
-        HeroMaxLevel(newHero)
-        newHero:AddNewModifier(newHero, nil, "modifier_disarmed", {})
-        newHero:AddNewModifier(newHero, nil, "modifier_damage_reduction_100", {})
-        newHero:AddNewModifier(newHero, nil, "modifier_break", {})
 
-        if isFirst then
-            local particleName = "particles/events/ti6_teams/teleport_start_ti6_lvl3_mvp_phoenix.vpcf"
-            local particle = ParticleManager:CreateParticle(particleName, PATTACH_ABSORIGIN, newHero)
-            ParticleManager:SetParticleControl(particle, 0, newHero:GetAbsOrigin())
+
+    -- 分两阶段创建英雄：先创建米波，然后创建其他英雄
+    Timers:CreateTimer(1, function()
+        -- 如果存在米波，先创建米波
+        if meepoRank then
+            local meepoPool = heroPoolsByRank[meepoRank]
+            table.remove(meepoPool, meepoIndex) -- 从原列表中移除米波
+            
+            local spawnPos = positions[meepoRank]
+            local meepoHero = CreateUnitByName("npc_dota_hero_meepo", spawnPos, true, nil, nil, DOTA_TEAM_GOODGUYS)
+            
+            -- 设置为该排名位置的基础英雄
+            heroPoolsByRank[meepoRank].baseHero = meepoHero
+            SetupHero(meepoHero, meepoRank == 1)
+            meepoHero:SetForwardVector(Vector(0, 1, 0))
+            
+            -- 等待米波设置完成后，创建其余英雄
+            Timers:CreateTimer(0.5, function()
+                SpawnRemainingHeroes(heroPoolsByRank, positions)
+            end)
+        else
+            -- 如果没有米波，直接创建所有英雄
+            SpawnRemainingHeroes(heroPoolsByRank, positions)
+        end
+    end)
+end
+function SetupHero(newHero, isFirst)
+    newHero:SetControllableByPlayer(0, true)
+    
+
+    newHero:StartGesture(ACT_DOTA_VICTORY)
+    
+
+    
+    HeroMaxLevel(newHero)
+    newHero:AddNewModifier(newHero, nil, "modifier_disarmed", {})
+    newHero:AddNewModifier(newHero, nil, "modifier_damage_reduction_100", {})
+    newHero:AddNewModifier(newHero, nil, "modifier_break", {})
+    newHero:AddNewModifier(newHero, nil, "modifier_phased", {})
+    newHero:AddItemByName("item_rapier")
+    newHero:AddItemByName("item_rapier")
+    newHero:AddItemByName("item_rapier")
+    newHero:AddItemByName("item_rapier")
+    newHero:AddItemByName("item_rapier")
+    newHero:AddItemByName("item_rapier")
+    newHero:AddItemByName("item_trident")
+    -- 神杖和魔晶
+    newHero:SetForwardVector(Vector(0, -1, 0))
+    newHero:AddNewModifier(newHero, nil, "modifier_item_aghanims_shard", {})
+    newHero:AddNewModifier(newHero, nil, "modifier_item_ultimate_scepter_consumed", {})
+    
+    -- 米波特殊处理
+    if newHero:GetUnitName() == "npc_dota_hero_meepo" then
+        local ability = newHero:FindAbilityByName("meepo_megameepo")
+        if ability then
+            ability:OnSpellStart()
+        else
+            print("米波没有第五个技能")
         end
     end
---每个表所有英雄都要上台
 
+    if isFirst then
+        local particleName = "particles/events/ti6_teams/teleport_start_ti6_lvl3_mvp_phoenix.vpcf"
+        local particle = ParticleManager:CreateParticle(particleName, PATTACH_ABSORIGIN, newHero)
+        ParticleManager:SetParticleControl(particle, 0, newHero:GetAbsOrigin())
+    end
+end
+
+-- 创建除米波外的所有其他英雄
+function SpawnRemainingHeroes(heroPoolsByRank, positions)
     for i = 1, 4 do
         local heroPool = heroPoolsByRank[i]
         if heroPool and #heroPool > 0 then
-            local baseHero = nil  -- 基础英雄（第一个）
+            local baseHero = heroPool.baseHero -- 获取可能已经创建的米波作为基础
             
             for heroIndex, heroName in ipairs(heroPool) do
                 local spawnPos = positions[i]
-                local newHero = CreateUnitByName(heroName, spawnPos, true, nil, nil, DOTA_TEAM_GOODGUYS)
-                
-                if heroIndex == 1 then
-                    baseHero = newHero  -- 记录第一个英雄作为基础
-                    SetupHero(newHero, i == 1)
-                else
-                    -- 将后续英雄附加到基础英雄
-                    newHero:AddNewModifier(
-                        newHero,
-                        nil,
-                        "modifier_stack_units",
-                        {parent_unit = baseHero:entindex()}  -- 传递父单位索引
-                    )
-                    -- 设置初始高度偏移
-                    newHero:SetAbsOrigin(spawnPos + Vector(0, 0, 150 * (heroIndex - 1)))
+                local playerId = 0
+                local FacetID = 2
+                local spawnPosition = spawnPos
+                local team = DOTA_TEAM_GOODGUYS
+                local isControllableByPlayer = true
+                local newHero = nil
+                CreateHero(playerId, heroName, FacetID, spawnPosition, team, isControllableByPlayer, 
+                function(hero)
+                    newHero = hero
+
+                    if not baseHero then
+                        -- 如果没有预先创建的基础英雄(米波)，把第一个英雄作为基础
+                        baseHero = newHero
+                        SetupHero(newHero, i == 1)
+                    else
+                        -- 将后续英雄附加到基础英雄
+                        newHero:AddNewModifier(
+                            newHero,
+                            nil,
+                            "modifier_stack_units",
+                            {parent_unit = baseHero:entindex()}
+                        )
+                        -- 设置初始高度偏移
+                       -- newHero:SetAbsOrigin(spawnPos + Vector(0, 0, 150 * (heroIndex)))
+                    end
                 end
-                
-                newHero:SetForwardVector(Vector(0, -1, 0))
+                )
+
+
             end
         end
     end

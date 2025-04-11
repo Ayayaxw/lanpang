@@ -25,6 +25,117 @@
     width: 200px;
 }
 
+/* 添加击杀计数器样式 - 现代闪金光效果 */
+.KillCounterText {
+    text-align: center;
+    horizontal-align: center;
+    font-weight: bold;
+    font-size: 36px;
+    color: gradient( linear, 0% 0%, 0% 100%, from( #ffffff ), to( #ffd700 ) );
+    letter-spacing: 1px;
+    
+    /* 强力描边 */
+    text-shadow: 2px 2px 2px #000000, 
+                -2px -2px 2px #000000, 
+                2px -2px 2px #000000, 
+                -2px 2px 2px #000000,
+                0px 0px 8px #9d7e16;
+    
+    /* 内边距和边框 */
+    padding: 2px 10px;
+    border: 1px solid gradient( linear, 0% 0%, 0% 100%, from( #ffd700aa ), to( #ff8c00aa ) );
+    border-radius: 6px;
+    
+    /* 金色背景 */
+    background-color: gradient( radial, 50% 50%, 0% 0%, 100% 100%, from( #ffd70033 ), to( #00000000 ) );
+    
+    /* 添加金光闪烁动画 */
+    animation-name: killCounterGlow;
+    animation-duration: 3s;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+}
+
+/* 闪金光动画关键帧 - 保留单引号 */
+@keyframes 'killCounterGlow' {
+    0% { 
+        text-shadow: 2px 2px 2px #000000, 
+                    -2px -2px 2px #000000, 
+                    2px -2px 2px #000000, 
+                    -2px 2px 2px #000000,
+                    0px 0px 5px #9d7e16; 
+    }
+    50% { 
+        text-shadow: 2px 2px 2px #000000, 
+                    -2px -2px 2px #000000, 
+                    2px -2px 2px #000000, 
+                    -2px 2px 2px #000000,
+                    0px 0px 12px #ffd700; 
+    }
+    100% { 
+        text-shadow: 2px 2px 2px #000000, 
+                    -2px -2px 2px #000000, 
+                    2px -2px 2px #000000, 
+                    -2px 2px 2px #000000,
+                    0px 0px 5px #9d7e16; 
+    }
+}
+
+/* 击杀数增加时的特效 - 使用其他方式实现放大效果 */
+.KillCounterIncrement {
+    animation-name: killIncrement;
+    animation-duration: 0.5s;
+    animation-timing-function: ease-out;
+}
+
+/* 使用width/height动画代替transform */
+@keyframes 'killIncrement' {
+    0% { 
+        width: 100%;
+        height: 100%;
+    }
+    50% { 
+        width: 120%;
+        height: 120%;
+    }
+    100% { 
+        width: 100%;
+        height: 100%;
+    }
+}
+
+
+
+/* 小兵属性样式 - 紧密描边版 */
+.MinionAttributeText {
+    text-align: center;
+    horizontal-align: center;
+    font-weight: bold;
+    font-size: 28px;
+    letter-spacing: 1px;
+    
+    /* 使用Panorama支持的text-shadow语法 */
+    text-shadow: 0px 0px 0px 3.0 #000000;
+    
+
+    y:40px;
+}
+
+/* 力量属性 - 鲜艳红色 */
+.MinionAttributeText.strength {
+    color: #ff3333;
+}
+
+/* 敏捷属性 - 鲜艳绿色 */
+.MinionAttributeText.agility {
+    color: #33ff33;
+}
+
+/* 智力属性 - 鲜艳蓝色 */
+.MinionAttributeText.intelligence {
+    color: #3399ff;
+}
+
 .FloatingTextContainerHidden {
     visibility: collapse;
 }

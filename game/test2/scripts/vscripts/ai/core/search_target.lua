@@ -573,6 +573,8 @@ function CommonAI:FindBestAllyHeroTarget(entity, ability, requiredModifiers, min
                 return (a:GetOrigin() - entity:GetOrigin()):Length2D(), (b:GetOrigin() - entity:GetOrigin()):Length2D()
             elseif sortBy == "mana_percent" then
                 return a:GetManaPercent(), b:GetManaPercent()
+            elseif sortBy == "max_mana" then
+                return a:GetMaxMana(), b:GetMaxMana()
             elseif sortBy == "nearest_to_enemy" then
                 local enemies = FindUnitsInRadius(
                     entity:GetTeamNumber(),
@@ -915,10 +917,10 @@ function CommonAI:FindBestEnemyHeroTarget(entity, ability, requiredModifiers, mi
             return a:GetHealthPercent() < b:GetHealthPercent()
         elseif sortBy == "health" then
             return a:GetHealth() < b:GetHealth()
+        elseif sortBy == "max_mana" then
+            return a:GetMaxMana() > b:GetMaxMana()
         elseif sortBy == "attack" then
             return a:GetAttackDamage() > b:GetAttackDamage()
-        elseif sortBy == "mana_percent" then
-            return a:GetManaPercent() < b:GetManaPercent()
         elseif sortBy == "threat" then
             -- 威胁度评估：优先攻击距离近且血量低的目标
             local distA = (a:GetOrigin() - entity:GetOrigin()):Length2D()
@@ -1012,6 +1014,7 @@ FindBestEnemyHeroTarget - 寻找最佳敌方目标单位
     - "health": 按当前血量排序
     - "attack": 按攻击力排序
     - "mana_percent": 按蓝量百分比排序
+    - "max_mana": 按最大魔法值排序，优先返回最大的
     - "threat": 按威胁度排序(结合距离和血量)
 - forceHero: bool, 是否只选择英雄单位, 默认true
 

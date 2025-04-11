@@ -67,6 +67,12 @@
 		"DOTA_Tooltip_ability_item_bracer_custom_bonus_intellect"       "+$int"
 		"DOTA_Tooltip_ability_item_bracer_custom_bonus_health_regen"    "+$hp_regen"
 		"DOTA_Tooltip_ability_item_bracer_custom_bonus_health"          "+$health"
+
+		
+
+		"DOTA_Tooltip_ability_item_giant_net"        "捕鱼网"
+		"DOTA_Tooltip_ability_item_giant_net_Description" "抓住范围内的小鱼"
+		"DOTA_Tooltip_ability_item_giant_net_Lore"   "不许走！"
 	}
 
 }

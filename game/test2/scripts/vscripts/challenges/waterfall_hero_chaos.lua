@@ -2,8 +2,8 @@ function Main:Init_waterfall_hero_chaos(event, playerID)
     -- 初始化全局变量
     self.showTeamPanel = true  
     self.isTestMode = false
-    self.heroesPerTeam = 3  -- 每个队伍初始传送的英雄数量，作为独立参数
-    self.preCreatePerTeam = 3 -- 每个队伍初始创建的英雄数量，作为独立参数
+    self.heroesPerTeam = 30  -- 每个队伍初始传送的英雄数量，作为独立参数
+    self.preCreatePerTeam = 30 -- 每个队伍初始创建的英雄数量，作为独立参数
     self.currentDeployIndex = 1  -- 当前部署的英雄索引
 
 
@@ -629,21 +629,6 @@ function Main:SetupWaterFallCombatBuffs(hero)
     hero:AddNewModifier(hero, nil, "modifier_item_ultimate_scepter_consumed", {})
     hero:AddNewModifier(hero, nil, "modifier_auto_elevation_waterfall", {})
 
-    if hero:GetUnitName() == "npc_dota_hero_naga_siren" then
-        hero:RemoveAbility("naga_siren_eelskin")
-
-        hero:AddAbility("naga_siren_eelskin")
-
-    end
-    if hero:GetUnitName() == "npc_dota_hero_tidehunter" then
-        hero:AddNewModifier(hero, nil, "modifier_attack_auto_cast_ability", {ability_index = 2})
-        hero:RemoveAbility("special_bonus_unique_tidehunter_8")
-    end
-
-    --如果英雄是npc_dota_hero_doom_bringer，给他modifier
-    if hero:GetUnitName() == "npc_dota_hero_doom_bringer" then
-        hero:AddNewModifier(hero, nil, "modifier_reset_passive_ability_cooldown", {})
-    end
     -- 查找英雄type
     local heroName = hero:GetUnitName()
     local heroType = nil
@@ -1025,6 +1010,26 @@ function Main:InitializeWaterfallHeroSequence()
     "npc_dota_hero_legion_commander", 
     "npc_dota_hero_tusk",
 
+    "npc_dota_hero_kunkka",
+    "npc_dota_hero_chaos_knight",
+    "npc_dota_hero_omniknight", 
+    "npc_dota_hero_doom_bringer", 
+
+    "npc_dota_hero_spirit_breaker", 
+    "npc_dota_hero_slardar", 
+    "npc_dota_hero_dawnbreaker",
+    "npc_dota_hero_dark_seer",
+    "npc_dota_hero_obsidian_destroyer", 
+    "npc_dota_hero_jakiro", 
+    "npc_dota_hero_muerta",
+
+    "npc_dota_hero_tidehunter",
+    "npc_dota_hero_skeleton_king",
+    "npc_dota_hero_ogre_magi",
+    "npc_dota_hero_axe",
+    "npc_dota_hero_legion_commander", 
+    "npc_dota_hero_tusk",
+
     "npc_dota_hero_kunkka"
 
 
@@ -1032,6 +1037,26 @@ function Main:InitializeWaterfallHeroSequence()
     }
     
     local heroesGroup2 = {
+    "npc_dota_hero_sniper", 
+
+    "npc_dota_hero_gyrocopter", 
+
+    "npc_dota_hero_juggernaut", 
+    "npc_dota_hero_weaver", 
+
+    "npc_dota_hero_shadow_shaman", 
+    "npc_dota_hero_faceless_void", 
+    "npc_dota_hero_drow_ranger", 
+    "npc_dota_hero_razor",
+    "npc_dota_hero_phantom_assassin",
+    "npc_dota_hero_naga_siren", 
+    "npc_dota_hero_broodmother", 
+    "npc_dota_hero_kez",
+    "npc_dota_hero_monkey_king",
+    "npc_dota_hero_phantom_lancer", 
+    "npc_dota_hero_hoodwink",
+    "npc_dota_hero_pangolier", 
+    "npc_dota_hero_brewmaster", 
     "npc_dota_hero_sniper", 
 
     "npc_dota_hero_gyrocopter", 
@@ -1437,7 +1462,7 @@ function Main:DeployWaterFallHero(heroType, isInitialSpawn)
             ParticleManager:ReleaseParticleIndex(particle)
             
             -- 创建AI并设置战斗状态
-            CreateAIForHero(hero,{"攻击无敌单位"})
+            CreateAIForHero(hero,{"攻击无敌单位"},nil,nil,1)
             self:SetupWaterFallCombatBuffs(hero)
             
             -- 执行英雄特殊效果
@@ -1704,7 +1729,7 @@ end
 
 
 function Main:OnNPCSpawned_waterfall_hero_chaos(spawnedUnit, event)
-    spawnedUnit:AddNewModifier(spawnedUnit, nil, "modifier_kv_editor", {})
+    --spawnedUnit:AddNewModifier(spawnedUnit, nil, "modifier_kv_editor", {})
     local minX = -7023.13
     local maxX = -4999.12
     local minY = -876.53

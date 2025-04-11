@@ -35,8 +35,35 @@ function modifier_miniboss_unyielding_shield_custom:DeclareFunctions()
 		MODIFIER_PROPERTY_TOOLTIP2,
 		MODIFIER_PROPERTY_PHYSICAL_ARMOR_BONUS,
 		MODIFIER_EVENT_ON_DAMAGE_HPLOSS,  -- 关键：生命移除专用钩子
+		MODIFIER_PROPERTY_IGNORE_CAST_ANGLE, -- 添加：忽略施法角度
+		MODIFIER_PROPERTY_DISABLE_TURNING, -- 添加：禁止转向属性
+		MODIFIER_EVENT_ON_ATTACK_RECORD 
 	}
 end
+
+function modifier_miniboss_unyielding_shield_custom:GetModifierDisableTurning()
+	return 1
+end
+
+-- 添加：忽略施法角度限制
+function modifier_miniboss_unyielding_shield_custom:GetModifierIgnoreCastAngle()
+	return 1
+end
+
+function modifier_miniboss_unyielding_shield_custom:OnAttackRecord(params)
+    if not IsServer() then return end    
+    -- 检查是否是被攻击的目标
+    if params.target == self:GetParent() then
+        local attacker = params.attacker
+        -- 检查攻击者是否拥有riki_innate_backstab技能
+        if attacker:HasAbility("riki_innate_backstab") then
+			attacker:AddNewModifier(attacker, backstab_ability, "modifier_hidden_break", {duration = 0.5})
+        end
+	elseif attacker:HasAbility("riki_innate_backstab") and HasModifier(attacker, "modifier_hidden_break") then
+		attacker:RemoveModifierByName("modifier_hidden_break")
+    end
+end
+
 
 function modifier_miniboss_unyielding_shield_custom:OnDamageHPLoss(event)
     if event.unit == self:GetParent() then

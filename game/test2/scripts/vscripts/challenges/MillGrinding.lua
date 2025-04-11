@@ -366,7 +366,7 @@ function Main:Init_MillGrinding(event, playerID)
                     end
                     
                     -- 更新显示的文本
-                    self:UpdateText(
+                    self:StartTextMonitor(
                         self.rightTeamHero1,
                         "当前移速: " .. currentSpeed,
                         fontSize,

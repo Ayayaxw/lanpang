@@ -22,13 +22,7 @@ function Main:Init_Skill_Probability_100(event, playerID)
                     hero:AddNewModifier(hero, nil, "modifier_reset_passive_ability_cooldown", {})
                 end
 
-                --如果英雄是npc_dota_hero_naga_siren，给他modifier
-                if hero:GetUnitName() == "npc_dota_hero_naga_siren" then
-                    hero:RemoveAbility("naga_siren_eelskin")
 
-                    hero:AddAbility("naga_siren_eelskin")
-
-                end
             end,
         },  
         FRIENDLY = {
@@ -50,12 +44,7 @@ function Main:Init_Skill_Probability_100(event, playerID)
                 hero:AddNewModifier(hero, nil, "modifier_auto_elevation_small", {})
                 
                 hero:AddNewModifier(hero, nil, "modifier_kv_editor", {})
-                if hero:GetUnitName() == "npc_dota_hero_naga_siren" then
-                    hero:RemoveAbility("naga_siren_eelskin")
 
-                    hero:AddAbility("naga_siren_eelskin")
-
-                end
             end,
         }
     }
@@ -611,53 +600,6 @@ function Main:Init_Skill_Probability_100(event, playerID)
     local order = {"挑战英雄", "对手英雄", "剩余时间"}
     SendInitializationMessage(data, order)
 
-    CreateHero(playerID, "npc_dota_hero_faceless_void", 3, self.waterFall_Center, DOTA_TEAM_BADGUYS, false, 
-    function(faceless_void)
-        
-        self.currentArenaHeroes[2] = faceless_void
-
-        faceless_void:AddNewModifier(faceless_void, nil, "modifier_item_aghanims_shard", {})
-        faceless_void:AddNewModifier(faceless_void, nil, "modifier_kv_editor", {})
-        HeroMaxLevel(faceless_void)
-        
-        -- 添加刷新球
-        local refresher = CreateItem("item_refresher", faceless_void, faceless_void)
-        faceless_void:AddItem(refresher)
-        
-        local ultimateAbility = faceless_void:FindAbilityByName("faceless_void_time_zone")
-        if ultimateAbility then
-            -- 第一次施法，往北移动200码
-            Timers:CreateTimer(1, function()
-                local northPosition = Main.waterFall_Center + Vector(0, 200, 0)
-                faceless_void:CastAbilityOnPosition(northPosition, ultimateAbility, -1)
-                
-                -- 短暂延迟后使用刷新球
-                Timers:CreateTimer(1, function()
-                    -- 使用刷新球 (NoTarget方式)
-                    faceless_void:CastAbilityNoTarget(refresher, -1)
-                    
-                    -- 再短暂延迟后第二次施法，往南移动200码
-                    Timers:CreateTimer(0.3, function()
-                        local southPosition = Main.waterFall_Center + Vector(0, -200, 0)
-                        faceless_void:CastAbilityOnPosition(southPosition, ultimateAbility, -1)
-                    end)
-                end)
-            end)
-        end
-        
-        -- 设置朝向和移动（延迟执行确保不干扰技能释放）
-        Timers:CreateTimer(3, function()
-            --faceless_void:AddNewModifier(faceless_void, nil, "modifier_wearable", {})
-            -- 朝向中心点
-            local direction = (Main.waterFall_Center - faceless_void:GetAbsOrigin()):Normalized()
-            faceless_void:SetForwardVector(direction)
-            
-            -- 移动虚空
-            FindClearSpaceForUnit(faceless_void, Main.waterFall_Caipan + Vector(100, 0, 0), true)
-        end)
-
-    end
-)
     -- 创建玩家英雄
     CreateHero(playerID, heroName, selfFacetId, self.smallDuelAreaLeft, DOTA_TEAM_GOODGUYS, false, function(playerHero)
         self:ConfigureHero(playerHero, true, playerID)
@@ -669,7 +611,8 @@ function Main:Init_Skill_Probability_100(event, playerID)
         if selfAIEnabled then
             Timers:CreateTimer(self.duration - 0.7, function()
                 if self.currentTimer ~= timerId or hero_duel.EndDuel then return end
-                CreateAIForHero(self.leftTeamHero1, selfOverallStrategy, selfHeroStrategy,"leftTeamHero1",0.01,selfSkillThresholds)
+                local otherSettings = {skillThresholds = selfSkillThresholds}
+                CreateAIForHero(self.leftTeamHero1, selfOverallStrategy, selfHeroStrategy,"leftTeamHero1",0.01, otherSettings)
                 return nil
             end)
         end
@@ -686,7 +629,8 @@ function Main:Init_Skill_Probability_100(event, playerID)
         if opponentAIEnabled then
             Timers:CreateTimer(self.duration - 0.7, function()
                 if self.currentTimer ~= timerId or hero_duel.EndDuel then return end
-                CreateAIForHero(self.rightTeamHero1, opponentOverallStrategy, opponentHeroStrategy,"rightTeamHero1",0.01,opponentSkillThresholds)
+                local otherSettings = {skillThresholds = opponentSkillThresholds}
+                CreateAIForHero(self.rightTeamHero1, opponentOverallStrategy, opponentHeroStrategy,"rightTeamHero1",0.01, otherSettings)
                 return nil
             end)
         end

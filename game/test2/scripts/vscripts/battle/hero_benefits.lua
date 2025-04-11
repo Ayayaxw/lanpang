@@ -19,10 +19,9 @@ function Main:HeroBenefits(heroName, hero, overallStrategy, heroStrategy)
                 false
             )
             for _, meepo in pairs(meepos) do
-                if meepo:HasModifier("modifier_meepo_divided_we_stand") and 
-                meepo:IsRealHero() and 
-                meepo ~= hero and
+                if meepo:IsClone() and
                 not AIs[meepo] then
+                    print("创建克隆体AI")
                     -- 创建AI
                     CreateAIForHero(meepo, overallStrategy, heroStrategy, "meepo_clone")
                     
@@ -51,6 +50,8 @@ function Main:HeroBenefits(heroName, hero, overallStrategy, heroStrategy)
                             end
                         end
                     end
+                else
+                    print("没有找到克隆体，单位名：" .. meepo:GetUnitName())
                 end
             end
         end)
@@ -743,13 +744,27 @@ function Main:HeroBenefits(heroName, hero, overallStrategy, heroStrategy)
 
     if heroName == "npc_dota_hero_marci" then
         --给他创建一个信使并且给信使狂战斧
-        --跟他一个team
+        local challengeCode = self.currentChallenge
+        print("challengeCode",challengeCode)
+
+        local challengeName = self:GetChallengeNameByCode(challengeCode)
+
+
         local heroTeam = hero:GetTeamNumber()
         local courier = CreateUnitByName("npc_dota_courier", hero:GetAbsOrigin() + Vector(9999, 9999, 0), true, nil, nil, heroTeam)
         --允许玩家0控制
         courier:SetControllableByPlayer(0, true)
         --狂战斧
-        courier:AddItemByName("item_bfury")
+        if challengeName == "捕鱼达人" then
+            courier:AddItemByName("item_gem")
+        else
+            courier:AddItemByName("item_bfury")
+        end
+
+
+
+        
+
 
     end
 
@@ -894,7 +909,7 @@ function Main:HeroPreparation(heroName, hero, overallStrategy, heroStrategy)
         end
     end
 
-    if heroName == "npc_dota_hero_morphling" then
+    if heroName == "npc_dota_hero_morphling" and not self.currentChallenge == 3021  then
         local ability_modifiers = {
             npc_dota_hero_morphling = {
                 morphling_replicate = {
@@ -948,6 +963,91 @@ function Main:HeroPreparation(heroName, hero, overallStrategy, heroStrategy)
             end)
         end
     end
+
+    if heroName == "npc_dota_hero_rubick" and self.currentChallenge == 3020 then
+        local ability_modifiers = {
+            npc_dota_hero_morphling = {
+                morphling_replicate = {
+                    AbilityValues = {
+                        duration = 1    
+                    },
+                },
+                morphling_morph_agi = {
+                    AbilityValues = {
+                        points_per_tick = 1,
+                        morph_cooldown = 0.001    
+                    },
+                },
+                morphling_morph_str = {
+                    AbilityValues = {
+                        points_per_tick = 1,
+                        morph_cooldown = 0.001    
+                    },
+                },
+            },
+        }
+        self:UpdateAbilityModifiers(ability_modifiers)
+        print("更新了morphling_replicate")
+        local heroTeam = hero:GetTeamNumber()
+        local enemyTeam = heroTeam == DOTA_TEAM_GOODGUYS and DOTA_TEAM_BADGUYS or DOTA_TEAM_GOODGUYS
+    
+        -- 创建娜迦
+        local naga = CreateUnitByName(
+            "npc_dota_hero_naga_siren",
+            hero:GetAbsOrigin() + Vector(100, 0, 0),
+            true,
+            nil,
+            nil,
+            enemyTeam
+        )
+    
+        if naga then
+            -- 添加无敌状态
+            --
+            HeroMaxLevel(naga)
+            naga:AddNewModifier(naga, nil, "modifier_item_aghanims_shard", {})
+            naga:AddNewModifier(naga, nil, "modifier_item_ultimate_scepter_consumed", {})
+            naga:SetControllableByPlayer(0, true)
+            naga:AddNewModifier(naga, nil, "modifier_damage_reduction_100", {})
+
+            
+            -- 添加缴械modifier
+            naga:AddNewModifier(ogre, nil, "modifier_disarmed", {})
+    
+            Timers:CreateTimer(0.5, function()  
+                naga:CastAbilityNoTarget(naga:FindAbilityByName("naga_siren_song_of_the_siren"), 0)
+            end)
+            -- 2秒后清理
+            Timers:CreateTimer(3.0, function()
+                if naga and not naga:IsNull() then
+
+                    hero:SetCursorCastTarget(naga)
+                    hero:FindAbilityByName("rubick_spell_steal"):OnSpellStart()
+                    naga:SetAbsOrigin(Main.SPAWN_POINT_FAR)
+                end
+                self:RestoreOriginalValues()
+                return nil
+            end)
+        end
+    end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     if heroName == "npc_dota_hero_sven" then
         local heroTeam = hero:GetTeamNumber()
         local enemyTeam = heroTeam == DOTA_TEAM_GOODGUYS and DOTA_TEAM_BADGUYS or DOTA_TEAM_GOODGUYS

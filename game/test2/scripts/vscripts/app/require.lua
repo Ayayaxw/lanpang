@@ -9,13 +9,7 @@ require("GameEventListeners/OnAttack") --监听英雄血量
 require("GameEventListeners/OnUnitKilled") --监听英雄血量
 require("GameEventListeners/OnNPCSpawned") --监听单位出生
 
-require("battle/hero_benefits")          --这里放的
-require("battle/game_end_animations")
-require("battle/coordinates")           --放置重要的地图坐标
-require("battle/hero_kv_overrides")           --处理英雄kv覆盖
-require("battle/api_extensions")           --自己实现的一些API没有的功能
-require("battle/ui_event_manager")           --前端信息展示的一些功能
-require("battle/camera_focus_manager")           --相机视角管理
+
 
 require("ai/core/ai_core")
 require("ai/core/AIstrategies")
@@ -30,6 +24,14 @@ require('print_manager')
 require('libraries/vector_targeting')
 require("libraries/timers")
 require("libraries/animations")
+
+require("battle/hero_benefits")          --这里放的
+require("battle/game_end_animations")
+require("battle/coordinates")           --放置重要的地图坐标
+require("battle/hero_kv_overrides")           --处理英雄kv覆盖
+require("battle/api_extensions")           --自己实现的一些API没有的功能
+require("battle/ui_event_manager")           --前端信息展示的一些功能
+require("battle/camera_focus_manager")           --相机视角管理
 
 --require('ai_script')
 require("trigger/quanshui")
@@ -95,3 +97,6 @@ LinkLuaModifier("modifier_attack_auto_cast_ability", "modifier/modifier_attack_a
 LinkLuaModifier("modifier_reset_passive_ability_cooldown", "modifier/modifier_reset_passive_ability_cooldown.lua", LUA_MODIFIER_MOTION_NONE)
 LinkLuaModifier("modifier_extra_health_bonus", "modifier/modifier_extra_health_bonus.lua", LUA_MODIFIER_MOTION_NONE)
 LinkLuaModifier("modifier_custom_neutral_upgrade", "modifier/modifier_custom_neutral_upgrade.lua", LUA_MODIFIER_MOTION_NONE)
+LinkLuaModifier("modifier_hidden_break", "modifier/modifier_hidden_break.lua", LUA_MODIFIER_MOTION_NONE)
+LinkLuaModifier("modifier_slark_shadow_dance_persistent", "modifier/modifier_slark_shadow_dance_persistent.lua", LUA_MODIFIER_MOTION_NONE)
+LinkLuaModifier("modifier_attribute_boost", "modifier/modifier_attribute_boost.lua", LUA_MODIFIER_MOTION_NONE)

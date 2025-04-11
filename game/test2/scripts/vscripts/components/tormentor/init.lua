@@ -5,7 +5,7 @@
 if not Tormentors then
 	Tormentors = class({})
 
-	require("components/tormentor/events")
+	--require("components/tormentor/events")
 
 	Tormentors.spawnLocation = {}
 	Tormentors.vanillaSpawnerName = {}
@@ -20,9 +20,9 @@ if not Tormentors then
 		Tormentors.spawnTime = 1200.0
 	end
 
-	ListenToGameEvent('game_rules_state_change', Dynamic_Wrap(Tormentors, 'OnGameRulesStateChange'), Tormentors)
-	ListenToGameEvent('npc_spawned', Dynamic_Wrap(Tormentors, 'OnNPCSpawned'), Tormentors)
-	ListenToGameEvent('entity_killed', Dynamic_Wrap(Tormentors, 'OnEntityKilled'), Tormentors)
+	--ListenToGameEvent('game_rules_state_change', Dynamic_Wrap(Tormentors, 'OnGameRulesStateChange'), Tormentors)
+	--ListenToGameEvent('npc_spawned', Dynamic_Wrap(Tormentors, 'OnNPCSpawned'), Tormentors)
+	--ListenToGameEvent('entity_killed', Dynamic_Wrap(Tormentors, 'OnEntityKilled'), Tormentors)
 end
 
 function Tormentors:Init()

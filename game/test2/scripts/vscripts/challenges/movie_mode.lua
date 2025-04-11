@@ -58,10 +58,10 @@ function Main:Init_movie_mode(heroName, heroFacet,playerID, heroChineseName)
     -- CreateParentHeroesWithFacets(function(allHeroes)
     --DisplayHeroes()
     --SpawnAllNeutralCreeps1()
-    SpawnMultipleMinibosses()
-    local creepUnit = CreateUnitByName("npc_dota_miniboss_custom", Main.largeSpawnCenter, true, nil, nil, DOTA_TEAM_BADGUYS)
-    --玩家控制
-    creepUnit:SetControllableByPlayer(0, true)
+    -- SpawnMultipleMinibosses()
+    -- local creepUnit = CreateUnitByName("npc_dota_miniboss_custom", Main.largeSpawnCenter, true, nil, nil, DOTA_TEAM_BADGUYS)
+    -- --玩家控制
+    -- creepUnit:SetControllableByPlayer(0, true)
     --CreateOgreMagi()
     --CreateMaxLevelHeroes()
     -- end)
@@ -69,8 +69,135 @@ function Main:Init_movie_mode(heroName, heroFacet,playerID, heroChineseName)
     -- local referee = CreateUnitByName("caipan", Vector(0, 0, 0), true, nil, nil, DOTA_TEAM_BADGUYS)
     -- ShowAnimations(referee)
         --Main:PreSpawnGolem_Golem_vs_Heroes()
-
+    Main:SpawnHeroes()
 end
+
+
+
+function Main:SpawnHeroes()
+    -- 创建第一个英雄（主英雄）
+    CreateHero(0,"npc_dota_hero_lina",1, Vector(0, 0, 0), DOTA_TEAM_GOODGUYS, true, 
+        function(hero)  
+            self.hero1 = hero
+        end
+    )
+    
+    -- 创建第二个英雄（将站在肩膀上的英雄）
+    CreateHero(0,"npc_dota_hero_axe",1, Vector(0, 0, 0), DOTA_TEAM_GOODGUYS, true, 
+        function(hero)  
+            self.hero2 = hero
+        end
+    )
+    
+    Timers:CreateTimer(0.5, function()
+            -- 缩小第二个英雄的尺寸
+            self.hero2:SetModelScale(0.4)
+            
+        -- 设置颜色效果使其更明显（可选）
+        self.hero2:SetRenderColor(255, 200, 200)
+        
+        -- 给予两个英雄相位状态
+        self.hero1:AddNewModifier(self.hero1, nil, "modifier_phased", {})
+        self.hero2:AddNewModifier(self.hero2, nil, "modifier_phased", {})
+        
+        -- 使用附件点获取头部位置
+        local hero1HeadAttach = self.hero1:ScriptLookupAttachment("attach_head")
+        local hero2HeadAttach = self.hero2:ScriptLookupAttachment("attach_head") 
+        
+        -- 使用脚部附件点或估算脚部位置
+        local hero1FootAttach = self.hero1:ScriptLookupAttachment("attach_foot") 
+        if hero1FootAttach <= 0 then
+            -- 许多英雄可能没有脚部附件点，使用hitbox信息估算
+            hero1FootAttach = nil
+        end
+        
+        local hero2FootAttach = self.hero2:ScriptLookupAttachment("attach_foot")
+        if hero2FootAttach <= 0 then
+            hero2FootAttach = nil
+        end
+        
+        -- 软同步：头贴头实现
+        local function SoftSyncPosition()
+            -- 获取主英雄的头部位置
+            local hero1HeadPos
+            if hero1HeadAttach and hero1HeadAttach > 0 then
+                hero1HeadPos = self.hero1:GetAttachmentOrigin(hero1HeadAttach)
+            else
+                -- 如果无法获取头部附件点，使用估算
+                local hero1Origin = self.hero1:GetOrigin()
+                local hero1Height = self.hero1:GetBoundingMaxs().z
+                hero1HeadPos = Vector(hero1Origin.x, hero1Origin.y, hero1Origin.z + hero1Height)
+            end
+            
+            -- 获取第二个英雄的头部和脚部高度差，用于对齐
+            local hero2HeadPos, hero2FootPos
+            if hero2HeadAttach and hero2HeadAttach > 0 then
+                hero2HeadPos = self.hero2:GetAttachmentOrigin(hero2HeadAttach)
+            else
+                local hero2Origin = self.hero2:GetOrigin()
+                local hero2Height = self.hero2:GetBoundingMaxs().z
+                hero2HeadPos = Vector(hero2Origin.x, hero2Origin.y, hero2Origin.z + hero2Height)
+            end
+            
+            if hero2FootAttach and hero2FootAttach > 0 then
+                hero2FootPos = self.hero2:GetAttachmentOrigin(hero2FootAttach)
+            else
+                hero2FootPos = self.hero2:GetOrigin()
+            end
+            
+            -- 计算高度差用于头部对齐
+            local hero2Height = (hero2HeadPos.z - hero2FootPos.z)
+            
+            -- 计算目标位置（将第二个英雄的头与第一个英雄的头对齐）
+            local targetPos = Vector(
+                hero1HeadPos.x,
+                hero1HeadPos.y,
+                hero1HeadPos.z - hero2Height  -- 减去第二个英雄的高度使头部对齐
+            )
+            
+            -- 当前位置
+            local currentPos = self.hero2:GetOrigin()
+            
+            -- 计算新位置 (软同步使用插值)
+            local lerpFactor = 0.2 -- 调整跟随速度
+            local newPos = Vector(
+                currentPos.x + (targetPos.x - currentPos.x) * lerpFactor,
+                currentPos.y + (targetPos.y - currentPos.y) * lerpFactor,
+                currentPos.z + (targetPos.z - currentPos.z) * lerpFactor
+            )
+            
+            -- 设置第二个英雄的位置
+            self.hero2:SetOrigin(newPos)
+            
+            -- 软同步角度
+            local hero1Angles = self.hero1:GetAnglesAsVector()
+            local currentAngles = self.hero2:GetAnglesAsVector()
+            
+            -- 计算角度差，应用平滑插值
+            local angleLerpFactor = 0.15
+            local newAngles = Vector(
+                currentAngles.x + (hero1Angles.x - currentAngles.x) * angleLerpFactor,
+                currentAngles.y + (hero1Angles.y - currentAngles.y) * angleLerpFactor,
+                currentAngles.z + (hero1Angles.z - currentAngles.z) * angleLerpFactor
+            )
+            
+            self.hero2:SetAngles(newAngles.x, newAngles.y, newAngles.z)
+        end
+        
+        -- 创建定时器持续更新
+        Timers:CreateTimer(0.03, function()
+            SoftSyncPosition()
+            return 0.03
+        end)
+        
+        -- 返回创建的英雄
+        return self.hero1, self.hero2
+    end)
+end
+
+
+
+
 function SpawnMultipleMinibosses()
     -- 专注于受击和闲置动画的列表，使用字符串名称来避免nil索引问题
     local animations = {

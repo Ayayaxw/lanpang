@@ -157,7 +157,7 @@ function Main:OnNPCSpawned(event)
                 end
             else
                 if unitName and unitName ~= "" then
-                    DebugPrint(unitName .. " 是真实英雄")
+                    --DebugPrint(unitName .. " 是真实英雄")
                 end
             end
             

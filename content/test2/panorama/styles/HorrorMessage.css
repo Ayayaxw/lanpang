@@ -1,0 +1,72 @@
+#HorrorMessageContainer {
+    width: 100%;
+    height: 100%;
+    horizontal-align: center;
+    vertical-align: center;
+    background-color: gradient( radial, 50% 50%, 0% 0%, 100% 100%, from( #00000000 ), to( #00000070 ) );
+    visibility: collapse;
+    z-index: 100;
+  }
+  
+  .HorrorMessageText {
+    font-size: 96px;
+    color: #ff0000;
+    font-weight: bold;
+    text-align: center;
+    horizontal-align: center;
+    vertical-align: top;
+    margin-top: 100px;
+    letter-spacing: 6px;
+    font-family: Radiance, FZLangQianYueS-R-GB, TH Sarabun New, YDYGO 540, Gulim,MingLiU;
+    
+    text-shadow: 0 0 15px #ff0000,
+                 0 0 25px #aa0000,
+                 0 0 35px #770000;
+    
+    transition-property: opacity, transform, text-shadow;
+    transition-duration: 1.5s;
+    transition-timing-function: ease-in-out;
+    opacity: 0;
+  }
+  
+  .HorrorMessageText.AnimateIn {
+    opacity: 1.0;
+    transform: scale3d(1.3, 1.3, 1.0);
+    text-shadow: 0px 0px 30px #ff0000, 
+                 0px 0px 40px #dd0000, 
+                 0px 0px 50px #aa0000;
+  }
+  
+  .HorrorMessageText.AnimateOut {
+    opacity: 0.0;
+    transform: scale3d(0.7, 0.7, 1.0);
+    transition-duration: 1.5s;  /* 延长过渡时间与背景同步 */
+    transition-property: opacity, transform;
+  }
+  
+  .VignetteStyle {
+    width: 100%;
+    height: 100%;
+    horizontal-align: center;
+    vertical-align: center;
+    background-color: gradient( radial, 50% 50%, 0% 0%, 70% 70%, from( #00000000 ), to( #55000080 ) );
+    opacity: 0;
+    z-index: 99;
+    
+    transition-property: opacity;
+    transition-duration: 1.5s; /* 增加过渡时间使其与文本一致 */
+    transition-timing-function: ease-in-out;
+  }
+  
+  .BlurOverlayStyle {
+    width: 100%;
+    height: 100%;
+    background-color: gradient( radial, 50% 50%, 0% 0%, 100% 100%, from( #00000000 ), to( #000000AA ) );
+    blur: gaussian(3, 3, 2);
+    opacity: 0;
+    z-index: 98;
+  
+    transition-property: opacity, blur;
+    transition-duration: 1.5s; /* 增加过渡时间使其与文本一致 */
+    transition-timing-function: ease-in-out;
+  }

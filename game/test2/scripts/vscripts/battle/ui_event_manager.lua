@@ -1,4 +1,3 @@
-
 function Main:MonitorUnitsStatus()
     -- 计算队伍基础状态的函数
     local function calculateTeamStats(team)
@@ -181,28 +180,22 @@ function Main:MonitorAbilitiesStatus(hero,enableOverlapDetection)
     --print("[发送数据] 数据已发送到前端")
 end
 
+--hero_score\minion_strength\minion_agility\minion_intelligence
 
-function Main:StartTextMonitor(entity, text, fontSize, color)
+
+function Main:StartTextMonitor(entity, text, fontSize, textStyle)
     if not entity or entity:IsNull() then return end
-    if not text or not fontSize or not color then return end
+    if not text or not fontSize or not textStyle then return end
 
     -- 直接发送更新
-    self:SendTextUpdate(entity, text, fontSize, color)
+    self:SendTextUpdate(entity, text, fontSize, textStyle)
 end
 
--- 更新文本内容
-function Main:UpdateText(entity, text, fontSize, color)
-    if not entity or entity:IsNull() then return end
-    if not text or not fontSize or not color then return end
-    
-    -- 直接发送更新
-    self:SendTextUpdate(entity, text, fontSize, color)
-end
 
 -- 发送文本更新到前端
-function Main:SendTextUpdate(entity, text, fontSize, color)
+function Main:SendTextUpdate(entity, text, fontSize, textStyle)
     if not entity or entity:IsNull() then return end
-    if not text or not fontSize or not color then return end
+    if not text or not fontSize or not textStyle then return end
     
     local entityId = entity:GetEntityIndex()
     
@@ -211,8 +204,43 @@ function Main:SendTextUpdate(entity, text, fontSize, color)
         teamId = entity:GetTeamNumber(),
         text = text,
         fontSize = fontSize,
+        textStyle = textStyle
+    })
+end
+
+-- 兼容旧版本的函数重载 - 保留颜色参数
+function Main:StartTextMonitorWithColor(entity, text, fontSize, color)
+    if not entity or entity:IsNull() then return end
+    if not text or not fontSize or not color then return end
+
+    CustomGameEventManager:Send_ServerToAllClients("update_floating_text", {
+        entityId = entity:GetEntityIndex(),
+        teamId = entity:GetTeamNumber(),
+        text = text,
+        fontSize = fontSize,
         color = color
     })
+end
+
+-- 获取预定义的文本样式 - 可扩展
+function Main:GetTextStyle(styleType, attributeType)
+    local styles = {
+        -- 英雄得分样式
+        hero_score = "hero_score",
+        
+        -- 小兵属性样式
+        minion_attribute = {
+            strength = "minion_strength",
+            agility = "minion_agility", 
+            intelligence = "minion_intelligence"
+        }
+    }
+    
+    if styleType == "minion_attribute" and attributeType then
+        return styles.minion_attribute[attributeType] or "default"
+    end
+    
+    return styles[styleType] or "default"
 end
 
 -- 清理指定实体的文本

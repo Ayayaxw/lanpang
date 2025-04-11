@@ -30,7 +30,7 @@
 
 	"item_null_talisman_custom"
 	{
-		"ID"                    "1000004"
+		"ID"                    "1000007"
 		"BaseClass"             "item_lua"
 		"ScriptFile"            "items/item_null_talisman_custom"
 		"AbilityTextureName"    "item_null_talisman"
@@ -196,7 +196,7 @@
 	
 	"item_attribute_amplifier_10x"
 	{
-		"ID"                            "1000004" // 自定义ID
+		"ID"                            "1000005" // 自定义ID
 		"BaseClass"                     "item_lua"
 		"ScriptFile"                    "items/item_attribute_amplifier_10x"
 		"AbilityBehavior"              "DOTA_ABILITY_BEHAVIOR_PASSIVE"
@@ -330,5 +330,54 @@
 			"model_scale"			"25"
 			"buff_linger_duration"		"999999"
 		}
+	}
+
+	"item_giant_net"
+	{
+		"ID"                            "1000004"  // 确保这个ID是唯一的
+		"BaseClass"                     "item_lua"
+		"ScriptFile"                    "items/item_giant_net"
+		"AbilityTextureName"            "item_clumsy_net" // 临时使用希瓦的守护图标，可以替换成更合适的
+		"AbilityBehavior"               "DOTA_ABILITY_BEHAVIOR_POINT | DOTA_ABILITY_BEHAVIOR_AOE"
+		"AbilityUnitTargetTeam"         "DOTA_UNIT_TARGET_TEAM_ENEMY"
+		"AbilityUnitTargetType"         "DOTA_UNIT_TARGET_HERO | DOTA_UNIT_TARGET_BASIC"
+		
+		// 基本属性
+		"ItemCost"                      "250"
+		"ItemShopTags"                  "disable;control"
+		"ItemQuality"                   "epic"
+		"ItemAliases"                   "giant net;net"
+		"ItemDeclarations"              "DECLARE_PURCHASES_TO_TEAMMATES | DECLARE_PURCHASES_IN_SPEECH | DECLARE_PURCHASES_TO_SPECTATORS"
+		
+		// 冷却和消耗
+		"AbilityCooldown"               "0"
+		"AbilityManaCost"               "0"
+		"AbilityCastRange"              "1200"
+		"AbilityCastPoint"              "0.2"
+		
+		// 特殊属性
+		"AbilitySpecial"
+		{
+			"01"
+			{
+				"var_type"              "FIELD_INTEGER"
+				"radius"                "2000"
+			}
+			"02"
+			{
+				"var_type"              "FIELD_FLOAT"
+				"duration"              "60"  // 改为合理的持续时间
+			}
+			"03"
+			{
+				"var_type"              "FIELD_INTEGER"
+				"cast_range"            "3000"
+			}
+		}
+		
+		// 添加直接特殊值，防止读取问题
+		"radius"                "2000"
+		"duration"              "60.0"
+		"cast_range"            "2000"
 	}
 }

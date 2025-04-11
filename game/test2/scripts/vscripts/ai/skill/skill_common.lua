@@ -56,6 +56,22 @@ DOTA_ABILITY_BEHAVIOR = {
     VECTOR_TARGETING = 1073741824
 }
 
+DOTA_UNIT_TARGET_TYPE = {
+    NONE = 0,
+    HERO = 1,
+    CREEP = 2,
+    BUILDING = 4,
+    COURIER = 16,
+    BASIC = 18,
+    HEROES_AND_CREEPS = 19,
+    OTHER = 32,
+    ALL = 55,
+    TREE = 64,
+    CUSTOM = 128,
+    SELF = 256
+}
+
+
 
 function CommonAI:GetAbilityInfo(skill, castRange, aoeRadius)
     local abilityName = skill:GetAbilityName()
@@ -69,7 +85,7 @@ function CommonAI:GetAbilityInfo(skill, castRange, aoeRadius)
 
     local info = {
         skill = skill,
-        targetType = skill:GetAbilityTargetType(),
+        targetType = self:GetSkillTargetType(skill),
         targetTeam = targetTeam,
         castPoint = self:GetRealCastPoint(skill),
         channelTime = channelTime,
@@ -120,7 +136,7 @@ function CommonAI:GetAbilityInfo(skill, castRange, aoeRadius)
     self:log(string.format("技能引导时间 (GetChannelTime): %.2f", info.channelTime))
     self:log(string.format("施法距离 (GetCastRange): %.2f", info.castRange))
     self:log(string.format("作用范围 (aoeRadius): %.2f", info.aoeRadius))
-    self:log(string.format("目标类型 (GetAbilityTargetType): %s", getTargetTypeName(info.targetType)))
+    self:log(string.format("目标类型 (GetSkillTargetType): %s", getTargetTypeName(info.targetType)))
     self:log(string.format("目标队伍 (GetSkillTargetTeam): %s", getTargetTeamName(info.targetTeam)))
     self:log(string.format("技能行为 (GetBehavior): %s", getBehaviorName(info.abilityBehavior)))
     if self.target then
@@ -411,6 +427,69 @@ function CommonAI:FindBestAbilityToUse(entity, target)
     local allSkills = {}
     local heroName = entity:GetUnitName()
     
+    -- 针对卡尔的技能锁定机制
+    if heroName == "npc_dota_hero_invoker" then
+        -- 初始化卡尔目标技能状态（如果不存在）
+        if not self.invokerTargetSkill then
+            self.invokerTargetSkill = nil
+            self.invokerTargetSkillTime = 0
+        end
+        
+        -- 检查大招状态
+        local invokeAbility = entity:FindAbilityByName("invoker_invoke")
+        if invokeAbility then
+            -- 如果大招已冷却，则重置目标技能
+            if self:IsSkillReady(invokeAbility) then
+                self.invokerTargetSkill = nil
+                self.invokerTargetSkillTime = 0
+                self:log("大招已冷却，重置目标技能")
+            -- 如果大招在CD且目标技能已锁定较长时间，检查是否需要继续坚持
+            elseif self.invokerTargetSkill and (GameRules:GetGameTime() - self.invokerTargetSkillTime) > 5 then
+                -- 检查当前元素组合
+                local currentOrbs = {
+                    Q = #entity:FindAllModifiersByName("modifier_invoker_quas_instance"),
+                    W = #entity:FindAllModifiersByName("modifier_invoker_wex_instance"),
+                    E = #entity:FindAllModifiersByName("modifier_invoker_exort_instance")
+                }
+                
+                -- 定义的元素球组合
+                local invokerSkills = {
+                    invoker_cold_snap = {Q = 3, W = 0, E = 0},
+                    invoker_ghost_walk = {Q = 2, W = 1, E = 0},
+                    invoker_tornado = {Q = 1, W = 2, E = 0},
+                    invoker_emp = {Q = 0, W = 3, E = 0},
+                    invoker_alacrity = {Q = 0, W = 2, E = 1},
+                    invoker_chaos_meteor = {Q = 0, W = 1, E = 2},
+                    invoker_sun_strike = {Q = 0, W = 0, E = 3},
+                    invoker_forge_spirit = {Q = 1, W = 0, E = 2},
+                    invoker_ice_wall = {Q = 2, W = 0, E = 1},
+                    invoker_deafening_blast = {Q = 1, W = 1, E = 1}
+                }
+                
+                -- 检查目标技能的元素是否已经匹配
+                local targetOrbs = invokerSkills[self.invokerTargetSkill]
+                local matched = true
+                if targetOrbs then
+                    for element, count in pairs(targetOrbs) do
+                        if currentOrbs[element] ~= count then
+                            matched = false
+                            break
+                        end
+                    end
+                    
+                    -- 如果已匹配，则保持目标不变
+                    if matched then
+                        self:log(string.format("目标技能[%s]元素已匹配，等待大招冷却", self.invokerTargetSkill))
+                    else
+                        -- 未匹配，允许重新选择目标技能
+                        self.invokerTargetSkill = nil
+                        self:log("元素未匹配目标技能，重置目标")
+                    end
+                end
+            end
+        end
+    end
+    
     -- 日志记录
     self:log("查找最大范围技能开始 for entity: " .. (entity and entity:GetUnitName() or "nil"))
     
@@ -419,9 +498,6 @@ function CommonAI:FindBestAbilityToUse(entity, target)
     
     -- 更新基于策略的技能优先级
     self:UpdateSkillPriorityBasedOnStrategy()
-
-
-
 
     if target then
         entityPosition = entity:GetAbsOrigin()
@@ -495,6 +571,7 @@ function CommonAI:FindBestAbilityToUse(entity, target)
         end
 
         if ability then
+            local targetTeam = self:GetSkillTargetTeam(ability)
             local abilityName = ability:GetAbilityName()
             if (self.disabledSkills[heroName] and self:IsDisabledSkill(abilityName, heroName)) or (self.disabledSkills_Threshold[heroName] and self:IsDisabledSkill_Threshold(abilityName, heroName)) then
                 self:log(string.format("忽略禁用的技能 %s", abilityName))
@@ -504,7 +581,7 @@ function CommonAI:FindBestAbilityToUse(entity, target)
                 -- 再次检查target是否有效
                 if IsValidEntity(self.target) then
                     -- 获取技能的目标队伍类型
-                    local targetTeam = self:GetSkillTargetTeam(ability)
+
                     -- 只有敌方技能才进行非英雄单位的判断
                     if targetTeam == DOTA_UNIT_TARGET_TEAM.ENEMY then
                         if not self.target:IsHero() and bit.band(ability:GetAbilityTargetFlags(), DOTA_UNIT_TARGET_FLAG_NOT_CREEP_HERO) ~= 0 then
@@ -541,6 +618,19 @@ function CommonAI:FindBestAbilityToUse(entity, target)
                 self:log(string.format("忽略已经处理过的技能 %s", abilityName))
                 goto continue
             end
+
+            if not self:isSelfCastAbility(abilityName) and targetTeam ~= DOTA_UNIT_TARGET_TEAM_FRIENDLY then
+                local targetType = self:GetSkillTargetType(ability)
+                -- 检查技能目标类型是否只包含英雄，没有其他目标类型
+                local isHeroOnlySkill = (targetType == DOTA_UNIT_TARGET_TYPE.HERO) or 
+                                        (bit.band(targetType, DOTA_UNIT_TARGET_TYPE.HERO) ~= 0 and 
+                                         bit.band(targetType, bit.bnot(DOTA_UNIT_TARGET_TYPE.HERO)) == 0)
+                
+                if self.target and not self.target:IsHero() and isHeroOnlySkill then
+                    self:log(string.format("技能 %s 只能对英雄释放，但目标不是英雄，跳过", abilityName))
+                    goto continue
+                end
+            end
             
 
             local castRange = self:GetSkillCastRange(entity, ability)
@@ -564,7 +654,114 @@ function CommonAI:FindBestAbilityToUse(entity, target)
 
                 -- 检查当前技能是否是卡尔的技能之一
                 if heroName == "npc_dota_hero_invoker" and invokerSkills[abilityName] then
-                    -- 检查是否已有两个可用的召唤技能
+                    -- 先检查该技能是否处于隐藏状态
+                    local skillEntity = entity:FindAbilityByName(abilityName)
+                    local isHidden = skillEntity and skillEntity:IsHidden()
+                    local isCooldown = skillEntity and not self:IsSkillReady(skillEntity)
+                    
+                    -- 检查大招状态
+                    local invokeAbility = entity:FindAbilityByName("invoker_invoke")
+                    local invokeCooldown = false
+                    
+                    if invokeAbility and not self:IsSkillReady(invokeAbility) then
+                        invokeCooldown = true
+                    end
+                    
+                    -- 如果技能处于隐藏状态
+                    if isHidden then
+                        -- 如果大招在CD且已有锁定的目标技能
+                        if invokeCooldown and self.invokerTargetSkill then
+                            -- 如果当前技能不是锁定的目标技能，则跳过
+                            if abilityName ~= self.invokerTargetSkill then
+                                self:log(string.format("大招CD中，已锁定技能[%s]，跳过当前技能[%s]", 
+                                    self.invokerTargetSkill, abilityName))
+                                goto continue
+                            else
+                                self:log(string.format("大招CD中，正在准备锁定的技能[%s]", abilityName))
+                            end
+                        -- 如果大招在CD但尚未锁定目标技能
+                        elseif invokeCooldown and not self.invokerTargetSkill then
+                            -- 检查技能是否在冷却
+                            if isCooldown then
+                                self:log(string.format("技能[%s]在冷却中，不锁定", abilityName))
+                                goto continue
+                            end
+                            
+                            -- 锁定当前技能作为目标
+                            self.invokerTargetSkill = abilityName
+                            self.invokerTargetSkillTime = GameRules:GetGameTime()
+                            self:log(string.format("大招CD中，锁定技能[%s]作为目标", abilityName))
+                        end
+                    else
+                        -- 如果技能不是隐藏状态（已经可用），跳过这部分机制
+                        self:log(string.format("技能[%s]已可用，无需准备元素球", abilityName))
+                    end
+                
+                    -- 先检查该技能所需的所有元素是否已学习
+                    local requiredOrbs = invokerSkills[abilityName]
+                    local allElementsLearned = true
+                    
+                    for element, count in pairs(requiredOrbs) do
+                        if count > 0 then  -- 只检查技能实际需要的元素
+                            local elementAbilityName
+                            if element == "Q" then
+                                elementAbilityName = "invoker_quas"
+                            elseif element == "W" then
+                                elementAbilityName = "invoker_wex"
+                            elseif element == "E" then
+                                elementAbilityName = "invoker_exort"
+                            end
+                            
+                            local elementAbility = entity:FindAbilityByName(elementAbilityName)
+                            if not elementAbility or elementAbility:GetLevel() <= 0 then
+                                self:log(string.format("技能 %s 需要元素 %s，但该元素未学习，跳过此技能", abilityName, elementAbilityName))
+                                allElementsLearned = false
+                                
+                                -- 如果这是锁定的目标技能，则解除锁定
+                                if self.invokerTargetSkill == abilityName then
+                                    self:log(string.format("锁定的目标技能[%s]缺少必要元素，解除锁定", abilityName))
+                                    self.invokerTargetSkill = nil
+                                end
+                                
+                                break
+                            end
+                        end
+                    end
+                    
+                    if not allElementsLearned then
+                        goto continue
+                    end
+
+                    -- 先检查当前元素球状态
+                    local currentOrbs = {
+                        Q = #entity:FindAllModifiersByName("modifier_invoker_quas_instance"),
+                        W = #entity:FindAllModifiersByName("modifier_invoker_wex_instance"),
+                        E = #entity:FindAllModifiersByName("modifier_invoker_exort_instance")
+                    }
+                    
+                    -- 检查当前元素球是否已匹配某个技能
+                    local matchedSkill = nil
+                    for skillName, orbs in pairs(invokerSkills) do
+                        if currentOrbs.Q == orbs.Q and currentOrbs.W == orbs.W and currentOrbs.E == orbs.E then
+                            matchedSkill = skillName
+                            break
+                        end
+                    end
+                    
+                    -- 如果元素球已匹配技能且大招在冷却
+                    local invokeAbility = entity:FindAbilityByName("invoker_invoke")
+                    if matchedSkill and not self:IsSkillReady(invokeAbility) then
+                        -- 如果当前元素球已经匹配了我们正在尝试释放的技能，就不再切换
+                        if matchedSkill == abilityName then
+                            self:log(string.format("元素球已配置为当前目标技能[%s]，大招冷却中，等待CD", matchedSkill))
+                            goto continue
+                        else
+                            self:log(string.format("元素球当前配置为技能[%s]，但目标技能是[%s]，需要切换", matchedSkill, abilityName))
+                            -- 继续执行下面的元素切换逻辑
+                        end
+                    end
+                    
+                    -- 其余原有逻辑不变
                     local availableSkills = 0
                     for skillName, _ in pairs(invokerSkills) do
                         local skill = entity:FindAbilityByName(skillName)
@@ -578,40 +775,115 @@ function CommonAI:FindBestAbilityToUse(entity, target)
                 
                     self:log(string.format("检测到卡尔技能：%s", abilityName))
                     
-                    local currentOrbs = {
-                        Q = #entity:FindAllModifiersByName("modifier_invoker_quas_instance"),
-                        W = #entity:FindAllModifiersByName("modifier_invoker_wex_instance"),
-                        E = #entity:FindAllModifiersByName("modifier_invoker_exort_instance")
-                    }
-                    
                     self:log(string.format("当前元素球状态：Q:%d, W:%d, E:%d", currentOrbs.Q, currentOrbs.W, currentOrbs.E))
                 
                     local requiredOrbs = invokerSkills[abilityName]
                     self:log(string.format("技能 %s 需要的元素球：Q:%d, W:%d, E:%d", abilityName, requiredOrbs.Q, requiredOrbs.W, requiredOrbs.E))
                 
-                    -- 检查是否需要添加新的元素
-                    for element, count in pairs(requiredOrbs) do
-                        if currentOrbs[element] < count then
-                            self:log(string.format("缺少元素：%s，当前数量：%d，需要数量：%d", element, currentOrbs[element], count))
-                            local elementAbility
-                            if element == "Q" then
-                                elementAbility = "invoker_quas"
-                            elseif element == "W" then
-                                elementAbility = "invoker_wex"
-                            elseif element == "E" then
-                                elementAbility = "invoker_exort"
-                            end
-                            ability = entity:FindAbilityByName(elementAbility)
-                            self:log(string.format("准备释放技能：%s", elementAbility))
-                            return ability, 0, 0
+                    -- 计算每个元素的差距，优先切换差距最大的元素
+                    local elementDiffs = {
+                        Q = requiredOrbs.Q - currentOrbs.Q,
+                        W = requiredOrbs.W - currentOrbs.W,
+                        E = requiredOrbs.E - currentOrbs.E
+                    }
+                    
+                    -- 检查是否已经达到目标元素组合
+                    local allMatched = true
+                    for element, diff in pairs(elementDiffs) do
+                        if diff ~= 0 then
+                            allMatched = false
+                            break
                         end
                     end
-                
-                    -- 所有元素都齐全，释放invoke
-                    local invokeAbility = entity:FindAbilityByName("invoker_invoke")
-                    if self:IsSkillReady(invokeAbility) then
-                        self:log("所有需要的元素球都已准备就绪，准备释放 invoke")
-                        return invokeAbility, 0, 0
+                    
+                    -- 如果元素组合已匹配，尝试invoke
+                    if allMatched then
+                        local invokeAbility = entity:FindAbilityByName("invoker_invoke")
+                        if self:IsSkillReady(invokeAbility) then
+                            self:log("所有需要的元素球都已准备就绪，准备释放 invoke")
+                            -- 重置锁定的目标技能，因为invoke后将会有新技能可用
+                            self.invokerTargetSkill = nil
+                            self.invokerTargetSkillTime = 0
+                            return invokeAbility, 0, 0
+                        else
+                            self:log("元素球组合已匹配目标技能，等待invoke冷却")
+                            goto continue
+                        end
+                    end
+                    
+                    -- 找出差距最大的元素（包括正差和负差）
+                    local maxDiffElement = nil
+                    local maxDiffValue = -99
+                    
+                    for element, diff in pairs(elementDiffs) do
+                        -- 优先处理需要增加的元素（正差）
+                        if diff > 0 and diff > maxDiffValue then
+                            maxDiffElement = element
+                            maxDiffValue = diff
+                        -- 其次处理需要减少的元素（负差，变为正值比较）
+                        elseif diff < 0 and -diff > maxDiffValue then
+                            -- 找出另外两个可以增加的元素中，差距较小的一个
+                            local otherElements = {}
+                            for e, d in pairs(elementDiffs) do
+                                if e ~= element then
+                                    table.insert(otherElements, {element = e, diff = d})
+                                end
+                            end
+                            
+                            table.sort(otherElements, function(a, b) 
+                                return (a.diff > 0 and b.diff > 0 and a.diff < b.diff) or 
+                                       (a.diff > 0 and b.diff <= 0)
+                            end)
+                            
+                            if #otherElements > 0 and otherElements[1].diff >= 0 then
+                                maxDiffElement = otherElements[1].element
+                                maxDiffValue = otherElements[1].diff
+                            elseif #otherElements > 0 then
+                                maxDiffElement = otherElements[1].element
+                                maxDiffValue = -diff  -- 使用原元素的差距绝对值
+                            end
+                        end
+                    end
+                    
+                    -- 如果没有找到差距最大的元素（可能已经达到目标状态），就选择一个需要增加的元素
+                    if not maxDiffElement then
+                        for element, diff in pairs(elementDiffs) do
+                            if diff > 0 then
+                                maxDiffElement = element
+                                break
+                            end
+                        end
+                    end
+                    
+                    -- 如果还是没找到，就说明当前元素已经足够，但invoke还在CD，等待即可
+                    if not maxDiffElement then
+                        self:log("当前元素球配置已满足技能需求，等待invoke冷却")
+                        goto continue
+                    end
+                    
+                    -- 确定要切换的元素技能
+                    local elementAbility
+                    if maxDiffElement == "Q" then
+                        elementAbility = "invoker_quas"
+                    elseif maxDiffElement == "W" then
+                        elementAbility = "invoker_wex"
+                    elseif maxDiffElement == "E" then
+                        elementAbility = "invoker_exort"
+                    end
+                    
+                    local abilityObj = entity:FindAbilityByName(elementAbility)
+                    
+                    -- 检查元素技能是否已学习
+                    if not abilityObj or abilityObj:GetLevel() <= 0 then
+                        self:log(string.format("元素技能 %s 未学习，跳过该技能", elementAbility))
+                        goto continue
+                    end
+                    
+                    ability = abilityObj
+                    self:log(string.format("选择切换元素：%s，差距值：%d", elementAbility, maxDiffValue))
+                    
+                    if self:IsSkillReady(ability, 0, 0) then
+                        return ability, 0, 0
                     else
                         goto continue
                     end
@@ -697,8 +969,8 @@ function CommonAI:FindBestAbilityToUse(entity, target)
                 else
                     if not ability:GetToggleState() then
                         ability:ToggleAbility()
-                        self.toggleSkills[abilityName] = true
-                        self:log(string.format("技能 %s 已开启", abilityName))
+                        -- self.toggleSkills[abilityName] = true
+                        -- self:log(string.format("技能 %s 已开启", abilityName))
                     end
                 end
                 goto continue
@@ -884,7 +1156,14 @@ function CommonAI:FindBestAbilityToUse(entity, target)
     end
     
 
-    local bestItem, itemCastRange, itemAoERadius = self:FindBestItemToUse(entity, target)
+    -- 初始化物品相关变量，以避免后续使用未定义变量
+    local bestItem = nil
+    local itemCastRange = 0
+    local itemAoERadius = 0
+    
+    if not self:containsStrategy(self.global_strategy, "禁用物品") then
+        bestItem, itemCastRange, itemAoERadius = self:FindBestItemToUse(entity, target)
+    end
     local targetDistance = (target:GetAbsOrigin() - entity:GetAbsOrigin()):Length2D()
     local itemTotalRange = itemCastRange + itemAoERadius
     if bestItem and itemTotalRange >= targetDistance then
@@ -926,8 +1205,56 @@ function CommonAI:FindBestAbilityToUse(entity, target)
                 W = #self.entity:FindAllModifiersByName("modifier_invoker_wex_instance"),
                 E = #self.entity:FindAllModifiersByName("modifier_invoker_exort_instance")
             }
-    
-            -- 检查策略和对应元素球
+            
+            -- 检查是否有锁定的目标技能
+            if self.invokerTargetSkill then
+                local targetOrbs = nil
+                for skillName, orbs in pairs(invokerSkills) do
+                    if skillName == self.invokerTargetSkill then
+                        targetOrbs = orbs
+                        break
+                    end
+                end
+                
+                if targetOrbs then
+                    -- 计算差距
+                    local elementDiffs = {
+                        Q = targetOrbs.Q - currentOrbs.Q,
+                        W = targetOrbs.W - currentOrbs.W,
+                        E = targetOrbs.E - currentOrbs.E
+                    }
+                    
+                    -- 找出需要调整的元素
+                    local maxDiff = -99
+                    local elementToAdjust = nil
+                    
+                    for element, diff in pairs(elementDiffs) do
+                        if diff ~= 0 and math.abs(diff) > math.abs(maxDiff) then
+                            maxDiff = diff
+                            elementToAdjust = element
+                        end
+                    end
+                    
+                    if elementToAdjust then
+                        local elementAbilityName
+                        if elementToAdjust == "Q" then
+                            elementAbilityName = "invoker_quas"
+                        elseif elementToAdjust == "W" then
+                            elementAbilityName = "invoker_wex"
+                        elseif elementToAdjust == "E" then
+                            elementAbilityName = "invoker_exort"
+                        end
+                        
+                        local elementAbility = self.entity:FindAbilityByName(elementAbilityName)
+                        if elementAbility and elementAbility:GetLevel() > 0 and self:IsSkillReady(elementAbility) then
+                            self:log(string.format("为锁定的目标技能[%s]调整元素[%s]", self.invokerTargetSkill, elementAbilityName))
+                            return elementAbility, 0, 0
+                        end
+                    end
+                end
+            end
+            
+            -- 如果没有锁定的目标技能或无法为其调整元素，则按策略处理
             local targetElement
             if self:containsStrategy(self.hero_strategy, "常驻冰球") then
                 targetElement = "Q"
@@ -938,7 +1265,7 @@ function CommonAI:FindBestAbilityToUse(entity, target)
             else
                 targetElement = "E"  -- 默认保持火球
             end
-    
+            
             -- 如果对应元素球不够3个，则释放对应技能
             if currentOrbs[targetElement] < 3 then
                 local elementAbilityName
@@ -949,13 +1276,14 @@ function CommonAI:FindBestAbilityToUse(entity, target)
                 elseif targetElement == "E" then
                     elementAbilityName = "invoker_exort"
                 end
-    
+                
                 local elementAbility = self.entity:FindAbilityByName(elementAbilityName)
-                if elementAbility then
+                if elementAbility and elementAbility:GetLevel() > 0 and self:IsSkillReady(elementAbility) then
+                    self:log(string.format("根据默认策略增加元素[%s]", elementAbilityName))
                     return elementAbility, 0, 0
                 end
             end
-    
+            
             -- 如果已经有3个对应元素球了，返回nil
             return nil, 0, 0
         end

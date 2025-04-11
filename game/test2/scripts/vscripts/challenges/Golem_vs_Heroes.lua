@@ -376,7 +376,8 @@ function Main:PreSpawnGolem_Golem_vs_Heroes()
                             
                             for idx, hero in pairs(self.heroPool) do
                                 if hero and not hero:IsNull() then
-                                    CreateAIForHero(hero, self.selfOverallStrategy, self.selfHeroStrategy, "heroClone_" .. idx,0.1,self.selfSkillThresholds)
+                                    local otherSettings = {skillThresholds = self.selfSkillThresholds}
+                                    CreateAIForHero(hero, self.selfOverallStrategy, self.selfHeroStrategy, "heroClone_" .. idx,0.1, otherSettings)
                                 end
                             end
                             

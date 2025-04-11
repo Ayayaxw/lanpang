@@ -125,7 +125,7 @@ function Main:InitGameMode()
     CustomGameEventManager:RegisterListener("fc_custom_event", Dynamic_Wrap(self, "RequestItemData"))
     CustomGameEventManager:RegisterListener("fc_custom_event", Dynamic_Wrap(self, "RequestStrategyData"))
     CustomGameEventManager:RegisterListener("SetTimescale", Dynamic_Wrap(self, "OnKeyPressed"))
-    CustomGameEventManager:RegisterListener("request_unit_info", Dynamic_Wrap(self, "OnRequestUnitInfo"))
+    CustomGameEventManager:RegisterListener("request_unit_info", Dynamic_Wrap(self, "PrintEverythingAboutUnit"))
     CustomGameEventManager:RegisterListener("request_nearby_units_info", Dynamic_Wrap(self, "OnRequestNearbyUnitsInfo"))
     CustomGameEventManager:RegisterListener("SetFogOverride", Dynamic_Wrap(self, "OnFogToggled"))
     CustomGameEventManager:RegisterListener("sandbox_custom_event", Dynamic_Wrap(self, "HandleSandboxEvent"))
@@ -603,12 +603,18 @@ function Main:OnRequestNearbyUnitsInfo(event)
     print("================================")
 end
 
-function Main:OnRequestUnitInfo(event)
+function Main:PrintEverythingAboutUnit(event)
     local playerID = event.PlayerID
     local unitEntIndex = event.unit_ent_index
     local unit = EntIndexToHScript(unitEntIndex)
 
     --打印坐标
+    if unit:IsHero() then
+        local gold = unit:GetGold()
+        print(string.format("【单位】%s 的金币：%d", unit:GetUnitName(), gold))
+    else
+        print(string.format("【单位】%s 不是英雄", unit:GetUnitName()))
+    end
 
     --打印该单位是不是守卫
     if unit:IsBarracks() then

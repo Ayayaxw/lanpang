@@ -47,6 +47,7 @@ require("challenges/Fishing_Master")
 require("challenges/Skill_Value_100")
 require("challenges/SoloMode")
 require("challenges/CreepChallenge_100percent")
+require("challenges/Escape_Bandits")
 
 Main.Challenges = {}
 Main.ModeConfig = {}
@@ -273,6 +274,7 @@ Main.GameModes = {
     --     menuConfig = {"SelfHeroRow", "OpponentHeroRow"},
     --     category = "multiplayer"
     -- },
+    
 
 
 
@@ -416,6 +418,15 @@ Main.GameModes = {
         menuConfig = {"SelfHeroRow"},
         category = "single"
     },
+
+    {
+        id = "Escape_Bandits",
+        code = 3022,
+        name = "逃离强盗",
+        menuConfig = {"SelfHeroRow"},
+        category = "single"
+    },
+
 }
 
 -- 自动生成 Challenges 和 ModeConfig

@@ -336,34 +336,33 @@ function modifier_kv_editor:OnCreated(kv)
         
         -- 遍历英雄的所有技能
         for i = 0, parent:GetAbilityCount() - 1 do
-            
-            local ability = parent:GetAbilityByIndex(i)
-
-            --print("【KV编辑器】检查技能 " .. ability:GetAbilityName())
+            if parent.GetAbilityByIndex then
+                local ability = parent:GetAbilityByIndex(i)
 
 
-            if ability then
-                local ability_name = ability:GetAbilityName()
-                local ability_index = hero_name .. "_" .. ability_name
-                local ability_data = CustomNetTables:GetTableValue("edit_kv", ability_index)
-                
-                -- 检查是否有KV覆盖数据且技能名称包含special_bonus或者是固有技能
-                if ability_data and (ability_name:find("special_bonus") or (ability:GetSpecialValueFor("Innate") == 1) or passive_ability_names[ability_name] or passive_ability_names[ability_name:match("([^_]+_[^_]+)_")]) then
-                    local current_level = ability:GetLevel()
-                    print("【KV编辑器】重置被动技能 " .. ability_name .. "，当前等级: " .. current_level)
+                if ability then
+                    local ability_name = ability:GetAbilityName()
+                    local ability_index = hero_name .. "_" .. ability_name
+                    local ability_data = CustomNetTables:GetTableValue("edit_kv", ability_index)
                     
-                    -- 如果技能有等级，通过重设等级来刷新KV
-                    if current_level > 0 then
-                        -- 保存原始等级
-                        local saved_level = current_level
+                    -- 检查是否有KV覆盖数据且技能名称包含special_bonus或者是固有技能
+                    if ability_data and (ability_name:find("special_bonus") or (ability:GetSpecialValueFor("Innate") == 1) or passive_ability_names[ability_name] or passive_ability_names[ability_name:match("([^_]+_[^_]+)_")]) then
+                        local current_level = ability:GetLevel()
+                        print("【KV编辑器】重置被动技能 " .. ability_name .. "，当前等级: " .. current_level)
                         
-                        -- 将技能等级设为0（强制刷新）
-                        ability:SetLevel(0)
-                        
-                        -- 立即将技能等级恢复到原来的等级
-                        ability:SetLevel(saved_level)
-                        
-                        print("【KV编辑器】成功刷新被动技能 " .. ability_name .. " 到等级 " .. saved_level)
+                        -- 如果技能有等级，通过重设等级来刷新KV
+                        if current_level > 0 then
+                            -- 保存原始等级
+                            local saved_level = current_level
+                            
+                            -- 将技能等级设为0（强制刷新）
+                            ability:SetLevel(0)
+                            
+                            -- 立即将技能等级恢复到原来的等级
+                            ability:SetLevel(saved_level)
+                            
+                            print("【KV编辑器】成功刷新被动技能 " .. ability_name .. " 到等级 " .. saved_level)
+                        end
                     end
                 end
             end

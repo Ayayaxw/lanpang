@@ -21,6 +21,7 @@ function CommonAI:Ini_SkillTargetTeam()
         dark_seer_ion_shell = DOTA_UNIT_TARGET_TEAM.FRIENDLY,
         weaver_time_lapse = DOTA_UNIT_TARGET_TEAM.FRIENDLY,
         item_disperser = DOTA_UNIT_TARGET_TEAM.FRIENDLY,
+        
     }
 end
 
@@ -29,3 +30,5 @@ function CommonAI:GetSkillTargetTeam(skill)
 
     return self.skillTargetTeam[abilityName] or skill:GetAbilityTargetTeam()
 end
+
+

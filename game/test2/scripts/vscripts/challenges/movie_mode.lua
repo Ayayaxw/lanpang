@@ -1,9 +1,3 @@
-function Main:Cleanup_movie_mode()
-
-end
-
-
-
 function Main:Init_movie_mode(heroName, heroFacet,playerID, heroChineseName)
     local spawnOrigin = Vector(43, -300, 256)  -- 假设的生成位置，您可以根据需要调整
     -- CreateTenAxes()
@@ -69,130 +63,425 @@ function Main:Init_movie_mode(heroName, heroFacet,playerID, heroChineseName)
     -- local referee = CreateUnitByName("caipan", Vector(0, 0, 0), true, nil, nil, DOTA_TEAM_BADGUYS)
     -- ShowAnimations(referee)
         --Main:PreSpawnGolem_Golem_vs_Heroes()
-    Main:SpawnHeroes()
+    Main:SpawnHeroe2()
+end
+
+function Main:SpawnHeroe2()
+
+    local lanpang = nil
+    CreateHero(0, "npc_dota_hero_ogre_magi", 1, Vector(-8000, -3824, 0), DOTA_TEAM_GOODGUYS, true,
+        function(hero)
+            hero:SetControllableByPlayer(0, true)
+            HeroMaxLevel(hero)
+            hero:AddNewModifier(hero, nil, "modifier_disarmed", {})
+            lanpang = hero
+            hero:AddItemByName("item_ultimate_orb")
+            hero:AddItemByName("item_ultimate_orb")
+            hero:AddItemByName("item_ultimate_orb")
+            hero:AddItemByName("item_ultimate_orb")
+            hero:AddItemByName("item_ultimate_orb")
+            hero:AddItemByName("item_ultimate_orb")
+
+        end
+    )
+    for i = 1, 10 do
+
+        local spawnPos = Vector(-9600,-3808,128)
+        
+        -- 创建赏金猎人
+        local bountyHunter = CreateUnitByName(
+            "npc_dota_hero_bounty_hunter",
+            spawnPos,
+            true,
+            nil,
+            nil,
+            DOTA_TEAM_BADGUYS
+        )
+        
+        -- 给予最大等级
+        HeroMaxLevel(bountyHunter)
+        bountyHunter:SetControllableByPlayer(0, true)
+
+        -- 设置基本属性和方向
+        bountyHunter:SetAcquisitionRange(0)
+        local direction = (Main.largeSpawnCenter - spawnPos):Normalized()
+        bountyHunter:SetForwardVector(direction)
+        
+        -- 添加100%降低攻击力的修饰器
+        local attackDamageModifier = bountyHunter:AddNewModifier(
+            bountyHunter,  -- 源单位
+            nil,  -- 技能来源
+            "modifier_attack_damage_percentage",  -- 修饰器名称
+            {damage_bonus_pct = -100}  -- 参数
+        )
+        --随机1秒到10秒
+        local randomTime = RandomInt(120, 130)
+        Timers:CreateTimer(randomTime/10, function()
+            bountyHunter:MoveToTargetToAttack(lanpang)
+        end)
+
+    end
+
+
+    -- 创建第一个英雄（主英雄）
+    CreateHero(
+        0,
+        "npc_dota_hero_faceless_void",
+        3,
+        Vector(-9327.61, -3828.95, 0),
+        DOTA_TEAM_BADGUYS,
+        true,
+        function(hero)
+            hero:AddNewModifier(hero, nil, "modifier_phased", {})
+            hero:SetControllableByPlayer(0, true)
+
+            hero:AddNewModifier(hero, nil, "modifier_kv_editor", {})
+            HeroMaxLevel(hero)
+            hero:AddItemByName("item_blink")
+
+            local ability_modifiers = {
+                npc_dota_hero_faceless_void = {
+                    faceless_void_time_zone = {
+
+                        AbilityValues = {
+                            duration = {
+                                value = 10
+                            },
+                            AbilityCastRange = {
+                                value = 9999
+                            },
+                            radius = {
+                                value = 3000
+                            },
+                        }
+                    },
+
+                },
+
+
+
+            }
+            self:UpdateAbilityModifiers(ability_modifiers)
+
+
+            local windrunner_dummy = CreateUnitByName(
+                "npc_dota_hero_facelessvoid_wearable_dummy",
+                Vector(-9327.61, -3828.95, 0),
+                true,
+                nil,
+                nil,
+                DOTA_TEAM_BADGUYS
+            )
+        
+        
+            windrunner_dummy:AddNewModifier(windrunner_dummy, nil, "modifier_wearable", {})
+            windrunner_dummy:FollowEntity(hero, true)
+        
+            hero:SetControllableByPlayer(0, true)
+            hero:SetBaseMoveSpeed(240)
+            hero:AddNewModifier(hero, nil, "modifier_disarmed", {})
+
+
+            local targetPosition = Vector(-8590, -3839.95, 128.00)
+
+            Timers:CreateTimer(5.5, function()
+                lanpang:MoveToPosition(targetPosition)
+            end)
+
+
+
+            Timers:CreateTimer(10.0, function()
+                hero:AddNewModifier(hero, nil, "modifier_rooted", {})
+                local targetPoint = Vector(-7318.49, -3816.20, 128.00)
+                hero:MoveToPosition(targetPoint)
+
+                Timers:CreateTimer(1.0, function()
+                    local ability = hero:FindAbilityByName("faceless_void_time_zone")
+                    if ability then
+                        print("发现时间结界技能")
+                        hero:CastAbilityOnPosition(targetPoint, ability, 0)
+
+                        print("时间结界技能已释放")
+                    else
+                        print("未找到时间结界技能")
+                    end
+                end)
+            end)
+
+
+
+        end
+    )
+
+    -- local facelessvoid = CreateHero(
+    --     0,
+    --     "npc_dota_hero_faceless_void",
+    --     3,
+    --     Vector(-6158, -3824, 0),
+    --     DOTA_TEAM_BADGUYS,
+    --     true,
+    --     function(hero)
+    --         hero:AddNewModifier(hero, nil, "modifier_phased", {})
+    --         HeroMaxLevel(hero)
+
+    --         hero:SetControllableByPlayer(0, true)
+    --         local facelessvoid_dummy = CreateUnitByName(
+    --             "npc_dota_hero_facelessvoid_wearable_dummy",
+    --             Vector(-6158, -3824, 0),
+    --             true,
+    --             nil,
+    --             nil,
+    --             DOTA_TEAM_BADGUYS
+    --         )
+            
+    --         facelessvoid_dummy:AddNewModifier(facelessvoid_dummy, nil, "modifier_wearable", {})
+    --         facelessvoid_dummy:FollowEntity(hero, true)
+    --         hero:SetBaseMoveSpeed(240)
+    --         hero:AddNewModifier(hero, nil, "modifier_disarmed", {})
+
+    --     end
+    -- )
+
+
+
+
+
 end
 
 
 
-function Main:SpawnHeroes()
+function Main:SpawnHeroes1()
+    local lanpang = nil
+
+    CreateHero(0, "npc_dota_hero_ogre_magi", 1, Vector(-5255, -3868, 0), DOTA_TEAM_GOODGUYS, true,
+        function(hero)
+            hero:SetControllableByPlayer(0, true)
+            HeroMaxLevel(hero)
+            hero:AddNewModifier(hero, nil, "modifier_disarmed", {})
+
+            hero:AddNewModifier(hero, nil, "modifier_rooted", {})
+            --朝东
+            hero:SetForwardVector(Vector(1, 0, 0))
+            lanpang = hero
+        end
+    )
+
+
+
     -- 创建第一个英雄（主英雄）
-    CreateHero(0,"npc_dota_hero_lina",1, Vector(0, 0, 0), DOTA_TEAM_GOODGUYS, true, 
-        function(hero)  
-            self.hero1 = hero
+    CreateHero(
+        0,
+        "npc_dota_hero_windrunner",
+        3,
+        Vector(-6158, -3824, 0),
+        DOTA_TEAM_BADGUYS,
+        true,
+        function(hero)
+            hero:AddNewModifier(hero, nil, "modifier_phased", {})
+            hero:SetControllableByPlayer(0, true)
+            HeroMaxLevel(hero)
+
+            local wearable = hero:FirstMoveChild()
+            while wearable ~= nil do
+                print("wearable", wearable:GetClassname())
+                if wearable:GetClassname() == "dota_item_wearable" then
+                    local nextWearable = wearable:NextMovePeer()
+                    UTIL_Remove(wearable)
+                    wearable = nextWearable
+                else
+                    wearable = wearable:NextMovePeer()
+                end
+            end
+
+
+            local windrunner_dummy = CreateUnitByName(
+                "npc_dota_hero_windrunner_wearable_dummy",
+                Vector(-6158, -3824, 0),
+                true,
+                nil,
+                nil,
+                DOTA_TEAM_BADGUYS
+            )
+        
+        
+            windrunner_dummy:AddNewModifier(windrunner_dummy, nil, "modifier_wearable", {})
+            windrunner_dummy:FollowEntity(hero, true)
+        
+            hero:SetControllableByPlayer(0, true)
+            hero:SetBaseMoveSpeed(240)
+            hero:AddNewModifier(hero, nil, "modifier_disarmed", {})
+
+
+
+            -- -- 3秒后，让英雄朝着指定坐标移动
+            Timers:CreateTimer(5.0, function()
+                local targetPosition = Vector(-6000.61, -3861.00, 128.00)
+                hero:MoveToPosition(targetPosition)
+                print("英雄开始移动到坐标: ", targetPosition.x, targetPosition.y, targetPosition.z)
+                
+                Timers:CreateTimer(12.0, function()
+                    lanpang:MoveToPosition(targetPosition)
+                end)
+
+
+                -- 10秒后，给英雄添加无限时长的rooted状态并尝试发出移动指令
+                Timers:CreateTimer(15.0, function()
+                    -- 尝试向出生点发出移动指令
+                    local spawnPoint = Vector(-7000, -3824, 0)
+                    hero:MoveToPosition(spawnPoint)
+                    Timers:CreateTimer(1.0, function()
+                        lanpang:RemoveModifierByName("modifier_rooted")
+                        lanpang:MoveToPosition(spawnPoint)
+                    end)
+
+
+                end)
+            end)
         end
     )
-    
-    -- 创建第二个英雄（将站在肩膀上的英雄）
-    CreateHero(0,"npc_dota_hero_axe",1, Vector(0, 0, 0), DOTA_TEAM_GOODGUYS, true, 
-        function(hero)  
-            self.hero2 = hero
+
+
+
+end
+
+
+
+
+
+
+function Main:SpawnHeroes()
+
+    local lanpang = nil
+    CreateHero(0, "npc_dota_hero_ogre_magi", 1, Vector(-6842, -3824, 0), DOTA_TEAM_GOODGUYS, true,
+        function(hero)
+            hero:SetControllableByPlayer(0, true)
+            HeroMaxLevel(hero)
+            hero:AddNewModifier(hero, nil, "modifier_disarmed", {})
+            lanpang = hero
+
         end
     )
-    
-    Timers:CreateTimer(0.5, function()
-            -- 缩小第二个英雄的尺寸
-            self.hero2:SetModelScale(0.4)
-            
-        -- 设置颜色效果使其更明显（可选）
-        self.hero2:SetRenderColor(255, 200, 200)
-        
-        -- 给予两个英雄相位状态
-        self.hero1:AddNewModifier(self.hero1, nil, "modifier_phased", {})
-        self.hero2:AddNewModifier(self.hero2, nil, "modifier_phased", {})
-        
-        -- 使用附件点获取头部位置
-        local hero1HeadAttach = self.hero1:ScriptLookupAttachment("attach_head")
-        local hero2HeadAttach = self.hero2:ScriptLookupAttachment("attach_head") 
-        
-        -- 使用脚部附件点或估算脚部位置
-        local hero1FootAttach = self.hero1:ScriptLookupAttachment("attach_foot") 
-        if hero1FootAttach <= 0 then
-            -- 许多英雄可能没有脚部附件点，使用hitbox信息估算
-            hero1FootAttach = nil
-        end
-        
-        local hero2FootAttach = self.hero2:ScriptLookupAttachment("attach_foot")
-        if hero2FootAttach <= 0 then
-            hero2FootAttach = nil
-        end
-        
-        -- 软同步：头贴头实现
-        local function SoftSyncPosition()
-            -- 获取主英雄的头部位置
-            local hero1HeadPos
-            if hero1HeadAttach and hero1HeadAttach > 0 then
-                hero1HeadPos = self.hero1:GetAttachmentOrigin(hero1HeadAttach)
-            else
-                -- 如果无法获取头部附件点，使用估算
-                local hero1Origin = self.hero1:GetOrigin()
-                local hero1Height = self.hero1:GetBoundingMaxs().z
-                hero1HeadPos = Vector(hero1Origin.x, hero1Origin.y, hero1Origin.z + hero1Height)
+
+
+
+    -- 创建第一个英雄（主英雄）
+    CreateHero(
+        0,
+        "npc_dota_hero_windrunner",
+        3,
+        Vector(-6158, -3824, 0),
+        DOTA_TEAM_BADGUYS,
+        true,
+        function(hero)
+            hero:AddNewModifier(hero, nil, "modifier_phased", {})
+            hero:SetControllableByPlayer(0, true)
+            HeroMaxLevel(hero)
+
+            local wearable = hero:FirstMoveChild()
+            while wearable ~= nil do
+                print("wearable", wearable:GetClassname())
+                if wearable:GetClassname() == "dota_item_wearable" then
+                    local nextWearable = wearable:NextMovePeer()
+                    UTIL_Remove(wearable)
+                    wearable = nextWearable
+                else
+                    wearable = wearable:NextMovePeer()
+                end
             end
-            
-            -- 获取第二个英雄的头部和脚部高度差，用于对齐
-            local hero2HeadPos, hero2FootPos
-            if hero2HeadAttach and hero2HeadAttach > 0 then
-                hero2HeadPos = self.hero2:GetAttachmentOrigin(hero2HeadAttach)
-            else
-                local hero2Origin = self.hero2:GetOrigin()
-                local hero2Height = self.hero2:GetBoundingMaxs().z
-                hero2HeadPos = Vector(hero2Origin.x, hero2Origin.y, hero2Origin.z + hero2Height)
+
+
+            local windrunner_dummy = CreateUnitByName(
+                "npc_dota_hero_windrunner_wearable_dummy",
+                Vector(-6158, -3824, 0),
+                true,
+                nil,
+                nil,
+                DOTA_TEAM_BADGUYS
+            )
+        
+        
+            windrunner_dummy:AddNewModifier(windrunner_dummy, nil, "modifier_wearable", {})
+            windrunner_dummy:FollowEntity(hero, true)
+        
+            hero:SetControllableByPlayer(0, true)
+            hero:SetBaseMoveSpeed(240)
+            hero:AddNewModifier(hero, nil, "modifier_disarmed", {})
+
+            -- 添加时间结界技能并设置等级
+            hero:AddAbility("faceless_void_time_zone")
+            local timeZoneAbility = hero:FindAbilityByName("faceless_void_time_zone")
+            if timeZoneAbility then
+                timeZoneAbility:SetLevel(3)
+                print("风行者已添加时间结界技能并设置等级为4")
             end
-            
-            if hero2FootAttach and hero2FootAttach > 0 then
-                hero2FootPos = self.hero2:GetAttachmentOrigin(hero2FootAttach)
-            else
-                hero2FootPos = self.hero2:GetOrigin()
-            end
-            
-            -- 计算高度差用于头部对齐
-            local hero2Height = (hero2HeadPos.z - hero2FootPos.z)
-            
-            -- 计算目标位置（将第二个英雄的头与第一个英雄的头对齐）
-            local targetPos = Vector(
-                hero1HeadPos.x,
-                hero1HeadPos.y,
-                hero1HeadPos.z - hero2Height  -- 减去第二个英雄的高度使头部对齐
-            )
-            
-            -- 当前位置
-            local currentPos = self.hero2:GetOrigin()
-            
-            -- 计算新位置 (软同步使用插值)
-            local lerpFactor = 0.2 -- 调整跟随速度
-            local newPos = Vector(
-                currentPos.x + (targetPos.x - currentPos.x) * lerpFactor,
-                currentPos.y + (targetPos.y - currentPos.y) * lerpFactor,
-                currentPos.z + (targetPos.z - currentPos.z) * lerpFactor
-            )
-            
-            -- 设置第二个英雄的位置
-            self.hero2:SetOrigin(newPos)
-            
-            -- 软同步角度
-            local hero1Angles = self.hero1:GetAnglesAsVector()
-            local currentAngles = self.hero2:GetAnglesAsVector()
-            
-            -- 计算角度差，应用平滑插值
-            local angleLerpFactor = 0.15
-            local newAngles = Vector(
-                currentAngles.x + (hero1Angles.x - currentAngles.x) * angleLerpFactor,
-                currentAngles.y + (hero1Angles.y - currentAngles.y) * angleLerpFactor,
-                currentAngles.z + (hero1Angles.z - currentAngles.z) * angleLerpFactor
-            )
-            
-            self.hero2:SetAngles(newAngles.x, newAngles.y, newAngles.z)
+
+            -- 3秒后，让英雄朝着指定坐标移动
+            Timers:CreateTimer(3.0, function()
+                local targetPosition = Vector(-9327.61, -3828.95, 128.00)
+                hero:MoveToPosition(targetPosition)
+                print("英雄开始移动到坐标: ", targetPosition.x, targetPosition.y, targetPosition.z)
+                
+                Timers:CreateTimer(5.5, function()
+                    lanpang:MoveToPosition(targetPosition)
+                end)
+                -- 10秒后，给英雄添加无限时长的rooted状态并尝试发出移动指令
+                Timers:CreateTimer(15.0, function()
+                    hero:AddNewModifier(hero, nil, "modifier_rooted", {})
+                    print("英雄被禁止移动")
+                    
+                    -- 尝试向出生点发出移动指令
+                    local spawnPoint = Vector(-6158, -3824, 0)
+                    hero:MoveToPosition(spawnPoint)
+                    print("尝试向出生点发出移动指令")
+                    
+                    -- 检查英雄是否有时间结界技能
+                    local ability = hero:FindAbilityByName("faceless_void_time_zone")
+                    if ability then
+                        print("发现时间结界技能")
+                        local targetPoint = Vector(-7318.49, -3816.20, 128.00)
+
+                        print("时间结界技能已释放")
+                    else
+                        print("未找到时间结界技能")
+                    end
+                end)
+            end)
         end
-        
-        -- 创建定时器持续更新
-        Timers:CreateTimer(0.03, function()
-            SoftSyncPosition()
-            return 0.03
-        end)
-        
-        -- 返回创建的英雄
-        return self.hero1, self.hero2
-    end)
+    )
+
+    -- local facelessvoid = CreateHero(
+    --     0,
+    --     "npc_dota_hero_faceless_void",
+    --     3,
+    --     Vector(-6158, -3824, 0),
+    --     DOTA_TEAM_BADGUYS,
+    --     true,
+    --     function(hero)
+    --         hero:AddNewModifier(hero, nil, "modifier_phased", {})
+    --         HeroMaxLevel(hero)
+
+    --         hero:SetControllableByPlayer(0, true)
+    --         local facelessvoid_dummy = CreateUnitByName(
+    --             "npc_dota_hero_facelessvoid_wearable_dummy",
+    --             Vector(-6158, -3824, 0),
+    --             true,
+    --             nil,
+    --             nil,
+    --             DOTA_TEAM_BADGUYS
+    --         )
+            
+    --         facelessvoid_dummy:AddNewModifier(facelessvoid_dummy, nil, "modifier_wearable", {})
+    --         facelessvoid_dummy:FollowEntity(hero, true)
+    --         hero:SetBaseMoveSpeed(240)
+    --         hero:AddNewModifier(hero, nil, "modifier_disarmed", {})
+
+    --     end
+    -- )
+
+
+
+
+
 end
 
 

@@ -48,6 +48,7 @@ require("challenges/Skill_Value_100")
 require("challenges/SoloMode")
 require("challenges/CreepChallenge_100percent")
 require("challenges/Escape_Bandits")
+require("challenges/Attack_Trigger_1skill")
 
 Main.Challenges = {}
 Main.ModeConfig = {}
@@ -154,13 +155,8 @@ Main.GameModes = {
         category = "test"
     },
     
-    {
-        id = "Escape_Bandits",
-        code = 0022,
-        name = "逃离强盗",
-        menuConfig = {"SelfHeroRow"},
-        category = "test"
-    },
+
+
 
 
 
@@ -427,6 +423,21 @@ Main.GameModes = {
         menuConfig = {"SelfHeroRow"},
         category = "single"
     },
+    {
+        id = "Escape_Bandits",
+        code = 3022,
+        name = "逃离强盗",
+        menuConfig = {"SelfHeroRow"},
+        category = "single"
+    },
+    {
+        id = "Attack_Trigger_1skill",
+        code = 3023,
+        name = "攻击触发一技能",
+        menuConfig = {"SelfHeroRow"},
+        category = "single"
+    },
+
 
 }
 
@@ -1160,6 +1171,10 @@ function Main:RequestStrategyData()
             {
                 name = "给予远古雷肤兽",        -- 改
                 id = "devour_big_thunder_lizard"
+            },
+            {
+                name = "给予远古青蛙战士",        -- 改
+                id = "devour_neutral_ancient_frog"
             },
     
             {

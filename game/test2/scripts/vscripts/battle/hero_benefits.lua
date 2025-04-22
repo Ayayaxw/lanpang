@@ -396,6 +396,8 @@ function Main:HeroBenefits(heroName, hero, overallStrategy, heroStrategy)
             createUnitAndCastSpell("npc_dota_neutral_small_thunder_lizard")
         elseif CommonAI:containsStrategy(heroStrategy, "给予远古雷肤兽") then
             createUnitAndCastSpell("npc_dota_neutral_big_thunder_lizard")
+        elseif CommonAI:containsStrategy(heroStrategy, "给予远古青蛙战士") then
+            createUnitAndCastSpell("npc_dota_neutral_ancient_frog")
         else
             createUnitAndCastSpell("npc_dota_neutral_centaur_khan")
         end
@@ -549,6 +551,8 @@ function Main:HeroBenefits(heroName, hero, overallStrategy, heroStrategy)
             local level = hero:GetLevel()
             -- 给予等级*30的生命值加成
             local bonus_health = level * 30
+            --恢复满血
+            hero:SetHealth(hero:GetMaxHealth())
             hero:AddNewModifier(hero, nil, "modifier_extra_health_bonus", {bonus_health = bonus_health})
         end
     end
@@ -639,6 +643,7 @@ function Main:HeroBenefits(heroName, hero, overallStrategy, heroStrategy)
             print("错误：未能找到斧王的战争饥渴技能或技能未升级！")
         end
     end
+
 
 
     if heroName == "npc_dota_hero_broodmother" then
@@ -747,7 +752,8 @@ function Main:HeroBenefits(heroName, hero, overallStrategy, heroStrategy)
         local challengeCode = self.currentChallenge
         print("challengeCode",challengeCode)
 
-        local challengeName = self:GetChallengeNameByCode(challengeCode)
+        local challengeName = self:GetChallengeIDByCode(challengeCode)
+        print("challengeName",challengeName)
 
 
         local heroTeam = hero:GetTeamNumber()
@@ -755,8 +761,10 @@ function Main:HeroBenefits(heroName, hero, overallStrategy, heroStrategy)
         --允许玩家0控制
         courier:SetControllableByPlayer(0, true)
         --狂战斧
-        if challengeName == "捕鱼达人" then
+        if challengeName == "Fishing_Master" then
             courier:AddItemByName("item_gem")
+        elseif challengeName == "Attack_Trigger_1skill" then
+            courier:AddItemByName("item_satanic")
         else
             courier:AddItemByName("item_bfury")
         end
@@ -963,6 +971,18 @@ function Main:HeroPreparation(heroName, hero, overallStrategy, heroStrategy)
             end)
         end
     end
+
+
+    if heroName == "npc_dota_hero_ringmaster" then
+        local gold = hero:GetGold()
+        local tempHero = CreateUnitByName("npc_dota_hero_axe", hero:GetAbsOrigin() + RandomVector(100), true, nil, nil, DOTA_TEAM_BADGUYS)
+        tempHero:AddNoDraw()
+        Timers:CreateTimer(0.5, function()
+            tempHero:Kill(nil,hero)
+            hero:SetGold(gold, false)
+        end)
+    end
+
 
     if heroName == "npc_dota_hero_rubick" and self.currentChallenge == 3020 then
         local ability_modifiers = {

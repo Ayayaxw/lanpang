@@ -43,7 +43,7 @@ function Main:OnUnitKilled(args)
         end
     end
     --打印死亡的单位名字
-    print("死亡的单位名字: " .. killedUnit:GetUnitName())
+    --print("死亡的单位名字: " .. killedUnit:GetUnitName())
 
 
 
@@ -58,10 +58,10 @@ function Main:OnUnitKilled(args)
                 self[challengeFunctionName](self, killedUnit, args)
             end)
         else
-            print("没有找到对应挑战模式的处理函数: " .. challengeName)
+            --print("没有找到对应挑战模式的处理函数: " .. challengeName)
         end
     else
-        print("未知的挑战模式ID: " .. tostring(challengeId))
+        --print("未知的挑战模式ID: " .. tostring(challengeId))
     end
 end
 

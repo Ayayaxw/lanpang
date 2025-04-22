@@ -2142,6 +2142,30 @@ HeroSkillConditions = {
                 return potentialTarget ~= nil
             end
         },
+
+        ["bounty_hunter_track"] = {
+            function(self, caster, log)
+
+                local ability = caster:FindAbilityByName("bounty_hunter_track")
+                if not ability then return false end
+
+                local potentialTarget = self:FindBestEnemyHeroTarget(
+                    caster,
+                    ability,
+                    {"modifier_bounty_hunter_track"},
+                    0.5,
+                    "distance",
+                    true
+                )
+                
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+
+                return potentialTarget ~= nil
+            end
+        },
+
     },
 
 
@@ -5554,6 +5578,28 @@ HeroSkillConditions = {
             function(self, caster, log)
 
                 local ability = caster:FindAbilityByName("kunkka_torrent")
+                if not ability then return false end
+                
+                local potentialTarget = self:FindBestEnemyHeroTarget(
+                    caster,
+                    ability,
+                    nil,
+                    nil,
+                    "control" 
+                )
+                
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+
+                return potentialTarget ~= nil
+                
+            end
+        },
+        ["kunkka_x_marks_the_spot"] = {
+            function(self, caster, log)
+
+                local ability = caster:FindAbilityByName("kunkka_x_marks_the_spot")
                 if not ability then return false end
                 
                 local potentialTarget = self:FindBestEnemyHeroTarget(

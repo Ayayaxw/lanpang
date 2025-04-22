@@ -20,6 +20,9 @@ function CommonAI:Ini_SkillBehavior()
 
         furion_wrath_of_nature = DOTA_ABILITY_BEHAVIOR.UNIT_TARGET,
         dawnbreaker_solar_guardian = DOTA_ABILITY_BEHAVIOR.UNIT_TARGET,
+        hoodwink_acorn_shot = DOTA_ABILITY_BEHAVIOR.UNIT_TARGET,
+
+        morphling_waveform = DOTA_ABILITY_BEHAVIOR.POINT,
     }
 end
 
@@ -45,8 +48,7 @@ function CommonAI:GetSkill_Behavior(skill, distance, aoeRadius)
 
 
     -- 只有当前技能是ES图腾时才检查
-    if abilityName == "earthshaker_enchant_totem" then
-
+    if abilityName == "earthshaker_enchant_totem" and distance and aoeRadius then
         if distance < aoeRadius or self:containsStrategy(self.hero_strategy, "边走边图腾") then
             print("施法距离够了")
             finalAbilityBehavior = DOTA_ABILITY_BEHAVIOR.UNIT_TARGET

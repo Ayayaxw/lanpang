@@ -254,10 +254,10 @@
     function updateLabelByKey(key, newValue) {
         var keyOrder = getKeyOrder(key);
         var labelId = key + "Value_" + keyOrder;
-        $.Msg("Updating label:");
-        $.Msg("- Key: " + key);
-        $.Msg("- Value: " + newValue);
-        $.Msg("- Label ID: " + labelId);
+        // $.Msg("Updating label:");
+        // $.Msg("- Key: " + key);
+        // $.Msg("- Value: " + newValue);
+        // $.Msg("- Label ID: " + labelId);
     
     
         var label = $("#"+labelId);

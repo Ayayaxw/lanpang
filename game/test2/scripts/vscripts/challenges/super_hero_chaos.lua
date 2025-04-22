@@ -1,5 +1,3 @@
-
-
 function Main:Init_super_hero_chaos(event, playerID)
     -- 初始化全局变量
     self.showTeamPanel = true
@@ -1233,62 +1231,36 @@ end
 
 function Main:GetSpawnPointForType(heroType, isInitialSpawn, hero)
     if isInitialSpawn then
-        if self.heroesPerTeam <= 1 then
-            -- 单个英雄时使用序号来决定角度
-            local teamIndex = self:GetTeamIndex(heroType)
-            local totalTeams = 0
-            for _ in pairs(self.teamTypes) do totalTeams = totalTeams + 1 end
-            local angle = (teamIndex - 1) * (2 * math.pi / totalTeams)
-            
-            local x = self.ARENA_CENTER.x + self.SPAWN_DISTANCE * math.cos(angle)
-            local y = self.ARENA_CENTER.y + self.SPAWN_DISTANCE * math.sin(angle)
-            return Vector(x, y, self.ARENA_CENTER.z)
-        else
-            -- 多个英雄时在直线上均匀分布
-            local x = self.ARENA_CENTER.x
-            local teamIndex = self:GetTeamIndex(heroType)
-            local baseOffset = 200
-            
-            -- 根据队伍序号决定位置
-            if teamIndex == 1 then 
-                x = self.ARENA_CENTER.x + self.SPAWN_DISTANCE + baseOffset  -- 右边
-            elseif teamIndex == 2 then 
-                x = self.ARENA_CENTER.x - self.SPAWN_DISTANCE - baseOffset  -- 左边
-            elseif teamIndex == 3 then 
-                x = self.ARENA_CENTER.x + self.SPAWN_DISTANCE + (baseOffset * 2)  -- 更右边
-            elseif teamIndex == 4 then 
-                x = self.ARENA_CENTER.x - self.SPAWN_DISTANCE - (baseOffset * 2)  -- 更左边
-            end
-            
-            -- 增加垂直方向的总范围
-            local totalHeight = self.SPAWN_DISTANCE * 3.0
-            
-            -- 如果英雄数量大于5，进一步增加间距
-            if self.heroesPerTeam > 5 then
-                totalHeight = self.SPAWN_DISTANCE * 4.0
-            end
-            
-            local stepSize = totalHeight / (self.heroesPerTeam - 1)
-            local verticalOffset = (self.currentDeployIndex - 1) * stepSize - totalHeight/2
-            
-            local y = self.ARENA_CENTER.y + verticalOffset
-            return Vector(x, y, self.ARENA_CENTER.z)
+        -- 获取队伍索引 (1-4)
+        local teamIndex = self:GetTeamIndex(heroType)
+        
+        -- 根据队伍索引计算基础角度 (平均分配四个方向)
+        local baseAngle = (teamIndex - 1) * (math.pi/2)
+        
+        -- 计算当前英雄在队伍中的位置
+        local totalWidth = 500  -- 一个阵容的宽度
+        local offsetFromCenter = 0
+        
+        if self.heroesPerTeam > 1 then
+            -- 计算英雄之间的间距
+            local spacing = totalWidth / (self.heroesPerTeam - 1)
+            -- 计算当前英雄偏移量(从队伍中心算起)
+            offsetFromCenter = (self.currentDeployIndex - 1) * spacing - totalWidth/2
         end
+        
+        -- 根据基础角度和偏移量计算最终位置
+        local distance = self.SPAWN_DISTANCE
+        local perpDistance = offsetFromCenter
+        
+        -- 基于角度和偏移计算坐标
+        local x = self.ARENA_CENTER.x + distance * math.cos(baseAngle) - perpDistance * math.sin(baseAngle)
+        local y = self.ARENA_CENTER.y + distance * math.sin(baseAngle) + perpDistance * math.cos(baseAngle)
+        
+        return Vector(x, y, self.ARENA_CENTER.z)
     else
-        local spawnDistance = 600 -- 默认距离
-
-        -- 根据heroType设置不同的spawn距离
-        if heroType == 1 then
-            spawnDistance = 600
-        elseif heroType == 2 then
-            spawnDistance = 600
-        elseif heroType == 4 then
-            spawnDistance = 600
-        elseif heroType == 8 then
-            spawnDistance = 600
-        end
-
-        -- 如果是远程英雄，减少生成距离
+        -- 后续生成的英雄位置逻辑保持不变
+        local spawnDistance = 600
+        
         if hero and hero:IsRangedAttacker() then
             spawnDistance = spawnDistance - 200
         end

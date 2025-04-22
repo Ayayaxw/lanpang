@@ -46,6 +46,54 @@ ItemConditions = {
             return self.Ally ~= nil
         end
     },
+    ["item_sphere"] = {
+        function(self, caster, item, log)
+            return false
+        end
+    },
+    ["item_quelling_blade"] = {
+        function(self, caster, item, log)
+            return false
+        end
+    },
+    ["item_power_treads"] = {
+        function(self, caster, item, log)
+            return false
+        end
+    },
+    ["item_urn_of_shadows"] = {
+        function(self, caster, item, log)
+            local charges = item:GetCurrentAbilityCharges()
+            self:log(string.format("魂匣当前充能: %d", charges))
+            
+            if charges > 0 then
+                return true
+            else
+                return false
+            end
+        end
+    },
+
+
+        
+
+    ["item_shadow_amulet"] = {
+        function(self, caster, item, log)
+            if not item then return false end
+            
+            self.Ally = self:FindBestAllyHeroTarget(
+                caster,
+                item,
+                nil,
+                nil,
+                "nearest_to_enemy"  -- 优先给离敌人最近的友军加静电护盾
+            )
+            
+            return self.Ally ~= nil
+        end
+    },
+
+
     ["item_refresher"] = {
         function(self, caster, item, log)
             if not item then 

@@ -23,6 +23,10 @@ let processingHeroSelection = false;
 // 添加计数器变量记录触发次数
 let heroSelectionTriggerCount = 0;
 
+// 位置选择相关变量
+let isSelectingLocation = false;
+let locationSelectParticle = null;
+
 // 初始化函数
 (function() {
     // 请求沙盒功能数据
@@ -388,6 +392,17 @@ function createSelectionPanel(parent) {
     zInput.text = userSelections.position.z.toString();
     zInput.AddClass('CoordinateInput');
     
+    // 创建选择位置按钮
+    const selectPosButton = $.CreatePanel('Button', positionRow, 'SelectPosButton');
+    selectPosButton.AddClass('GameModeOption');
+    const selectPosLabel = $.CreatePanel('Label', selectPosButton, '');
+    selectPosLabel.text = '选择位置';
+    
+    // 设置选择位置按钮事件
+    selectPosButton.SetPanelEvent('onactivate', function() {
+        selectLocationOnMap();
+    });
+    
     // 设置坐标输入事件
     xInput.SetPanelEvent('ontextentrychange', function() {
         userSelections.position.x = parseInt(xInput.text) || 0;
@@ -617,4 +632,70 @@ function getTeamName(teamId) {
         7: "自定义4"
     };
     return teamMap[teamId] || "未知队伍";
+}
+
+// 选择位置函数
+function selectLocationOnMap() {
+    // 关闭沙盒面板
+    if (isSandboxModePanelVisible) {
+        toggleSandboxModePanel();
+    }
+    
+    // 创建一个全屏透明面板
+    const overlayPanel = $.CreatePanel('Panel', $.GetContextPanel(), 'LocationSelectOverlay');
+    overlayPanel.AddClass('FullscreenOverlay');
+    
+    // 设置样式确保它覆盖整个屏幕并透明
+    overlayPanel.style.width = '100%';
+    overlayPanel.style.height = '100%';
+    overlayPanel.style.backgroundColor = 'rgba(0, 0, 0, 0.01)'; // 几乎完全透明
+    overlayPanel.style.zIndex = '999';
+    
+    // 添加提示文本
+    const helpText = $.CreatePanel('Label', overlayPanel, 'OverlayHelpText');
+    helpText.text = '点击地图选择位置';
+    helpText.style.color = 'white';
+    helpText.style.fontSize = '24px';
+    helpText.style.fontWeight = 'bold';
+    helpText.style.textShadow = '2px 2px 2px black';
+    helpText.style.textAlign = 'center';
+    helpText.style.horizontalAlign = 'center';
+    helpText.style.verticalAlign = 'bottom';
+    helpText.style.marginBottom = '100px';
+    
+    // 设置点击事件
+    overlayPanel.SetPanelEvent('onactivate', function() {
+        // 获取鼠标位置
+        const cursorPos = GameUI.GetCursorPosition();
+        const worldPos = GameUI.GetScreenWorldPosition(cursorPos);
+        
+        $.Msg("选择位置，屏幕坐标:", cursorPos, "世界坐标:", worldPos);
+        
+        if (worldPos) {
+            // 更新用户选择的位置
+            userSelections.position.x = Math.round(worldPos[0]);
+            userSelections.position.y = Math.round(worldPos[1]);
+            userSelections.position.z = Math.round(worldPos[2]);
+            
+            // 提示用户
+            $.Msg("已选择位置:", userSelections.position);
+        }
+        
+        // 移除面板
+        overlayPanel.DeleteAsync(0);
+        
+        // 重新打开沙盒面板
+        if (!isSandboxModePanelVisible) {
+            toggleSandboxModePanel();
+        }
+        
+        // 确保更新UI上的坐标值
+        $.Schedule(0.1, function() {
+            if ($('#XInput')) $('#XInput').text = userSelections.position.x.toString();
+            if ($('#YInput')) $('#YInput').text = userSelections.position.y.toString();
+            if ($('#ZInput')) $('#ZInput').text = userSelections.position.z.toString();
+        });
+    });
+    
+    $.Msg("已创建位置选择覆盖面板，请点击地图选择位置");
 }

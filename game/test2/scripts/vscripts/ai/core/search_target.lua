@@ -231,6 +231,13 @@ function CommonAI:FindNearestEnemyLastResort(entity)
         return nil
     end
     
+    -- 排除的单位名单
+    local excludedUnits = {
+        ["caipan"] = true,
+        ["npc_dota_thinker"] = true,
+        ["npc_dota_side_gunner"] = true, -- 新增排除的单位
+    }
+    
     -- 设置查找标志
     local flags = DOTA_UNIT_TARGET_FLAG_MAGIC_IMMUNE_ENEMIES + 
                  DOTA_UNIT_TARGET_FLAG_INVULNERABLE + 
@@ -250,11 +257,12 @@ function CommonAI:FindNearestEnemyLastResort(entity)
         false
     )
     
-    -- 找到除caipan外且不带wearable modifier的最近英雄
+    -- 找到不在排除列表中且不带wearable modifier的最近英雄
     local nearestHero = nil
     local nearestHeroDist = GLOBAL_SEARCH_RADIUS
     for _, hero in ipairs(heroEnemies) do
-        if hero:GetUnitName() ~= "caipan" and not hero:HasModifier("modifier_wearable") then
+        local unitName = hero:GetUnitName()
+        if not excludedUnits[unitName] and not hero:HasModifier("modifier_wearable") then
             local dist = (hero:GetOrigin() - entity:GetOrigin()):Length2D()
             if dist < nearestHeroDist then
                 nearestHero = hero
@@ -281,13 +289,12 @@ function CommonAI:FindNearestEnemyLastResort(entity)
         false
     )
     
-    -- 找到除caipan和thinker外且不带wearable modifier的最近单位
+    -- 找到不在排除列表中且不带wearable modifier的最近单位
     local nearestUnit = nil
     local nearestDist = GLOBAL_SEARCH_RADIUS
     for _, enemy in ipairs(allEnemies) do
-        if enemy:GetUnitName() ~= "npc_dota_thinker" and 
-           enemy:GetUnitName() ~= "caipan" and
-           not enemy:HasModifier("modifier_wearable") then
+        local unitName = enemy:GetUnitName()
+        if not excludedUnits[unitName] and not enemy:HasModifier("modifier_wearable") then
             local dist = (enemy:GetOrigin() - entity:GetOrigin()):Length2D()
             if dist < nearestDist then
                 nearestUnit = enemy

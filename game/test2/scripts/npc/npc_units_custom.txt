@@ -32,8 +32,8 @@
 		"Model"						"models/props_gameplay/default_ward.vmdl"   // 虚守卫模型
 		// 或者
 		// "Model"					"models/props_gameplay/observer_ward.vmdl"  // 真眼模型
-		"VisionDaytimeRange"		"9999"		// 白天视野范围。
-		"VisionNighttimeRange"		"9999"		// 夜晚视野范围。
+		"VisionDaytimeRange"		"99999"		// 白天视野范围。
+		"VisionNighttimeRange"		"99999"		// 夜晚视野范围。
 
 		// 队伍
 		//----------------------------------------------------------------
@@ -592,6 +592,106 @@
 		"VisionNighttimeRange"        "1800"        // 夜晚视野范围
 	}
 
+	"npc_dota_hero_facelessvoid_wearable_dummy"
+	{
+		"BaseClass"             "npc_dota_creature"
+		"Model"                 "models/heroes/faceless_void/faceless_void.vmdl"  // 使用英雄的模型
+		"ModelScale"            "1.0"
+		"VisibilityStart"       "0"
+		"VisibilityEnd"         "0"
+		"Creature"
+		{
+			"AttachWearables"
+			{
+
+				"Wearable1"
+				{
+					"ItemDef"     "13807"
+				}
+				"Wearable2"
+				{
+					"ItemDef"     "13804"
+				}
+				"Wearable3"
+				{
+					"ItemDef"     "13806"
+				}
+			}
+		}
+	}
+		"npc_dota_hero_windrunner_wearable_dummy"
+	{
+		"BaseClass"             "npc_dota_creature"
+		"Model"                 "models/heroes/windrunner/windrunner.vmdl"  // 使用英雄的模型
+		"ModelScale"            "1.0"
+		"VisibilityStart"       "0"
+		"VisibilityEnd"         "0"
+		"Creature"
+		{
+			"AttachWearables"
+			{
+
+				"Wearable1"
+				{
+					"ItemDef"     "13805"
+				}
+
+				"Wearable2"
+				{
+					"ItemDef"     "13808"
+				}
+				"Wearable3"
+				{
+					"ItemDef"     "13807"
+				}
+				"Wearable4"
+				{
+					"ItemDef"     "13804"
+				}
+				"Wearable5"
+				{
+					"ItemDef"     "13806"
+				}
+				"Wearable6"
+				{
+					"ItemDef"     "21"
+				}
+			}
+		}
+	}
+
+
+	"npc_dota_hero_marci_wearable_dummy"
+	{
+		"BaseClass"             "npc_dota_creature"
+		"Model"                 "models/heroes/marci/marci_base.vmdl"  // 使用英雄的模型
+		"ModelScale"            "1.0"
+		"VisibilityStart"       "0"
+		"VisibilityEnd"         "0"
+		"Creature"
+		{
+			"AttachWearables"
+			{
+
+				"Wearable1"
+				{
+					"ItemDef"     "25116"
+				}
+				"Wearable2"
+				{
+					"ItemDef"     "25114"
+				}
+				"Wearable3"
+				{
+					"ItemDef"     "25113"
+				}
+				"Wearable4"
+				{
+					"ItemDef"     "25351"
+				}
+			}
+		}
+	}
 
 	"custom_ember_spirit"
 	{
@@ -1084,6 +1184,9 @@
 		"StatusHealth"				"1"		// 基础生命值。
 				"AttackDamageMin"			"0"		// 最小攻击力。
 		"AttackDamageMax"			"0"		// 最大攻击力。
+				"BountyXP"					"0"		// Experience earn.
+		"BountyGoldMin"				"0"			// Gold earned min.
+		"BountyGoldMax"				"0"			// Gold earned max.
 
 	}
 	"npc_dota_creep_goodguys_melee_upgraded_mega"	

@@ -34,17 +34,38 @@ function modifier_extra_health_bonus:OnCreated(kv)
             self.extra_health = 0
         end
         
+        
+        
+        
         -- 强制重新计算属性以应用修饰符的加成
         local parent = self:GetParent()
+        local old_health = parent:GetHealth()
+        local old_max_health = parent:GetMaxHealth()
+        local health_percent = old_health / old_max_health
+        
+        
+        
+        
+        
+        -- 计算应用额外生命值后的理论最大生命值
+        local theoretical_max_health = old_max_health + self.extra_health
+        
+        
+        -- 先重新计算属性，让游戏应用修饰符效果
         if parent:IsHero() then
-            -- 英雄单位使用CalculateStatBonus
             parent:CalculateStatBonus(true)
-        else
-            -- 非英雄单位不需要调用CalculateStatBonus
-            -- 可以使用其他方法刷新状态
-            parent:SetMaxHealth(parent:GetMaxHealth() + self.extra_health)
-            parent:SetHealth(parent:GetHealth() + self.extra_health)
         end
+        
+        -- 获取更新后的最大生命值
+        local new_max_health = parent:GetMaxHealth()
+        
+        
+        -- 保持原有的生命值百分比
+        local new_health = new_max_health * health_percent
+        
+        
+        parent:SetHealth(new_health)
+        
     end
 end
 
@@ -52,6 +73,9 @@ function modifier_extra_health_bonus:OnRefresh(kv)
     if IsServer() then
         -- 记录旧的生命值加成，用于计算生命值差值
         local old_extra_health = self.extra_health or 0
+        
+        
+        
         
         -- 更新额外生命值
         if kv and kv.bonus_health then
@@ -62,48 +86,67 @@ function modifier_extra_health_bonus:OnRefresh(kv)
                 self.extra_health = 0
             end
             
+            
+            
             -- 强制重新计算属性以应用修饰符的加成
             local parent = self:GetParent()
+            local old_health = parent:GetHealth()
+            local old_max_health = parent:GetMaxHealth()
+            local health_percent = old_health / old_max_health
+
+            
+            
+            
+            
+            -- 计算应用额外生命值后的理论最大生命值
+            local theoretical_max_health = old_max_health - old_extra_health + self.extra_health
+            
+
+            -- 先重新计算属性，让游戏应用修饰符效果
             if parent:IsHero() then
-                -- 英雄单位使用CalculateStatBonus
                 parent:CalculateStatBonus(true)
-            else
-                -- 非英雄单位处理生命值差值
-                local health_diff = self.extra_health - old_extra_health
-                if health_diff ~= 0 then
-                    parent:SetMaxHealth(parent:GetMaxHealth() + health_diff)
-                    
-                    -- 如果是增加生命值，同时增加当前生命值
-                    if health_diff > 0 then
-                        parent:SetHealth(parent:GetHealth() + health_diff)
-                    end
-                end
             end
+            
+            -- 获取更新后的最大生命值
+            local new_max_health = parent:GetMaxHealth()
+            
+            
+            -- 保持原有的生命值百分比
+            local new_health = new_max_health * health_percent
+            
+            
+            parent:SetHealth(new_health)
+            
         end
     end
 end
 
+-- function modifier_extra_health_bonus:PlayLevelUpEffect()
+--     local parent = self:GetParent()
+--     local particle = ParticleManager:CreateParticle("particles/generic_gameplay/generic_level_up.vpcf", PATTACH_ABSORIGIN_FOLLOW, parent)
+--     ParticleManager:ReleaseParticleIndex(particle)
+    
+--     -- 可选：播放升级音效
+--     EmitSoundOn("General.LevelUp", parent)
+-- end
+
 function modifier_extra_health_bonus:DeclareFunctions()
-    local funcs = {
+    return {
         MODIFIER_PROPERTY_EXTRA_HEALTH_BONUS
     }
-    return funcs
 end
 
 function modifier_extra_health_bonus:GetModifierExtraHealthBonus()
-    -- 对英雄单位返回额外生命值，对非英雄单位返回0（因为已经在OnCreated/OnRefresh直接修改）
-    if self:GetParent():IsHero() then
-        return self.extra_health or 0
-    else
-        return 0
-    end
+    return self.extra_health or 0
 end
 
--- 设置额外生命值的方法（可供外部调用）
 function modifier_extra_health_bonus:SetExtraHealth(value)
     if IsServer() then
         -- 记录旧的生命值加成，用于计算生命值差值
         local old_extra_health = self.extra_health or 0
+        
+        
+        
         
         -- 确保数值为非负
         if value < 0 then
@@ -112,26 +155,40 @@ function modifier_extra_health_bonus:SetExtraHealth(value)
             self.extra_health = value
         end
         
+        
+        
         -- 强制重新计算属性以应用修饰符的加成
         local parent = self:GetParent()
+        local old_health = parent:GetHealth()
+        local old_max_health = parent:GetMaxHealth()
+        local health_percent = old_health / old_max_health
+        
+        
+        
+        
+        
+        -- 计算应用额外生命值后的理论最大生命值
+        local theoretical_max_health = old_max_health - old_extra_health + self.extra_health
+        
+        
+        -- 先重新计算属性，让游戏应用修饰符效果
         if parent:IsHero() then
-            -- 英雄单位使用CalculateStatBonus
             parent:CalculateStatBonus(true)
-        else
-            -- 非英雄单位处理生命值差值
-            local health_diff = self.extra_health - old_extra_health
-            if health_diff ~= 0 then
-                parent:SetMaxHealth(parent:GetMaxHealth() + health_diff)
-                
-                -- 如果是增加生命值，同时增加当前生命值
-                if health_diff > 0 then
-                    parent:SetHealth(parent:GetHealth() + health_diff)
-                end
-            end
         end
+        
+        -- 获取更新后的最大生命值
+        local new_max_health = parent:GetMaxHealth()
+        
+        
+        -- 保持原有的生命值百分比
+        local new_health = new_max_health * health_percent
+        
+        
+        parent:SetHealth(new_health)
+        
     end
 end
 
 function modifier_extra_health_bonus:GetCustomDescription()
     return string.format("额外生命值: +%d", self.extra_health or 0)
-end 
+end

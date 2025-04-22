@@ -96,7 +96,7 @@ heroes_precache = {
     {particleName = "warlock", soundName = "warlock", name = "npc_dota_hero_warlock", chinese = "术士", id = 37, model = "warlock"},
     {particleName = "witch_doctor", soundName = "witchdoctor", name = "npc_dota_hero_witch_doctor", chinese = "巫医", id = 30, model = "witchdoctor"},
     {particleName = "zuus", soundName = "zuus", name = "npc_dota_hero_zuus", chinese = "宙斯", id = 22, model = "zeus"},
-    {particleName = "ringmaster", soundName = "ringmaster", name = "npc_dota_hero_ringmaster", chinese = "驯兽师", id = 131, model = "ringmaster"},
+    {particleName = "ringmaster", soundName = "ringmaster", name = "npc_dota_hero_ringmaster", chinese = "百戏大王", id = 131, model = "ringmaster"},
     
     {particleName = "abaddon", soundName = "abaddon", name = "npc_dota_hero_abaddon", chinese = "亚巴顿", id = 102, model = "abaddon"},
     {particleName = "bane", soundName = "bane", name = "npc_dota_hero_bane", chinese = "祸乱之源", id = 3, model = "bane"},

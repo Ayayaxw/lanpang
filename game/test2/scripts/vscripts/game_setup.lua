@@ -46,7 +46,7 @@ function GameSetup:init()
 
   -- 调试模式特有的设置
   if IsInToolsMode() then
-      GameRules:SetTreeRegrowTime(1)
+      GameRules:SetTreeRegrowTime(5)
       GameRules:SetCreepSpawningEnabled(false)
   end
 

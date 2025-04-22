@@ -5,6 +5,7 @@ function Main:ProcessHeroChangeRequest(event)
 
     GridNav:DestroyTreesAroundPoint(mapCenter, mapRadius, false)
     GridNav:RegrowAllTrees()
+    CameraControl:Stop()
 
     local playerID = 0  -- 假设是玩家0，如果需要可以修改
     local player = PlayerResource:GetPlayer(playerID)
@@ -88,7 +89,7 @@ function Main:GetChallengeNameById(challengeId)
     return nil
 end
 
-function Main:GetChallengeNameByCode(challengeCode)
+function Main:GetChallengeIDByCode(challengeCode)
     for name, code in pairs(Main.Challenges) do
         if code == challengeCode then
             return name

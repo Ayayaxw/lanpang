@@ -1,4 +1,5 @@
 function Main:PlayDefeatAnimation(unit)
+    CameraControl:Stop()
     -- 创建聚光灯特效
     local particle = ParticleManager:CreateParticle("particles/econ/taunts/ursa/ursa_unicycle/ursa_unicycle_taunt_spotlight.vpcf", PATTACH_ABSORIGIN, unit)
     ParticleManager:SetParticleControl(particle, 0, unit:GetAbsOrigin())
@@ -20,6 +21,7 @@ function Main:PlayDefeatAnimation(unit)
 end
 
 function Main:PlayVictoryEffects(unit)
+    CameraControl:Stop()
     -- 播放胜利特效
     local particle = ParticleManager:CreateParticle("particles/units/heroes/hero_legion_commander/legion_commander_duel_victory.vpcf", PATTACH_OVERHEAD_FOLLOW, unit)
     ParticleManager:SetParticleControl(particle, 0, unit:GetAbsOrigin())

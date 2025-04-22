@@ -78,7 +78,7 @@ function Main:InitGameMode()
     Convars:SetFloat("dota_roshan_upgrade_rate", 10000000)
 
 	-- GameRules:GetGameModeEntity():SetThink( "OnThink", self, "GlobalThink", 2 )
-	GameRules:GetGameModeEntity():SetFogOfWarDisabled(true)
+	GameRules:GetGameModeEntity():SetFogOfWarDisabled(false)
 	GameRules:GetGameModeEntity():SetFixedRespawnTime(99999)
 	--GameRules:GetGameModeEntity():SetCameraDistanceOverride(2200)
 	GameRules:GetGameModeEntity():SetDaynightCycleDisabled(false)
@@ -608,7 +608,9 @@ function Main:PrintEverythingAboutUnit(event)
     local unitEntIndex = event.unit_ent_index
     local unit = EntIndexToHScript(unitEntIndex)
 
-    --打印坐标
+
+    -- unit:AddNewModifier(unit, nil, "modifier_percentage_total_armor", {})
+    -- --打印坐标
     if unit:IsHero() then
         local gold = unit:GetGold()
         print(string.format("【单位】%s 的金币：%d", unit:GetUnitName(), gold))

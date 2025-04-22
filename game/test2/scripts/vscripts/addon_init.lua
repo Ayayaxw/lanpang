@@ -53,3 +53,7 @@ LinkLuaModifier("modifier_custom_neutral_upgrade", "modifier/modifier_custom_neu
 LinkLuaModifier("modifier_hidden_break", "modifier/modifier_hidden_break.lua", LUA_MODIFIER_MOTION_NONE)
 LinkLuaModifier("modifier_slark_shadow_dance_persistent", "modifier/modifier_slark_shadow_dance_persistent.lua", LUA_MODIFIER_MOTION_NONE)
 LinkLuaModifier("modifier_attribute_boost", "modifier/modifier_attribute_boost.lua", LUA_MODIFIER_MOTION_NONE)
+LinkLuaModifier("modifier_tethered", "modifier/modifier_tethered.lua", LUA_MODIFIER_MOTION_NONE)
+LinkLuaModifier("modifier_attack_cast_ability_1", "modifier/modifier_attack_cast_ability_1.lua", LUA_MODIFIER_MOTION_NONE)
+LinkLuaModifier("modifier_percent_armor_buff", "modifier/modifier_percent_armor_buff.lua", LUA_MODIFIER_MOTION_NONE)
+LinkLuaModifier("modifier_percentage_total_armor", "modifier/modifier_percentage_total_armor.lua", LUA_MODIFIER_MOTION_NONE)

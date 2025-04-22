@@ -30,7 +30,8 @@ function Main:isExcludedUnit(unit)
         "npc_dota_wisp_spirit",
         "npc_dota_muerta_revenant",
         "npc_dota_wraith_king_skeleton_warrior",
-        "",
+        "ward",
+        "npc_dota_ember_spirit_remnant"
 
     }
     -- 检查单位名称是否在排除列表中
@@ -54,13 +55,13 @@ end
 function Main:OnNPCSpawned(event)
     local spawnedUnit = EntIndexToHScript(event.entindex)
     if not spawnedUnit then
-        DebugPrint("函数结束：生成的单位为空")
+        --DebugPrint("函数结束：生成的单位为空")
         return
     end
 
     local unitName = spawnedUnit:GetUnitName() or "未知单位"
     if unitName and unitName ~= "" then
-        DebugPrint("单位生成：" .. unitName)
+        --DebugPrint("单位生成：" .. unitName)
     end
 
     if Main.currentChallenge == Main.Challenges.CreepChallenge_100Creeps then 
@@ -124,7 +125,7 @@ function Main:OnNPCSpawned(event)
             end
 
             if shouldAddAI then
-                print("需要添加AI")
+                --print("需要添加AI")
                 local teamNumber = spawnedUnit:GetTeamNumber()
                 local foundAI = false
                 for unit, aiInfo in pairs(AIs) do
@@ -152,7 +153,7 @@ function Main:OnNPCSpawned(event)
                 
                 if not foundAI then
                     if unitName and unitName ~= "" then
-                        DebugPrint("没有找到同阵营的 AI，无法为 " .. unitName .. " 创建 AI")
+                        --DebugPrint("没有找到同阵营的 AI，无法为 " .. unitName .. " 创建 AI")
                     end
                 end
             else
@@ -161,7 +162,7 @@ function Main:OnNPCSpawned(event)
                 end
             end
             
-            DebugPrint("函数结束：AI处理Timer完成")
+            --DebugPrint("函数结束：AI处理Timer完成")
             return nil
         end)
     end
@@ -181,9 +182,9 @@ function Main:OnNPCSpawned(event)
         if self[challengeFunctionName] then
             self[challengeFunctionName](self, spawnedUnit, event)
         else
-            DebugPrint("函数结束：没有找到对应挑战模式的处理函数: " .. challengeName)
+            --DebugPrint("函数结束：没有找到对应挑战模式的处理函数: " .. challengeName)
         end
     else
-        DebugPrint("函数结束：未知的挑战模式ID: " .. tostring(challengeId))
+        --DebugPrint("函数结束：未知的挑战模式ID: " .. tostring(challengeId))
     end
 end

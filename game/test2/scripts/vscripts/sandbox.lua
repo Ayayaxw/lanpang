@@ -1,4 +1,15 @@
 -- 发送沙盒功能数据到前端
+-- 在Main表中添加迷雾状态跟踪变量
+if Main.FogDisabled == nil then
+    Main.FogDisabled = false
+end
+
+-- 在Main表中添加血条状态跟踪变量
+if Main.HealthbarsEnabled == nil then
+    Main.HealthbarsEnabled = true
+end
+
+
 function Main:SendSandboxFunctionsData()
     local sandboxFunctions = {}
     
@@ -198,26 +209,25 @@ Main.SandboxFunctions = {
         name = "重置地图",
         functionName = "ResetMap",
         category = "environment"
+    },
+    {
+        id = "toggle_healthbars",
+        name = "显示/隐藏血条",
+        functionName = "ToggleHealthbars",
+        category = "environment"
     }
 }
 
 
 -- 英雄操作类功能
 function Main:CreateHero_Sandbox(playerId, heroId, facetId, teamId, position)
-    print(string.format("Creating hero for player %d, heroId: %s, team: %d",
-                      playerId, tostring(heroId), teamId))
+    print(string.format("Creating hero at position (%f, %f, %f)", 
+                      position.x, position.y, position.z))
     
     if heroId then
-        -- 根据队伍决定生成位置
-        local spawnPosition
-        if teamId == DOTA_TEAM_GOODGUYS then
-            spawnPosition = Vector(-5600, -1720, 128.00)  -- 天辉（Good）基地
-        elseif teamId == DOTA_TEAM_BADGUYS then
-            spawnPosition = Vector(5600, -1720, 128.00)    -- 夜魇（Bad）基地
-        else
-            spawnPosition = Vector(0, 0, 128.00)           -- 默认位置（中立）
-            print("Warning: Unknown teamId, spawning at default position")
-        end
+        -- 使用传入的position参数，如果position的值有效
+        local spawnPosition = position
+
         
         local isControllableByPlayer = true
         local heroName = DOTAGameManager:GetHeroUnitNameByID(heroId)
@@ -624,7 +634,28 @@ end
 -- 环境设置类功能
 function Main:ToggleDayNight(playerId)
     print("Toggling day/night for player " .. playerId)
-    -- 实现切换昼夜的代码
+
+    -- 获取当前游戏时间
+    local currentTime = GameRules:GetTimeOfDay()
+    print("当前游戏时间: " .. currentTime)
+    
+    -- 判断当前是白天还是夜晚
+    local isDay = currentTime >= 0.25 and currentTime < 0.75
+    
+    if isDay then
+        -- 如果是白天，切换到夜晚（0.0 代表夜晚）
+        GameRules:SetTimeOfDay(0.0)
+        print("切换到夜晚")
+
+    else
+        -- 如果是夜晚，切换到白天（0.5 代表正午）
+        GameRules:SetTimeOfDay(0.5)
+
+    end
+    
+    -- 播放切换音效
+    local soundName = isDay and "Imba.NightStalker.Night" or "Imba.NightStalker.Day"
+    EmitGlobalSound(soundName)
 end
 
 function Main:ToggleWeatherEffects(playerId)
@@ -632,14 +663,43 @@ function Main:ToggleWeatherEffects(playerId)
     -- 实现切换天气效果的代码
 end
 
+
+
 function Main:ClearFog(playerId)
-    print("Clearing fog for player " .. playerId)
-    -- 实现清除迷雾的代码
+    -- 切换迷雾状态
+    Main.FogDisabled = not Main.FogDisabled
+    
+    if Main.FogDisabled then
+        print("禁用迷雾")
+        GameRules:GetGameModeEntity():SetFogOfWarDisabled(true)
+
+    else
+        print("启用迷雾")
+        GameRules:GetGameModeEntity():SetFogOfWarDisabled(false)
+
+    end
 end
 
 function Main:ResetMap(playerId)
     print("Resetting map for player " .. playerId)
     -- 实现重置地图的代码
+end
+
+
+-- 显示/隐藏血条功能
+function Main:ToggleHealthbars(playerId)
+    -- 切换血条显示状态
+    Main.HealthbarsEnabled = not Main.HealthbarsEnabled
+    
+    if Main.HealthbarsEnabled then
+        print("显示血条")
+        SendToServerConsole("dota_hud_healthbars 3")
+        
+    else
+        print("隐藏血条")
+        SendToServerConsole("dota_hud_healthbars 0")
+        
+    end
 end
 
 -- 添加AI到英雄

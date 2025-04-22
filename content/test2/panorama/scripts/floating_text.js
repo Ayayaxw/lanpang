@@ -113,13 +113,13 @@
 
         const mainContainer = $('#FloatingTextContainer');
         if (!mainContainer) {
-            $.Msg("[UpdateAllTextPositions] 找不到主容器");
+            // $.Msg("[UpdateAllTextPositions] 找不到主容器");
             return;
         }
 
         // 如果没有需要更新的文本，取消计时器
         if (trackedTexts.size === 0) {
-            $.Msg("[UpdateAllTextPositions] 没有需要更新的文本，停止更新");
+            // $.Msg("[UpdateAllTextPositions] 没有需要更新的文本，停止更新");
             updateTimer = null;
             return;
         }
@@ -138,7 +138,7 @@
             }
 
             if (!entityId) {
-                $.Msg("[UpdateAllTextPositions] 实体ID为空");
+                // $.Msg("[UpdateAllTextPositions] 实体ID为空");
                 return;
             }
 
@@ -197,17 +197,17 @@
     function StartUpdateSystem() {
         // 如果计时器已经在运行，就不要再创建新的
         if (!updateTimer && trackedTexts.size > 0) {
-            $.Msg("[StartUpdateSystem] 开始更新文本位置");
+            // $.Msg("[StartUpdateSystem] 开始更新文本位置");
             updateTimer = $.Schedule(1/200, UpdateAllTextPositions);
         }
     }
     
     function OnUpdateFloatingText(data) {
-        $.Msg("[OnUpdateFloatingText] 收到事件:", data);
+        //$.Msg("[OnUpdateFloatingText] 收到事件:", data);
         
         const mainContainer = $('#FloatingTextContainer');
         if (!mainContainer) {
-            $.Msg("[OnUpdateFloatingText] 错误: 找不到容器");
+            // $.Msg("[OnUpdateFloatingText] 错误: 找不到容器");
             return;
         }
         
@@ -219,7 +219,7 @@
         }
 
         if (!entityId) {
-            $.Msg("[OnUpdateFloatingText] 错误: 实体ID为空");
+            // $.Msg("[OnUpdateFloatingText] 错误: 实体ID为空");
             return;
         }
 
@@ -237,7 +237,7 @@
             
             // 添加向上偏移的CSS样式
             panel.style.marginTop = "-65px"; // 使面板向上偏移50像素
-            $.Msg("更新文本位置");
+            //$.Msg("更新文本位置");
             // 重要：先将面板存储到trackedTexts中，再获取位置
             trackedTexts.set(entityId, panel);
 
@@ -446,9 +446,9 @@
     }
 
     // 初始化
-    $.Msg("[初始化] 注册浮动文本事件处理程序");
+    // $.Msg("[初始化] 注册浮动文本事件处理程序");
     GameEvents.Subscribe("update_floating_text", OnUpdateFloatingText);
     GameEvents.Subscribe("clear_floating_text", OnClearFloatingText);
     GameEvents.Subscribe("clear_all_floating_text", OnClearAllFloatingText);
-    $.Msg("[初始化] 浮动文本系统已初始化完成");
+    // $.Msg("[初始化] 浮动文本系统已初始化完成");
 })();

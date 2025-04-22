@@ -29,6 +29,7 @@
     <include src="file://{resources}/styles/hero_chaos_killboard.css" />
     <include src="file://{resources}/styles/floating_text.css" />
     <include src="file://{resources}/styles/HorrorMessage.css" />
+
     <!-- <include src="file://{resources}/styles/custom_ability_display.css" /> -->
 
 
@@ -42,9 +43,11 @@
   </styles>
   <scripts>
     <!--初始化隐藏-->
+    <include src="file://{resources}/scripts/AutoCameraControl.js" />
     <include src="file://{resources}/scripts/HideDefaultButton.js" />
     <include src="file://{resources}/scripts/CameraControlPanel.js" />
     <include src="file://{resources}/scripts/CommonFunction.js" />
+
     <include src="file://{resources}/scripts/AbilitiesContainer.js" />
     <include src="file://{resources}/scripts/hero_chaos.js" />
     <include src="file://{resources}/scripts/hero_chaos_score.js" />

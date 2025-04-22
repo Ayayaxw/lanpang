@@ -5,7 +5,7 @@ var defaultDistance = 1400
 GameUI.SetCameraDistance(defaultDistance);
 GameUI.SetCameraPitchMin(20);
 var targetPosition = [
-    1600,
+    1400,
     1000,
     128.00,
 ];

@@ -2850,7 +2850,7 @@ function printHeroFacetsNames() {
     $.Msg("}");
 }
 
-printHeroFacetsNames();
+//printHeroFacetsNames();
 
 // function printNeutralCreepsLocalization() {
 //     const creeps = [

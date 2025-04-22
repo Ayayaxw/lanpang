@@ -39,3 +39,4 @@ Main.Work_Work_Camera = Vector(-130, -7500, 128)
 
 Main.SPAWN_POINT_FAR = Vector(-10000, 10000, 128)
     
+Main.Forest_Left = Vector(-9050, -3834, 128.00)

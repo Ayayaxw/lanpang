@@ -168,7 +168,7 @@ function Main:Init_CreepChallenge_100percent(event, playerID)
         "[LanPang_RECORD][",
         self.currentMatchID,
         "]",
-        "[技能百分百大战肉山开始]"
+        "[技能百分百大战熊猫]"
     )
 
     self:createLocalizedMessage(

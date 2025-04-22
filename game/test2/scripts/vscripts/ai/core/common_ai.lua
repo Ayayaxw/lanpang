@@ -46,7 +46,7 @@ require("ai/skill/SkillInfo/GetSkill_TargetType")
 
 require("ai/skill/SkillInfo/Get_DodgableSkills")
 require("ai/skill/SkillInfo/Get_DodgeSkills")
-
+require("ai/skill/SkillInfo/GetSkill_NumberMapping")
 
 
 AIStates = {
@@ -199,7 +199,8 @@ function CommonAI:Think(entity)
     if self:containsStrategy(self.global_strategy, "优先打小僵尸") then
         self.attackTarget = self:FindPreferredTarget(entity, {
             "npc_dota_unit_undying_zombie_torso",
-            "npc_dota_unit_undying_zombie"
+            "npc_dota_unit_undying_zombie",
+            "npc_dota_weaver_swarm"
         })
     end
 

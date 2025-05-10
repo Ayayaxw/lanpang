@@ -74,7 +74,8 @@
     <include src="file://{resources}/scripts/OnReceive/show_hero.js" />
     <include src="file://{resources}/scripts/OnReceive/show_left_hero.js" />
     <include src="file://{resources}/scripts/HorrorMessage.js" />
-
+    <include src="file://{resources}/scripts/screen_filter.js" />
+    <include src="file://{resources}/scripts/countdown_timer.js" />
   </scripts>
     <!-- 主面板 -->
 
@@ -82,7 +83,13 @@
 
   <Panel class="MainPanel" hittest="false" > 
   <!-- <Panel class="AbilityDisplayRoot" /> -->
-
+  <Panel id="ScreenFilterSystem" class="ScreenFilterSystem" hittest="false">
+    <Panel id="WhiteFlashFilter" class="WhiteFlashFilter" />
+    <Panel id="CountdownTimer" class="CountdownTimer" hittest="false">
+      <Label id="CountdownNumber" class="CountdownNumber" text="" />
+      <Label id="CountdownReadyText" class="CountdownReadyText" text="时间到!" />
+    </Panel>
+  </Panel>
 
 <!--   <DOTAScenePanel class="Greenpanel_1" 
     id="Greenpanel_1" 
@@ -618,7 +625,7 @@
         </Panel>
       </Panel>
 
-      <Panel id="SandboxModePanelUnique" class="GameModeSelectionPanel">
+      <Panel id="SandboxModePanelUnique" class="SandboxModeSelectionPanel">
           <Label text="沙盒模式" />
           <!-- 内容将由JavaScript动态填充 -->
       </Panel>

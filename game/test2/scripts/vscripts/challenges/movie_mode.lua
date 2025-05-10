@@ -37,7 +37,8 @@ function Main:Init_movie_mode(heroName, heroFacet,playerID, heroChineseName)
     --SpawnSimpleHeroGrid()--四人循环赛
     --SetupBristlebackAndLinaScene()
     --SetupRingmasterScene()
-    -- SetupHeroMatrix()
+    --SetupHeroMatrix()
+    
     --CreateAxeWithAbility()
     --SpawnAllCreepsAndHeroes()
     --CreateTuskAndCastAbility()
@@ -63,7 +64,159 @@ function Main:Init_movie_mode(heroName, heroFacet,playerID, heroChineseName)
     -- local referee = CreateUnitByName("caipan", Vector(0, 0, 0), true, nil, nil, DOTA_TEAM_BADGUYS)
     -- ShowAnimations(referee)
         --Main:PreSpawnGolem_Golem_vs_Heroes()
-    Main:SpawnHeroe2()
+    --Main:SpawnHeroe2()
+    --TestDisarmedAttack()
+end
+
+
+function SetupHeroMatrix()
+    print("开始创建5*9的英雄方阵...")
+    
+    -- 定义方阵的尺寸
+    local rows = 5
+    local columns = 9
+    local totalHeroes = rows * columns
+    
+    -- 定义英雄之间的间距
+    local spacingX = 300
+    local spacingY = 300
+    
+    -- 计算起始点，使方阵围绕中心点
+    local startX = Main.largeSpawnCenter.x - (columns - 1) * spacingX / 2
+    local startY = Main.largeSpawnCenter.y - (rows - 1) * spacingY / 2
+    
+    -- 英雄数组，随机选择不同英雄
+    local heroPool = {
+        "npc_dota_hero_crystal_maiden",
+        "npc_dota_hero_lina",
+        "npc_dota_hero_axe",
+        "npc_dota_hero_juggernaut",
+        "npc_dota_hero_pudge",
+        "npc_dota_hero_invoker",
+        "npc_dota_hero_sniper",
+        "npc_dota_hero_sven",
+        "npc_dota_hero_vengefulspirit",
+        "npc_dota_hero_luna",
+        "npc_dota_hero_drow_ranger",
+        "npc_dota_hero_faceless_void"
+    }
+    
+    print("方阵中心点: " .. tostring(Main.largeSpawnCenter))
+    print("方阵尺寸: " .. rows .. "x" .. columns .. " (共" .. totalHeroes .. "个英雄)")
+    
+    -- 创建英雄
+    local heroCount = 0
+    local centerHero = nil
+    local centerRow = 2  -- 从0开始计数，第3行
+    local centerCol = 4  -- 从0开始计数，第5列
+    
+    for row = 0, rows - 1 do
+        for col = 0, columns - 1 do
+            -- 计算位置
+            local posX = startX + col * spacingX
+            local posY = startY + row * spacingY
+            local position = Vector(posX, posY, Main.largeSpawnCenter.z)
+            
+            -- 随机选择英雄
+            local heroName = heroPool[RandomInt(1, #heroPool)]
+            
+            -- 创建英雄
+            local hero = CreateUnitByName(
+                heroName, 
+                position, 
+                true, 
+                nil, 
+                nil, 
+                DOTA_TEAM_GOODGUYS
+            )
+            
+            if hero then
+                heroCount = heroCount + 1
+                
+                -- 让英雄面向前方
+                hero:SetForwardVector(Vector(0, 1, 0))
+                
+                -- 禁止移动
+                hero:AddNewModifier(hero, nil, "modifier_rooted", {})
+                
+                -- 禁止攻击
+                hero:AddNewModifier(hero, nil, "modifier_disarmed", {})
+                
+                -- 随机设置等级
+                local level = RandomInt(15, 30)
+                for i = 1, level do
+                    hero:HeroLevelUp(false)
+                end
+                
+                -- 如果是中心位置的英雄，记录下来
+                if row == centerRow and col == centerCol then
+                    centerHero = hero
+                    print("记录中心位置的英雄: " .. heroName .. " 在位置 (" .. posX .. ", " .. posY .. "), 等级: " .. level)
+                else
+                    print("创建英雄: " .. heroName .. " 在位置 (" .. posX .. ", " .. posY .. "), 等级: " .. level)
+                end
+            end
+        end
+    end
+    
+    print("成功创建 " .. heroCount .. " 个英雄")
+    
+    -- 获取中心位置的英雄
+    if centerHero then
+
+        Main:SendTextUpdate(centerHero, "中心英雄", 20, "center")
+        
+        print("已设置中心英雄: " .. centerHero:GetName() .. " 实体ID: " .. centerHero:GetEntityIndex())
+    else
+        print("错误：未找到中心位置的英雄")
+    end
+end
+
+function TestDisarmedAttack()
+    print("开始测试缴械状态下的PerformAttack")
+    
+    -- 创建两个测试单位
+    local attacker = CreateUnitByName("npc_dota_hero_axe", Vector(0, 0, 128), true, nil, nil, DOTA_TEAM_GOODGUYS)
+    local target = CreateUnitByName("npc_dota_hero_crystal_maiden", Vector(300, 0, 128), true, nil, nil, DOTA_TEAM_BADGUYS)
+    
+    -- 确保两个单位都创建成功
+    if not attacker or not target then
+        print("单位创建失败")
+        return
+    end
+    
+    print("单位创建成功")
+    print("攻击者: " .. attacker:GetUnitName())
+    print("目标: " .. target:GetUnitName())
+    
+    -- 给攻击者添加缴械效果
+    attacker:AddNewModifier(attacker, nil, "modifier_disarmed", {duration = 10})
+    attacker:AddNewModifier(attacker, nil, "modifier_parabola_attack_landed", {})
+    target:AddNewModifier(attacker, nil, "modifier_disarmed", {duration = 10})
+    -- 确认攻击者有缴械效果
+    if attacker:HasModifier("modifier_disarmed") then
+        print("攻击者已被缴械")
+    else
+        print("缴械效果添加失败")
+        return
+    end
+    
+    -- 尝试使用PerformAttack进行攻击
+    print("尝试使用PerformAttack进行攻击")
+    
+
+    attacker:PerformAttack(
+        target,     -- 目标
+        false,      -- 使用攻击法球效果
+        true,       -- 处理攻击过程
+        false,      -- 不跳过冷却
+        false,      -- 不忽略隐身
+        true,       -- 使用投射物
+        false,      -- 不是假攻击
+        false       -- 不是必定命中
+    )
+
+
 end
 
 function Main:SpawnHeroe2()
@@ -3965,92 +4118,7 @@ function CreateAndControlOgreMagi()
     return hero
 end
 
-function SetupHeroMatrix()
-    local center = Vector(43, 255, 256)
-    local spacing = 200  -- 英雄之间的间距
 
-    local allies = {
-        "razor", "ogre_magi", "luna", "lina", "mars", 
-        "meepo", "obsidian_destroyer", "death_prophet", 
-        "slark", "slardar", "marci", "shadow_shaman", 
-        "nevermore", "necrolyte", 
-        "lich", "tinker", "riki", "viper", "juggernaut", "shredder", "undying", "ringmaster"
-    }
-
-    local enemies = {
-        "monkey_king", "primal_beast", "muerta", "chaos_knight", "doom_bringer",
-        "ursa", "shadow_demon", "terrorblade", "spectre", "pugna", 
-        "phantom_assassin", "troll_warlord", "nyx_assassin", "morphling"
-    }
-
-    local function SetupHero(hero)
-        if hero and IsValidEntity(hero) then
-            HeroMaxLevel(hero)  -- 假设最大等级是30
-            hero:AddNewModifier(hero, nil, "modifier_disarmed", {})
-
-            hero:AddItemByName("item_aghanims_shard")
-        else
-            print("Warning: Attempted to setup an invalid hero")
-        end
-    end
-
-    local heroMatrix = {}
-
-    -- 创建友方英雄
-    for i, heroName in ipairs(allies) do
-        local row = math.ceil(i / 5)
-        local col = (i - 1) % 5 + 1
-        local pos = center + Vector((col - 3) * spacing, (row - 3) * spacing, 0)
-        local hero = CreateUnitByName("npc_dota_hero_" .. heroName, pos, true, nil, nil, DOTA_TEAM_GOODGUYS)
-        if hero and IsValidEntity(hero) then
-            SetupHero(hero)
-            hero:SetForwardVector(Vector(0, 0, 0))
-            table.insert(heroMatrix, hero)
-        else
-            print("Failed to create hero: " .. heroName)
-        end
-    end
-
-    -- 创建敌方英雄
-    for i, heroName in ipairs(enemies) do
-        local row = math.ceil(i / 5) + 5
-        local col = (i - 1) % 5 + 1
-        local pos = center + Vector((col - 3) * spacing, (row - 3) * spacing, 0)
-        local hero = CreateUnitByName("npc_dota_hero_" .. heroName, pos, true, nil, nil, DOTA_TEAM_BADGUYS)
-        if hero and IsValidEntity(hero) then
-            SetupHero(hero)
-            hero:SetForwardVector(Vector(0, -1, 0))  -- 朝南
-        else
-            print("Failed to create hero: " .. heroName)
-        end
-    end
-
-    -- 10秒后替换友方英雄为bristleback
-    Timers:CreateTimer(10, function()
-        for i, hero in ipairs(heroMatrix) do
-            if hero and IsValidEntity(hero) then
-                local playerID = hero:GetPlayerOwnerID()
-                local pos = hero:GetAbsOrigin()
-                local newHero = PlayerResource:ReplaceHeroWith(0, "npc_dota_hero_bristleback", 0, 0)
-                
-                if newHero and IsValidEntity(newHero) then
-                    SetupHero(newHero)
-                    newHero:SetAbsOrigin(pos)
-                    newHero:SetForwardVector(Vector(0, 0, 0))
-                    -- 更新heroMatrix中的引用
-                    heroMatrix[i] = newHero
-                else
-                    print("Failed to replace hero with Bristleback for player " .. 0)
-                end
-            else
-                print("Invalid hero in heroMatrix at index " .. i)
-            end
-        end
-        print("All allied heroes have been replaced with Bristleback.")
-    end)
-
-    print("Hero matrix created successfully!")
-end
 function SpawnHeroFormations(origin)
     local leftHeroes = {
         "npc_dota_hero_necrolyte",

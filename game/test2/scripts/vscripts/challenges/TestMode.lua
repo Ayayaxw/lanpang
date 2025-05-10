@@ -48,106 +48,9 @@ function Main:Init_TestMode(event, playerID)
         BATTLEFIELD = {
             function(hero)
 
-                
-
-                if hero:GetUnitName() == "npc_dota_hero_naga_siren" then
-                    hero:RemoveAbility("naga_siren_eelskin")
-
-                    hero:AddAbility("naga_siren_eelskin")
-
-                end
             end,
         }
     }
-    self:StandardizeAbilityPercentages()
-    local ability_modifiers = {
-        npc_dota_hero_phantom_assassin = {
-            phantom_assassin_coup_de_grace = {
-                AbilityValues = {
-                    crit_chance = {
-                        value = 100
-                    },
-                    dagger_crit_chance = {
-                        value = 100
-                    },
-                    attacks_to_proc = {
-                        value = 0
-                    },
-                    attacks_to_proc_creeps = {
-                        value = 0
-                    },
-                    crit_bonus = {
-                        value = 1000
-                    },
-
-                }
-            },
-        },
-
-        npc_dota_hero_omniknight = {
-            omniknight_purification = {
-                AbilityValues = {
-                    recast_effectiveness_pct = {
-                        special_bonus_shard = 100
-                    }
-                }
-            },
-            omniknight_degen_aura = {
-                AbilityValues = {
-                    bonus_damage_per_stack = {
-                        special_bonus_facet_omniknight_omnipresent = 100
-                    }
-                }
-            }
-        },
-
-
-        npc_dota_hero_magnataur = {
-            magnataur_empower = {
-                AbilityValues = {
-                    bonus_damage_pct=
-                    {
-                        value = 100,
-                        special_bonus_unique_magnus_2 = 100
-                    },
-                    cleave_damage_pct=
-                    {
-                        value = 100,
-                        special_bonus_unique_magnus_2 = 100
-                    },
-
-
-                    self_multiplier_bonus_max_stacks = {
-                        value = 100
-                    },
-                    self_multiplier_bonus_per_stack = {
-                        value = 100
-                    }
-                }
-            }
-        },
-
-        -- npc_dota_hero_shredder = {
-        --     shredder_whirling_death = {
-        --         AbilityValues = {
-        --             stat_loss_universal =
-        --             {
-        --                 value = 100,
-        --                 special_bonus_unique_timbersaw_5 = 100
-        --             },
-        --             stat_loss_pct=
-        --             {
-        --                 value = 100,
-        --                 special_bonus_unique_timbersaw_5 = 100
-        --             }
-        --         }
-        --     }
-        -- }
-
-
-    }
-    self:UpdateAbilityModifiers(ability_modifiers)
-
     -- 从 event 中获取新的数据
     local selfHeroId = event.selfHeroId or -1
     local selfFacetId = event.selfFacetId or -1
@@ -236,9 +139,9 @@ function Main:Init_TestMode(event, playerID)
         end
     end)
 
-    ember_spirit = CreateUnitByName("custom_ember_spirit", self.smallDuelAreaLeft, true, nil, nil, DOTA_TEAM_BADGUYS)
-    storm_spirit = CreateUnitByName("custom_storm_spirit", self.smallDuelAreaLeft, true, nil, nil, DOTA_TEAM_BADGUYS)
-    earth_spirit = CreateUnitByName("custom_earth_spirit", self.smallDuelAreaLeft, true, nil, nil, DOTA_TEAM_BADGUYS)
+    -- ember_spirit = CreateUnitByName("custom_ember_spirit", self.smallDuelAreaLeft, true, nil, nil, DOTA_TEAM_BADGUYS)
+    -- storm_spirit = CreateUnitByName("custom_storm_spirit", self.smallDuelAreaLeft, true, nil, nil, DOTA_TEAM_BADGUYS)
+    -- earth_spirit = CreateUnitByName("custom_earth_spirit", self.smallDuelAreaLeft, true, nil, nil, DOTA_TEAM_BADGUYS)
 
 
 

@@ -349,7 +349,6 @@ function Main:PreSpawnSniper()
                 sniper:AddNewModifier(sniper, nil, "modifier_invulnerable", {duration = 8.0})
 
 
-
                 HeroMaxLevel(sniper)
                 -- 面向中心点
                 local centerPoint = Vector((left + right) / 2, (top + bottom) / 2, self.largeSpawnArea_northWest.z)

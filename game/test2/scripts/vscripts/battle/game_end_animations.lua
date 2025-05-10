@@ -13,7 +13,8 @@ function Main:PlayDefeatAnimation(unit)
     if unit:IsAlive() then
         -- 添加状态修饰器:免伤、定身、禁疗
         unit:AddNewModifier(unit, nil, "modifier_damage_reduction_100", { duration = 10 })
-        unit:AddNewModifier(unit, nil, "modifier_rooted", { duration = 10 })
+        unit:AddNewModifier(unit, nil, "modifier_command_restricted", { duration = 10 })
+        self:DisableHeroWithModifiers(unit, 10)
         unit:AddNewModifier(unit, nil, "modifier_disable_healing", { duration = 10 })
         -- 播放失败动作
         unit:StartGesture(ACT_DOTA_DEFEAT)
@@ -41,7 +42,8 @@ function Main:PlayVictoryEffects(unit)
     if unit:IsAlive() then
         -- 添加状态修饰器
         unit:AddNewModifier(unit, nil, "modifier_damage_reduction_100", { duration = 10 })
-        unit:AddNewModifier(unit, nil, "modifier_rooted", { duration = 10 })
+        unit:AddNewModifier(unit, nil, "modifier_command_restricted", { duration = 10 })
+        self:DisableHeroWithModifiers(unit, 10)
         unit:AddNewModifier(unit, nil, "modifier_disable_healing", { duration = 10 })
         -- 播放胜利动作
         unit:StartGesture(ACT_DOTA_VICTORY)
@@ -115,12 +117,85 @@ end
 
 
 function Main:gradual_slow_down(loserPos, winnerPos)--游戏结束时的慢动作聚焦
+    local treeRadius = 1000
+    GridNav:DestroyTreesAroundPoint(winnerPos, treeRadius, false)
+
+
+    SendToServerConsole("dota_hud_healthbars 0")
     SendToServerConsole("host_timescale 0.1")
-
+    Main:ClearAbilitiesPanel()
+    CustomGameEventManager:Send_ServerToAllClients("FlashWhite",{winnerPos})
     CustomGameEventManager:Send_ServerToAllClients("stop_timer", {winnerPos})
+    local adjustedWinnerPos = Vector(winnerPos.x, winnerPos.y - 200 , winnerPos.z)
+    CustomGameEventManager:Send_ServerToAllClients("cinematic_camera_move", {
+        heroPosition = adjustedWinnerPos,
+        cameraData = {
+            startDistance = 1200,
+            endDistance = 1100,
+            startPitch = 60,
+            endPitch = 59,
+            startYaw = 0,
+            endYaw = -2,
+            animationDuration = 3
+        }
+    })
+
+    -- Timers:CreateTimer(0.3,function()
+    --     local adjustedWinnerPos2 = Vector(winnerPos.x, winnerPos.y , winnerPos.z)
+    --     CustomGameEventManager:Send_ServerToAllClients("cinematic_camera_move", {
+    --         heroPosition = adjustedWinnerPos2,
+    --         cameraData = {
+    --             startDistance = 500,
+    --             endDistance = 400,
+    --             startPitch = 1,
+    --             endPitch = 1,
+    --             startYaw = 148,
+    --             endYaw = 145,
+    --             animationDuration = 3,
+    --             startHeightOffset = winnerPos.z,
+    --             endHeightOffset = winnerPos.z
+    --         }
+    --     })
+
+    -- end)
+
+    --     Timers:CreateTimer(0.3,function()
+    --     local adjustedWinnerPos2 = Vector(winnerPos.x - 200, winnerPos.y - 100 , winnerPos.z)
+    --     CustomGameEventManager:Send_ServerToAllClients("cinematic_camera_move", {
+    --         heroPosition = adjustedWinnerPos2,
+    --         cameraData = {
+    --             startDistance = 250,
+    --             endDistance = 250,
+    --             startPitch = 40,
+    --             endPitch = 40,
+    --             startYaw = -125,
+    --             endYaw = -130,
+    --             animationDuration = 3,
+    --             startHeightOffset = winnerPos.z + 200,
+    --             endHeightOffset = winnerPos.z + 100
+    --         }
+    --     })
+
+    -- end)
+
+    Timers:CreateTimer(0.3,function()
 
 
-    Timers:CreateTimer(0.2,function()
+        local adjustedWinnerPos2 = Vector(winnerPos.x, winnerPos.y, winnerPos.z)
+        CustomGameEventManager:Send_ServerToAllClients("cinematic_camera_move", {
+            heroPosition = adjustedWinnerPos2,
+            cameraData = {
+
+                startYaw = 30,
+                endYaw = -10,
+
+            }
+        })
+        
+    end)
+
+
+    Timers:CreateTimer(2,function()
         SendToServerConsole("host_timescale 1")
     end)
 

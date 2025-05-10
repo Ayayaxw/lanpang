@@ -135,6 +135,7 @@
                 
                 // 应用统一的逻辑判断时间是否接近0
                 if (timeNumber < 0.05) {
+                    ShowTimeUp();
                     // 根据原始格式决定输出格式
                     if (currentTime.indexOf(':') !== -1) {
                         // 对于带冒号的格式，保持格式但设置为0
@@ -171,7 +172,7 @@
     
     
         // 隐藏 HUD 元素
-        $.Schedule(1, function() {
+        $.Schedule(0, function() {
             // 隐藏 HUD 元素
             var hud = GetHud();
             var panelsToToggle = [
@@ -197,25 +198,6 @@
             if (rightPanel) {
                 rightPanel.AddClass('AbilitiesContainerhidden');
                 $.Msg("右方技能面板已隐藏");
-            }
-                    // 处理相机移动
-            if (event && event["1"]) {
-                var positionString = event["1"];
-                var coordinates = positionString.split(' ');
-        
-                if (coordinates.length === 3) {
-                    var jsPosition = coordinates.map(Number);
-                    
-                    if (!jsPosition.some(isNaN)) {
-                        cinematicCameraMove(jsPosition);
-                    } else {
-                        $.Msg("无效的坐标值:", positionString);
-                    }
-                } else {
-                    $.Msg("坐标数量不正确:", positionString);
-                }
-            } else {
-                $.Msg("事件中没有收到位置数据:", event);
             }
         });
     

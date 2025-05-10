@@ -112,7 +112,7 @@ function CommonAI:Think(entity)
         return nil  -- 彻底停止AI循环
     end
 
-    if entity:IsHero() then
+    if entity:IsRealHero() then
         if entity:GetAbilityPoints() > 0 then
             Main:AutoUpgradeHeroAbilities(entity)
         end

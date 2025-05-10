@@ -1,92 +1,143 @@
 var isCameraLocked = false; // 用于跟踪相机锁定状态
 var cameraLockInterval; // 用于存储定时器的引用
 var defaultDistance = 1400
+var cinematicAnimationInterval; // 用于存储cinematicCameraMove的计时器引用
 
 GameUI.SetCameraDistance(defaultDistance);
-GameUI.SetCameraPitchMin(20);
-var targetPosition = [
-    1400,
-    1000,
-    128.00,
-];
+
+// var targetPosition = [
+//     1400,
+//     1000,
+//     128.00,
+// ];
+// $.Schedule(3, function() {
+//     GameUI.SetCameraTargetPosition(targetPosition, -1); // 将相机平滑移动到目标位置
+// });
+
 // GameUI.SetCameraTargetPosition(targetPosition, 40)
 // GameUI.SetCameraLookAtPosition(targetPosition);
 
-function cinematicCameraMove(heroPosition) {
-    var targetDistance = 800;
-    var zoomDuration = 0.05; // 放大的时间
-    var lockDuration = 4;
-    var startTime;
-    var cameraLockInterval;
 
-    function moveCamera() {
-        cameraLockInterval = $.Schedule(0, function smoothPanCamera() {
 
-            if (heroPosition) {
-                // 计算英雄北方100码的位置
-                var targetPosition = [
-                    heroPosition[0],
-                    heroPosition[1] + 100, // 在Y轴上加100单位，表示北方100码
-                    heroPosition[2]
-                ];
-                GameUI.SetCameraTargetPosition(targetPosition, 0.03); // 将相机平滑移动到目标位置
-            }
-            cameraLockInterval = $.Schedule(0.01, smoothPanCamera);
-        });
 
-        // 延迟1秒后开始缩放
-        $.Schedule(0, function() {
-            // 停止相机移动
-            if (cameraLockInterval) {
-                $.CancelScheduled(cameraLockInterval);
-            }
-            startTime = Game.GetGameTime(); // 重置开始时间为放大阶段
-            zoomCamera();
-        });
+function cinematicCameraMove(heroPosition, cameraData) {
+    // 如果存在之前的动画，立即停止
+    if (cinematicAnimationInterval) {
+        $.CancelScheduled(cinematicAnimationInterval);
+        cinematicAnimationInterval = null;
+        $.Msg("已停止之前的相机运镜");
     }
 
-    function zoomCamera() {
-        var currentTime = Game.GetGameTime();
-        var elapsedTime = currentTime - startTime;
-        var t = Math.min(elapsedTime / zoomDuration, 1);
-        
-        t = easeInOutQuad(t);
-        
-        var newDistance = defaultDistance + (targetDistance - defaultDistance) * t;
-        
-        GameUI.SetCameraDistance(newDistance);
-        
-        if (t < 1) {
-            $.Schedule(0, zoomCamera);
-        } else if (elapsedTime < zoomDuration + lockDuration) {
-            // $.Schedule(1, moveLeft);
-
+    // 处理heroPosition，可能是字符串格式的坐标
+    if (typeof heroPosition === 'string') {
+        var coordinates = heroPosition.split(' ');
+        if (coordinates.length === 3) {
+            heroPosition = coordinates.map(Number);
+            if (heroPosition.some(isNaN)) {
+                $.Msg("无效的坐标值:", heroPosition);
+                return;
+            }
         } else {
-            // 放大完成后等待2秒，然后向左移动
-            $.Schedule(0, zoomCamera); // 保持锁定状态
+            $.Msg("坐标数量不正确:", heroPosition);
+            return;
         }
     }
 
-    function moveLeft() {
+    var animationDuration = cameraData && cameraData.animationDuration !== undefined ? cameraData.animationDuration : 10; // 总动画时间为10秒
+    var updateInterval = 0.01; // 每0.01秒更新一次
 
+    var animationInterval;
+    
+    // 初始相机参数和目标参数
+    var startPitch = cameraData && cameraData.startPitch !== undefined ? cameraData.startPitch : 40;
+    var endPitch = cameraData && cameraData.endPitch !== undefined ? cameraData.endPitch : 20;
+    var startYaw = cameraData && cameraData.startYaw !== undefined ? cameraData.startYaw : 10;
+    var endYaw = cameraData && cameraData.endYaw !== undefined ? cameraData.endYaw : -10;
+    var startDistance = cameraData && cameraData.startDistance !== undefined ? cameraData.startDistance : 800;
+    var endDistance = cameraData && cameraData.endDistance !== undefined ? cameraData.endDistance : 800;
+    // 添加高度偏移参数
+    var startHeightOffset = cameraData && cameraData.startHeightOffset !== undefined ? cameraData.startHeightOffset : 0;
+    var endHeightOffset = cameraData && cameraData.endHeightOffset !== undefined ? cameraData.endHeightOffset : 0;
+    
+    var totalSteps = Math.floor(animationDuration / updateInterval);
+    var currentStep = 0;
+    GameUI.SetCameraDistance(startDistance);
+    // 设置初始高度偏移
+    GameUI.SetCameraLookAtPositionHeightOffset(startHeightOffset);
+    
+    function startCameraAnimation() {
+        // 取消可能存在的旧计时器
+        if (animationInterval) {
+            $.CancelScheduled(animationInterval);
+        }
+        
+        $.Msg("开始运镜：从Pitch " + startPitch + "到" + endPitch + "，从Yaw " + startYaw + "到" + endYaw + "，从Distance " + startDistance + "到" + endDistance + "，从高度偏移 " + startHeightOffset + "到" + endHeightOffset);
+        
+        // 计算每步移动的距离
+        var pitchStep = (endPitch - startPitch) / totalSteps;
+        var yawStep = (endYaw - startYaw) / totalSteps;
+        var distanceStep = (endDistance - startDistance) / totalSteps;
+        var heightOffsetStep = (endHeightOffset - startHeightOffset) / totalSteps;
+        
+        // 如果提供了位置，立即将相机移动到该位置
+
+        
+        // 重置步数计数
+        currentStep = 0;
+        
+        // 开始线性动画
+        animateCameraLinear(pitchStep, yawStep, distanceStep, heightOffsetStep);
+    }
+
+    function animateCameraLinear(pitchStep, yawStep, distanceStep, heightOffsetStep) {
+        // 计算当前值
         if (heroPosition) {
-            // 计算英雄北方100码的位置
             var targetPosition = [
-                heroPosition[0]- 200,
-                heroPosition[1]+ 100, // 在Y轴上加100单位，表示北方100码
+                heroPosition[0],
+                heroPosition[1] + 200,
                 heroPosition[2]
             ];
-            GameUI.SetCameraTargetPosition(targetPosition, 1); // 将相机平滑移动到目标位置
+
+            GameUI.SetCameraTargetPosition(targetPosition, -1);
         }
-        // 在这里可以添加移动完成后的其他操作
+        var currentPitch = startPitch + (pitchStep * currentStep);
+        var currentYaw = startYaw + (yawStep * currentStep);
+        var currentDistance = startDistance + (distanceStep * currentStep);
+        var currentHeightOffset = startHeightOffset + (heightOffsetStep * currentStep);
+        
+        // 应用到相机
+        GameUI.SetCameraPitchMin(currentPitch);
+        GameUI.SetCameraPitchMax(currentPitch);
+        GameUI.SetCameraYaw(currentYaw);
+        GameUI.SetCameraDistance(currentDistance);
+        GameUI.SetCameraLookAtPositionHeightOffset(currentHeightOffset);
+        
+        // 增加步数
+        currentStep++;
+        
+        // 检查是否完成动画
+        if (currentStep <= totalSteps) {
+            // 安排下一帧
+            animationInterval = $.Schedule(updateInterval, function() {
+                animateCameraLinear(pitchStep, yawStep, distanceStep, heightOffsetStep);
+            });
+            // 将计时器引用保存到全局变量
+            cinematicAnimationInterval = animationInterval;
+        } else {
+            // 动画完成，设置最终值确保精确
+            GameUI.SetCameraPitchMin(endPitch);
+            GameUI.SetCameraPitchMax(endPitch);
+            GameUI.SetCameraYaw(endYaw);
+            GameUI.SetCameraDistance(endDistance);
+            GameUI.SetCameraLookAtPositionHeightOffset(endHeightOffset);
+            $.Msg("相机运镜完成");
+            // 清除全局计时器引用
+            cinematicAnimationInterval = null;
+        }
     }
-
-
-    function easeInOutQuad(t) {
-        return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-    }
-
-    moveCamera(); // 开始相机移动
+    
+    // 直接开始相机动画
+    startCameraAnimation();
 }
 
 //cinematicCameraMove()
@@ -197,15 +248,28 @@ function zoomAndPanCamera(unitPosition) {
     moveCamera(); // 开始相机移动
 }
 
+GameEvents.Subscribe("move_camera_position", OnMoveCameraPosition);
 
-(function() {
-    GameEvents.Subscribe("move_camera_position", OnMoveCameraPosition);
-})();
+GameEvents.Subscribe("cinematic_camera_move", function(event) {
+    cinematicCameraMove(event.heroPosition, event.cameraData);
+});
+
 
 function OnMoveCameraPosition(data) {
+    // 取消cinematicCameraMove的所有后续移动
+    if (cinematicAnimationInterval) {
+        $.CancelScheduled(cinematicAnimationInterval);
+        cinematicAnimationInterval = null;
+        $.Msg("已停止之前的相机运镜");
+    }
+    
     var position = [data.x, data.y, data.z];
     var duration = data.duration;
     GameUI.SetCameraTargetPosition(position, duration);
+    GameUI.SetCameraPitchMin(60);
+    GameUI.SetCameraPitchMax(60);
+    GameUI.SetCameraYaw(0);
+
     $.Msg("相机正在移动到新位置: ", position, " 持续时间: ", duration);
     const leftPanel = $('#LeftHeroAbilities');
     const rightPanel = $('#RightHeroAbilities');
@@ -576,13 +640,9 @@ function OnMoveCameraPosition(data) {
         
             // 设置相机位置
             GameUI.SetCameraTarget(-1);
-            GameUI.SetCameraTargetPosition(
-                this.recordedPositions[index].position,
-                transitionTime
-            );
-        
+            
             // 使用Schedule来设置角度和距离
-            const updateInterval = 0.01; // 100fps
+            const updateInterval = 1/144; // 144fps
             const steps = Math.ceil(transitionTime / updateInterval);
             let currentStep = 0;
         
@@ -591,6 +651,7 @@ function OnMoveCameraPosition(data) {
             const initialYaw = this.currentValues.yaw;
             const initialDistance = this.currentValues.distance;
             const initialHeightOffset = this.currentValues.heightOffset;
+            const initialPosition = GameUI.GetCameraLookAtPosition();
         
             const targetPos = this.recordedPositions[index];
             const pitchDiff = targetPos.pitch - initialPitch;
@@ -618,8 +679,16 @@ function OnMoveCameraPosition(data) {
         
                 // 在最后一步时直接使用目标角度
                 const finalYaw = (currentStep === steps) ? targetPos.yaw : currentYaw;
+                
+                // 计算当前位置
+                const currentPosition = [
+                    initialPosition[0] + (targetPos.position[0] - initialPosition[0]) * progress,
+                    initialPosition[1] + (targetPos.position[1] - initialPosition[1]) * progress,
+                    initialPosition[2] + (targetPos.position[2] - initialPosition[2]) * progress
+                ];
         
                 // 更新相机参数
+                GameUI.SetCameraTargetPosition(currentPosition, -1);
                 GameUI.SetCameraYaw(finalYaw);
                 GameUI.SetCameraPitchMin(currentPitch);
                 GameUI.SetCameraPitchMax(currentPitch);

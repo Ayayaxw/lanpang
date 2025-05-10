@@ -3138,7 +3138,7 @@ HeroSkillConditions = {
                 
                 -- 原有的 modifier 刷新检查
                 return self:NeedsModifierRefresh(self.target, {"modifier_invoker_deafening_blast_knockback"}, 1.2) 
-                       and self:NeedsModifierRefresh(self.target, {"modifier_invoker_tornado"}, 1.6)
+                       and self:NeedsModifierRefresh(self.target, {"modifier_invoker_tornado"}, 1.5)
             end
         },
 
@@ -3160,6 +3160,13 @@ HeroSkillConditions = {
                 end
 
                 return potentialTarget ~= nil
+            end
+        },
+
+
+        ["invoker_chaos_meteor"] = {
+            function(self, caster, log)
+                return self:NeedsModifierRefresh(self.target, {"modifier_invoker_tornado"}, 0.5)
             end
         },
         

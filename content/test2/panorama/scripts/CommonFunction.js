@@ -2783,7 +2783,7 @@ var heroesFacets = {
 
 
 
-
+// $.Msg("技能描述" + $.Localize("#DOTA_Tooltip_Ability_tidehunter_krill_eater_Description"));
 
 
 

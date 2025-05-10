@@ -31,6 +31,7 @@ function Main:isExcludedUnit(unit)
         "npc_dota_muerta_revenant",
         "npc_dota_wraith_king_skeleton_warrior",
         "ward",
+        "mantle_unit",
         "npc_dota_ember_spirit_remnant"
 
     }
@@ -54,14 +55,10 @@ end
 
 function Main:OnNPCSpawned(event)
     local spawnedUnit = EntIndexToHScript(event.entindex)
-    if not spawnedUnit then
-        --DebugPrint("函数结束：生成的单位为空")
-        return
-    end
 
     local unitName = spawnedUnit:GetUnitName() or "未知单位"
     if unitName and unitName ~= "" then
-        --DebugPrint("单位生成：" .. unitName)
+        DebugPrint("单位生成：" .. unitName)
     end
 
     if Main.currentChallenge == Main.Challenges.CreepChallenge_100Creeps then 
@@ -134,16 +131,12 @@ function Main:OnNPCSpawned(event)
                             if unitName and unitName ~= "" then
                                 DebugPrint("找到同阵营的 AI，正在为 " .. unitName .. " 创建 AI")
                             end
-                            if CreateAIForHero then
-                                local originalAI = aiInfo.ai
-                                local overallStrategy = originalAI.global_strategy
-                                local heroStrategy = originalAI.hero_strategy
-                                CreateAIForHero(spawnedUnit, overallStrategy, heroStrategy)
-                                if unitName and unitName ~= "" then
-                                    DebugPrint("已成功为 " .. unitName .. " 创建 AI 并继承策略")
-                                end
-                            else
-                                DebugPrint("警告：CreateAIForHero 函数未定义")
+                            local originalAI = aiInfo.ai
+                            local overallStrategy = originalAI.global_strategy
+                            local heroStrategy = originalAI.hero_strategy
+                            CreateAIForHero(spawnedUnit, overallStrategy, heroStrategy)
+                            if unitName and unitName ~= "" then
+                                DebugPrint("已成功为 " .. unitName .. " 创建 AI 并继承策略")
                             end
                             foundAI = true
                             break

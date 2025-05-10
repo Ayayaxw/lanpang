@@ -222,6 +222,26 @@ function Main:StartTextMonitorWithColor(entity, text, fontSize, color)
     })
 end
 
+-- 新增：发送图像到指定实体上
+function Main:SendImageToEntity(entity, imageSource, imageWidth, imageHeight)
+    if not entity or entity:IsNull() then return end
+    if not imageSource then return end
+    
+    local entityId = entity:GetEntityIndex()
+    
+    -- 默认图像尺寸
+    imageWidth = imageWidth or 48
+    imageHeight = imageHeight or 48
+    
+    CustomGameEventManager:Send_ServerToAllClients("update_floating_text", {
+        entityId = entityId,
+        teamId = entity:GetTeamNumber(),
+        imageSource = imageSource,
+        imageWidth = imageWidth,
+        imageHeight = imageHeight
+    })
+end
+
 -- 获取预定义的文本样式 - 可扩展
 function Main:GetTextStyle(styleType, attributeType)
     local styles = {
@@ -275,6 +295,7 @@ function Main:StartAbilitiesMonitor(hero,enableOverlapDetection)
         endTime = 0.1,
         callback = function()
             if not hero or hero:IsNull() then return nil end
+            if hero_duel.EndDuel then return end
             self:MonitorAbilitiesStatus(hero,enableOverlapDetection)
             return 0.1
         end

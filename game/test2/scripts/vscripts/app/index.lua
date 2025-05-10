@@ -160,8 +160,10 @@ function Main:InitGameMode()
     end)
 
     self.caipan = self:CreateReferee(Main.largeSpawnArea_Caipan)
-    self.caipan_waterfall = self:CreateReferee(Main.waterFall_Caipan)
+    self.caipan:AddNewModifier(self.caipan, nil, "modifier_global_ability_listener", {})
     
+    self.caipan_waterfall = self:CreateReferee(Main.waterFall_Caipan)
+
     self.currentHeroName = nil  -- 初始化时没有英雄被选中
     if not IsInToolsMode() then
         local message = "游戏的菜单在左上角，把鼠标移过去就可以看见！有任何BUG欢迎加群反馈！Q群：934026049"
@@ -182,7 +184,7 @@ end
 
 function Main:CreateReferee(position)
     local referee = CreateUnitByName("caipan", position, true, nil, nil, DOTA_TEAM_BADGUYS)
-    referee:AddNewModifier(referee, nil, "modifier_global_ability_listener", {})
+
     referee:AddNewModifier(referee, nil, "modifier_caipan", {})
     referee:AddNewModifier(referee, nil, "modifier_wearable", {})
     referee:AddNewModifier(referee, nil, "modifier_phased", {})
@@ -603,277 +605,201 @@ function Main:OnRequestNearbyUnitsInfo(event)
     print("================================")
 end
 
-function Main:PrintEverythingAboutUnit(event)
-    local playerID = event.PlayerID
-    local unitEntIndex = event.unit_ent_index
-    local unit = EntIndexToHScript(unitEntIndex)
-
-
-    -- unit:AddNewModifier(unit, nil, "modifier_percentage_total_armor", {})
-    -- --打印坐标
-    if unit:IsHero() then
-        local gold = unit:GetGold()
-        print(string.format("【单位】%s 的金币：%d", unit:GetUnitName(), gold))
-    else
-        print(string.format("【单位】%s 不是英雄", unit:GetUnitName()))
-    end
-
-    --打印该单位是不是守卫
-    if unit:IsBarracks() then
-        print(string.format("【单位】%s 是守卫", unit:GetUnitName()))
-    else
-        print(string.format("【单位】%s 不是守卫", unit:GetUnitName()))
-    end
-
-    --打印该单位是不是守卫IsWard
-    if unit:IsWard() then
-        print(string.format("【单位】%s 是ward", unit:GetUnitName()))
-    else
-        print(string.format("【单位】%s 不是ward", unit:GetUnitName()))
-    end
-
-    if unit:IsZombie() then
-        print(string.format("【单位】%s 是zombie", unit:GetUnitName()))
-    else
-        print(string.format("【单位】%s 不是zombie", unit:GetUnitName()))
+function Main:ExecuteSpellCast(spell_data)
+    local parent = spell_data.parent
+    local ability = spell_data.ability
+    local target = spell_data.target
+    local behavior = spell_data.behavior
+    local targetTeam = spell_data.targetTeam
+    local abilityName = spell_data.abilityName
+    
+    -- 检查实体是否有效
+    if not parent or parent:IsNull() or not ability or ability:IsNull() then
+        return
     end
     
-    if unit:IsOther() then
-        print(string.format("【单位】%s 是other", unit:GetUnitName()))
-    else
-        print(string.format("【单位】%s 不是other", unit:GetUnitName()))
-    end
+    -- 检查技能是否是持续施法
+    local isChanneled = ability:GetChannelTime() > 0
     
-    if unit:IsHero() then
-        print(string.format("【单位】%s 是英雄", unit:GetUnitName()))
-    else
-        print(string.format("【单位】%s 不是英雄", unit:GetUnitName()))
-    end
-
-    if unit:IsConsideredHero() then
-        print(string.format("【单位】%s 是ConsideredHero", unit:GetUnitName()))
-    else
-        print(string.format("【单位】%s 不是ConsideredHero", unit:GetUnitName()))
-    end
-    
-    
-
-    print(string.format("【单位坐标】%s 当前坐标：X=%.2f, Y=%.2f, Z=%.2f", unit:GetUnitName(), unit:GetOrigin().x, unit:GetOrigin().y, unit:GetOrigin().z))
-    --打印是否是幻象
-    if unit:IsIllusion() then
-        print(string.format("【单位】%s 是幻象", unit:GetUnitName()))
-    end
-
-    onwer = unit:GetRealOwner()
-    if onwer then print("主人是，",onwer:GetUnitName())
-
-    end
-    if unit and IsValidEntity(unit) then
-        -- 打印单位身上的所有物品
-        print(string.format("【单位物品】%s 当前携带的物品：", unit:GetUnitName()))
-        for i = 0, 16 do
-            local item = unit:GetItemInSlot(i)
-            if item then
-                print(string.format("    槽位 %d: %s", i, item:GetName()))
+    -- 如果是持续施法技能，使用幻想施法方法
+    if isChanneled then
+        if spell_data.is_self_cast then
+            Main:CreateIllusionAndCast(parent, abilityName, "target", parent)
+            return
+        end
+        
+        if bit.band(behavior, DOTA_ABILITY_BEHAVIOR_NO_TARGET) ~= 0 then
+            Main:CreateIllusionAndCast(parent, abilityName, "no_target", nil)
+        elseif bit.band(behavior, DOTA_ABILITY_BEHAVIOR_POINT) ~= 0 then
+            local position
+            if targetTeam == DOTA_UNIT_TARGET_TEAM_FRIENDLY then
+                position = parent:GetAbsOrigin()
+            else
+                position = (target and not target:IsNull()) and target:GetAbsOrigin() or spell_data.lastPosition
             end
-        end
-
-        -- 打印所有技能，按类别分类
-        print(string.format("【单位技能】%s 的所有技能：", unit:GetUnitName()))
-        
-        -- 创建三个分类数组
-        local normalAbilities = {}
-        local hiddenAbilities = {}
-        local talentAbilities = {}
-        
-        -- 遍历所有技能并分类
-        for i = 0, unit:GetAbilityCount() - 1 do
-            local ability = unit:GetAbilityByIndex(i)
-            if ability then
-                local abilityName = ability:GetAbilityName()
-                local activeStatus = ability:GetToggleState() and "[已激活]" or ""
-                local targetType = ability:GetAbilityTargetType()
-                local targetTypeStr = ""
-                
-                -- 转换数字目标类型为可读字符串
-                if bit.band(targetType, DOTA_UNIT_TARGET_HERO) ~= 0 then
-                    targetTypeStr = targetTypeStr .. "HERO "
+            Main:CreateIllusionAndCast(parent, abilityName, "point", position)
+        elseif bit.band(behavior, DOTA_ABILITY_BEHAVIOR_UNIT_TARGET) ~= 0 then
+            local castTarget
+            if targetTeam == DOTA_UNIT_TARGET_TEAM_FRIENDLY then
+                castTarget = parent
+            else
+                if not target or target:IsNull() then
+                    return
                 end
-                if bit.band(targetType, DOTA_UNIT_TARGET_CREEP) ~= 0 then
-                    targetTypeStr = targetTypeStr .. "CREEP "
-                end
-                if bit.band(targetType, DOTA_UNIT_TARGET_BUILDING) ~= 0 then
-                    targetTypeStr = targetTypeStr .. "BUILDING "
-                end
-                if bit.band(targetType, DOTA_UNIT_TARGET_COURIER) ~= 0 then
-                    targetTypeStr = targetTypeStr .. "COURIER "
-                end
-                if bit.band(targetType, DOTA_UNIT_TARGET_BASIC) ~= 0 then
-                    targetTypeStr = targetTypeStr .. "BASIC "
-                end
-                if bit.band(targetType, DOTA_UNIT_TARGET_OTHER) ~= 0 then
-                    targetTypeStr = targetTypeStr .. "OTHER "
-                end
-                if bit.band(targetType, DOTA_UNIT_TARGET_TREE) ~= 0 then
-                    targetTypeStr = targetTypeStr .. "TREE "
-                end
-                if bit.band(targetType, DOTA_UNIT_TARGET_CUSTOM) ~= 0 then
-                    targetTypeStr = targetTypeStr .. "CUSTOM "
-                end
-                if bit.band(targetType, DOTA_UNIT_TARGET_SELF) ~= 0 then
-                    targetTypeStr = targetTypeStr .. "SELF "
-                end
-                
-                if targetTypeStr == "" then
-                    targetTypeStr = "NONE"
-                end
-                
-                local abilityInfo = {
-                    index = i,
-                    name = abilityName,
-                    activeStatus = activeStatus,
-                    targetTypeStr = targetTypeStr,
-                    targetType = targetType
-                }
-                
-                -- 根据类别分组
-                if string.find(abilityName, "special_bonus_") == 1 then
-                    table.insert(talentAbilities, abilityInfo)
-                elseif ability:IsHidden() then
-                    table.insert(hiddenAbilities, abilityInfo)
-                else
-                    table.insert(normalAbilities, abilityInfo)
-                end
+                castTarget = target
             end
-        end
-        
-        -- 打印非隐藏技能
-        print("  [非隐藏技能]")
-        for _, abilityInfo in ipairs(normalAbilities) do
-            print(string.format("    - %d:%s %s [目标类型: %s (%d)]", 
-                abilityInfo.index,
-                abilityInfo.name, 
-                abilityInfo.activeStatus, 
-                abilityInfo.targetTypeStr, 
-                abilityInfo.targetType))
-        end
-        
-        -- 打印隐藏技能
-        print("  [隐藏技能]")
-        for _, abilityInfo in ipairs(hiddenAbilities) do
-            print(string.format("    - %d:%s %s [目标类型: %s (%d)]", 
-                abilityInfo.index,
-                abilityInfo.name, 
-                abilityInfo.activeStatus, 
-                abilityInfo.targetTypeStr, 
-                abilityInfo.targetType))
-        end
-        
-        -- 打印天赋技能
-        print("  [天赋技能]")
-        for _, abilityInfo in ipairs(talentAbilities) do
-            print(string.format("    - %d:%s %s [目标类型: %s (%d)]", 
-                abilityInfo.index,
-                abilityInfo.name, 
-                abilityInfo.activeStatus, 
-                abilityInfo.targetTypeStr, 
-                abilityInfo.targetType))
-        end
-
-        -- 查找最近的单位
-        local nearbyUnits = FindUnitsInRadius(
-            unit:GetTeamNumber(),
-            unit:GetAbsOrigin(),
-            nil,
-            99999, -- 搜索范围设为最大以找到最近的单位
-            DOTA_UNIT_TARGET_TEAM_BOTH,  -- 搜索所有队伍
-            DOTA_UNIT_TARGET_ALL,        -- 搜索所有类型单位
-            DOTA_UNIT_TARGET_FLAG_NONE,
-            FIND_CLOSEST,                -- 按距离排序
-            false
-        )
-
-        -- 找到最近的非自身单位
-        local closestUnit = nil
-        local closestDistance = 99999
-        for _, nearbyUnit in pairs(nearbyUnits) do
-            if nearbyUnit ~= unit then
-                local distance = (nearbyUnit:GetAbsOrigin() - unit:GetAbsOrigin()):Length2D()
-                closestUnit = nearbyUnit
-                closestDistance = distance
-                break  -- 因为已经按距离排序，第一个非自身单位就是最近的
-            end
-        end
-
-        if closestUnit then
-            print(string.format("【最近单位】%s 最近的单位是 %s，距离 %.0f", 
-                unit:GetUnitName(),
-                closestUnit:GetUnitName(),
-                closestDistance
-            ))
+            Main:CreateIllusionAndCast(parent, abilityName, "target", castTarget)
         else
-            print(string.format("【最近单位】%s 附近没有其他单位", unit:GetUnitName()))
-        end
-
-    
-
-        local unitName = unit:GetUnitName()
-        local modifiers = {}
-        local unitModifiers = unit:FindAllModifiers()
-        for _, modifier in pairs(unitModifiers) do
-            local modifierName = modifier:GetName()
-            local remainingTime = modifier:GetRemainingTime()
-            local duration = modifier:GetDuration()
-            local stackCount = modifier:GetStackCount()
-            table.insert(modifiers, {
-                name = modifierName,
-                remaining_time = remainingTime,
-                duration = duration,
-                stack_count = stackCount
-            })
-        end
-        local ownerPlayerID = unit:GetPlayerOwnerID()
-        local teamNumber = unit:GetTeamNumber()
-        
-        local facetID = nil
-        if unit.GetHeroFacetID then
-            facetID = unit:GetHeroFacetID()
-        end
-
-        -- Add new unit information
-        local isHero = unit:IsHero()
-        local IsRealHero = unit:IsRealHero()
-        local isIllusion = unit:IsIllusion()
-        local isSummoned = unit:IsSummoned()
-
-        -- Get child units
-        local childUnits = {}
-        local children = unit:GetChildren()
-        for _, child in pairs(children) do
-            -- 检查是否是单位（通过尝试调用IsUnit方法）
-            if IsValidEntity(child) and child.IsUnit and child:IsUnit() then
-                table.insert(childUnits, {
-                    name = child:GetUnitName(),
-                    ent_index = child:GetEntityIndex(),
-                    is_summoned = child:IsSummoned()
-                })
+            if not target or target:IsNull() then
+                return
             end
+            Main:CreateIllusionAndCast(parent, abilityName, "target", target)
         end
-
-        CustomGameEventManager:Send_ServerToPlayer(PlayerResource:GetPlayer(playerID), "response_unit_info", {
-            unit_name = unitName,
-            modifiers = modifiers,
-            owner_player_id = ownerPlayerID,
-            team_number = teamNumber,
-            facet_id = facetID,
-            is_hero = isHero,
-            is_true_hero = IsRealHero,
-            is_illusion = isIllusion,
-            is_summoned = isSummoned,
-            child_units = childUnits
-        })
+        return
+    end
+    
+    -- 如果不是持续施法技能，使用原来的方式
+    if spell_data.is_self_cast then
+        parent:SetCursorCastTarget(parent)
+        ability:OnSpellStart()
+        return
+    end
+    
+    if bit.band(behavior, DOTA_ABILITY_BEHAVIOR_NO_TARGET) ~= 0 then
+        ability:OnSpellStart()
+    elseif bit.band(behavior, DOTA_ABILITY_BEHAVIOR_POINT) ~= 0 then
+        if targetTeam == DOTA_UNIT_TARGET_TEAM_FRIENDLY then
+            parent:SetCursorPosition(parent:GetAbsOrigin())
+        else
+            -- 使用目标位置或保存的死亡位置
+            local position = (target and not target:IsNull()) and target:GetAbsOrigin() or spell_data.lastPosition
+            parent:SetCursorPosition(position)
+        end
+        ability:OnSpellStart()
+    elseif bit.band(behavior, DOTA_ABILITY_BEHAVIOR_UNIT_TARGET) ~= 0 then
+        if targetTeam == DOTA_UNIT_TARGET_TEAM_FRIENDLY then
+            parent:SetCursorCastTarget(parent)
+        else
+            -- 检查目标有效性
+            if not target or target:IsNull() then
+                return
+            end
+            parent:SetCursorCastTarget(target)
+        end
+        ability:OnSpellStart()
+    else
+        -- 检查目标有效性
+        if not target or target:IsNull() then
+            return
+        end
+        parent:SetCursorCastTarget(target)
+        ability:OnSpellStart()
     end
 end
+
+
+
+
+
+
+function Main:CreateIllusionAndCast(unit, abilityName, castType, castTarget)
+    local modifierKeys = {
+        outgoing_damage = 1.0,          -- 造成100%伤害
+        incoming_damage = 1.0,          -- 承受100%伤害
+        bounty_base = 0,                -- 无赏金
+        bounty_growth = 0,              -- 无赏金成长
+        outgoing_damage_structure = 1.0, -- 对建筑造成100%伤害
+        outgoing_damage_roshan = 1.0     -- 对肉山造成100%伤害
+    }
+    
+    local illusions = CreateIllusions(unit, unit, modifierKeys, 1, 0, false, false)
+
+
+    if abilityName ~= "crystal_maiden_freezing_field" then
+        illusions[1]:AddNewModifier(unit, nil, "modifier_wearable", {})
+    else
+        illusions[1]:AddNewModifier(unit, nil, "modifier_phased", {})
+        illusions[1]:AddNewModifier(unit, nil, "modifier_invulnerable", {})
+        illusions[1]:AddNewModifier(unit, nil, "modifier_attack_immune", {})
+        illusions[1]:AddNewModifier(unit, nil, "modifier_disarmed", {})
+    end
+
+    if abilityName ~= "kez_raptor_dance" then
+        illusions[1]:AddNoDraw()
+    end
+    if #illusions > 0 then
+        local illusion = illusions[1]
+        -- 通过技能名称在幻象身上查找对应技能
+        local ability = illusion:FindAbilityByName(abilityName)
+        
+        
+        -- 让幻象释放指定技能
+        if ability and not ability:IsNull() then
+            -- 根据施法类型设置不同的施法方式
+            if castType == "target" then
+                illusion:SetCursorCastTarget(castTarget or illusion) -- 如果没有指定目标，则以自身为目标
+                ability:OnSpellStart()
+            elseif castType == "point" then
+                print("施法点",castTarget)
+                illusion:SetCursorPosition(castTarget) -- castTarget应为Vector类型坐标
+                ability:OnSpellStart()
+            elseif castType == "no_target" then
+                ability:OnSpellStart()
+            end
+            
+            -- 检查是否是持续施法技能
+            local channelTime = ability:GetChannelTime()
+            if channelTime > 0 then
+                -- 对于持续施法技能，等待持续时间结束后再结束施法
+                print("开始持续施法时间",channelTime)
+                Timers:CreateTimer(channelTime, function()
+                    if illusion and not illusion:IsNull() and ability and not ability:IsNull() then
+                        ability:OnChannelFinish(false)
+                        print(string.format("【幻象】%s 结束持续施法", illusion:GetUnitName()))
+                        
+                        -- 为kez_raptor_dance技能特殊处理，延迟3秒后杀死幻象
+                        if abilityName == "kez_raptor_dance" then
+                            print(string.format("【幻象】%s 使用kez_raptor_dance技能，将在3秒后被杀死", illusion:GetUnitName()))
+                            Timers:CreateTimer(1.5, function()
+                                if illusion and not illusion:IsNull() then
+                                    illusion:ForceKill(false)
+                                    print(string.format("【幻象】%s 在延迟3秒后被杀死", illusion:GetUnitName()))
+                                end
+                            end)
+                        else
+                            -- 其它技能的幻象在持续施法结束后立即杀死
+                            illusion:ForceKill(false)
+                            print(string.format("【幻象】%s 在持续施法结束后被杀死", illusion:GetUnitName()))
+                        end
+                    end
+                end)
+                print(string.format("【幻象】%s 开始持续施法，持续时间: %.1f秒", illusion:GetUnitName(), channelTime))
+            else
+                print(string.format("【幻象】%s 已创建并释放了技能", illusion:GetUnitName()))
+                
+
+                -- 其它技能的幻象在施法结束后立即杀死
+                illusion:ForceKill(false)
+                print(string.format("【幻象】%s 在施法结束后被杀死", illusion:GetUnitName()))
+
+            end
+
+            return illusion
+        else
+            print(string.format("【幻象】%s 无法找到技能: %s", illusion:GetUnitName(), abilityName))
+            Timers:CreateTimer(0.1, function()
+                -- 无法释放技能时也杀死幻象
+                illusion:ForceKill(false)
+                print(string.format("【幻象】%s 因无法释放技能被杀死", illusion:GetUnitName()))
+                return nil
+            end)
+        end
+    end
+    return nil
+end
+
+
+
 
 function Main:OnKeyPressed(keys)
     local timescale = keys.timescale

@@ -111,7 +111,7 @@ end
 --获取单位的真实所有者
 
 CDOTA_BaseNPC.GetRealOwner = function(self)
-    debug = debug or false  -- 默认为false
+    debug = debug or true  -- 默认为false
     
     local function PrintDebug(...)
         if debug then
@@ -205,6 +205,12 @@ CDOTA_BaseNPC.GetRealOwner = function(self)
                     end
                 end
             end
+            local owner = checkUnit:GetOwnerEntity()
+            if owner and not owner:IsNull() then
+                PrintDebug("通过GetOwner找到幻象创造者:", owner:GetUnitName())
+                return owner
+            end
+            
             PrintDebug("未找到幻象的主人")
         end
 

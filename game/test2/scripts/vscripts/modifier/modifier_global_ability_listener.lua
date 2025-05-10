@@ -16,7 +16,10 @@ function modifier_global_ability_listener:RemoveOnDeath()
 end
 
 function modifier_global_ability_listener:DeclareFunctions()
-    return { MODIFIER_EVENT_ON_ABILITY_EXECUTED }
+    return { 
+        MODIFIER_EVENT_ON_ABILITY_EXECUTED,
+        MODIFIER_EVENT_ON_DEATH_COMPLETED
+    }
 end
 
 function modifier_global_ability_listener:GetHeroChineseName(heroName)
@@ -88,70 +91,6 @@ function modifier_global_ability_listener:OnAbilityExecuted(params)
         print("检查完可躲避技能")
     end
 end
-
--- function modifier_global_ability_listener:CheckForRubick(caster, ability)
---     if not Main or not Main.currentArenaHeroes then 
---         return 
---     end
-
---     local leftHero = Main.currentArenaHeroes[1]
---     local rightHero = Main.currentArenaHeroes[2]
-
---     if not leftHero or not rightHero then 
---         return 
---     end
-
---     local rubick, opponent
-
---     if leftHero:GetUnitName() == "npc_dota_hero_rubick" then
---         rubick = leftHero
---         opponent = rightHero
---     elseif rightHero:GetUnitName() == "npc_dota_hero_rubick" then
---         rubick = rightHero
---         opponent = leftHero
---     end
-
---     if rubick and opponent and caster == opponent then
---         local rubickAIWrapper = AIs[rubick]
---         if rubickAIWrapper and rubickAIWrapper.ai then
---             local rubickAI = rubickAIWrapper.ai
---             rubickAI.enemyUsedAbility = true
-            
---             if rubickAI.OnOpponentCastAbility then
---                 rubickAI:OnOpponentCastAbility(ability)
---             end
---         end
---     end
--- end
-
--- function modifier_global_ability_listener:NotifyRubickAI(caster, ability)
---     local arenaHeroes = hero_duel.currentArenaHeroes
---     if not arenaHeroes then 
---         return 
---     end
-
---     local rubick, opponent
-    
---     for i = 1, 2 do
---         local hero = arenaHeroes[i]
---         if hero and hero:IsAlive() then
---             if hero:GetUnitName() == "npc_dota_hero_rubick" then
---                 rubick = hero
---             else
---                 opponent = hero
---             end
---         end
---     end
-
---     if rubick and opponent and caster == opponent then
---         local rubickAIWrapper = AIs[rubick]
---         if rubickAIWrapper and rubickAIWrapper.ai then
---             local rubickAI = rubickAIWrapper.ai
---             rubickAI.enemyUsedAbility = true
---         end
---     end
--- end
-
 
 
 function modifier_global_ability_listener:CheckForDodgeableAbility(caster, ability)

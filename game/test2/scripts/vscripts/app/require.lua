@@ -8,7 +8,7 @@ require("GameEventListeners/OnHeroHealth") --监听英雄血量
 require("GameEventListeners/OnAttack") --监听英雄血量
 require("GameEventListeners/OnUnitKilled") --监听英雄血量
 require("GameEventListeners/OnNPCSpawned") --监听单位出生
-
+require("GameEventListeners/PrintEverythingAboutUnit") --监听单位出生
 
 
 require("ai/core/ai_core")
@@ -24,6 +24,7 @@ require('print_manager')
 require('libraries/vector_targeting')
 require("libraries/timers")
 require("libraries/animations")
+require('libraries/projectiles')
 
 require("battle/hero_benefits")          --这里放的
 require("battle/game_end_animations")
@@ -106,3 +107,14 @@ LinkLuaModifier("modifier_tethered", "modifier/modifier_tethered.lua", LUA_MODIF
 LinkLuaModifier("modifier_attack_cast_ability_1", "modifier/modifier_attack_cast_ability_1.lua", LUA_MODIFIER_MOTION_NONE)
 LinkLuaModifier("modifier_percent_armor_buff", "modifier/modifier_percent_armor_buff.lua", LUA_MODIFIER_MOTION_NONE)
 LinkLuaModifier("modifier_percentage_total_armor", "modifier/modifier_percentage_total_armor.lua", LUA_MODIFIER_MOTION_NONE)
+LinkLuaModifier("modifier_attack_cast_ability_2", "modifier/modifier_attack_cast_ability_2.lua", LUA_MODIFIER_MOTION_NONE)
+LinkLuaModifier("modifier_attack_cast_ability_3", "modifier/modifier_attack_cast_ability_3.lua", LUA_MODIFIER_MOTION_NONE)
+LinkLuaModifier("modifier_death_check_enchant", "modifier/modifier_death_check_enchant.lua", LUA_MODIFIER_MOTION_NONE)
+LinkLuaModifier("modifier_damage_reduction", "modifier/modifier_damage_reduction.lua", LUA_MODIFIER_MOTION_NONE)
+LinkLuaModifier("modifier_unselectable_custom", "modifier/modifier_unselectable_custom.lua", LUA_MODIFIER_MOTION_NONE)
+LinkLuaModifier("modifier_outgoing_damage_reduction", "modifier/modifier_outgoing_damage_reduction.lua", LUA_MODIFIER_MOTION_NONE)
+LinkLuaModifier("modifier_command_restricted", "modifier/modifier_command_restricted.lua", LUA_MODIFIER_MOTION_NONE)
+LinkLuaModifier("modifier_attack_speed_custom", "modifier/modifier_attack_speed_custom.lua", LUA_MODIFIER_MOTION_NONE)
+LinkLuaModifier("modifier_attack_rate_custom", "modifier/modifier_attack_rate_custom.lua", LUA_MODIFIER_MOTION_NONE)
+LinkLuaModifier("modifier_attack_cast_ability_Ult", "modifier/modifier_attack_cast_ability_Ult.lua", LUA_MODIFIER_MOTION_NONE)
+LinkLuaModifier("modifier_walrus_punch_stun", "modifier/modifier_walrus_punch_stun.lua", LUA_MODIFIER_MOTION_NONE)

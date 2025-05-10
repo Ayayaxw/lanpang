@@ -1,0 +1,13 @@
+<root>
+    <styles>
+        <include src="file://{resources}/styles/grid_panel.css" />
+    </styles>
+    <scripts>
+        <include src="file://{resources}/scripts/grid_panel.js" />
+    </scripts>
+    <Panel class="RootPanel" hittest="false">
+        <Panel id="GridPanelContainer" class="GridPanelContainer" hittest="false">
+            <!-- 方阵面板将通过脚本动态创建并添加到这里 -->
+        </Panel>
+    </Panel>
+</root> 

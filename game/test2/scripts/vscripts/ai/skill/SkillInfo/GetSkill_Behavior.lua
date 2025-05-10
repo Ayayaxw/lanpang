@@ -28,6 +28,10 @@ end
 
 
 function CommonAI:GetSkill_Behavior(skill, distance, aoeRadius)
+    if not self.skillBehavior then
+        self:Ini_SkillBehavior()
+    end
+
     local abilityName = skill:GetAbilityName()
     local abilityBehavior = skill:GetBehavior()
 

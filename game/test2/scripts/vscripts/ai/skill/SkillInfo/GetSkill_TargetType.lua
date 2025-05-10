@@ -10,6 +10,11 @@ function CommonAI:Ini_SkillTargetType()
 end
 
 function CommonAI:GetSkillTargetType(skill)
+
+    if not self.skillTargetType then
+        self:Ini_SkillTargetType()
+    end
+
     local abilityName = skill:GetAbilityName()
 
     return self.skillTargetType[abilityName] or skill:GetAbilityTargetType()

@@ -9,20 +9,20 @@ end
 function SpawnFourHeroes()
     -- 四个排名位置及其对应的英雄池
 
-    local rank1Heroes = {    "npc_dota_hero_nevermore",
-    }
-    local rank2Heroes = {    
-        "npc_dota_hero_monkey_king",
 
+    local rank1Heroes = { 
+        "npc_dota_hero_sand_king"
     }
-    --允许表格为空
-    local rank3Heroes = { "npc_dota_hero_phantom_assassin",}
-    local rank4Heroes = {"npc_dota_hero_hoodwink",
-
+    local rank2Heroes = { 
+        "npc_dota_hero_furion"
+    }
+    local rank3Heroes = { 
+        "npc_dota_hero_void_spirit"
+    }
+    local rank4Heroes = { 
+        "npc_dota_hero_crystal_maiden"
     }
 
-    
-    -- 排名位置坐标
     local positions = {
         Vector(767.79, 6149.44, 384.00),    -- 第一名位置
         Vector(1028.40, 6142.33, 256.00),   -- 第二名位置
@@ -75,6 +75,8 @@ function SpawnFourHeroes()
         end
     end)
 end
+
+
 function SetupHero(newHero, isFirst)
     newHero:SetControllableByPlayer(0, true)
     

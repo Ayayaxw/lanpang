@@ -210,8 +210,7 @@ function Main:ProcessHeroDeath(killedUnit)
         )
 
         -- 砍伐获胜英雄周围的树木
-        local treeRadius = 500
-        GridNav:DestroyTreesAroundPoint(winningHero:GetOrigin(), treeRadius, false)
+
 
         winningHero:SetForwardVector(Vector(0, -1, 0))
         local modifiers = {"modifier_damage_reduction_100", "modifier_rooted", "modifier_disable_healing"}

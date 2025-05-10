@@ -56,28 +56,21 @@
     animation-iteration-count: infinite;
 }
 
-/* 闪金光动画关键帧 - 保留单引号 */
-@keyframes 'killCounterGlow' {
-    0% { 
-        text-shadow: 2px 2px 2px #000000, 
-                    -2px -2px 2px #000000, 
-                    2px -2px 2px #000000, 
-                    -2px 2px 2px #000000,
-                    0px 0px 5px #9d7e16; 
+/* 闪金光动画关键帧 */
+/*单引号是正确的*/
+@keyframes 'killCounterGlow'
+{
+    0%
+    { 
+        text-shadow: 2px 2px 2px #000000, -2px -2px 2px #000000, 2px -2px 2px #000000, -2px 2px 2px #000000, 0px 0px 5px #9d7e16; 
     }
-    50% { 
-        text-shadow: 2px 2px 2px #000000, 
-                    -2px -2px 2px #000000, 
-                    2px -2px 2px #000000, 
-                    -2px 2px 2px #000000,
-                    0px 0px 12px #ffd700; 
+    50%
+    { 
+        text-shadow: 2px 2px 2px #000000, -2px -2px 2px #000000, 2px -2px 2px #000000, -2px 2px 2px #000000, 0px 0px 12px #ffd700; 
     }
-    100% { 
-        text-shadow: 2px 2px 2px #000000, 
-                    -2px -2px 2px #000000, 
-                    2px -2px 2px #000000, 
-                    -2px 2px 2px #000000,
-                    0px 0px 5px #9d7e16; 
+    100%
+    { 
+        text-shadow: 2px 2px 2px #000000, -2px -2px 2px #000000, 2px -2px 2px #000000, -2px 2px 2px #000000, 0px 0px 5px #9d7e16; 
     }
 }
 
@@ -89,22 +82,25 @@
 }
 
 /* 使用width/height动画代替transform */
-@keyframes 'killIncrement' {
-    0% { 
+/*单引号是正确的不要改*/
+@keyframes 'killIncrement'
+{
+    0%
+    { 
         width: 100%;
         height: 100%;
     }
-    50% { 
+    50%
+    { 
         width: 120%;
         height: 120%;
     }
-    100% { 
+    100%
+    { 
         width: 100%;
         height: 100%;
     }
 }
-
-
 
 /* 小兵属性样式 - 紧密描边版 */
 .MinionAttributeText {
@@ -135,6 +131,23 @@
 .MinionAttributeText.intelligence {
     color: #3399ff;
 }
+
+/* 浮动图像样式 */
+.FloatingImage {
+    horizontal-align: center;
+    border-radius: 0px;
+    background-color: transparent;
+}
+
+/* 为不同团队添加不同颜色边框 */
+.FloatingImage.GoodTeam {
+    border: 2px solid #1BC05B; /* 天辉绿色 */
+}
+
+.FloatingImage.BadTeam {
+    border: 2px solid #F33030; /* 夜魇红色 */
+}
+
 
 .FloatingTextContainerHidden {
     visibility: collapse;

@@ -9,6 +9,10 @@ if Main.HealthbarsEnabled == nil then
     Main.HealthbarsEnabled = true
 end
 
+-- 在Main表中添加镜头锁定状态跟踪变量
+if Main.CameraLocked == nil then
+    Main.CameraLocked = false
+end
 
 function Main:SendSandboxFunctionsData()
     local sandboxFunctions = {}
@@ -214,6 +218,12 @@ Main.SandboxFunctions = {
         id = "toggle_healthbars",
         name = "显示/隐藏血条",
         functionName = "ToggleHealthbars",
+        category = "environment"
+    },
+    {
+        id = "toggle_camera_lock",
+        name = "切换镜头锁定",
+        functionName = "ToggleCameraLock",
         category = "environment"
     }
 }
@@ -790,5 +800,37 @@ function Main:MaxLevelHero(playerId, teamId, position, selectedEntityId)
         print("已将英雄 " .. selectedHero:GetUnitName() .. " 从 " .. oldLevel .. " 级升至 " .. newLevel .. " 级")
     else
         print("未选中英雄单位")
+    end
+end
+
+-- 镜头锁定功能
+function Main:ToggleCameraLock(playerId)
+    -- 切换镜头锁定状态
+    Main.CameraLocked = not Main.CameraLocked
+    
+    if Main.CameraLocked then
+        print("锁定镜头")
+        -- 发送镜头锁定事件给客户端（通过sandbox_custom_event而不是单独事件）
+        CustomGameEventManager:Send_ServerToAllClients("sandbox_custom_event", { toggle_camera_lock = true })
+        
+        -- 显示消息给玩家
+        local notification = {
+            message = "镜头已锁定",
+            duration = 3.0,
+            style = { color = "orange" }
+        }
+        CustomGameEventManager:Send_ServerToPlayer(PlayerResource:GetPlayer(playerId), "game_notification", notification)
+    else
+        print("解锁镜头")
+        -- 发送镜头解锁事件给客户端（通过sandbox_custom_event而不是单独事件）
+        CustomGameEventManager:Send_ServerToAllClients("sandbox_custom_event", { toggle_camera_lock = false })
+        
+        -- 显示消息给玩家
+        local notification = {
+            message = "镜头已解锁",
+            duration = 3.0,
+            style = { color = "green" }
+        }
+        CustomGameEventManager:Send_ServerToPlayer(PlayerResource:GetPlayer(playerId), "game_notification", notification)
     end
 end

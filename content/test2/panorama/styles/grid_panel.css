@@ -1,0 +1,55 @@
+.SimplePanel {
+    /* 简单面板样式 */
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 2px solid #754c24;
+    border-radius: 8px;
+    z-index: 10;
+
+}
+.GridPanelContainer {
+    /* 方阵容器样式 */
+    background-color: rgba(0, 0, 0, 0.3);
+    width: 100%;
+    height: 100%;
+    
+}
+
+.RootPanel {
+    z-index: 10;
+    width: 100%;
+    height: 100%;
+}
+
+
+.PlantGridPanel {
+    /* 方阵面板样式 */
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 2px solid #754c24;
+    border-radius: 8px;
+    z-index: 10;
+}
+
+.GridCell {
+    /* 方格单元样式 */
+    background-color: rgba(83, 129, 53, 0.7);
+    border: 2px solid #3a5b24;
+    border-radius: 6px;
+}
+
+.GridCellHover {
+    /* 鼠标悬停高亮效果 */
+    background-color: rgba(126, 193, 81, 0.8);
+    box-shadow: 0px 0px 12px 4px #7ec15166;
+    border: 2px solid #afd582;
+}
+
+/* 适配不同位置的方格样式 */
+.FirstRow {
+    /* 第一行特殊样式 */
+    background-color: rgba(83, 129, 53, 0.6);
+}
+
+.LastRow {
+    /* 最后一行特殊样式 */
+    background-color: rgba(83, 129, 53, 0.8);
+} 

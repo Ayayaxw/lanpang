@@ -18,7 +18,7 @@ function CommonAI:Ini_SkillTargetTeam()
         invoker_alacrity = DOTA_UNIT_TARGET_TEAM.FRIENDLY,
         slark_depth_shroud = DOTA_UNIT_TARGET_TEAM.FRIENDLY,
         earth_spirit_petrify = DOTA_UNIT_TARGET_TEAM.FRIENDLY,
-        dark_seer_ion_shell = DOTA_UNIT_TARGET_TEAM.FRIENDLY,
+
         weaver_time_lapse = DOTA_UNIT_TARGET_TEAM.FRIENDLY,
         item_disperser = DOTA_UNIT_TARGET_TEAM.FRIENDLY,
         
@@ -26,6 +26,10 @@ function CommonAI:Ini_SkillTargetTeam()
 end
 
 function CommonAI:GetSkillTargetTeam(skill)
+    if not self.skillTargetTeam then
+        self:Ini_SkillTargetTeam()
+    end
+
     local abilityName = skill:GetAbilityName()
 
     return self.skillTargetTeam[abilityName] or skill:GetAbilityTargetTeam()

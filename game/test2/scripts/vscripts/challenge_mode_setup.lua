@@ -49,6 +49,10 @@ require("challenges/SoloMode")
 require("challenges/CreepChallenge_100percent")
 require("challenges/Escape_Bandits")
 require("challenges/Attack_Trigger_1skill")
+require("challenges/Attack_Trigger_2skill")
+require("challenges/Attack_Trigger_3skill")
+require("challenges/Attack_Trigger_Ulti")
+require("challenges/Intelligence_Cloak_Battle")
 
 Main.Challenges = {}
 Main.ModeConfig = {}
@@ -154,7 +158,13 @@ Main.GameModes = {
         menuConfig = {"SelfHeroRow", "OpponentHeroRow"},
         category = "test"
     },
-    
+    {
+        id = "Intelligence_Cloak_Battle",
+        code = 0015,
+        name = "智力斗篷大战",
+        menuConfig = {"SelfHeroRow"},
+        category = "test"
+    },
 
 
 
@@ -173,6 +183,35 @@ Main.GameModes = {
         id = "SuperCreepChallenge90CD",
         code = 1002,
         name = "90%减CD击杀大赛",
+        menuConfig = {"SelfHeroRow"},
+        category = "creep"
+    },
+
+    {
+        id = "Attack_Trigger_1skill",
+        code = 1003,
+        name = "攻击触发一技能",
+        menuConfig = {"SelfHeroRow"},
+        category = "creep"
+    },
+    {
+        id = "Attack_Trigger_2skill",
+        code = 1004,
+        name = "攻击触发二技能",
+        menuConfig = {"SelfHeroRow"},
+        category = "creep"
+    },
+    {
+        id = "Attack_Trigger_3skill",
+        code = 1005,
+        name = "攻击触发三技能",
+        menuConfig = {"SelfHeroRow"},
+        category = "creep"
+    },
+    {
+        id = "Attack_Trigger_Ulti",
+        code = 1006,
+        name = "攻击触发大招",
         menuConfig = {"SelfHeroRow"},
         category = "creep"
     },
@@ -427,13 +466,6 @@ Main.GameModes = {
         id = "Escape_Bandits",
         code = 3022,
         name = "逃离强盗",
-        menuConfig = {"SelfHeroRow"},
-        category = "single"
-    },
-    {
-        id = "Attack_Trigger_1skill",
-        code = 3023,
-        name = "攻击触发一技能",
         menuConfig = {"SelfHeroRow"},
         category = "single"
     },

@@ -23,15 +23,153 @@ function Main:OnAttack(keys)
     local targetName = target:GetUnitName()
     local damageRounded = string.format("%.2f", damage or 0)
 
+    -- 初始化伤害消息队列
+    if not Main.damageMessageQueue then
+        Main.damageMessageQueue = {}
+        Main.lastDamageBroadcastTime = 0
+    end
+    
+    -- 同时维护两种合并规则的队列
+    if not Main.attackerAbilityQueue then
+        Main.attackerAbilityQueue = {}  -- 攻击者+技能为键 (原规则)
+    end
+    
+    if not Main.abilityTargetQueue then
+        Main.abilityTargetQueue = {}  -- 技能+目标为键 (新规则)
+    end
+
+    -- 初始化实体类型计数表
+    if not Main.entityCounters then
+        Main.entityCounters = {}
+    end
+    
+    -- 构建伤害事件的唯一键：攻击者ID + 技能名称(如果有)
+    local abilityName = "普通攻击"
+    local abilityLocalized = "普通攻击"
+    
+    if inflictor then
+        abilityName = inflictor:GetName()
+        abilityLocalized = {localize = true, text = "DOTA_Tooltip_Ability_" .. abilityName}
+    end
+    
+    -- 获取当前的秒数时间戳 - 用于创建每一秒的新计数表
+    local timestamp = math.floor(GameRules:GetGameTime())
+    local timestampKey = tostring(timestamp)
+    
+    -- 确保存在当前时间戳的计数表
+    if not Main.entityCounters[timestampKey] then
+        Main.entityCounters[timestampKey] = {
+            attackers = {},
+            targets = {}
+        }
+        
+        -- 如果是新的一秒，清理旧的计数表（保留最近30秒的数据）
+        local timeToKeep = 30
+        for oldTimestamp, _ in pairs(Main.entityCounters) do
+            if tonumber(oldTimestamp) < timestamp - timeToKeep then
+                Main.entityCounters[oldTimestamp] = nil
+            end
+        end
+    end
+    
+    -- 记录本次攻击的攻击者和目标
+    local attackerKey = attackerName .. "_" .. attacker:GetEntityIndex()
+    local targetKey = targetName .. "_" .. target:GetEntityIndex()
+    
+    Main.entityCounters[timestampKey].attackers[attackerKey] = {
+        name = attackerName,
+        entityId = attacker:GetEntityIndex()
+    }
+    
+    Main.entityCounters[timestampKey].targets[targetKey] = {
+        name = targetName,
+        entityId = target:GetEntityIndex()
+    }
+    
+    -- 原规则的键：攻击者类型 + 技能
+    local attackerAbilityKey = attackerName .. "_" .. abilityName
+    
+    -- 新规则的键：技能 + 目标类型
+    local abilityTargetKey = abilityName .. "_" .. targetName
+    
+    -- 1. 更新原规则队列 (攻击者+技能 -> 目标)
+    if not Main.attackerAbilityQueue[attackerAbilityKey] then
+        Main.attackerAbilityQueue[attackerAbilityKey] = {
+            attackerName = {localize = true, text = attackerName},
+            abilityName = abilityLocalized,
+            targets = {},
+            totalDamage = 0
+        }
+    end
+    
+    -- 更新目标和伤害信息
+    if not Main.attackerAbilityQueue[attackerAbilityKey].targets[targetName] then
+        Main.attackerAbilityQueue[attackerAbilityKey].targets[targetName] = {
+            count = 1,
+            name = {localize = true, text = targetName},
+            damage = damage
+        }
+    else
+        Main.attackerAbilityQueue[attackerAbilityKey].targets[targetName].count = Main.attackerAbilityQueue[attackerAbilityKey].targets[targetName].count + 1
+        Main.attackerAbilityQueue[attackerAbilityKey].targets[targetName].damage = Main.attackerAbilityQueue[attackerAbilityKey].targets[targetName].damage + damage
+    end
+    
+    -- 更新总伤害
+    Main.attackerAbilityQueue[attackerAbilityKey].totalDamage = Main.attackerAbilityQueue[attackerAbilityKey].totalDamage + damage
+    
+    -- 2. 更新新规则队列 (技能+目标 -> 攻击者)
+    if not Main.abilityTargetQueue[abilityTargetKey] then
+        Main.abilityTargetQueue[abilityTargetKey] = {
+            abilityName = abilityLocalized,
+            targetName = {localize = true, text = targetName},
+            attackers = {},
+            totalDamage = 0,
+            targetIsHero = target:IsHero(),
+            targetStartHealth = target:GetHealth(),
+            targetCurrentHealth = target:GetHealth()
+        }
+    end
+    
+    -- 更新攻击者和伤害信息
+    if not Main.abilityTargetQueue[abilityTargetKey].attackers[attackerName] then
+        Main.abilityTargetQueue[abilityTargetKey].attackers[attackerName] = {
+            count = 1,
+            name = {localize = true, text = attackerName},
+            damage = damage
+        }
+    else
+        Main.abilityTargetQueue[abilityTargetKey].attackers[attackerName].count = Main.abilityTargetQueue[abilityTargetKey].attackers[attackerName].count + 1
+        Main.abilityTargetQueue[abilityTargetKey].attackers[attackerName].damage = Main.abilityTargetQueue[abilityTargetKey].attackers[attackerName].damage + damage
+    end
+    
+    -- 更新总伤害和目标当前血量
+    Main.abilityTargetQueue[abilityTargetKey].totalDamage = Main.abilityTargetQueue[abilityTargetKey].totalDamage + damage
+    Main.abilityTargetQueue[abilityTargetKey].targetCurrentHealth = target:GetHealth()
+    
+    -- 检查是否需要广播伤害消息（每秒一次）
+    local currentTime = GameRules:GetGameTime()
+    if currentTime - Main.lastDamageBroadcastTime >= 1.0 then
+        self:BroadcastDamageMessages()
+        Main.lastDamageBroadcastTime = currentTime
+    end
+
     -- 追踪技能伤害
     if hero_duel.damagePanelEnabled and inflictor then
         -- 获取技能名称
         local abilityName = inflictor:GetName()
         
+        -- 获取真正的攻击者（主人）
+        local realAttacker = attacker:GetRealOwner()
+        
+        -- 如果没有主人，则不记录伤害
+        if not realAttacker then
+            return
+        end
+        
         -- 确定攻击者的属性
         local attribute = "All"
-        if attacker:IsHero() then
-            local heroData = Main.heroListKV[attackerName]
+        if realAttacker:IsHero() then
+            local heroData = Main.heroListKV[realAttacker:GetUnitName()]
             if heroData then
                 local attributePrimary = heroData["AttributePrimary"]
                 local attributeType = GetHeroTypeFromAttribute(attributePrimary)
@@ -49,7 +187,7 @@ function Main:OnAttack(keys)
         end
         
         -- 为这个技能+攻击者组合创建唯一键
-        local abilityKey = abilityName .. "_" .. attacker:GetEntityIndex()
+        local abilityKey = abilityName .. "_" .. realAttacker:GetEntityIndex()
         
         -- 获取当前时间
         local currentTime = GameRules:GetGameTime()
@@ -68,7 +206,7 @@ function Main:OnAttack(keys)
             -- 为这个技能创建新条目
             hero_duel.abilityDamageTracker[abilityKey] = {
                 abilityName = abilityName,
-                attackerName = attacker:GetUnitName(),
+                attackerName = realAttacker:GetUnitName(),
                 attribute = attribute,
                 damage = damage,
                 lastDamageTime = currentTime
@@ -120,14 +258,14 @@ function Main:OnAttack(keys)
         end
     end
 
-    local attacker = EntIndexToHScript(keys.entindex_attacker)
-    if attacker and attacker:GetUnitName() == self.currentHeroName then
-        local ability = attacker:GetCurrentActiveAbility()
-        if ability then
-            local message = PrintManager:FormatAbilityMessage(attacker, ability)
-            PrintManager:PrintMessage(message)
-        end
-    end
+    -- local attacker = EntIndexToHScript(keys.entindex_attacker)
+    -- if attacker then
+    --     local ability = attacker:GetCurrentActiveAbility()
+    --     if ability then
+    --         local message = PrintManager:FormatAbilityMessage(attacker, ability)
+    --         PrintManager:PrintMessage(message)
+    --     end
+    -- end
 
     local challengeId = self.currentChallenge
 
@@ -148,6 +286,236 @@ function Main:OnAttack(keys)
             self[challengeFunctionName](self, keys)
         end
     end
+end
+
+-- 新增函数：广播队列中的所有伤害消息
+function Main:BroadcastDamageMessages()
+    if not Main.currentMatchID then return end
+    
+    -- 创建消息合并表
+    local combinedMessages = {}
+    
+    -- 获取当前的时间戳
+    local currentTimestamp = math.floor(GameRules:GetGameTime())
+    local timestampKey = tostring(currentTimestamp)
+    
+    -- 计算当前秒内不重复的攻击者和目标数量
+    local uniqueAttackerCounts = {}
+    local uniqueTargetCounts = {}
+    
+    -- 只处理当前秒的数据
+    if Main.entityCounters[timestampKey] then
+        -- 先创建用于存储不重复ID的表
+        local uniqueAttackerIds = {}
+        local uniqueTargetIds = {}
+        
+        for attackerKey, attackerInfo in pairs(Main.entityCounters[timestampKey].attackers) do
+            local attackerName = attackerInfo.name
+            local attackerId = attackerInfo.entityId
+            
+            -- 为每种攻击者类型初始化ID集合
+            if not uniqueAttackerIds[attackerName] then
+                uniqueAttackerIds[attackerName] = {}
+            end
+            
+            -- 记录ID
+            uniqueAttackerIds[attackerName][attackerId] = true
+        end
+        
+        for targetKey, targetInfo in pairs(Main.entityCounters[timestampKey].targets) do
+            local targetName = targetInfo.name
+            local targetId = targetInfo.entityId
+            
+            -- 为每种目标类型初始化ID集合
+            if not uniqueTargetIds[targetName] then
+                uniqueTargetIds[targetName] = {}
+            end
+            
+            -- 记录ID
+            uniqueTargetIds[targetName][targetId] = true
+        end
+        
+        -- 然后计算每种类型的不重复ID数量
+        for attackerName, ids in pairs(uniqueAttackerIds) do
+            local count = 0
+            for _ in pairs(ids) do
+                count = count + 1
+            end
+            uniqueAttackerCounts[attackerName] = count
+        end
+        
+        for targetName, ids in pairs(uniqueTargetIds) do
+            local count = 0
+            for _ in pairs(ids) do
+                count = count + 1
+            end
+            uniqueTargetCounts[targetName] = count
+        end
+        
+        -- 调试输出
+        for name, count in pairs(uniqueAttackerCounts) do
+            print("[伤害统计] 攻击者: " .. name .. ", 不重复数量: " .. count)
+        end
+        
+        for name, count in pairs(uniqueTargetCounts) do
+            print("[伤害统计] 目标: " .. name .. ", 不重复数量: " .. count)
+        end
+    end
+    
+    -- 1. 先处理原规则的消息：攻击者+技能 -> 多目标
+    if Main.attackerAbilityQueue then
+        for attackerAbilityKey, attackData in pairs(Main.attackerAbilityQueue) do
+            -- 获取攻击者名称
+            local attackerNameText = ""
+            if type(attackData.attackerName) == "table" and attackData.attackerName.text then
+                attackerNameText = attackData.attackerName.text
+            else
+                attackerNameText = tostring(attackData.attackerName)
+            end
+            
+            -- 遍历每种目标类型
+            for targetName, targetData in pairs(attackData.targets) do
+                local messageKey = attackerNameText .. "_" .. 
+                                  (type(attackData.abilityName) == "table" and attackData.abilityName.text or attackData.abilityName) .. "_" .. 
+                                  (type(targetData.name) == "table" and targetData.name.text or targetName)
+                
+                -- 检查是否已存在相同类型的消息
+                if not combinedMessages[messageKey] then
+                    -- 计算目标的不重复数量
+                    local uniqueTargetCount = uniqueTargetCounts[targetName] or 1
+                    
+                    combinedMessages[messageKey] = {
+                        attackerName = attackData.attackerName,
+                        abilityName = attackData.abilityName,
+                        targetName = targetData.name,
+                        count = targetData.count,
+                        uniqueCount = uniqueTargetCount,
+                        damage = targetData.damage,
+                        targetIsHero = false, -- 原规则不支持此特性
+                        messageType = "original"
+                    }
+                else
+                    -- 合并相同类型的消息
+                    combinedMessages[messageKey].count = combinedMessages[messageKey].count + targetData.count
+                    combinedMessages[messageKey].damage = combinedMessages[messageKey].damage + targetData.damage
+                end
+            end
+        end
+        
+        -- 清空原规则队列
+        Main.attackerAbilityQueue = {}
+    end
+    
+    -- 2. 再处理新规则的消息：技能+目标 -> 多攻击者
+    if Main.abilityTargetQueue then
+        for abilityTargetKey, attackData in pairs(Main.abilityTargetQueue) do
+            -- 获取目标名称
+            local targetNameText = ""
+            if type(attackData.targetName) == "table" and attackData.targetName.text then
+                targetNameText = attackData.targetName.text
+            else
+                targetNameText = tostring(attackData.targetName)
+            end
+            
+            -- 遍历每种攻击者类型
+            for attackerName, attackerData in pairs(attackData.attackers) do
+                local messageKey = attackerName .. "_" .. 
+                                  (type(attackData.abilityName) == "table" and attackData.abilityName.text or attackData.abilityName) .. "_" .. 
+                                  targetNameText
+                
+                -- 检查是否已存在相同类型的消息（攻击者+技能+目标）
+                if not combinedMessages[messageKey] then
+                    -- 计算攻击者的不重复数量
+                    local uniqueAttackerCount = uniqueAttackerCounts[attackerName] or 1
+                    
+                    -- 创建新的消息对象
+                    combinedMessages[messageKey] = {
+                        attackerName = attackerData.name,
+                        abilityName = attackData.abilityName,
+                        targetName = attackData.targetName,
+                        count = attackerData.count,
+                        uniqueCount = uniqueAttackerCount,
+                        damage = attackerData.damage,
+                        targetIsHero = attackData.targetIsHero,
+                        targetStartHealth = attackData.targetStartHealth,
+                        targetCurrentHealth = attackData.targetCurrentHealth,
+                        messageType = "new"
+                    }
+                else
+                    -- 合并相同类型的消息
+                    local existingMsg = combinedMessages[messageKey]
+                    existingMsg.count = existingMsg.count + attackerData.count
+                    existingMsg.damage = existingMsg.damage + attackerData.damage
+                    
+                    -- 如果已有消息不包含血量信息但当前消息有，则添加
+                    if attackData.targetIsHero and not existingMsg.targetIsHero then
+                        existingMsg.targetIsHero = true
+                        existingMsg.targetStartHealth = attackData.targetStartHealth
+                        existingMsg.targetCurrentHealth = attackData.targetCurrentHealth
+                    end
+                end
+            end
+        end
+        
+        -- 清空新规则队列
+        Main.abilityTargetQueue = {}
+    end
+    
+    -- 3. 发送所有合并后的消息
+    for _, messageData in pairs(combinedMessages) do
+        local damageRounded = string.format("%.2f", messageData.damage or 0)
+        
+        local messageElements = {
+            "[LanPang_RECORD][",
+            Main.currentMatchID,
+            "]",
+            "[伤害事件]",
+        }
+        
+        -- 根据消息类型决定如何显示攻击者和数量
+        if messageData.messageType == "new" then
+            -- 新规则：显示格式为 "攻击者X数量的技能对目标造成伤害"
+            table.insert(messageElements, messageData.attackerName)
+            -- 只有当不重复攻击者数量大于1时才显示数量
+            if messageData.uniqueCount and messageData.uniqueCount > 1 then
+                table.insert(messageElements, " X" .. messageData.uniqueCount)
+            end
+        else
+            -- 原规则：显示格式为 "攻击者的技能对目标X数量造成伤害"
+            table.insert(messageElements, messageData.attackerName)
+        end
+        
+        -- 添加技能和目标信息
+        table.insert(messageElements, "的")
+        table.insert(messageElements, messageData.abilityName)
+        table.insert(messageElements, "对")
+        table.insert(messageElements, messageData.targetName)
+        
+        -- 对于原规则，数量显示在目标名称后面
+        -- 只有当不重复目标数量大于1时才显示数量
+        if messageData.messageType == "original" and messageData.uniqueCount and messageData.uniqueCount > 1 then
+            table.insert(messageElements, " X" .. messageData.uniqueCount)
+        end
+        
+        table.insert(messageElements, "共计造成了")
+        table.insert(messageElements, damageRounded)
+        table.insert(messageElements, "点伤害")
+        
+        -- 如果目标是英雄，添加血量变化信息
+        if messageData.targetIsHero then
+            local startHealth = math.floor(messageData.targetStartHealth)
+            local endHealth = math.floor(messageData.targetCurrentHealth)
+            table.insert(messageElements, "（" .. startHealth .. "->" .. endHealth .. "）")
+        end
+        
+        -- 发送本次消息
+        if Main.createLocalizedMessage then
+            Main:createLocalizedMessage(unpack(messageElements))
+        end
+    end
+    
+    -- 每次广播后清空计数表
+    Main.entityCounters[timestampKey] = nil
 end
 
 -- 检查过期技能的函数

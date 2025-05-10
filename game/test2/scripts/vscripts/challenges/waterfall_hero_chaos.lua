@@ -3,7 +3,7 @@ function Main:Init_waterfall_hero_chaos(event, playerID)
     self.showTeamPanel = true  
     self.isTestMode = false
     self.heroesPerTeam = 3  -- 每个队伍初始传送的英雄数量，作为独立参数
-    self.preCreatePerTeam = 3 -- 每个队伍初始创建的英雄数量，作为独立参数
+    self.preCreatePerTeam = 4 -- 每个队伍初始创建的英雄数量，作为独立参数
     self.currentDeployIndex = 1  -- 当前部署的英雄索引
 
 
@@ -16,484 +16,6 @@ function Main:Init_waterfall_hero_chaos(event, playerID)
 
 
     -- local ability_modifiers = {
-    --     npc_dota_hero_pangolier = {
-    --         pangolier_fortune_favors_the_bold =
-    --         {
-    --             AbilityValues = {
-    --                 chance_reduce = {
-    --                     value = -100
-    --                 }
-    --             }
-    --         },
-
-    --         pangolier_lucky_shot =
-    --         {
-    --             AbilityValues = {
-    --                 chance_pct = {
-    --                     value = 100
-    --                 }
-    --             }
-    --         },
-    --     },
-    --     npc_dota_hero_hoodwink = {
-    --         hoodwink_mistwoods_wayfarer = {
-    --             AbilityValues = {
-    --                 redirect_chance = {
-    --                     value = 100
-    --                 }
-    --             }
-    --         },
-    --     },
-    --     npc_dota_hero_dark_seer = {
-    --         dark_seer_normal_punch = {
-    --             AbilityValues = {
-    --                 AbilityCooldown = {
-    --                     value = 0
-    --                 }
-    --             }
-    --         },
-    --     },
-
-    --     npc_dota_hero_legion_commander = {
-    --         legion_commander_moment_of_courage = {
-    --             AbilityValues = {
-    --                 trigger_chance = {
-    --                     value = 100
-    --                 }
-    --             }
-    --         },
-    --     },
-    --     npc_dota_hero_troll_warlord = {
-    --         troll_warlord_berserkers_rage  = {
-    --             AbilityValues = {
-    --                 ensnare_chance = 100,
-    --                 maim_chance = 100
-    --             }
-    --         },
-    --         troll_warlord_whirling_axes_melee = {
-    --             AbilityValues = {
-    --                 blind_pct = 100
-    --             }
-    --         },
-    --     },
-
-    --     npc_dota_hero_skeleton_king = {
-    --         skeleton_king_mortal_strike = {
-    --             AbilityValues = {
-    --                 AbilityCooldown = 0 ,
-    --             }
-    --         },
-    --         skeleton_king_spectral_blade = {
-    --             AbilityValues = {
-    --                 curse_cooldown = {
-    --                     value = 0,
-    --                 },
-    --                 curse_delay = {
-    --                     value = 0,
-    --                 },
-    --             }
-    --         },
-    --     },
-    --     npc_dota_hero_tusk = {
-    --         special_bonus_unique_tusk_4 = {
-    --             AbilityValues = {
-    --                 value = {
-    --                     value = 100
-    --                 }
-    --             }
-    --         }
-    --     },
-    --     npc_dota_hero_axe = {
-    --         axe_counter_helix = {
-    --             AbilityValues = {
-    --                 AbilityCooldown = {
-    --                     value = 0
-    --                 },
-    --                 trigger_attacks = {
-    --                     value = 0
-    --                 },
-    --             }
-    --         },
-    --     },
-    --     npc_dota_hero_slardar = {
-    --         slardar_bash = {
-    --             AbilityValues = {
-    --                 attack_count = {
-    --                     value = 0
-    --                 }
-    --             }
-    --         },
-    --     },
-    --     npc_dota_hero_kunkka = {
-    --         kunkka_tidebringer = {
-    --             AbilityValues = {
-    --                 AbilityCooldown = 0,
-    --             }
-    --         },
-    --     },
-    --     npc_dota_hero_doom_bringer = {
-    --         doom_bringer_infernal_blade = {
-    --             AbilityValues = {
-    --                 AbilityCooldown = 0,
-    --             }
-    --         },
-    --         berserker_troll_break = {
-    --             AbilityValues = {
-    --                 AbilityCooldown = 0,
-    --             }
-    --         },
-    --         spawnlord_master_freeze = {
-    --             AbilityValues = {
-    --                 AbilityCooldown = 0,
-    --             }
-    --         },
-
-    --         big_thunder_lizard_wardrums_aura =
-    --         {
-    --             AbilityValues = {
-    --                 accuracy =  {
-    --                     value = 100,
-    --                 }
-    --             }
-    --         },
-    --         alpha_wolf_critical_strike={
-    --             AbilityValues = {
-    --                 crit_chance = {
-    --                     value = 100,
-    --                 }
-    --             }
-    --         },
-            
-    --     },
-    --     npc_dota_hero_chaos_knight = {
-    --         chaos_knight_reins_of_chaos = {
-    --             AbilityValues = {
-    --                 bonus_illusion_chance = {
-    --                     value = 100
-    --                 }
-    --             }
-    --         },
-    --         chaos_knight_chaos_strike = {
-    --             AbilityValues = {
-    --                 chance = {
-    --                     value = 100
-    --                 }
-    --             }
-    --         },
-    --     },
-    --     npc_dota_hero_dawnbreaker = {
-    --         dawnbreaker_luminosity = {
-    --             AbilityValues = {
-    --                 attack_count = {
-    --                     value = 0
-    --                 }
-    --             }
-    --         },
-    --     },
-    --     npc_dota_hero_spirit_breaker = {
-    --         spirit_breaker_greater_bash = {
-    --             AbilityValues = {
-    --                 AbilityCooldown ={
-    --                     value = 0
-    --                 },
-    --                 chance_pct = {
-    --                     value = 100
-    --                 }
-    --             }
-    --         },
-    --     },
-    --     npc_dota_hero_ogre_magi = {
-    --         ogre_magi_multicast = {
-    --             AbilityValues = {
-    --                 multicast_4_times = {
-    --                     value = 100
-    --                 }
-    --             }
-    --         },
-    --         special_bonus_unique_ogre_magi_3 = {
-    --             AbilityValues = {
-    --                 value = {
-    --                     value = 100
-    --                 }
-    --             }
-    --         },
-    --     },
-    --     npc_dota_hero_juggernaut = {
-    --         juggernaut_blade_dance = {
-    --             AbilityValues = {
-    --                 blade_dance_crit_chance = {
-    --                     value = 100
-    --                 }
-    --             }
-    --         },
-    --     },
-    --     npc_dota_hero_kez = {
-    --         kez_shodo_sai = {
-    --             AbilityValues = {
-    --                 sai_proc_vuln_chance = {
-    --                     value = 100
-    --                 }
-    --             }
-    --         },
-    --         kez_falcon_rush = {
-    --             AbilityValues = {
-    --                 buff_evasion_pct = {
-    --                     value = 100
-    --                 }
-    --             }
-    --         },
-    --     },
-    --     npc_dota_hero_drow_ranger = {
-    --         drow_ranger_marksmanship = {
-    --             AbilityValues = {
-    --                 chance = {
-    --                     value = 100
-    --                 }
-    --             }
-    --         },
-    --     },
-    --     npc_dota_hero_naga_siren = {
-    --         naga_siren_rip_tide = {
-    --             AbilityValues = {
-    --                 hits = {
-    --                     value = 0
-    --                 }
-    --             }
-    --         },
-    --         naga_siren_eelskin = {
-    --             AbilityValues = {
-    --                 evasion_per_naga = {
-    --                     value = 100
-    --                 }
-    --             }
-    --         },
-    --     },
-    --     npc_dota_hero_sniper = {
-    --         sniper_headshot = {
-    --             AbilityValues = {
-    --                 proc_chance = {
-    --                     value = 100
-    --                 }
-    --             }
-    --         },
-    --     },
-    --     npc_dota_hero_broodmother = {
-    --         broodmother_incapacitating_bite = {
-    --             AbilityValues = {
-    --                 miss_chance = {
-    --                     value = 100
-    --                 }
-    --             }
-    --         },
-    --     },
-    --     npc_dota_hero_faceless_void = {
-    --         special_bonus_unique_faceless_void_4 = {
-    --             AbilityValues = {
-    --                 dodge_chance_pct = {
-    --                     value = 100
-    --                 }
-    --             }
-    --         },
-    --         faceless_void_time_lock = {
-    --             AbilityValues = {
-    --                 chance_pct = {
-    --                     value = 100
-    --                 }
-    --             }
-    --         },
-
-    --     },
-    --     npc_dota_hero_monkey_king = {
-    --         monkey_king_jingu_mastery = {
-    --             AbilityValues = {
-    --                 required_hits = {
-    --                     value = 0
-    --                 }
-    --             }
-    --         },
-    --     },
-
-    --     npc_dota_hero_shadow_shaman = {
-    --         shadow_shaman_voodoo_hands = {
-    --             AbilityValues = {
-    --                 AbilityCooldown = {
-    --                     value = 0
-    --                 }
-    --             }
-    --         },
-    --     },
-    --     npc_dota_hero_disruptor = { 
-    --         disruptor_electromagnetic_repulsion = {
-    --             AbilityValues = {
-    --                 damage_threshold = 1,
-    --                 AbilityCooldown = {
-    --                     value = 0
-    --                 }
-    --             }
-    --         },
-    --     },
-    --     npc_dota_hero_jakiro = {
-    --         jakiro_liquid_fire = {
-    --             AbilityValues = {
-    --                 AbilityCooldown = {
-    --                     value = 0
-    --                 }
-    --             }
-    --         },
-    --         jakiro_liquid_ice = {
-    --             AbilityValues = {
-    --                 AbilityCooldown = {
-    --                     value = 0
-    --                 }
-    --             }
-    --         },  
-    --     },
-    --     npc_dota_hero_obsidian_destroyer = {
-    --         obsidian_destroyer_equilibrium = {
-    --             AbilityValues = {
-    --                 proc_chance = {
-    --                     value = 100
-    --                 }
-    --             }
-    --         },
-    --     },
-    --     npc_dota_hero_snapfire = {
-    --         snapfire_buckshot = {
-    --             AbilityValues = {
-    --                 miss_chance = {
-    --                     value = 100
-    --                 }
-    --             }
-    --         },
-    --     },
-    --     npc_dota_hero_phantom_assassin = {
-    --         phantom_assassin_immaterial = {
-    --             AbilityValues = {
-    --                 evasion_base = {
-    --                     value = 100
-    --                 }
-    --             }
-    --         },
-    --         phantom_assassin_coup_de_grace = {
-    --             AbilityValues = {
-    --                 crit_chance = {
-    --                     value = 100
-    --                 },
-    --                 dagger_crit_chance = {
-    --                     value = 100
-    --                 },
-    --                 attacks_to_proc = {
-    --                     value = 0
-    --                 },
-    --                 attacks_to_proc_creeps = {
-    --                     value = 0
-    --                 },
-    --             }
-    --         },
-    --     },
-    --     npc_dota_hero_weaver = {
-    --         weaver_geminate_attack = {
-    --             AbilityValues = {
-    --                 AbilityCooldown = {
-    --                     value = 0
-    --                 }
-    --             }
-    --         },
-    --     },
-    --     npc_dota_hero_gyrocopter = {
-    --         gyrocopter_flak_cannon = {
-    --             AbilityValues = {
-    --                 sidegunner_fire_rate = {
-    --                     value = 0
-    --                 }
-    --             }
-    --         },
-    --     },
-    --     npc_dota_hero_muerta = {
-    --         muerta_gunslinger = {
-    --             AbilityValues = {
-    --                 double_shot_chance = {
-    --                     value = 100
-    --                 }
-    --             }
-    --         },
-    --     },
-    --     npc_dota_hero_enigma = {
-    --         enigma_splitting_image = {
-    --             AbilityValues = {
-    --                 damage_threshold = 0 ,
-    --                 eidolon_spawns = 999,
-    --             }
-    --         },
-    --     },
-    --     npc_dota_hero_phantom_lancer = {
-    --         phantom_lancer_phantom_edge = {
-    --             AbilityValues = {
-    --                 min_distance = {
-    --                     value = 0
-    --                 },
-    --                 AbilityCooldown = {
-    --                     value = 0
-    --                 }
-    --             }
-    --         },
-    --         phantom_lancer_juxtapose = {
-    --             AbilityValues = {
-    --                 proc_chance_pct = {
-    --                     value = 100
-    --                 },
-    --                 illusion_proc_chance_pct = {
-    --                     value = 100
-    --                 }
-    --             }
-    --         },
-    --     },
-    --     npc_dota_hero_treant = {
-    --         treant_natures_guise = {
-    --             AbilityValues = {
-    --                 shard_cooldown ={
-    --                     value = 0
-    --                 },
-    --                 cooldown_time = {
-    --                     value = 0
-    --                 }
-    --             }
-    --         },
-    --     },
-    --     npc_dota_hero_brewmaster = {
-    --         brewmaster_drunken_brawler = {
-    --             AbilityValues = {
-    --                 dodge_chance = {
-    --                     value = 100
-    --                 },
-    --                 crit_chance = {
-    --                     value = 100
-    --                 }
-    --             }
-    --         },
-    --     },
-    --     npc_dota_hero_omniknight = {
-    --         omniknight_hammer_of_purity = {
-    --             AbilityValues = {
-    --                 AbilityCooldown = {
-    --                     value = 0
-    --                 }
-    --             }
-
-    --         },
-    --     },
-    --     npc_dota_hero_razor = {
-    --         razor_storm_surge = {
-    --             AbilityValues = {
-    --                 strike_pct_chance = {
-    --                     value = 100
-    --                 },
-    --                 strike_internal_cd = {
-    --                     value = 0
-    --                 }
-    --             }
-    --         },
-    --     },
 
     -- }
     -- self:UpdateAbilityModifiers(ability_modifiers)
@@ -628,7 +150,9 @@ function Main:SetupWaterFallCombatBuffs(hero)
     hero:AddNewModifier(hero, nil, "modifier_item_aghanims_shard", {})
     hero:AddNewModifier(hero, nil, "modifier_item_ultimate_scepter_consumed", {})
     hero:AddNewModifier(hero, nil, "modifier_auto_elevation_waterfall", {})
-    hero:AddNewModifier(hero, nil, "modifier_attack_cast_ability_1", {})
+    if hero:GetUnitName() ~= "npc_dota_hero_dawnbreaker" then
+        hero:AddNewModifier(hero, nil, "modifier_attack_cast_ability_Ult", {})
+    end
     -- 查找英雄type
     local heroName = hero:GetUnitName()
     local heroType = nil
@@ -861,23 +385,23 @@ function Main:OnUnitKilled_waterfall_hero_chaos(killedUnit, args)
             -- 在更新完被击杀者状态后，再处理击杀者数据和胜利检查
             if realKiller and killerType and killerData and killerTeamData then
                 --self:KamiBlessing(realKiller)
-                local newHealth = realKiller:GetHealth() + realKiller:GetMaxHealth() / 3
-                if newHealth > realKiller:GetMaxHealth() then
-                    newHealth = realKiller:GetMaxHealth()
-                end
+                -- local newHealth = realKiller:GetHealth() + realKiller:GetMaxHealth() / 3
+                -- if newHealth > realKiller:GetMaxHealth() then
+                --     newHealth = realKiller:GetMaxHealth()
+                -- end
                 
-                local newMana = realKiller:GetMana() + realKiller:GetMaxMana()  / 3
-                if newMana > realKiller:GetMaxMana() then
-                    newMana = realKiller:GetMaxMana()
-                end
+                -- local newMana = realKiller:GetMana() + realKiller:GetMaxMana()  / 3
+                -- if newMana > realKiller:GetMaxMana() then
+                --     newMana = realKiller:GetMaxMana()
+                -- end
                 
-                realKiller:SetHealth(newHealth)
-                realKiller:SetMana(newMana)
+                -- realKiller:SetHealth(newHealth)
+                -- realKiller:SetMana(newMana)
                 
 
-                local particle = ParticleManager:CreateParticle("particles/econ/items/omniknight/hammer_ti6_immortal/omniknight_purification_ti6_immortal.vpcf", PATTACH_ABSORIGIN_FOLLOW, realKiller)
-                ParticleManager:SetParticleControl(particle, 0, realKiller:GetAbsOrigin())
-                ParticleManager:ReleaseParticleIndex(particle)
+                -- local particle = ParticleManager:CreateParticle("particles/econ/items/omniknight/hammer_ti6_immortal/omniknight_purification_ti6_immortal.vpcf", PATTACH_ABSORIGIN_FOLLOW, realKiller)
+                -- ParticleManager:SetParticleControl(particle, 0, realKiller:GetAbsOrigin())
+                -- ParticleManager:ReleaseParticleIndex(particle)
                 --重置所有技能冷却和充能
                 -- for i = 0, realKiller:GetAbilityCount() - 1 do
                 --     local ability = realKiller:GetAbilityByIndex(i)
@@ -989,82 +513,13 @@ end
 
 
 function Main:InitializeWaterfallHeroSequence()
+    local balanceMode = true
     -- local heroesGroup1 = {
     --     "npc_dota_hero_nevermore",
-    --     "npc_dota_hero_monkey_king",
-    --     "npc_dota_hero_phantom_assassin",
-    --     "npc_dota_hero_hoodwink",
-    --     "npc_dota_hero_pangolier",
-    --     "npc_dota_hero_razor",
-    --     "npc_dota_hero_witch_doctor",
-    --     "npc_dota_hero_omniknight",
-    --     "npc_dota_hero_crystal_maiden",
-    --     "npc_dota_hero_leshrac",
-    --     "npc_dota_hero_dragon_knight",
-    --     "npc_dota_hero_faceless_void",
-    --     "npc_dota_hero_tidehunter",
-    --     "npc_dota_hero_earthshaker",
-    --     "npc_dota_hero_tinker",
-    --     "npc_dota_hero_keeper_of_the_light",
-    --     "npc_dota_hero_night_stalker",
-    --     "npc_dota_hero_snapfire",
-    --     "npc_dota_hero_necrolyte",
-    --     "npc_dota_hero_muerta",
-    --     "npc_dota_hero_sven",
-    --     "npc_dota_hero_tiny",
-    --     "npc_dota_hero_huskar",
-    --     "npc_dota_hero_brewmaster",
-    --     "npc_dota_hero_morphling",
-    --     "npc_dota_hero_kunkka",
-    --     "npc_dota_hero_ursa",
-    --     "npc_dota_hero_abyssal_underlord",
-    --     "npc_dota_hero_mars",
-    --     "npc_dota_hero_sand_king",
-    --     "npc_dota_hero_invoker",
-    --     "npc_dota_hero_lina",
-    --     "npc_dota_hero_death_prophet",
-    --     "npc_dota_hero_nyx_assassin",
-    --     "npc_dota_hero_morphling",
-    --     "npc_dota_hero_grimstroke",
-
     -- }
     
     -- local heroesGroup2 = {
     --     "npc_dota_hero_lion",
-    --     "npc_dota_hero_kez",
-    --     "npc_dota_hero_alchemist",
-    --     "npc_dota_hero_lich",
-    --     "npc_dota_hero_legion_commander",
-    --     "npc_dota_hero_pugna",
-    --     "npc_dota_hero_mirana",
-    --     "npc_dota_hero_zuus",
-    --     "npc_dota_hero_ember_spirit",
-    --     "npc_dota_hero_storm_spirit",
-    --     "npc_dota_hero_centaur",
-    --     "npc_dota_hero_warlock",
-    --     "npc_dota_hero_dawnbreaker",
-    --     "npc_dota_hero_magnataur",
-    --     "npc_dota_hero_queenofpain",
-    --     "npc_dota_hero_abaddon",
-    --     "npc_dota_hero_techies",
-    --     "npc_dota_hero_beastmaster",
-    --     "npc_dota_hero_marci",
-    --     "npc_dota_hero_axe",
-    --     "npc_dota_hero_doom_bringer",
-    --     "npc_dota_hero_dark_willow",
-    --     "npc_dota_hero_juggernaut",
-    --     "npc_dota_hero_templar_assassin",
-    --     "npc_dota_hero_spirit_breaker",
-    --     "npc_dota_hero_tusk",
-    --     "npc_dota_hero_puck",
-    --     "npc_dota_hero_bounty_hunter",
-    --     "npc_dota_hero_ancient_apparition",
-    --     "npc_dota_hero_shadow_shaman",
-    --     "npc_dota_hero_chaos_knight",
-    --     "npc_dota_hero_venomancer",
-    --     "npc_dota_hero_earth_spirit",
-    --     "npc_dota_hero_phantom_lancer",
-    --     "npc_dota_hero_dark_seer"
 
     -- }
     
@@ -1074,76 +529,7 @@ function Main:InitializeWaterfallHeroSequence()
     -- 使用原始type分类方式，但只使用这个组里列出的英雄
     -- local heroesGroup3 = {
     --     "npc_dota_hero_nevermore",
-    --     "npc_dota_hero_monkey_king",
-    --     "npc_dota_hero_phantom_assassin",
-    --     "npc_dota_hero_hoodwink",
-    --     "npc_dota_hero_pangolier",
-    --     "npc_dota_hero_razor",
-    --     "npc_dota_hero_witch_doctor",
-    --     "npc_dota_hero_omniknight",
-    --     "npc_dota_hero_crystal_maiden",
-    --     "npc_dota_hero_leshrac",
-    --     "npc_dota_hero_dragon_knight",
-    --     "npc_dota_hero_faceless_void",
-    --     "npc_dota_hero_tidehunter",
-    --     "npc_dota_hero_earthshaker",
-    --     "npc_dota_hero_tinker",
-    --     "npc_dota_hero_keeper_of_the_light",
-    --     "npc_dota_hero_night_stalker",
-    --     "npc_dota_hero_snapfire",
-    --     "npc_dota_hero_necrolyte",
-    --     "npc_dota_hero_muerta",
-    --     "npc_dota_hero_sven",
-    --     "npc_dota_hero_tiny",
-    --     "npc_dota_hero_huskar",
-    --     "npc_dota_hero_brewmaster",
-    --     "npc_dota_hero_morphling",
-    --     "npc_dota_hero_kunkka",
-    --     "npc_dota_hero_ursa",
-    --     "npc_dota_hero_abyssal_underlord",
-    --     "npc_dota_hero_mars",
-    --     "npc_dota_hero_sand_king",
-    --     "npc_dota_hero_invoker",
-    --     "npc_dota_hero_lina",
-    --     "npc_dota_hero_death_prophet",
-    --     "npc_dota_hero_nyx_assassin",
-    --     "npc_dota_hero_morphling",
-    --     "npc_dota_hero_grimstroke",
-    --     "npc_dota_hero_lion",
-    --     "npc_dota_hero_kez",
-    --     "npc_dota_hero_alchemist",
-    --     "npc_dota_hero_lich",
-    --     "npc_dota_hero_legion_commander",
-    --     "npc_dota_hero_pugna",
-    --     "npc_dota_hero_mirana",
-    --     "npc_dota_hero_zuus",
-    --     "npc_dota_hero_ember_spirit",
-    --     "npc_dota_hero_storm_spirit",
-    --     "npc_dota_hero_centaur",
-    --     "npc_dota_hero_warlock",
-    --     "npc_dota_hero_dawnbreaker",
-    --     "npc_dota_hero_magnataur",
-    --     "npc_dota_hero_queenofpain",
-    --     "npc_dota_hero_abaddon",
-    --     "npc_dota_hero_techies",
-    --     "npc_dota_hero_beastmaster",
-    --     "npc_dota_hero_marci",
-    --     "npc_dota_hero_axe",
-    --     "npc_dota_hero_doom_bringer",
-    --     "npc_dota_hero_dark_willow",
-    --     "npc_dota_hero_juggernaut",
-    --     "npc_dota_hero_templar_assassin",
-    --     "npc_dota_hero_spirit_breaker",
-    --     "npc_dota_hero_tusk",
-    --     "npc_dota_hero_puck",
-    --     "npc_dota_hero_bounty_hunter",
-    --     "npc_dota_hero_ancient_apparition",
-    --     "npc_dota_hero_shadow_shaman",
-    --     "npc_dota_hero_chaos_knight",
-    --     "npc_dota_hero_venomancer",
-    --     "npc_dota_hero_earth_spirit",
-    --     "npc_dota_hero_phantom_lancer",
-    --     "npc_dota_hero_dark_seer"
+
     -- }
     local useOriginalType = not heroesGroup1 and not heroesGroup2
     local useGroup3Filter = heroesGroup3 ~= nil
@@ -1275,6 +661,48 @@ function Main:InitializeWaterfallHeroSequence()
                 i, 
                 self.heroSequence[heroType].sequence[i].name,
                 self.heroSequence[heroType].sequence[i].chinese))
+        end
+    end
+    
+    -- 平衡模式：确保每个阵营的英雄数量相同
+    if balanceMode and not self.isTestMode then
+        -- 找出最大的英雄池大小
+        local maxHeroCount = 0
+        for heroType, _ in pairs(self.teamTypes) do
+            local currentCount = #self.heroSequence[heroType].sequence
+            if currentCount > maxHeroCount then
+                maxHeroCount = currentCount
+            end
+        end
+        
+        -- 填充英雄较少的阵营
+        for heroType, _ in pairs(self.teamTypes) do
+            local currentSequence = self.heroSequence[heroType].sequence
+            local currentCount = #currentSequence
+            
+            if currentCount < maxHeroCount and currentCount > 0 then
+                print(string.format("[Arena] 平衡模式：类型 %d 的英雄数量 %d，需要填充到 %d", 
+                    heroType, currentCount, maxHeroCount))
+                
+                -- 需要复制的英雄数量
+                local needMoreHeroes = maxHeroCount - currentCount
+                
+                -- 循环添加英雄直到达到最大数量
+                for i = 1, needMoreHeroes do
+                    -- 随机选择当前池中的一个英雄
+                    local randomIndex = RandomInt(1, currentCount)
+                    local heroToCopy = table.deepcopy(currentSequence[randomIndex])
+                    
+                    -- 添加到序列末尾
+                    table.insert(currentSequence, heroToCopy)
+                end
+                
+                -- 更新总数
+                self.heroSequence[heroType].totalCount = #currentSequence
+                
+                print(string.format("[Arena] 平衡后：类型 %d 的英雄池大小: %d", 
+                    heroType, #self.heroSequence[heroType].sequence))
+            end
         end
     end
 end
@@ -1579,7 +1007,7 @@ function Main:InitialPreWaterFallCreateHeroes()
         -- 确定每种属性预创建的英雄数量
         local heroesPerType = math.max(self.preCreatePerTeam, self.heroesPerTeam)
         local totalTime = 10
-        local interval = totalTime / (#heroTypes * heroesPerType)
+        local interval = 0.1
         
         local currentIndex = 0
         for _, heroType in ipairs(heroTypes) do

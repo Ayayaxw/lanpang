@@ -27,6 +27,7 @@ let heroSelectionTriggerCount = 0;
 let isSelectingLocation = false;
 let locationSelectParticle = null;
 
+
 // 初始化函数
 (function() {
     // 请求沙盒功能数据
@@ -34,6 +35,9 @@ let locationSelectParticle = null;
     
     // 注册事件监听器，接收沙盒功能数据
     GameEvents.Subscribe("initialize_sandbox_functions", onInitializeSandboxFunctions);
+    
+    // 注册沙盒功能事件监听器
+    GameEvents.Subscribe("sandbox_custom_event", onSandboxCustomEvent);
     
     // 设置按钮事件
     sandboxModeButton.SetPanelEvent('onactivate', toggleSandboxModePanel);
@@ -51,6 +55,89 @@ let locationSelectParticle = null;
     
     $.Msg("沙盒模式脚本初始化完成，F8键绑定已设置");
 })();
+
+// 处理沙盒自定义事件
+function onSandboxCustomEvent(data) {
+    // 检查是否是镜头锁定/解锁事件
+    if (data.toggle_camera_lock !== undefined) {
+        handleCameraLock(data.toggle_camera_lock);
+        return;
+    }
+    
+    // 处理其他沙盒自定义事件
+    $.Msg("收到沙盒自定义事件: ", data);
+}
+
+// 处理镜头锁定/解锁
+function handleCameraLock(isLocked) {
+    isCameraLocked = isLocked;
+    $.Msg("镜头状态变更: " + (isCameraLocked ? "锁定" : "解锁"));
+    
+    // 禁用/启用镜头移动
+    if (isCameraLocked) {
+        // 获取当前选中的单位
+        const selectedEntityId = Players.GetLocalPlayerPortraitUnit();
+        let currentPosition;
+        
+        if (selectedEntityId && selectedEntityId !== -1) {
+            // 使用选中单位的位置
+            currentPosition = Entities.GetAbsOrigin(selectedEntityId);
+            $.Msg("锁定镜头到选中单位位置:", currentPosition);
+        }
+        
+        // 使用定时器每帧强制锁定镜头位置
+        if (!$.GetContextPanel().cameraLockTimer) {
+            $.GetContextPanel().cameraLockTimer = $.Schedule(0.005, function lockCamera() {
+                if (isCameraLocked) {
+                    // 强制设置镜头位置到保存的位置
+                    GameUI.SetCameraTargetPosition(currentPosition, -1);
+                    // 每帧执行一次 (1/200秒)
+                    $.GetContextPanel().cameraLockTimer = $.Schedule(0.005, lockCamera);
+                }
+            });
+        }
+        
+        // 显示锁定图标
+        createCameraLockIcon();
+    } else {
+        // 解锁镜头，取消定时器
+        if ($.GetContextPanel().cameraLockTimer) {
+            $.CancelScheduled($.GetContextPanel().cameraLockTimer);
+            $.GetContextPanel().cameraLockTimer = null;
+        }
+        
+        // 移除锁定图标
+        removeCameraLockIcon();
+    }
+}
+
+// 创建镜头锁定图标
+function createCameraLockIcon() {
+    const existingIcon = $('#CameraLockIcon');
+    if (existingIcon) {
+        existingIcon.DeleteAsync(0);
+    }
+    
+    const icon = $.CreatePanel('Panel', $.GetContextPanel(), 'CameraLockIcon');
+    icon.AddClass('CameraLockIcon');
+    
+    const iconImage = $.CreatePanel('Image', icon, '');
+    iconImage.SetImage('s2r://panorama/images/control_icons/lock_large_png.vtex');
+    iconImage.style.width = '32px';
+    iconImage.style.height = '32px';
+    iconImage.style.opacity = '0.8';
+    
+    icon.style.position = '15px 15px 0px';
+    icon.style.zIndex = '1000';
+}
+
+// 移除镜头锁定图标
+function removeCameraLockIcon() {
+    const icon = $('#CameraLockIcon');
+    if (icon) {
+        icon.DeleteAsync(0);
+    }
+}
 
 // 简化的键盘快捷键处理函数
 function toggleSandboxOnKeyPress() {
@@ -553,6 +640,7 @@ function openHeroSelectionPanel(action) {
         fcHeroPickPanel.RemoveClass('minimized');
         $.Msg("英雄选择面板已打开");
     } else {
+        fcHeroPickPanel.AddClass('minimized');
         $.Msg("英雄选择面板已经是打开状态");
     }
 }
@@ -660,7 +748,7 @@ function selectLocationOnMap() {
     helpText.style.textShadow = '2px 2px 2px black';
     helpText.style.textAlign = 'center';
     helpText.style.horizontalAlign = 'center';
-    helpText.style.verticalAlign = 'bottom';
+    helpText.style.verticalAlign = 'center';
     helpText.style.marginBottom = '100px';
     
     // 设置点击事件

@@ -109,7 +109,7 @@ function Main:SetupNewHero(event, playerID)
         print("当前挑战模式ID: " .. challengeId)
         local challengeName = self:GetChallengeNameById(challengeId)
 
-        
+        SendToServerConsole("dota_hud_healthbars 3")
         SendToServerConsole("host_timescale 1")
         self.currentTimer = (self.currentTimer or 0) + 1
         self.currentMatchID = self:GenerateUniqueID()    --比赛ID
@@ -139,9 +139,10 @@ end
 function Main:DeleteCurrentArenaHeroes()
     -- 遍历并清除当前竞技场中的英雄
     Main:ClearAbilitiesPanel()
-    Main:ClearAllFloatingText()
+
     Timers:CreateTimer(1, function()
         Main:ClearAbilitiesPanel()
+        Main:ClearAllFloatingText()
     end)
     for index, hero in ipairs(Main.currentArenaHeroes) do
         if hero and not hero:IsNull() and hero.GetPlayerID then
@@ -186,6 +187,7 @@ end
 
 function Main:HandleCustomGameEvents(event)
     local eventName = event.event
+    SendToServerConsole("host_timescale 1")
     if eventName == "ChangeHeroRequest" then
         Main:ProcessHeroChangeRequest(event)
     end

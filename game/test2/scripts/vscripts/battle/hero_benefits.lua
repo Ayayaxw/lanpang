@@ -144,7 +144,11 @@ function Main:HeroBenefits(heroName, hero, overallStrategy, heroStrategy)
                 local trees = GridNav:GetAllTreesAroundPoint(position, 80, true)
                 
                 if #units == 0 and #trees == 0 then
-                    CreateTempTree(position, 30)
+                    if self.limitTime then
+                        CreateTempTree(position, self.limitTime)
+                    else
+                        CreateTempTree(position, 30)
+                    end
                 end
             end
         end
@@ -201,11 +205,11 @@ function Main:HeroBenefits(heroName, hero, overallStrategy, heroStrategy)
         -- 过滤出所有小精灵并按实体索引排序
         local sortedWisps = {}
         for _, w in pairs(wisps) do
-            if w:GetUnitName() == "npc_dota_hero_wisp" then
-                print(string.format("【小精灵连接】发现小精灵，实体索引: %d，所属队伍: %d", 
-                    w:GetEntityIndex(), w:GetTeamNumber()))
+            -- if w:GetUnitName() == "npc_dota_hero_wisp" then
+            --     print(string.format("【小精灵连接】发现小精灵，实体索引: %d，所属队伍: %d", 
+            --         w:GetEntityIndex(), w:GetTeamNumber()))
                 table.insert(sortedWisps, w)
-            end
+            -- end
         end
         table.sort(sortedWisps, function(a,b) return a:GetEntityIndex() < b:GetEntityIndex() end)
 
@@ -656,20 +660,28 @@ function Main:HeroBenefits(heroName, hero, overallStrategy, heroStrategy)
             hero:SetCursorPosition(hero:GetAbsOrigin())
             webAbility:OnSpellStart()
         end
-        
-        if spiderlingAbility and spiderlingAbility:GetLevel() > 0 then
-            -- 创建5个狗头人
-            for i = 1, 5 do
-                local unit = CreateUnitByName("npc_dota_neutral_kobold", hero:GetAbsOrigin() + RandomVector(100), true, nil, nil, DOTA_TEAM_NEUTRALS)
-                if unit then
-                    -- 对每个狗头人释放技能
-                    hero:SetCursorCastTarget(unit)
-                    spiderlingAbility:OnSpellStart()
-                end
-            end
+
+        local challengeCode = self.currentChallenge
+        print("challengeCode",challengeCode)
+
+        local challengeName = self:GetChallengeIDByCode(challengeCode)
+        print("challengeName",challengeName)
+        if challengeName == "Intelligence_Cloak_Battle" then
         else
-            print("Error: Unable to find Spawn Spiderlings ability or ability not learned!")
+            if spiderlingAbility and spiderlingAbility:GetLevel() > 0 then
+                -- 创建5个狗头人
+                for i = 1, 3 do
+                    local unit = CreateUnitByName("npc_dota_neutral_kobold", hero:GetAbsOrigin() + RandomVector(100), true, nil, nil, DOTA_TEAM_NEUTRALS)
+                    if unit then
+                        -- 对每个狗头人释放技能
+                        hero:SetCursorCastTarget(unit)
+                        spiderlingAbility:OnSpellStart()
+                    end
+                end
+    
+            end
         end
+
     end
 
     if heroName == "npc_dota_hero_necrolyte" then
@@ -763,8 +775,10 @@ function Main:HeroBenefits(heroName, hero, overallStrategy, heroStrategy)
         --狂战斧
         if challengeName == "Fishing_Master" then
             courier:AddItemByName("item_gem")
-        elseif challengeName == "Attack_Trigger_1skill" then
+        elseif challengeName == "Attack_Trigger_1skill"then
             courier:AddItemByName("item_satanic")
+        elseif challengeName == "Intelligence_Cloak_Battle" then
+            courier:AddItemByName("item_moon_shard")
         else
             courier:AddItemByName("item_bfury")
         end

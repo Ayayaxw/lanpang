@@ -17,6 +17,31 @@
   overflow: squish scroll;
 }
 
+.SandboxModeSelectionPanel {
+  margin-top: 150px;
+  margin-right: 200px;
+  horizontal-align: right;
+  width: 700px;
+  height: 1000px;
+  background-color: gradient( linear, 0% 0%, 0% 100%, from( #0a0a0e ), to( #1a1a25 ) );
+  border: 2px solid #333340;
+  box-shadow: #00000066 0px 0px 8px 0px;
+  opacity: 0;
+  z-index: 92;
+  flow-children: down;
+  padding: 16px;
+  transform: translateX( 100px) translateY( -80px);
+  transition-property: opacity, transform;
+  transition-duration: 0.2s;
+  overflow: squish scroll;
+}
+
+.SandboxModeSelectionPanel.Visible {
+  transform: translateX( 200px) translateY( -80px);
+  opacity: 1;
+}
+
+
 .GameModeSelectionPanel.Visible {
   transform: translateX( 200px) translateY( -80px);
   opacity: 1;

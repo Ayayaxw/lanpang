@@ -69,28 +69,10 @@
         mainHero.heroimagestyle = "landscape";
         mainHero.scaling = "stretch-to-fit-preserve-aspect";
 
-        // 创建次要部分
-        const secondarySection = $.CreatePanel('Panel', heroesSection, '');
-        secondarySection.AddClass('hero_chaos_SecondarySection');
-    
-        // Add wrapper panel
-        const secondaryWrapper = $.CreatePanel('Panel', secondarySection, '');
-        secondaryWrapper.AddClass('hero_chaos_SecondaryWrapper');
-    
-        const secondaryHero = $.CreatePanel('DOTAHeroImage', secondaryWrapper, '');
-        secondaryHero.AddClass('hero_chaos_HeroPortrait');
-        secondaryHero.AddClass('hero_chaos_Secondary');
-        secondaryHero.heroname = g_TeamData[type].nextHero;
-        secondaryHero.heroimagestyle = "landscape";
-        secondaryHero.scaling = "stretch-to-fit-preserve-aspect";
-    
-        // Add overlay panel as a sibling
-        const secondaryOverlay = $.CreatePanel('Panel', secondaryWrapper, '');
-        secondaryOverlay.AddClass('hero_chaos_SecondaryOverlay');
-
-        const remainingCount = $.CreatePanel('Label', secondarySection, '');
+        // 创建剩余英雄计数
+        const remainingCount = $.CreatePanel('Label', heroesSection, '');
         remainingCount.AddClass('hero_chaos_RemainingCount');
-        const remainingIcon = $.CreatePanel('Image', secondarySection, '');
+        const remainingIcon = $.CreatePanel('Image', heroesSection, '');
         remainingIcon.AddClass('hero_chaos_RemainingIcon');
         remainingIcon.SetImage("s2r://panorama/images/hud/reborn/heart_psd.vtex");
         remainingCount.text = g_TeamData[type].remainingHeroes;
@@ -148,7 +130,6 @@
         g_TeamPanels[type] = {
             panel: panel,
             mainHero: mainHero,
-            secondaryHero: secondaryHero,
             remainingCount: remainingCount,
             killsLabel: killsLabel,
             deathsLabel: deathsLabel,
@@ -205,12 +186,6 @@
     
         if (data.currentHero) {
             panelData.mainHero.heroname = data.currentHero;
-        }
-        if (data.nextHero) {
-            panelData.secondaryHero.heroname = data.nextHero;
-            panelData.secondaryHero.RemoveClass('no_next_hero');
-        } else {
-            panelData.secondaryHero.AddClass('no_next_hero');
         }
         
         if (data.remainingHeroes !== undefined && data.totalHeroes !== undefined) {

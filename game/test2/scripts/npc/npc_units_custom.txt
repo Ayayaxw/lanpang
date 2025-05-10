@@ -268,6 +268,82 @@
 			}
 		}
 	}
+
+
+
+
+	"npc_dota_hero_riki_wearable_dummy"
+	{
+		"BaseClass"             "npc_dota_creature"
+		"Model"                 "models/heroes/rikimaru/rikimaru.vmdl"  // 使用英雄的模型
+		"ModelScale"            "1.0"
+		"VisibilityStart"       "0"
+		"VisibilityEnd"         "0"
+		"Creature"
+		{
+			"AttachWearables"
+			{
+
+				"Wearable1"
+				{
+					"ItemDef"     "561"
+				}
+				"Wearable2"
+				{
+					"ItemDef"     "322"
+				}
+				"Wearable3"
+				{
+					"ItemDef"     "166"
+				}
+				"Wearable4"
+				{
+					"ItemDef"     "165"
+				}
+				"Wearable5"
+				{
+					"ItemDef"     "164"
+				}
+				"Wearable6"
+				{
+					"ItemDef"     "163"
+				}
+			}
+		}
+	}
+
+	"npc_dota_hero_oracle_wearable_dummy"
+	{
+		"BaseClass"             "npc_dota_creature"
+		"Model"                 "models/heroes/oracle/oracle.vmdl"  // 使用英雄的模型
+		"ModelScale"            "1.0"
+		"VisibilityStart"       "0"
+		"VisibilityEnd"         "0"
+		"Creature"
+		{
+			"AttachWearables"
+			{
+				"Wearable1"
+				{
+					"ItemDef"     "546"
+				}
+				"Wearable2"
+				{
+					"ItemDef"     "547"
+				}
+				"Wearable3"
+				{
+					"ItemDef"     "548"
+				}
+				"Wearable4"
+				{
+					"ItemDef"     "549"
+				}
+			}
+		}
+	}
+
+
 	
 	"npc_dota_neutral_king"
 	{										
@@ -1224,7 +1300,23 @@
 	}
 
 
+	"mantle_unit"
+	{
+		// General
+		//
+		"BaseClass"					"npc_dota_creep_lane"	// Class of entity of link to.
+		"Model"						"models/creeps/lane_creeps/creep_radiant_melee/radiant_melee_mega.vmdl"	// Model.	
+		"SoundSet"					""					// Name of sound set.
+		"ModelScale"				"1"
+		"Level"						"1"
+		"MovementCapabilities"		"DOTA_UNIT_CAP_MOVE_GROUND"			// Type of locomotion - ground, air
+		"MovementSpeed"				"325"		// Speed
+		"MovementTurnRate"			"0.5"		// Turning rate.
 
+		"AttackCapabilities"		"DOTA_UNIT_CAP_MELEE_ATTACK"
+
+
+	}
 	"luosipi"
 	{
 		"BaseClass"             "npc_dota_creature"

@@ -75,6 +75,12 @@
 		"DOTA_Tooltip_ability_item_giant_net"        "捕鱼网"
 		"DOTA_Tooltip_ability_item_giant_net_Description" "抓住范围内的小鱼"
 		"DOTA_Tooltip_ability_item_giant_net_Lore"   "不许走！"
+
+		// 智力斗篷
+		"DOTA_Tooltip_ability_item_mantle_custom"        "智力斗篷"
+		"DOTA_Tooltip_ability_item_mantle_custom_Description" "提供基础智力加成"
+		"DOTA_Tooltip_ability_item_mantle_custom_Lore"   "为了守护家人而战"
+		"DOTA_Tooltip_ability_item_mantle_custom_bonus_intellect"       "+$int"
 	}
 
 }

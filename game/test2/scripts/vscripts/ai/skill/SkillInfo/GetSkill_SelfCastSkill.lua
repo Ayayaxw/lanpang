@@ -35,21 +35,27 @@ function CommonAI:isSelfCastAbility(abilityName)
     end
     -- ES跳判定
     if abilityName == "earthshaker_enchant_totem" then
-        local totemAbility = self.entity:FindAbilityByName("earthshaker_enchant_totem")
-        local totemRadius = 500 -- 默认值
-        
-        if totemAbility then
-            print("[Debug] 用图腾的范围代替")
-            totemRadius = self:GetSkillAoeRadius(totemAbility)
-            print("[Debug] 图腾范围:", totemRadius)
-        end
-        
-        if self.target and self.entity and (self.target:GetAbsOrigin() - self.entity:GetAbsOrigin()):Length2D() < totemRadius then
-            return true
-        elseif self:containsStrategy(self.hero_strategy, "边走边图腾") or self:containsStrategy(self.hero_strategy, "原地图腾") then
-            return true
+
+
+        if self.entity then
+            local totemAbility = self.entity:FindAbilityByName("earthshaker_enchant_totem")
+            local totemRadius = 500 -- 默认值
+            
+            if totemAbility then
+                print("[Debug] 用图腾的范围代替")
+                totemRadius = self:GetSkillAoeRadius(totemAbility)
+                print("[Debug] 图腾范围:", totemRadius)
+            end
+            
+            if self.target and self.entity and (self.target:GetAbsOrigin() - self.entity:GetAbsOrigin()):Length2D() < totemRadius then
+                return true
+            elseif self:containsStrategy(self.hero_strategy, "边走边图腾") or self:containsStrategy(self.hero_strategy, "原地图腾") then
+                return true
+            else
+                return false
+            end
         else
-            return false
+            selfCastSkills["earthshaker_enchant_totem"] = true
         end
     end
 

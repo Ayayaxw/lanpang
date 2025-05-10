@@ -121,9 +121,7 @@ function Main:Init_Attack_Trigger_1skill(event, playerID)
                 return nil
             end)
         end
-        -- 移除90%减CD的modifier
-        -- playerHero:AddNewModifier(playerHero, nil, "modifier_cooldown_reduction_90", {})
-        playerHero:AddNewModifier(playerHero, nil, "modifier_attack_cast_ability_1", {})
+
     end)
 
     -- 赛前准备时间
@@ -229,7 +227,7 @@ function Main:StartSpawning_Attack_Trigger_1skill(timerId)
     hero_duel.dragonLevel = 1
     
     -- 初始生成若干个黑龙单位
-    for i = 1, 29 do
+    for i = 1, 30 do
         local angle = RandomFloat(0, 360)
         local radius = 300
         local spawnPos = Vector(
@@ -376,11 +374,7 @@ end
 
 
 function Main:OnNPCSpawned_Attack_Trigger_1skill(spawnedUnit, event)
-    -- Timers:CreateTimer(0.1, function()
-    --     if not self:isExcludedUnit(spawnedUnit) then
-
-    --         local team = spawnedUnit:GetTeamNumber()
-    --         CameraControl:AddUnitToCameraControl(spawnedUnit, team)
-    --     end
-    -- end)
+    if spawnedUnit:IsRealHero() then
+        spawnedUnit:AddNewModifier(spawnedUnit, nil, "modifier_attack_cast_ability_1", {})
+    end
 end

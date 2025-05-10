@@ -1,8 +1,21 @@
 function Main:OnUnitKilled(args)
     -- 获取被杀死的单位的entindex
     local killedUnit = EntIndexToHScript(args.entindex_killed)
-    
+    local killerUnit = EntIndexToHScript(args.entindex_attacker)
 
+    -- 记录死亡事件，供modifier_death_check_enchant检查使用
+    if not Main.DeathEventTracking then
+        Main.DeathEventTracking = {}
+    end
+    
+    -- 使用单位的实体索引作为表的键，记录已处理的死亡事件
+    if killedUnit and not killedUnit:IsNull() then
+        local unitIndex = killedUnit:GetEntityIndex()
+        Main.DeathEventTracking[unitIndex] = {
+            handled = true,
+            attackerIndex = args.entindex_attacker
+        }
+    end
 
     -- 如果是米波克隆体，找到本体
     if killedUnit:GetUnitName() == "npc_dota_hero_meepo" and killedUnit:IsClone() then
@@ -28,6 +41,12 @@ function Main:OnUnitKilled(args)
             -- 更新 args 中的 entindex_killed
             args.entindex_killed = mainMeepo:GetEntityIndex()
             killedUnit = mainMeepo
+            
+            -- 更新死亡事件跟踪信息
+            Main.DeathEventTracking[mainMeepo:GetEntityIndex()] = {
+                handled = true,
+                attackerIndex = args.entindex_attacker
+            }
         end
     end
 
@@ -45,8 +64,6 @@ function Main:OnUnitKilled(args)
     --打印死亡的单位名字
     --print("死亡的单位名字: " .. killedUnit:GetUnitName())
 
-
-
     if challengeName then
         -- 构建处理函数的名称
         local challengeFunctionName = "OnUnitKilled_" .. challengeName
@@ -54,6 +71,47 @@ function Main:OnUnitKilled(args)
             -- 先检查英雄是否真正死亡
             IsHeroTrulyDead(killedUnit, function(isDead)
                 if not isDead then return end
+
+                if Main.currentMatchID then
+                    -- 初始化击杀消息队列
+                    if not Main.killMessageQueue then
+                        Main.killMessageQueue = {}
+                    end
+                    
+                    -- 初始化击杀者的最后广播时间表
+                    if not Main.lastBroadcastTimes then
+                        Main.lastBroadcastTimes = {}
+                    end
+                    
+                    local killerID = killerUnit:GetEntityIndex()
+                    local killedUnitName = killedUnit:GetUnitName()
+                    
+                    -- 检查此击杀者是否已有记录
+                    if not Main.killMessageQueue[killerID] then
+                        Main.killMessageQueue[killerID] = {
+                            killerName = {localize = true, text = killedUnitName},
+                            victims = {}
+                        }
+                    end
+                    
+                    -- 更新被击杀单位的计数
+                    if not Main.killMessageQueue[killerID].victims[killedUnitName] then
+                        Main.killMessageQueue[killerID].victims[killedUnitName] = {
+                            count = 1,
+                            name = {localize = true, text = killedUnitName}
+                        }
+                    else
+                        Main.killMessageQueue[killerID].victims[killedUnitName].count = Main.killMessageQueue[killerID].victims[killedUnitName].count + 1
+                    end
+                    
+                    -- 为每个击杀者单独控制广播时间（每秒一次）
+                    local currentTime = GameRules:GetGameTime()
+                    if not Main.lastBroadcastTimes[killerID] or (currentTime - Main.lastBroadcastTimes[killerID] >= 1.0) then
+                        self:BroadcastKillMessagesByKiller(killerID)
+                        Main.lastBroadcastTimes[killerID] = currentTime
+                    end
+                end
+
                 -- 英雄确实死亡后，调用对应的处理函数
                 self[challengeFunctionName](self, killedUnit, args)
             end)
@@ -65,22 +123,54 @@ function Main:OnUnitKilled(args)
     end
 end
 
--- 添加查找米波本体的辅助函数
-function Main:FindMainMeepo(meepoClone)
-    local player = meepoClone:GetPlayerOwner()
-    if not player then return nil end
+-- 新增函数：广播指定击杀者的击杀消息
+function Main:BroadcastKillMessagesByKiller(killerID)
+    if not Main.killMessageQueue or not Main.currentMatchID or not Main.killMessageQueue[killerID] then return end
     
-    -- 获取该玩家控制的所有单位
-    local allUnits = player:GetAllControlledUnits()
+    local killerData = Main.killMessageQueue[killerID]
     
-    for _, unit in pairs(allUnits) do
-        if unit:GetUnitName() == "npc_dota_hero_meepo" 
-           and not unit:IsClone()
-           and unit:IsRealHero() then
-            return unit
+    local messageElements = {
+        "[LanPang_RECORD][",
+        Main.currentMatchID,
+        "]",
+        "[击杀信息]",
+        killerData.killerName,
+        "击杀了"
+    }
+    
+    -- 构建被击杀单位列表
+    local isFirst = true
+    for unitName, victimData in pairs(killerData.victims) do
+        if not isFirst then
+            table.insert(messageElements, "、")
         end
+        
+        table.insert(messageElements, victimData.name)
+        if victimData.count > 1 then
+            table.insert(messageElements, " X" .. victimData.count)
+        end
+        
+        isFirst = false
     end
-    return nil
+    
+    -- 发送本次消息
+    Main:createLocalizedMessage(unpack(messageElements))
+    
+    -- 仅清空当前击杀者的队列
+    Main.killMessageQueue[killerID] = nil
+end
+
+-- 保留原有函数以兼容其他可能调用的地方
+function Main:BroadcastKillMessages()
+    if not Main.killMessageQueue or not Main.currentMatchID then return end
+    
+    -- 遍历每个击杀者
+    for killerID, _ in pairs(Main.killMessageQueue) do
+        self:BroadcastKillMessagesByKiller(killerID)
+    end
+    
+    -- 清空整个队列
+    Main.killMessageQueue = {}
 end
 
 -- function Main:OnUnitKilled(args)

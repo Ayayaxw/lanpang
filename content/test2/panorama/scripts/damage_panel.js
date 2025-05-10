@@ -12,6 +12,21 @@
     let panelRoot = null;
     let abilityDamagePanel = null;
     
+    /**
+     * 格式化大数值，使用K、M等单位
+     * @param {number} value - 要格式化的数值
+     * @return {string} - 格式化后的字符串
+     */
+    function formatLargeNumber(value) {
+        if (value >= 1000000) {
+            return (value / 1000000).toFixed(1) + "M";
+        } else if (value >= 1000) {
+            return (value / 1000).toFixed(1) + "K";
+        } else {
+            return value.toString();
+        }
+    }
+    
     // 日志函数
     function logMessage(message) {
         //$.Msg("[技能伤害面板] " + message);
@@ -354,7 +369,7 @@
             
             const damageValue = $("#AbilityDamageValue");
             if (damageValue && damageValue.IsValid()) {
-                damageValue.text = currentDamage.toString();
+                damageValue.text = formatLargeNumber(currentDamage);
                 logMessage("已设置初始伤害值: " + currentDamage);
             } else {
                 logMessage("错误: 无法找到伤害值标签");
@@ -475,7 +490,7 @@
             const baseValue = isPanelVisible ? currentDisplayValue : 0;
             const increase = Math.abs(targetDamage - baseValue); // 使用绝对值确保增量为正
             
-            damageIncrease.text = "+" + increase;
+            damageIncrease.text = "+" + formatLargeNumber(increase);
             damageIncrease.AddClass("Show");
             
             // 自动隐藏增量提示
@@ -516,7 +531,7 @@
             // 如果已经超过目标值或动画被取消
             if (progress >= 1 || !animationHandle) {
                 currentDisplayValue = targetDamage;
-                damageValue.text = targetDamage.toString();
+                damageValue.text = formatLargeNumber(targetDamage);
                 damageValue.RemoveClass("Updating");
                 logMessage("动画最终值: " + targetDamage);
                 animationHandle = null;
@@ -526,7 +541,7 @@
             // 应用缓动函数
             progress = 1 - Math.pow(1 - progress, 3);
             currentDisplayValue = Math.floor(initialValue + (targetDamage - initialValue) * progress);
-            damageValue.text = currentDisplayValue.toString();
+            damageValue.text = formatLargeNumber(currentDisplayValue);
 
             // 继续更新
             animationHandle = $.Schedule(0.01, update);
@@ -566,7 +581,7 @@
             };
             
             const currentValue = Math.floor(start + difference * easeOut(progress));
-            element.text = currentValue.toString();
+            element.text = formatLargeNumber(currentValue);
             
             $.Schedule(0.01, updateValue);
         }

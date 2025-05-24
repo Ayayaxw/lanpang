@@ -18,7 +18,8 @@ end
 function modifier_global_ability_listener:DeclareFunctions()
     return { 
         MODIFIER_EVENT_ON_ABILITY_EXECUTED,
-        MODIFIER_EVENT_ON_DEATH_COMPLETED
+        MODIFIER_EVENT_ON_DEATH_COMPLETED,
+        MODIFIER_EVENT_ON_ATTACK_FINISHED
     }
 end
 
@@ -34,8 +35,30 @@ end
 function modifier_global_ability_listener:OnAbilityExecuted(params)
     if IsServer() then
         print("有单位在放技能")
+        DeepPrintTable(params)
+        
+        -- 尝试获取更多施法信息
         local ability = params.ability
         local caster = params.unit
+        
+        if ability and caster then
+            print("施法单位: " .. caster:GetUnitName())
+            print("施法技能: " .. ability:GetAbilityName())
+            
+            -- 尝试获取施法位置
+            local cursor_position = ability:GetCursorPosition()
+            if cursor_position then
+                print("施法目标位置: ", cursor_position.x, cursor_position.y, cursor_position.z)
+            end
+            
+            -- 获取施法单位当前位置
+            local caster_position = caster:GetAbsOrigin()
+            print("施法单位位置: ", caster_position.x, caster_position.y, caster_position.z)
+            
+            -- 尝试获取目标单位
+            local cursor_target = ability:GetCursorTarget()
+
+        end
 
         if ability and caster and not ability:IsItem() then
             print("技能名称: " .. ability:GetAbilityName())
@@ -66,12 +89,29 @@ function modifier_global_ability_listener:OnAbilityExecuted(params)
 
                 local abilityName = ability:GetAbilityName()
                 print("记录技能 " .. abilityName .. " 的释放时间")
-                -- 记录该英雄每个技能最近一次释放的时间
+                
+                -- 获取目标位置和目标单位
+                local cursor_position = ability:GetCursorPosition()
+                local cursor_target = ability:GetCursorTarget()
+                local target_unit_name = cursor_target and cursor_target.GetUnitName and cursor_target:GetUnitName() or nil
+                local target_unit_index = cursor_target and cursor_target:GetEntityIndex() or nil
+                
+                -- 记录该英雄每个技能最近一次释放的信息
                 Main.heroLastCastAbility[heroIndex][abilityName] = {
-                    hero = caster:GetUnitName(),
-                    time = GameRules:GetGameTime()
+                    time = GameRules:GetGameTime(),
+                    cursor_position = cursor_position,
+                    target_unit_index = target_unit_index,
+                    caster_position = caster:GetAbsOrigin()
                 }
                 print("当前游戏时间: " .. GameRules:GetGameTime())
+                
+                -- 打印记录的信息
+                if cursor_position then
+                    print("已记录施法目标位置: ", cursor_position.x, cursor_position.y, cursor_position.z)
+                end
+                if target_unit_name then
+                    print("已记录施法目标单位: " .. target_unit_name)
+                end
             else
                 print("施法者不是英雄: " .. caster:GetUnitName())
             end
@@ -92,10 +132,7 @@ function modifier_global_ability_listener:OnAbilityExecuted(params)
     end
 end
 
-
 function modifier_global_ability_listener:CheckForDodgeableAbility(caster, ability)
-
-
     if not Main or not Main.currentArenaHeroes then 
         --print("失败：Main 或 currentArenaHeroes 不存在")
         return 
@@ -116,7 +153,6 @@ function modifier_global_ability_listener:CheckForDodgeableAbility(caster, abili
     end
 
     if not player or not aiHero then
-
         return
     end
 
@@ -171,7 +207,6 @@ function modifier_global_ability_listener:CheckForDodgeableAbility(caster, abili
     --print("检查可躲避技能结束")
 end
 
-
 function modifier_global_ability_listener:GetHeroDodgeableAbilities(hero)
     local dodgeableAbilities = {}
     local ai = AIs[hero].ai
@@ -198,4 +233,57 @@ function modifier_global_ability_listener:GetHeroDodgeableAbilities(hero)
         end
     end
     return dodgeableAbilities
+end
+
+function modifier_global_ability_listener:OnAttackFinished(params)
+    if IsServer() then
+        print("有单位完成攻击动作，弹道已发射")
+        local attacker = params.attacker
+        local target = params.target
+        
+        if attacker and target then
+            print("攻击者名称: " .. attacker:GetUnitName())
+            print("目标名称: " .. target:GetUnitName())
+            
+            -- 如果攻击者是英雄(包括幻象)
+            if attacker:IsHero() then
+                print("攻击者是英雄: " .. attacker:GetUnitName())
+                -- 这里可以添加类似技能记录的逻辑
+                
+                -- 记录发起攻击的英雄
+                if not Main.heroesAttacked then
+                    Main.heroesAttacked = {}
+                end
+                Main.heroesAttacked[attacker:GetEntityIndex()] = true
+                print("已记录英雄发起攻击: " .. attacker:GetEntityIndex())
+                
+                -- 如果需要记录攻击时间等信息，可以参照技能记录的方式
+                if not Main.heroLastAttack then
+                    Main.heroLastAttack = {}
+                end
+                
+                local heroIndex = attacker:GetEntityIndex()
+                if not Main.heroLastAttack[heroIndex] then
+                    Main.heroLastAttack[heroIndex] = {}
+                end
+                
+                Main.heroLastAttack[heroIndex] = {
+                    target = target:GetUnitName(),
+                    time = GameRules:GetGameTime(),
+                    damage = params.damage,
+                    ranged_attack = params.ranged_attack
+                }
+                print("当前游戏时间: " .. GameRules:GetGameTime())
+            else
+                print("攻击者不是英雄: " .. attacker:GetUnitName())
+            end
+        else
+            if not attacker then
+                print("无效的攻击者对象")
+            end
+            if not target then
+                print("无效的目标对象")
+            end
+        end
+    end
 end

@@ -835,7 +835,170 @@ function Main:HeroBenefits(heroName, hero, overallStrategy, heroStrategy)
 
 
 end
+function Main:HeroBenefits_10000(heroName, hero, overallStrategy, heroStrategy)
 
+    local stacks = 1000
+    if heroName == "npc_dota_hero_necrolyte" then
+
+        hero:SetModifierStackCount("modifier_silencer_brain_drain", hero, stacks)
+        print(string.format("沉默术士获得智力窃取层数: %d", stacks))
+    end
+
+    if heroName == "npc_dota_hero_silencer" then
+
+        hero:SetModifierStackCount("modifier_silencer_brain_drain", hero, stacks * 3)
+
+        hero:ModifyIntellect(stacks*3)
+
+    end
+
+    if heroName == "npc_dota_hero_rattletrap" then
+        local ability = hero:FindAbilityByName("rattletrap_armor_power")
+        print("找到了",ability)
+        if ability and ability:GetLevel() > 0 then
+            print("",ability:GetLevel())
+            hero:AddNewModifier(hero, ability, "modifier_rattletrap_junk_mail", {})
+            hero:SetModifierStackCount("modifier_rattletrap_junk_mail", hero, stacks)
+        end
+    end
+
+
+
+    if heroName == "npc_dota_hero_necrolyte" then
+        -- 设置英雄的生命和魔法恢复
+                -- 为了显示效果，仍然设置modifier的层数
+    local ability = hero:FindAbilityByName("necrolyte_reapers_scythe")
+        hero:AddNewModifier(hero, ability, "modifier_health_regen_custom", {regen_amount = stacks * 6})
+        hero:AddNewModifier(hero, ability, "modifier_mana_regen_custom", {regen_amount = stacks * 3})
+        
+
+        hero:AddNewModifier(hero, ability, "modifier_necrolyte_reapers_scythe_respawn_time", {})
+        hero:SetModifierStackCount("modifier_necrolyte_reapers_scythe_respawn_time", hero, stacks)
+    end
+
+    if heroName == "npc_dota_hero_slark" then
+        local ability = hero:FindAbilityByName("slark_essence_shift")
+        hero:AddNewModifier(hero, ability, "modifier_slark_essence_shift_permanent_buff", {})
+        hero:SetModifierStackCount("modifier_slark_essence_shift_permanent_buff", hero, stacks)
+    end
+
+    if heroName == "npc_dota_hero_pudge" then
+        local ability = hero:FindAbilityByName("pudge_flesh_heap") 
+        hero:SetModifierStackCount("modifier_pudge_innate_graft_flesh", hero, stacks)
+    end
+
+    if heroName == "npc_dota_hero_legion_commander" then
+        local ability = hero:FindAbilityByName("legion_commander_duel")
+        hero:AddNewModifier(hero, ability, "modifier_legion_commander_duel_damage_boost", {})
+        hero:SetModifierStackCount("modifier_legion_commander_duel_damage_boost", hero, stacks * 35)
+    end
+
+    if heroName == "npc_dota_hero_lion" then
+        local ability = hero:FindAbilityByName("lion_finger_of_death") 
+        hero:SetModifierStackCount("modifier_lion_finger_of_death_kill_counter", hero, stacks)
+
+    end
+    if heroName == "npc_dota_hero_axe" then
+        local ability = hero:FindAbilityByName("axe_battle_hunger")
+        hero:SetModifierStackCount("modifier_axe_coat_of_blood", hero, stacks * 3)
+    end
+    if heroName == "npc_dota_hero_centaur" then
+        local ability = hero:FindAbilityByName("centaur_rawhide")
+        if ability then
+            hero:RemoveAbility("centaur_rawhide")
+            local bonus_health = stacks * 30
+            --恢复满血
+            hero:SetHealth(hero:GetMaxHealth())
+            hero:AddNewModifier(hero, nil, "modifier_extra_health_bonus", {bonus_health = bonus_health})
+        end
+    end
+    if heroName == "npc_dota_hero_life_stealer" then
+        local ability = hero:FindAbilityByName("life_stealer_feast")
+        if ability then
+            if not hero:HasModifier("modifier_life_stealer_feast") then
+                hero:AddNewModifier(hero, ability, "modifier_life_stealer_feast", {})
+            end
+            hero:SetModifierStackCount("modifier_life_stealer_feast", hero, stacks * 30)
+            hero:AddNewModifier(hero, nil, "modifier_extra_health_bonus", {bonus_health = stacks * 30})
+        end
+    end
+
+
+    if heroName == "npc_dota_hero_muerta" then
+        local ability = hero:FindAbilityByName("muerta_pierce_the_veil")
+        if ability then
+            if not hero:HasModifier("modifier_muerta_pierce_the_veil_spell_amp_boost") then
+                hero:AddNewModifier(hero, ability, "modifier_muerta_pierce_the_veil_spell_amp_boost", {})
+            end
+            hero:SetModifierStackCount("modifier_muerta_pierce_the_veil_spell_amp_boost", hero, stacks * 2)
+        end
+    end
+
+    if heroName == "npc_dota_hero_nevermore" then
+        hero:SetModifierStackCount("modifier_nevermore_necromastery", hero, stacks)
+    end
+
+    if heroName == "npc_dota_hero_storm_spirit" then
+        hero:SetModifierStackCount("modifier_storm_spirit_galvanized", hero, stacks + 9)
+        -- 同时提供魔法恢复速度加成，根据stacks数值
+        hero:SetBaseManaRegen(hero:GetBaseManaRegen() + stacks * 0.1)
+    end
+
+
+    if heroName == "npc_dota_hero_tidehunter" then
+        local ability = hero:FindAbilityByName("tidehunter_kraken_shell")
+        if not hero:HasModifier("modifier_tidehunter_kraken_shell") then
+            hero:AddNewModifier(hero, ability, "modifier_tidehunter_kraken_shell", {})
+        end
+        hero:SetModifierStackCount("modifier_tidehunter_kraken_shell", hero, stacks*4)
+    end
+
+    if heroName == "npc_dota_hero_arc_warden" then
+        local ability = hero:FindAbilityByName("arc_warden_runic_infusion")
+        if ability then
+            hero:SetModifierStackCount("modifier_arc_warden_runic_infusion", hero, stacks)
+        end
+    end
+
+    if heroName == "npc_dota_hero_alchemist" then
+        local ability = hero:FindAbilityByName("alchemist_goblins_greed")
+        if not hero:HasModifier("modifier_alchemist_scepter_bonus_damage") then
+            hero:AddNewModifier(hero, ability, "modifier_alchemist_scepter_bonus_damage", {})
+        end
+
+        Timers:CreateTimer(0.01, function()
+            -- 设置原有的技能层数
+            hero:SetModifierStackCount("modifier_alchemist_scepter_bonus_damage", hero, stacks)
+
+            return 0.01
+        end)
+        
+    end
+
+
+
+
+    if heroName == "npc_dota_hero_pugna" then
+        local ability = hero:FindAbilityByName("pugna_oblivion_savant")
+        if ability then
+
+            hero:AddNewModifier(hero, ability, "modifier_special_bonus_spell_amplify", {
+                bonus_value = stacks * 1.25
+            })
+            Timers:CreateTimer(0.01, function()
+                -- 设置原有的技能层数
+                hero:SetModifierStackCount("modifier_pugna_oblivion_savant", hero, stacks)
+                
+
+                
+                return 0.01
+            end)
+        end
+    end
+
+
+
+end
 
 
 function Main:HeroPreparation(heroName, hero, overallStrategy, heroStrategy)
@@ -1115,7 +1278,7 @@ function Main:HeroPreparation(heroName, hero, overallStrategy, heroStrategy)
     
     if heroName == "npc_dota_hero_silencer" then
         print("创建沉默术士的可穿戴假人")
-        hero:AddNewModifier(hero, nil, "modifier_sheepstick_debuff", {duration = 8})
+
         -- 移除英雄本身的穿戴装备
         local wearable = hero:FirstMoveChild()
         while wearable ~= nil do

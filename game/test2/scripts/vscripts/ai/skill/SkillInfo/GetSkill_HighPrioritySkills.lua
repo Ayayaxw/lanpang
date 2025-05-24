@@ -15,7 +15,7 @@ function CommonAI:Ini_HighPrioritySkills()
         npc_dota_hero_ancient_apparition = {"ancient_apparition_ice_blast_release"},
         npc_dota_hero_tinker = {"tinker_defense_matrix"},
         npc_dota_hero_techies = {"techies_reactive_tazer","techies_suicide"},
-        npc_dota_hero_rattletrap = {"rattletrap_hookshot"},
+
         npc_dota_hero_morphling = {"morphling_waveform"},
         npc_dota_hero_oracle = {"oracle_false_promise"},
         npc_dota_hero_huskar = {"huskar_life_break"},
@@ -41,9 +41,7 @@ function CommonAI:Ini_HighPrioritySkills()
     if self:containsStrategy(self.hero_strategy, "先大后矛") then
         self.highPrioritySkills.npc_dota_hero_mars = {"mars_arena_of_blood"}
     end
-    if self:containsStrategy(self.hero_strategy, "出门放齿轮") then
-        self.highPrioritySkills.npc_dota_hero_rattletrap = {"rattletrap_power_cogs"}
-    end
+
 
 
     -- self:log("运行了初始化Ini_HighPrioritySkills")

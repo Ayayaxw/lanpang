@@ -1,6 +1,6 @@
 function CommonAI:Ini_MediumPrioritySkills()
         self.mediumPrioritySkills = {
-            npc_dota_hero_life_stealer = {"life_stealer_infest","life_stealer_open_wounds"},
+            npc_dota_hero_life_stealer = {"life_stealer_rage","life_stealer_infest","life_stealer_open_wounds"},
             npc_dota_hero_earthshaker = {"earthshaker_echo_slam"},
             npc_dota_hero_tusk = {"tusk_snowball","tusk_ice_shards"},
             npc_dota_hero_kunkka = {"kunkka_ghostship","kunkka_tidal_wave","kunkka_torrent_storm"},
@@ -33,7 +33,7 @@ function CommonAI:Ini_MediumPrioritySkills()
             npc_dota_hero_tinker = {"tinker_laser","tinker_march_of_the_machines","tinker_warp_grenade","tinker_rearm"},
             npc_dota_hero_necrolyte = {},
             npc_dota_hero_queenofpain = {"queenofpain_scream_of_pain","queenofpain_sonic_wave"},
-            npc_dota_hero_silencer = {"silencer_global_silence"},
+            npc_dota_hero_silencer = {"silencer_global_silence","silencer_last_word"},
             npc_dota_hero_void_spirit= {"void_spirit_resonant_pulse","void_spirit_aether_remnant","void_spirit_astral_step","void_spirit_dissimilate"},
             npc_dota_hero_luna = {"luna_eclipse"},
             npc_dota_hero_huskar = {""},
@@ -50,7 +50,7 @@ function CommonAI:Ini_MediumPrioritySkills()
             npc_dota_hero_dazzle = {"dazzle_nothl_projection","dazzle_shallow_grave","dazzle_shadow_wave"},
             npc_dota_hero_batrider = {"batrider_firefly","batrider_flaming_lasso"},
             npc_dota_hero_venomancer = {"venomancer_noxious_plague","venomancer_plague_ward"},
-            npc_dota_hero_rattletrap = {"rattletrap_battery_assault","rattletrap_jetpack","rattletrap_power_cogs"},
+            npc_dota_hero_rattletrap = {"rattletrap_overclocking","rattletrap_battery_assault"},
             npc_dota_hero_dark_willow = {"dark_willow_shadow_realm","dark_willow_terrorize","dark_willow_pixie_dust"},
             npc_dota_hero_invoker = {"invoker_tornado","invoker_emp","invoker_ice_wall","invoker_chaos_meteor","invoker_deafening_blast","invoker_sun_strike","invoker_forge_spirit","invoker_cold_snap","invoker_alacrity"},
             npc_dota_hero_techies = {"techies_land_mines"},

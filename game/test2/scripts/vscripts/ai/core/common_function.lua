@@ -234,7 +234,7 @@ end
 
 
 function CommonAI:MoveToRange(targetPosition, range)
-    if self:containsStrategy(self.global_strategy, "原地不动") then
+    if self:containsStrategy(self.global_strategy, "非沉默不动") then
         self:log("策略:原地不动,禁止移动")
         --如果self.entity被沉默了，不return
         if not self.entity:IsSilenced() then
@@ -242,6 +242,11 @@ function CommonAI:MoveToRange(targetPosition, range)
         end
 
         
+    end
+
+    if self:containsStrategy(self.global_strategy, "原地不动") then
+        self:log("原地不动")
+        return
     end
 
     local target = self.target
@@ -370,7 +375,7 @@ function CommonAI:MoveToRange(targetPosition, range)
     end
 end
 
-function CommonAI:IsWeakIllusion(entity)
+function CommonAI:IsWeakAIUnit(entity)
     -- 定义弱单位列表
     local weakUnits = {
         "npc_dota_creep"
@@ -430,7 +435,7 @@ function CommonAI:IsUnableToCastAbility(entity, skill)
         end
     end
 
-    if self:IsWeakIllusion(entity) then
+    if self:IsWeakAIUnit(entity) then
         printReason("是幻象单位")
         return true
     end
@@ -548,20 +553,20 @@ function CommonAI:IsUnableToAttack(entity, target)
         printReason("当前状态: " .. self.currentState)
         return true
     end
-    -- 检查磁场效果
-    local distance = (entity:GetAbsOrigin() - target:GetAbsOrigin()):Length2D()
+    -- -- 检查磁场效果
+    -- local distance = (entity:GetAbsOrigin() - target:GetAbsOrigin()):Length2D()
 
-    -- 检查原地不动策略
-    if self:containsStrategy(self.global_strategy, "原地不动") then
-        local attackRange = entity:Script_GetAttackRange()
-        if distance > attackRange then
-            printReason("原地不动策略，目标超出攻击范围")
-            if not self.entity:IsSilenced() then
-                return true
-            end
+    -- -- 检查原地不动策略
+    -- if self:containsStrategy(self.global_strategy, "非沉默不动") then
+    --     local attackRange = entity:Script_GetAttackRange()
+    --     if distance > attackRange then
+    --         printReason("原地不动策略，目标超出攻击范围")
+    --         if not self.entity:IsSilenced() then
+    --             return true
+    --         end
 
-        end
-    end
+    --     end
+    -- end
     
     return false
 end

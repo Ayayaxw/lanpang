@@ -1,4 +1,6 @@
 function Main:Init_movie_mode(heroName, heroFacet,playerID, heroChineseName)
+    local teams = {DOTA_TEAM_GOODGUYS, DOTA_TEAM_BADGUYS} -- 或其他你需要的队伍
+    self:CreateTrueSightWards(teams)
     local spawnOrigin = Vector(43, -300, 256)  -- 假设的生成位置，您可以根据需要调整
     -- CreateTenAxes()
     --SetupStrengthHeroesScene()
@@ -66,6 +68,468 @@ function Main:Init_movie_mode(heroName, heroFacet,playerID, heroChineseName)
         --Main:PreSpawnGolem_Golem_vs_Heroes()
     --Main:SpawnHeroe2()
     --TestDisarmedAttack()
+    --CreatePugnaAndTowers()
+
+
+
+    local hPlayer = PlayerResource:GetPlayer(0)
+    DebugCreateHeroWithVariant(hPlayer, "npc_dota_hero_axe", 2, DOTA_TEAM_GOODGUYS, false,
+        function(hero)
+
+            local spawnPosition = Vector(43, -300, 256)
+            hero:SetRespawnPosition(spawnPosition)
+            FindClearSpaceForUnit(hero, spawnPosition, true)
+            hero:SetIdleAcquire(true)
+            hero:SetAcquisitionRange(0)
+            
+
+            if callback then
+                callback(hero)  -- 使用回调函数处理英雄对象
+            end
+        end)
+
+
+
+
+    -- CreateHeroesSquareFormation1()
+end
+
+
+function CreateHeroesSquareFormation1()
+    print("开始创建英雄方阵...")
+    
+    -- 定义方阵的大小 (可以根据需要调整)
+    local rows = 3
+    local columns = 6
+    local totalHeroes = rows * columns
+    
+    -- 定义英雄之间的间距
+    local spacing = 300
+    
+    -- 计算中心点 (Main.largeSpawnCenter往北移动200码)
+    local centerPoint = Vector(Main.largeSpawnCenter.x, Main.largeSpawnCenter.y + 200, Main.largeSpawnCenter.z)
+    
+    -- 计算起始点，使方阵围绕中心点 (左下角是第一个)
+    local startX = centerPoint.x - (columns - 1) * spacing / 2
+    local startY = centerPoint.y - (rows - 1) * spacing / 2
+    
+    -- 英雄数组，随机选择不同英雄
+    local heroPool = {
+        "npc_dota_hero_legion_commander", -- 军团指挥官
+        "npc_dota_hero_pudge",      -- 帕吉
+        "npc_dota_hero_slark",      -- 斯拉克
+        "npc_dota_hero_silencer",   -- 沉默术士
+        "npc_dota_hero_axe",        -- 斧王
+        "npc_dota_hero_necrolyte",  -- 瘟疫法师
+        "npc_dota_hero_life_stealer", -- 噬魂鬼
+        "npc_dota_hero_vengefulspirit", -- 复仇之魂
+        "npc_dota_hero_alchemist",  -- 炼金术士
+        "npc_dota_hero_doom_bringer", -- 末日使者
+        "npc_dota_hero_storm_spirit", -- 风暴之灵
+        "npc_dota_hero_tidehunter", -- 潮汐猎人
+        "npc_dota_hero_arc_warden", -- 天穹守望者
+        "npc_dota_hero_pugna",      -- 帕格纳
+        "npc_dota_hero_muerta",     -- 琼英碧灵
+        "npc_dota_hero_centaur",    -- 半人马战行者
+        "npc_dota_hero_lion",       -- 莱恩
+        "npc_dota_hero_nevermore"   -- 影魔
+    }
+    
+    -- 头顶文本内容
+    local textMessages = {
+        "每次获胜攻击力+35",
+        "每次击杀力量+3",
+        "每次击杀敏捷+1",
+        "每次击杀智力+3",
+        "每次淘汰护甲+1.5",
+        "每次击杀生命恢复+6 魔法恢复+3",
+        "每次击杀生命值+30",
+        "每个敌方补刀伤害+0.75",
+        "每把神杖攻击力+25",
+        "每6.66分钟末日持续时间+0.66",
+        "每次击杀魔法恢复+0.3",
+        "每次击杀伤害格挡+4",
+        "每次激活神符全属性+1.5",
+        "每次摧毁防御塔技能增强+1.25",
+        "每次击杀技能增强+2",
+        "每120秒最大生命+30",
+        "每次击杀死亡一指伤害+60",
+        "每次击杀灵魂上限+1",
+    }
+    
+    print("方阵中心点: " .. tostring(centerPoint))
+    print("方阵尺寸: " .. rows .. "x" .. columns .. " (共" .. totalHeroes .. "个英雄)")
+    
+    -- 定义不需要被踢走的英雄列表（7个幸存者）
+    local survivorHeroes = {
+        "npc_dota_hero_silencer",    -- 沉默术士
+        "npc_dota_hero_arc_warden",  -- 天穹守望者
+        "npc_dota_hero_axe",         -- 斧王
+        "npc_dota_hero_muerta",      -- 琼英碧灵
+        "npc_dota_hero_storm_spirit", -- 风暴之灵
+        "npc_dota_hero_nevermore",   -- 影魔
+        "npc_dota_hero_necrolyte",   -- 瘟疫法师
+    }
+    
+    -- 创建英雄
+    local heroCount = 0
+    local createdHeroes = {}
+    local survivorEntities = {}
+    
+    for row = 0, rows - 1 do
+        for col = 0, columns - 1 do
+            -- 计算位置
+            local posX = startX + col * spacing
+            local posY = startY + row * spacing
+            local position = Vector(posX, posY, centerPoint.z)
+            
+            -- 随机选择英雄
+            local heroIndex = heroCount % #heroPool + 1
+            local heroName = heroPool[heroIndex]
+            
+            -- 创建英雄
+            local hero = CreateUnitByName(
+                heroName, 
+                position, 
+                true, 
+                nil, 
+                nil, 
+                DOTA_TEAM_GOODGUYS
+            )
+            
+            if hero then
+                heroCount = heroCount + 1
+                table.insert(createdHeroes, hero)
+                
+                -- 检查是否是幸存者
+                local isSurvivor = false
+                for _, survivorName in ipairs(survivorHeroes) do
+                    if heroName == survivorName then
+                        isSurvivor = true
+                        survivorEntities[hero] = heroName
+                        break
+                    end
+                end
+                
+                -- 让英雄面向南方
+                hero:SetForwardVector(Vector(0, -1, 0))
+                
+                -- 禁止移动
+                hero:AddNewModifier(hero, nil, "modifier_rooted", {})
+                
+                -- 禁止攻击
+                hero:AddNewModifier(hero, nil, "modifier_disarmed", {})
+                
+                -- 设置最高等级
+                HeroMaxLevel(hero)
+                
+                -- 设置头顶文本
+                local textIndex = (row * columns + col) % #textMessages + 1
+                local text = textMessages[textIndex]
+                Timers:CreateTimer(0.1, function()
+                    Main:StartTextMonitor(hero, text, 12, "hero_score")
+                end)
+                
+                print("创建英雄: " .. heroName .. " 在位置 (" .. posX .. ", " .. posY .. "), 文本: " .. text)
+            end
+        end
+    end
+    
+    print("成功创建 " .. heroCount .. " 个英雄")
+    
+    -- 20秒后执行淘汰操作
+    Timers:CreateTimer(20, function()
+        print("开始淘汰环节...")
+        local eliminatedCount = 0
+        
+        -- 淘汰非幸存者英雄
+        for _, hero in ipairs(createdHeroes) do
+            if hero and IsValidEntity(hero) and not survivorEntities[hero] then
+                eliminatedCount = eliminatedCount + 1
+                print("淘汰英雄: " .. hero:GetUnitName())
+                
+                -- 移除禁止移动的modifier
+                hero:RemoveModifierByName("modifier_rooted")
+                
+                -- 添加被踢飞的modifier
+                local kickDistance = 2000 + math.random(0, 1000) -- 随机距离，最小2000
+                local randomDirection = Vector(math.random(-100, 100), math.random(-100, 100), 0):Normalized()
+                
+                -- 播放音效
+                EmitSoundOn("Hero_Tusk.WalrusPunch.Target", hero)
+                
+                -- 播放特效
+                local particleID = ParticleManager:CreateParticle("particles/units/heroes/hero_tusk/tusk_walruspunch_start.vpcf", PATTACH_CUSTOMORIGIN, hero)
+                ParticleManager:SetParticleControl(particleID, 0, hero:GetAbsOrigin())
+                ParticleManager:ReleaseParticleIndex(particleID)
+                
+                -- 添加空中旋转的modifier
+                hero:AddNewModifier(
+                    hero,
+                    nil,
+                    "modifier_air_spin_controller",
+                    {
+                        height = 800, -- 高度
+                        distance = kickDistance, -- 水平距离
+                        direction = randomDirection, -- 踢飞方向
+                        rotation_speed = 2.0, -- 旋转速度，每秒2圈
+                        gravity_factor = 1.2 -- 重力因子
+                    }
+                )
+            end
+        end
+        
+        print("共淘汰 " .. eliminatedCount .. " 个英雄")
+        
+        -- 3秒后让幸存者移动到新的阵型
+        Timers:CreateTimer(3, function()
+            print("幸存者开始移动到新阵型...")
+            
+            -- 新阵型是1x7排列，使用相同的中心点
+            local newSpacing = 200 -- 新阵型的间距
+            local survivorCount = 0
+            local survivors = {}
+            
+            -- 创建指定顺序的英雄名字数组
+            local orderedHeroNames = {
+                "npc_dota_hero_silencer",    -- 沉默术士（最左边）
+                "npc_dota_hero_arc_warden",  -- 天穹守望者
+                "npc_dota_hero_axe",         -- 斧王
+                "npc_dota_hero_muerta",      -- 琼英碧灵
+                "npc_dota_hero_storm_spirit", -- 风暴之灵
+                "npc_dota_hero_nevermore",   -- 影魔
+                "npc_dota_hero_necrolyte"    -- 瘟疫法师
+            }
+            
+            -- 按指定顺序收集英雄
+            local heroByName = {}
+            for hero, heroName in pairs(survivorEntities) do
+                if hero and IsValidEntity(hero) then
+                    heroByName[heroName] = hero
+                    survivorCount = survivorCount + 1
+                end
+            end
+            
+            -- 按照指定顺序填充survivors数组
+            for _, heroName in ipairs(orderedHeroNames) do
+                local hero = heroByName[heroName]
+                if hero and IsValidEntity(hero) then
+                    table.insert(survivors, hero)
+                end
+            end
+            
+            -- 计算新阵型的起始点
+            local newStartX = centerPoint.x - ((#survivors - 1) * newSpacing) / 2
+            
+            -- 给幸存者移除rooted状态，让他们可以移动
+            for i, hero in ipairs(survivors) do
+                hero:RemoveModifierByName("modifier_rooted")
+                
+                -- 计算新位置
+                local newPos = Vector(newStartX + (i-1) * newSpacing, centerPoint.y, centerPoint.z)
+                
+                -- 移动到新位置
+                hero:MoveToPosition(newPos)
+                
+                -- 5秒后，所有幸存者停止移动，面朝南方，并再次被禁止移动
+                Timers:CreateTimer(3, function()
+                    if hero and IsValidEntity(hero) then
+                        -- 让英雄停止移动
+                        hero:Stop()
+                        
+                        -- 设置位置（确保精确到达目标位置）
+                        hero:SetAbsOrigin(newPos)
+                        
+                        -- 让英雄面向南方
+                        hero:SetForwardVector(Vector(0, -1, 0))
+                        
+                        -- 重新添加禁止移动的modifier
+                        hero:AddNewModifier(hero, nil, "modifier_rooted", {})
+                    end
+                end)
+            end
+            
+            print("幸存者移动指令已发出，5秒后完成阵型重组")
+        end)
+    end)
+    
+    return createdHeroes
+end
+
+
+
+function CreateHeroesSquareFormation()
+    print("开始创建英雄方阵...")
+    
+    -- 定义方阵的大小 (可以根据需要调整)
+    local rows = 2
+    local columns = 9
+    local totalHeroes = rows * columns
+    
+    -- 定义英雄之间的间距
+    local spacing = 300
+    
+    -- 计算中心点 (Main.largeSpawnCenter往北移动200码)
+    local centerPoint = Vector(Main.largeSpawnCenter.x, Main.largeSpawnCenter.y + 200, Main.largeSpawnCenter.z)
+    
+    -- 计算起始点，使方阵围绕中心点 (左下角是第一个)
+    local startX = centerPoint.x - (columns - 1) * spacing / 2
+    local startY = centerPoint.y - (rows - 1) * spacing / 2
+    
+    -- 英雄数组，随机选择不同英雄
+    local heroPool = {
+        "npc_dota_hero_pudge",      -- 帕吉
+        "npc_dota_hero_axe",        -- 斧王
+        "npc_dota_hero_slark",      -- 斯拉克
+        "npc_dota_hero_necrolyte",  -- 瘟疫法师
+        "npc_dota_hero_silencer",   -- 沉默术士
+        "npc_dota_hero_life_stealer", -- 噬魂鬼
+        "npc_dota_hero_legion_commander", -- 军团指挥官
+        "npc_dota_hero_vengefulspirit", -- 复仇之魂
+        "npc_dota_hero_alchemist",  -- 炼金术士
+        "npc_dota_hero_doom_bringer", -- 末日使者
+        "npc_dota_hero_storm_spirit", -- 风暴之灵
+        "npc_dota_hero_tidehunter", -- 潮汐猎人
+        "npc_dota_hero_arc_warden", -- 天穹守望者
+        "npc_dota_hero_pugna",      -- 帕格纳
+        "npc_dota_hero_muerta",     -- 琼英碧灵
+        "npc_dota_hero_centaur",    -- 半人马战行者
+        "npc_dota_hero_lion",       -- 莱恩
+        "npc_dota_hero_nevermore"   -- 影魔
+    }
+    
+    -- 头顶文本内容
+    local textMessages = {
+        "每次击杀力量+3",
+        "每次淘汰护甲+1.5",
+        "每次击杀敏捷+1",
+        "每次击杀生命恢复+6 魔法恢复+3",
+        "每次击杀智力+3",
+        "每次击杀生命值+30",
+        "每次获胜攻击力+35",
+        "每个敌方补刀伤害+0.75",
+        "每把神杖攻击力+25",
+        "每6.66分钟末日持续时间+0.66",
+        "每次击杀魔法恢复+0.3",
+        "每次击杀伤害格挡+4",
+        "每次激活神符全属性+1.5",
+        "每次摧毁防御塔技能增强+1.25",
+        "每次击杀技能增强+2",
+        "每120秒最大生命+30",
+        "每次击杀死亡一指伤害+60",
+        "每次击杀灵魂上限+1",
+    }
+    
+    print("方阵中心点: " .. tostring(centerPoint))
+    print("方阵尺寸: " .. rows .. "x" .. columns .. " (共" .. totalHeroes .. "个英雄)")
+    
+    -- 创建英雄
+    local heroCount = 0
+    local createdHeroes = {}
+    
+    for row = 0, rows - 1 do
+        for col = 0, columns - 1 do
+            -- 计算位置
+            local posX = startX + col * spacing
+            local posY = startY + row * spacing
+            local position = Vector(posX, posY, centerPoint.z)
+            
+            -- 随机选择英雄
+            local heroIndex = heroCount % #heroPool + 1
+            local heroName = heroPool[heroIndex]
+            
+            -- 创建英雄
+            local hero = CreateUnitByName(
+                heroName, 
+                position, 
+                true, 
+                nil, 
+                nil, 
+                DOTA_TEAM_GOODGUYS
+            )
+            
+            if hero then
+                heroCount = heroCount + 1
+                table.insert(createdHeroes, hero)
+                
+                -- 让英雄面向南方
+                hero:SetForwardVector(Vector(0, -1, 0))
+                
+                -- 禁止移动
+                hero:AddNewModifier(hero, nil, "modifier_rooted", {})
+                
+                -- 禁止攻击
+                hero:AddNewModifier(hero, nil, "modifier_disarmed", {})
+                
+                -- 设置最高等级
+                HeroMaxLevel(hero)
+                
+                -- 设置头顶文本
+                local textIndex = (row * columns + col) % #textMessages + 1
+                local text = textMessages[textIndex]
+                Timers:CreateTimer(0.1, function()
+                    Main:StartTextMonitor(hero, text, 12, "hero_score")
+                end)
+                
+                print("创建英雄: " .. heroName .. " 在位置 (" .. posX .. ", " .. posY .. "), 文本: " .. text)
+            end
+        end
+    end
+    
+    print("成功创建 " .. heroCount .. " 个英雄")
+    return createdHeroes
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function CreatePugnaAndTowers()
+    -- 创建帕格纳英雄（命石ID为2）
+    local spawnPosition = Vector(0, 0, 128)  -- 帕格纳的生成位置
+    
+    CreateHero(0, "npc_dota_hero_pugna", 2, spawnPosition, DOTA_TEAM_GOODGUYS, true,
+        function(hero)
+            -- 设置英雄满级
+            HeroMaxLevel(hero)
+            
+            print("已创建命石为2的帕格纳并设置满级")
+            
+            -- 创建两个敌方防御塔
+            local towerDistance = 1000  -- 离英雄的距离
+            
+            -- 第一个防御塔位置（X轴正方向）
+            local tower1Pos = Vector(spawnPosition.x + towerDistance, spawnPosition.y, spawnPosition.z)
+            local tower1 = CreateUnitByName("npc_dota_badguys_tower1_mid", tower1Pos, true, nil, nil, DOTA_TEAM_BADGUYS)
+            
+            if tower1 then
+                print("已创建第一个敌方防御塔，位置：X轴正方向1000单位")
+                -- 设置防御塔朝向英雄
+                local direction1 = (spawnPosition - tower1Pos):Normalized()
+                tower1:SetForwardVector(direction1)
+            end
+            
+            -- 第二个防御塔位置（Y轴正方向）
+            local tower2Pos = Vector(spawnPosition.x, spawnPosition.y + towerDistance, spawnPosition.z)
+            local tower2 = CreateUnitByName("npc_dota_badguys_tower1_mid", tower2Pos, true, nil, nil, DOTA_TEAM_BADGUYS)
+            
+            if tower2 then
+                print("已创建第二个敌方防御塔，位置：Y轴正方向1000单位")
+                -- 设置防御塔朝向英雄
+                local direction2 = (spawnPosition - tower2Pos):Normalized()
+                tower2:SetForwardVector(direction2)
+            end
+        end
+    )
 end
 
 
@@ -4455,3 +4919,4 @@ function SetupStrengthHeroesScene()
         end)
     end)
 end
+

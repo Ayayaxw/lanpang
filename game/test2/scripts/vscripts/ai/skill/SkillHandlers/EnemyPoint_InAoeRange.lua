@@ -215,59 +215,119 @@ function CommonAI:HandleEnemyPoint_InAoeRange(entity,target,abilityInfo,targetIn
             return true     
         end
     elseif abilityInfo.abilityName == "muerta_the_calling" then
-        local targetOrigin = targetInfo.targetPos
-        local casterOrigin = entity:GetOrigin()
-        local targetDirection = (targetOrigin - casterOrigin):Normalized()
-        local castRange = abilityInfo.castRange
-        local aoeRadius = abilityInfo.aoeRadius
-    
-        -- 将目标方向调整为最接近的有效方向
-        local validAngles = {30, 90, 150, 210, 270, 330} -- 12、2、4、6、8、10点钟方向的角度
-        local targetAngle = math.deg(math.atan2(targetDirection.y, targetDirection.x))
-        if targetAngle < 0 then targetAngle = targetAngle + 360 end
-        
-        local closestAngle = validAngles[1]
-        local minDiff = 360
-        for _, angle in ipairs(validAngles) do
-            local diff = math.abs(targetAngle - angle)
-            if diff > 180 then diff = 360 - diff end
-            if diff < minDiff then
-                minDiff = diff
-                closestAngle = angle
+        if self:containsStrategy(self.hero_strategy, "直线封锁") then
+            local targetOrigin = targetInfo.targetPos
+            local casterOrigin = entity:GetOrigin()
+            self:log("AOE范围内直线封锁模式")
+            
+            -- 从敌人到自己的方向向量（归一化）
+            local enemyToCasterDirection = (casterOrigin - targetOrigin):Normalized()
+            
+            -- 找到距离敌人300码的点
+            local pointOnLine = targetOrigin + enemyToCasterDirection * 470
+            
+            -- 计算垂直于当前直线的方向向量
+            -- 垂直向量可以通过交换x和y坐标并取反其中一个来获得
+            local perpendicular1 = Vector(-enemyToCasterDirection.y, enemyToCasterDirection.x, 0):Normalized()
+            local perpendicular2 = Vector(enemyToCasterDirection.y, -enemyToCasterDirection.x, 0):Normalized()
+            
+            -- 在垂线上找到距离点240码的两个可能位置
+            local possiblePosition1 = pointOnLine + perpendicular1 * 235
+            local possiblePosition2 = pointOnLine + perpendicular2 * 235
+            
+            -- 获取英雄当前朝向
+            local heroForward = entity:GetForwardVector()
+            
+            -- 计算英雄朝向与两个可能位置方向的点积（判断转身幅度）
+            local direction1 = (possiblePosition1 - casterOrigin):Normalized()
+            local direction2 = (possiblePosition2 - casterOrigin):Normalized()
+            
+            local dot1 = heroForward:Dot(direction1)
+            local dot2 = heroForward:Dot(direction2)
+            
+            -- 选择转身幅度较小的点（点积越大，夹角越小）
+            local finalCastPosition
+            if dot1 > dot2 then
+                finalCastPosition = possiblePosition1
+                self:log("选择垂线1上的施法点")
+            else
+                finalCastPosition = possiblePosition2
+                self:log("选择垂线2上的施法点")
             end
-        end
-    
-        -- 计算调整后的方向
-        local adjustedDirection = Vector(math.cos(math.rad(closestAngle)), math.sin(math.rad(closestAngle)), 0):Normalized()
-    
-        -- 计算从目标反向到六边形角所需的距离
-        local distanceToTarget = (targetOrigin - casterOrigin):Length2D()
-        
-        -- 计算施法位置，使得六边形的角正好位于目标位置
-        -- 从目标位置沿着反方向退aoeRadius的距离，就是让六边形角落正好在目标位置的施法点
-        local idealCastPosition = targetOrigin - adjustedDirection * aoeRadius
-        local idealCastDistance = (idealCastPosition - casterOrigin):Length2D()
-        
-        -- 确保施法距离不超过最大施法距离
-        local finalCastPosition
-        if idealCastDistance <= castRange then
-            finalCastPosition = idealCastPosition
-            self:log("理想施法位置在施法范围内")
+            
+            -- 确保施法距离不超过最大施法距离
+            local distanceToCast = (finalCastPosition - casterOrigin):Length2D()
+            if distanceToCast > abilityInfo.castRange then
+                finalCastPosition = casterOrigin + (finalCastPosition - casterOrigin):Normalized() * abilityInfo.castRange
+                self:log("施法位置超出范围，使用最大施法距离")
+            end
+            
+            -- 打印施法信息
+            self:log(string.format("直线封锁模式: 目标距离: %.2f, 施法距离: %.2f", 
+                (targetOrigin - casterOrigin):Length2D(), (finalCastPosition - casterOrigin):Length2D()))
+            self:log(string.format("直线上点位置: %s", tostring(pointOnLine)))
+            self:log(string.format("最终施法位置: %s", tostring(finalCastPosition)))
+            
+            -- 施放技能
+            entity:CastAbilityOnPosition(finalCastPosition, abilityInfo.skill, 0)
+            abilityInfo.castPoint = CommonAI:calculateAdjustedCastPoint(entity, finalCastPosition, abilityInfo.castPoint)
+            return true
         else
-            -- 如果超出施法范围，则在最大施法距离处施法
-            finalCastPosition = casterOrigin + (idealCastPosition - casterOrigin):Normalized() * castRange
-            self:log("理想施法位置超出范围，使用最大施法距离")
+
+            local targetOrigin = targetInfo.targetPos
+            local casterOrigin = entity:GetOrigin()
+            local targetDirection = (targetOrigin - casterOrigin):Normalized()
+            local castRange = abilityInfo.castRange
+            local aoeRadius = abilityInfo.aoeRadius
+        
+            -- 将目标方向调整为最接近的有效方向
+            local validAngles = {30, 90, 150, 210, 270, 330} -- 12、2、4、6、8、10点钟方向的角度
+            local targetAngle = math.deg(math.atan2(targetDirection.y, targetDirection.x))
+            if targetAngle < 0 then targetAngle = targetAngle + 360 end
+            
+            local closestAngle = validAngles[1]
+            local minDiff = 360
+            for _, angle in ipairs(validAngles) do
+                local diff = math.abs(targetAngle - angle)
+                if diff > 180 then diff = 360 - diff end
+                if diff < minDiff then
+                    minDiff = diff
+                    closestAngle = angle
+                end
+            end
+        
+            -- 计算调整后的方向
+            local adjustedDirection = Vector(math.cos(math.rad(closestAngle)), math.sin(math.rad(closestAngle)), 0):Normalized()
+        
+            -- 计算从目标反向到六边形角所需的距离
+            local distanceToTarget = (targetOrigin - casterOrigin):Length2D()
+            
+            -- 计算施法位置，使得六边形的角正好位于目标位置
+            -- 从目标位置沿着反方向退aoeRadius的距离，就是让六边形角落正好在目标位置的施法点
+            local idealCastPosition = targetOrigin - adjustedDirection * aoeRadius
+            local idealCastDistance = (idealCastPosition - casterOrigin):Length2D()
+            
+            -- 确保施法距离不超过最大施法距离
+            local finalCastPosition
+            if idealCastDistance <= castRange then
+                finalCastPosition = idealCastPosition
+                self:log("理想施法位置在施法范围内")
+            else
+                -- 如果超出施法范围，则在最大施法距离处施法
+                finalCastPosition = casterOrigin + (idealCastPosition - casterOrigin):Normalized() * castRange
+                self:log("理想施法位置超出范围，使用最大施法距离")
+            end
+        
+            -- 打印施法信息
+            self:log(string.format("准备施放技能: %s，目标距离: %.2f，理想施法距离: %.2f，最终施法距离: %.2f，作用范围: %.2f", 
+                abilityInfo.abilityName, distanceToTarget, idealCastDistance, (finalCastPosition - casterOrigin):Length2D(), aoeRadius))
+            self:log(string.format("原始目标方向角度: %.2f，调整后角度: %.2f", targetAngle, closestAngle))
+            self:log(string.format("施法位置: %s", tostring(finalCastPosition)))
+        
+            -- 施放技能
+            entity:CastAbilityOnPosition(finalCastPosition, abilityInfo.skill, 0)
+            abilityInfo.castPoint = CommonAI:calculateAdjustedCastPoint(entity, finalCastPosition, abilityInfo.castPoint)
         end
-    
-        -- 打印施法信息
-        self:log(string.format("准备施放技能: %s，目标距离: %.2f，理想施法距离: %.2f，最终施法距离: %.2f，作用范围: %.2f", 
-            abilityInfo.abilityName, distanceToTarget, idealCastDistance, (finalCastPosition - casterOrigin):Length2D(), aoeRadius))
-        self:log(string.format("原始目标方向角度: %.2f，调整后角度: %.2f", targetAngle, closestAngle))
-        self:log(string.format("施法位置: %s", tostring(finalCastPosition)))
-    
-        -- 施放技能
-        entity:CastAbilityOnPosition(finalCastPosition, abilityInfo.skill, 0)
-        abilityInfo.castPoint = CommonAI:calculateAdjustedCastPoint(entity, finalCastPosition, abilityInfo.castPoint)
 
     elseif abilityInfo.abilityName == "death_prophet_silence" then
         -- 计算方向向量并归一化

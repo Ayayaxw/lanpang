@@ -597,7 +597,6 @@ function CommonAI:FindBestAbilityToUse(entity, target)
 
             -- 忽略名称为 generic_hidden 或以 special_bonus 开头的技能
             if abilityName == "generic_hidden" or abilityName:find("^special_bonus") then
-                self:log(string.format("忽略技能 %s", abilityName))
                 goto continue
             end
 
@@ -1100,12 +1099,14 @@ function CommonAI:FindBestAbilityToUse(entity, target)
 
 
             -- 如果是最高优先级技能且在范围内，直接返回
-            if skillInfo.priority < 2 and isInRange then
-                self:log(string.format("选择了最高优先级的技能 %s，施法距离为 %d", ability:GetAbilityName(), castRange))
-                return ability, castRange, aoeRadius
-            elseif skillInfo.priority < 3 and isInRange then
-                self:log(string.format("选择了第二优先级的技能 %s，施法距离为 %d", ability:GetAbilityName(), castRange))
-                return ability, castRange, aoeRadius
+            if not self:containsStrategy(self.hero_strategy, "辅助切球") then
+                if skillInfo.priority < 2 and isInRange then
+                    self:log(string.format("选择了最高优先级的技能 %s，施法距离为 %d", ability:GetAbilityName(), castRange))
+                    return ability, castRange, aoeRadius
+                elseif skillInfo.priority < 3 and isInRange then
+                    self:log(string.format("选择了第二优先级的技能 %s，施法距离为 %d", ability:GetAbilityName(), castRange))
+                    return ability, castRange, aoeRadius
+                end
             end
 
             -- 所有技能都加入待选列表（包括超出范围的高优先级技能）
@@ -1128,17 +1129,6 @@ function CommonAI:FindBestAbilityToUse(entity, target)
         local abilityName = skillData.abilityName
         local castRange = skillData.castRange
         local aoeRadius = skillData.aoeRadius
-
-
-
-        -- 特殊处理 pugna_decrepify
-        if not target and abilityName == "pugna_decrepify" then
-            return ability, castRange, aoeRadius
-        end
-
-        -- 如果技能是大招，没有作用范围和施法范围，且是无目标施法技能，则无条件将其作为best技能
-
-
         -- 更新最佳技能（基于施法距离）
         local combinedRange = castRange + aoeRadius
         if combinedRange > maxCombinedRange then

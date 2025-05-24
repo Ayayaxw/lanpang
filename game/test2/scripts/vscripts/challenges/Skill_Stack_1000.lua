@@ -1,5 +1,4 @@
-
-function Main:Init_SoloMode(event, playerID)
+function Main:Init_Skill_Stack_1000(event, playerID)
     -- 技能修改器
 
     local teams = {DOTA_TEAM_GOODGUYS, DOTA_TEAM_BADGUYS} -- 或其他你需要的队伍
@@ -7,35 +6,16 @@ function Main:Init_SoloMode(event, playerID)
     self.HERO_CONFIG = {
         ALL = {
             function(hero)
-                hero:AddNewModifier(hero, nil, "modifier_kv_editor", {})
+
                 hero:AddNewModifier(hero, nil, "modifier_rooted", {duration = 5})
+                HeroMaxLevel(hero)
                 hero:AddNewModifier(hero, nil, "modifier_item_aghanims_shard", {})
                 hero:AddNewModifier(hero, nil, "modifier_item_ultimate_scepter_consumed", {})
-                HeroMaxLevel(hero)
 
-                -- -- 添加投影技能
-                -- hero:AddAbility("dazzle_nothl_projection")
-                -- -- 获取技能引用
-                -- local ability = hero:FindAbilityByName("dazzle_nothl_projection")
-                -- -- 升级到3级
-                -- ability:SetLevel(3)
-            
-                -- -- 创建定时器每秒释放技能
-                -- Timers:CreateTimer(function()
-                --     if not hero:IsAlive() then return nil end
-                    
-                --     -- 获取英雄朝向的前方500码位置
-                --     local forward = hero:GetForwardVector()
-                --     local target_pos = hero:GetAbsOrigin() + forward * 500
-                    
-                --     -- 设置施法位置并释放技能
-                --     hero:SetCursorPosition(target_pos)
-                --     ability:OnSpellStart()
-                    
-                --     return 1.0 -- 1秒后重复
-                -- end)
+
+
             end,
-        },
+        },  
         FRIENDLY = {
             function(hero)
                 hero:SetForwardVector(Vector(1, 0, 0))
@@ -52,10 +32,36 @@ function Main:Init_SoloMode(event, playerID)
         ,
         BATTLEFIELD = {
             function(hero)
-                --hero:AddNewModifier(hero, nil, "modifier_auto_elevation_small", {})
+                hero:AddNewModifier(hero, nil, "modifier_auto_elevation_small", {})
+                
+                hero:AddNewModifier(hero, nil, "modifier_kv_editor", {})
+
             end,
         }
     }
+    local ability_modifiers = {
+        npc_dota_hero_nevermore = {
+            nevermore_necromastery =
+            {
+                AbilityValues = {
+                    necromastery_max_souls = {
+                        value = 1000
+                    },
+                }
+            },
+        },
+        npc_dota_hero_vengefulspirit = {
+            vengefulspirit_magic_missile = {
+                AbilityValues = {
+                    magic_missile_damage = {
+                        value = 1190,
+                    },
+                }
+            }
+        },
+
+    }
+    self:UpdateAbilityModifiers(ability_modifiers)
 
     -- 从 event 中获取新的数据
     local selfHeroId = event.selfHeroId or -1
@@ -70,6 +76,8 @@ function Main:Init_SoloMode(event, playerID)
     local selfHeroStrategy = self:getDefaultIfEmpty(event.selfHeroStrategies)
     local opponentOverallStrategy = self:getDefaultIfEmpty(event.opponentOverallStrategies)
     local opponentHeroStrategy = self:getDefaultIfEmpty(event.opponentHeroStrategies)
+    local selfSkillThresholds = event.selfSkillThresholds or {}
+    local opponentSkillThresholds = event.opponentSkillThresholds or {}
 
     -- 获取玩家和对手的英雄名称及中文名称
     local heroName, heroChineseName = self:GetHeroNames(selfHeroId)
@@ -85,7 +93,7 @@ function Main:Init_SoloMode(event, playerID)
     -- 定义时间参数
     self.duration = 10         -- 赛前准备时间
     self.endduration = 10      -- 赛后庆祝时间
-    self.limitTime = 60        -- 限定时间为准备时间结束后的一分钟
+    self.limitTime = 100        -- 限定时间为准备时间结束后的一分钟
 
 
     self:createLocalizedMessage(
@@ -123,7 +131,7 @@ function Main:Init_SoloMode(event, playerID)
     }
     local order = {"挑战英雄", "对手英雄", "剩余时间"}
     SendInitializationMessage(data, order)
-    --self:UpdateAbilityModifiers(ability_modifiers)
+
     -- 创建玩家英雄
     CreateHero(playerID, heroName, selfFacetId, self.smallDuelAreaLeft, DOTA_TEAM_GOODGUYS, false, function(playerHero)
         self:ConfigureHero(playerHero, true, playerID)
@@ -135,7 +143,8 @@ function Main:Init_SoloMode(event, playerID)
         if selfAIEnabled then
             Timers:CreateTimer(self.duration - 0.7, function()
                 if self.currentTimer ~= timerId or hero_duel.EndDuel then return end
-                CreateAIForHero(self.leftTeamHero1, selfOverallStrategy, selfHeroStrategy,"leftTeamHero1")
+                local otherSettings = {skillThresholds = selfSkillThresholds}
+                CreateAIForHero(self.leftTeamHero1, selfOverallStrategy, selfHeroStrategy,"leftTeamHero1",0.01, otherSettings)
                 return nil
             end)
         end
@@ -152,7 +161,8 @@ function Main:Init_SoloMode(event, playerID)
         if opponentAIEnabled then
             Timers:CreateTimer(self.duration - 0.7, function()
                 if self.currentTimer ~= timerId or hero_duel.EndDuel then return end
-                CreateAIForHero(self.rightTeamHero1, opponentOverallStrategy, opponentHeroStrategy,"rightTeamHero1")
+                local otherSettings = {skillThresholds = opponentSkillThresholds}
+                CreateAIForHero(self.rightTeamHero1, opponentOverallStrategy, opponentHeroStrategy,"rightTeamHero1",0.01, otherSettings)
                 return nil
             end)
         end
@@ -173,13 +183,14 @@ function Main:Init_SoloMode(event, playerID)
         if self.currentTimer ~= timerId or hero_duel.EndDuel then return end
         self:HeroPreparation(heroName, self.leftTeamHero1, selfOverallStrategy,selfHeroStrategy)
         self:HeroPreparation(opponentHeroName, self.rightTeamHero1, opponentOverallStrategy,opponentHeroStrategy)
-    end)
+        if heroName == "npc_dota_hero_doom_bringer" then
+            self:HeroBenefits(heroName, self.leftTeamHero1, selfOverallStrategy,selfHeroStrategy)
+        end
 
-    Timers:CreateTimer(self.duration - 0.5, function()
-        if self.currentTimer ~= timerId or hero_duel.EndDuel then return end
-        self:HeroBenefits(heroName, self.leftTeamHero1, selfOverallStrategy,selfHeroStrategy)
-        self:HeroBenefits(opponentHeroName, self.rightTeamHero1, opponentOverallStrategy,opponentHeroStrategy)
-        
+
+        self:HeroBenefits_10000(heroName, self.leftTeamHero1, selfOverallStrategy,selfHeroStrategy)
+        self:HeroBenefits_10000(opponentHeroName, self.rightTeamHero1, opponentOverallStrategy,opponentHeroStrategy)
+
     end)
 
     -- 赛前限制
@@ -187,15 +198,20 @@ function Main:Init_SoloMode(event, playerID)
         if self.currentTimer ~= timerId or hero_duel.EndDuel then return end
 
         -- 给双方英雄添加禁用效果
-        local modifiers = {"modifier_disarmed", "modifier_silence", "modifier_rooted", "modifier_break"}
-        for _, modifier in ipairs(modifiers) do
-            if self.leftTeamHero1 and not self.leftTeamHero1:IsNull() then
-                self.leftTeamHero1:AddNewModifier(self.leftTeamHero1, nil, modifier, { duration = self.duration - 5 })
-            end
-            if self.rightTeamHero1 and not self.rightTeamHero1:IsNull() then
-                self.rightTeamHero1:AddNewModifier(self.rightTeamHero1, nil, modifier, { duration = self.duration - 5 })
-            end
-        end
+        self:PrepareHeroForDuel(
+            self.leftTeamHero1,                     -- 英雄单位
+            self.smallDuelAreaLeft,      -- 左侧决斗区域坐标
+            self.duration - 5,                      -- 限制效果持续20秒
+            Vector(1, 0, 0)          -- 朝向右侧
+        )
+
+        self:PrepareHeroForDuel(
+            self.rightTeamHero1,        
+            self.smallDuelAreaRight,     
+            self.duration - 5,           
+            Vector(-1, 0, 0)         
+        )
+
     end)
 
     -- 发送摄像机位置给前端
@@ -206,9 +222,9 @@ function Main:Init_SoloMode(event, playerID)
     Timers:CreateTimer(self.duration - 6, function()
         if self.currentTimer ~= timerId or hero_duel.EndDuel then return end
 
-        Timers:CreateTimer(0.1, function()
-            if self.currentTimer ~= timerId or hero_duel.EndDuel then return end
+        Timers:CreateTimer(0.01, function()
             self:MonitorUnitsStatus()
+            if self.currentTimer ~= timerId or hero_duel.EndDuel then return end
             return 0.01
         end)
 
@@ -235,6 +251,8 @@ function Main:Init_SoloMode(event, playerID)
         self.startTime = GameRules:GetGameTime() -- 记录开始时间
         CustomGameEventManager:Send_ServerToAllClients("start_timer", {})
         self:MonitorUnitsStatus()
+        self:StartAbilitiesMonitor(self.rightTeamHero1,true)
+        self:StartAbilitiesMonitor(self.leftTeamHero1,true)
         self:createLocalizedMessage(
             "[LanPang_RECORD][",
             self.currentMatchID,
@@ -251,21 +269,13 @@ function Main:Init_SoloMode(event, playerID)
         -- 停止计时
         CustomGameEventManager:Send_ServerToAllClients("stop_timer", {})
 
-        -- 对英雄再次施加禁用效果
-        local modifiers = {"modifier_disarmed", "modifier_silence", "modifier_rooted", "modifier_break"}
-        for _, modifier in ipairs(modifiers) do
-            if self.leftTeamHero1 and not self.leftTeamHero1:IsNull() then
-                self.leftTeamHero1:AddNewModifier(self.leftTeamHero1, nil, modifier, { duration = self.endduration })
-            end
-            if self.rightTeamHero1 and not self.rightTeamHero1:IsNull() then
-                self.rightTeamHero1:AddNewModifier(self.rightTeamHero1, nil, modifier, { duration = self.endduration })
-            end
-        end
+        self:DisableHeroWithModifiers(self.leftTeamHero1, self.endduration)
+        self:DisableHeroWithModifiers(self.rightTeamHero1, self.endduration)
     end)
 end
 
 
-function Main:OnUnitKilled_SoloMode(killedUnit, args)
+function Main:OnUnitKilled_Skill_Stack_1000(killedUnit, args)
     local killedUnit = EntIndexToHScript(args.entindex_killed)
 
     if hero_duel.EndDuel or not killedUnit:IsRealHero() then
@@ -277,9 +287,15 @@ function Main:OnUnitKilled_SoloMode(killedUnit, args)
 end
 
 
-function Main:OnNPCSpawned_SoloMode(spawnedUnit, event)
-    --过两秒打印单位身上的modifier名字
+function Main:OnNPCSpawned_Skill_Stack_1000(spawnedUnit, event)
     if not self:isExcludedUnit(spawnedUnit) then
         self:ApplyConfig(spawnedUnit, "BATTLEFIELD")
     end
 end
+
+function Main:OnAbilityUsed_Skill_Stack_1000(event)
+
+
+end
+
+

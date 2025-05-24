@@ -38,17 +38,6 @@ function IsHeroTrulyDead(killedUnit, callback)
                         if Main.currentChallenge == Main.Challenges.CD0_2skill then
                             illusion:AddNewModifier(illusion, nil, "modifier_no_cooldown_SecondSkill", {}) 
                         end
-
-                        -- 检查原单位是否在 AIs 列表中，如果是，则为幻象添加 AI
-                        if AIs and AIs[killedUnit] and not aiApplied then
-                            if CreateAIForHero then
-                                CreateAIForHero(illusion)
-                                aiApplied = true
-                                print("为复仇之魂幻象添加了 AI")
-                            else
-                                print("CreateAIForHero 函数不存在，无法为幻象添加 AI")
-                            end
-                        end
                     end
                     return true
                 end

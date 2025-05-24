@@ -134,7 +134,7 @@
                 }
                 
                 // 应用统一的逻辑判断时间是否接近0
-                if (timeNumber < 0.05) {
+                if (timeNumber < 0.07) {
                     ShowTimeUp();
                     // 根据原始格式决定输出格式
                     if (currentTime.indexOf(':') !== -1) {

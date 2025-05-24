@@ -205,12 +205,15 @@ CDOTA_BaseNPC.GetRealOwner = function(self)
                     end
                 end
             end
-            local owner = checkUnit:GetOwnerEntity()
-            if owner and not owner:IsNull() then
-                PrintDebug("通过GetOwner找到幻象创造者:", owner:GetUnitName())
-                return owner
+            -- 检查modifier_illusion
+            local illusionModifier = checkUnit:FindModifierByName("modifier_illusion")
+            if illusionModifier then
+                local owner = illusionModifier:GetCaster()
+                if owner and not owner:IsNull() then
+                    PrintDebug("通过modifier_illusion找到幻象创造者:", owner:GetUnitName())
+                    return owner
+                end
             end
-            
             PrintDebug("未找到幻象的主人")
         end
 

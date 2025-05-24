@@ -105,6 +105,11 @@ function Main:AutoUpgradeHeroAbilities(hero)
     
     -- 如果没有可升级的天赋，升级普通技能
     if not upgraded and #normalAbilities > 0 then
+        -- 按照等级要求从低到高排序普通技能
+        table.sort(normalAbilities, function(a, b)
+            return a:GetHeroLevelRequiredToUpgrade() < b:GetHeroLevelRequiredToUpgrade()
+        end)
+        
         for _, ability in ipairs(normalAbilities) do
             if ability:CanAbilityBeUpgraded() then
                 upgraded = Main:upgradeAbilityWithOrder(hero, ability)

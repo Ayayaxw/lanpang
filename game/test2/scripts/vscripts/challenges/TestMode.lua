@@ -173,8 +173,8 @@ function Main:Init_TestMode(event, playerID)
 
     Timers:CreateTimer(self.duration - 0.5, function()
         if self.currentTimer ~= timerId or hero_duel.EndDuel then return end
-        self:HeroBenefits(heroName, self.leftTeamHero1, selfOverallStrategy,selfHeroStrategy)
-        self:HeroBenefits(opponentHeroName, self.rightTeamHero1, opponentOverallStrategy,opponentHeroStrategy)
+        -- self:HeroBenefits(heroName, self.leftTeamHero1, selfOverallStrategy,selfHeroStrategy)
+        -- self:HeroBenefits(opponentHeroName, self.rightTeamHero1, opponentOverallStrategy,opponentHeroStrategy)
 
     end)
 

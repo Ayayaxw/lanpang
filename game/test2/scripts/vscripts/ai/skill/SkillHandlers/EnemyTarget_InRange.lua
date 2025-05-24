@@ -4,6 +4,7 @@ function CommonAI:HandleEnemyTargetAction(entity,target,abilityInfo,targetInfo)
 
 
     if abilityInfo.abilityName == "pugna_life_drain" then
+        local temp_target, enemyHeroCount = self:FindHeroTarget(entity)
         -- 查找附近是否存在友方单位 npc_dota_pugna_nether_ward
         local allies = FindUnitsInRadius(
             entity:GetTeamNumber(),
@@ -41,7 +42,7 @@ function CommonAI:HandleEnemyTargetAction(entity,target,abilityInfo,targetInfo)
             )
             
             -- 如果netherWard周围有敌人且周围敌人数量超过2，释放技能到netherWard
-            if #enemiesAroundNetherWard > 0 and self.enemyHeroCount >= 2 then
+            if #enemiesAroundNetherWard > 0 and enemyHeroCount >= 2 then
                 entity:CastAbilityOnTarget(netherWard, abilityInfo.skill, 0)
                 abilityInfo.castPoint = CommonAI:calculateAdjustedCastPoint(entity, netherWard:GetOrigin(), abilityInfo.castPoint)
             else
@@ -103,15 +104,7 @@ function CommonAI:HandleEnemyTargetAction(entity,target,abilityInfo,targetInfo)
         end
 
 
-    elseif abilityInfo.abilityName == "pugna_decrepify" then
-        if self.enemyHeroCount < 2 or self:containsStrategy(self.hero_strategy, "不虚无自己") then
-            self:log("目标小于2")
-            entity:CastAbilityOnTarget(self.target, abilityInfo.skill, 0)
-            abilityInfo.castPoint = CommonAI:calculateAdjustedCastPoint(entity, targetInfo.targetPos, abilityInfo.castPoint)
-        else
-            self:log("目标大于2")
-            entity:CastAbilityOnTarget(entity, abilityInfo.skill, 0)
-        end
+
 
     elseif abilityInfo.abilityName == "tiny_tree_grab" or abilityInfo.abilityName == "furion_force_of_nature" then
         if self.treetarget then

@@ -160,3 +160,60 @@ end
 function CDOTABaseAbility:IgnoreVectorArrowWidth()
 	return false
 end
+
+-- 添加一个实用函数，用于以编程方式释放矢量施法技能（单位+方向版本）
+function CDOTABaseAbility:CastVectorAbilityOnTarget(target, direction)
+    -- 获取目标位置
+    local target_pos = target:GetAbsOrigin()
+    
+    -- 如果direction是角度而不是向量，转换为向量
+    if type(direction) == "number" then
+        local angle_rad = math.rad(direction)
+        direction = Vector(math.cos(angle_rad), math.sin(angle_rad), 0)
+    end
+    
+    -- 确保方向是规范化的向量
+    direction = Vector(direction.x, direction.y, 0):Normalized()
+    
+    -- 计算终点位置（用于设置vectorTargetPosition2）
+    local cast_range = self:GetVectorTargetRange()
+    local end_pos = target_pos + direction * cast_range
+    
+    -- 修改：直接模拟OrderFilter的逻辑
+    local caster = self:GetCaster()
+    
+    -- 1. 模拟第一次点击，设置vectorTargetPosition2
+    self.vectorTargetPosition2 = end_pos
+    
+    -- 2. 模拟第二次点击，设置vectorTargetPosition和direction
+    self.vectorTargetPosition = target_pos
+    self.vectorTargetDirection = direction
+    
+    -- 3. 重写OnSpellStart为调用OnVectorCastStart
+    local original_OnSpellStart = self.OnSpellStart
+    local function OverrideSpellStart(selfRef)
+        selfRef:OnVectorCastStart(target_pos, direction)
+    end
+    self.OnSpellStart = OverrideSpellStart
+    
+    -- 4. 设置施法目标和位置
+    caster:SetCursorCastTarget(target)
+    caster:SetCursorPosition(target_pos)
+    
+    -- 5. 触发技能释放
+    self:CastAbility()
+    
+    -- 6. 恢复原始OnSpellStart
+    self.OnSpellStart = original_OnSpellStart
+    
+    print("[VT] 程序化施放矢量技能，目标: " .. target:GetName() .. ", 方向: " .. tostring(direction))
+    return true
+end
+
+-- 添加简化方法，允许用一个角度值来指定方向
+function CDOTABaseAbility:CastVectorAbilityOnTargetWithAngle(target, angle_degrees)
+    local angle_rad = math.rad(angle_degrees)
+    local direction = Vector(math.cos(angle_rad), math.sin(angle_rad), 0)
+    return self:CastVectorAbilityOnTarget(target, direction)
+end
+

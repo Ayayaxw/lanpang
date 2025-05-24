@@ -185,11 +185,7 @@
         // 忽略错误，如果事件未注册
         $.Msg("初始化时移除事件处理器出错:", e);
       }
-      
-      // 注册调试日志事件处理器（这只是用于调试，不影响实际功能）
-      $.RegisterEventHandler('DOTAUIHeroPickerHeroSelected', $('#HeroPicker'), (heroId, facetId) => {
-        $.Msg(`【原始事件】收到英雄选择事件：heroId=${heroId}, facetId=${facetId}, currentAction=${GameEvents.GameSetup?.currentAction || '未设置'}`);
-      });
+
   
 
       $('#CancelButton').SetPanelEvent('onactivate', onCancelButtonClick);
@@ -553,8 +549,9 @@
               }
               
               // 注册新的事件处理器，确保只处理当前选中的自定义英雄面板
-              $.RegisterEventHandler('DOTAUIHeroPickerHeroSelected', $('#HeroPicker'), (heroId, facetId) => {
+              $.RegisterEventHandler('DOTAUIHeroPickerHeroSelected', $('#HeroPicker'), (heroId, facetidraw) => {
                   // 只处理当前动作为ModifyCustomHero的情况
+                  let facetId = facetidraw & 0xFFFFFFFF;
                   if (GameEvents.GameSetup.currentAction === 'ModifyCustomHero') {
                       // 获取当前操作的自定义英雄ID
                       const customHeroId = GameEvents.GameSetup.currentCustomHeroId;

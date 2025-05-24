@@ -31,6 +31,6 @@ function TriggerWhiteFlash(duration = 0.3, opacity = 0.5) {
 GameEvents.Subscribe("FlashWhite", function() {   
     $.Msg("FlashWhite");
     
-    TriggerWhiteFlash(1, 0.05);
+    TriggerWhiteFlash(1, 0.01);
 });
 

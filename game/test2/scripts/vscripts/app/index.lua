@@ -622,7 +622,7 @@ function Main:ExecuteSpellCast(spell_data)
     local isChanneled = ability:GetChannelTime() > 0
     
     -- 如果是持续施法技能，使用幻想施法方法
-    if isChanneled then
+    if isChanneled and abilityName ~= "windrunner_powershot" then
         if spell_data.is_self_cast then
             Main:CreateIllusionAndCast(parent, abilityName, "target", parent)
             return

@@ -17,7 +17,7 @@ function Main:Init_Level1_Duel(event, playerID)
         ALL = {
             function(hero)
                 hero:AddNewModifier(hero, nil, "modifier_kv_editor", {})
-                hero:AddNewModifier(hero, nil, "modifier_health_regen_7", {})
+                hero:AddNewModifier(hero, nil, "modifier_health_regen_custom", {regen_amount = 7})
                 hero:AddNewModifier(hero, nil, "modifier_rooted", {duration = 5})
             end,
         },

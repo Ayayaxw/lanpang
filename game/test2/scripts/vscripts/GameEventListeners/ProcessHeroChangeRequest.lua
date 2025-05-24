@@ -140,6 +140,24 @@ function Main:DeleteCurrentArenaHeroes()
     -- 遍历并清除当前竞技场中的英雄
     Main:ClearAbilitiesPanel()
 
+    local thinkers = Entities:FindAllByName("npc_dota_thinker")
+
+    -- 遍历找到的所有thinker单位
+    for _, thinker in pairs(thinkers) do
+
+        local allModifiers = thinker:FindAllModifiers()
+
+        for _, modifier in pairs(allModifiers) do
+            local modifierName = modifier:GetName()
+            modifier:Destroy()
+        end
+    end
+
+
+
+
+
+
     Timers:CreateTimer(1, function()
         Main:ClearAbilitiesPanel()
         Main:ClearAllFloatingText()

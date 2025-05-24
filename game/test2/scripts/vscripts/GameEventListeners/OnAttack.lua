@@ -1,4 +1,5 @@
 function Main:OnAttack(keys)
+
     local attacker = EntIndexToHScript(keys.entindex_attacker)
     local victim = EntIndexToHScript(keys.entindex_killed)
     local damage = keys.damage
@@ -46,11 +47,14 @@ function Main:OnAttack(keys)
     -- 构建伤害事件的唯一键：攻击者ID + 技能名称(如果有)
     local abilityName = "普通攻击"
     local abilityLocalized = "普通攻击"
-    
+
     if inflictor then
         abilityName = inflictor:GetName()
+        print("攻击者的技能为",abilityName)
+
         abilityLocalized = {localize = true, text = "DOTA_Tooltip_Ability_" .. abilityName}
     end
+
     
     -- 获取当前的秒数时间戳 - 用于创建每一秒的新计数表
     local timestamp = math.floor(GameRules:GetGameTime())
@@ -72,6 +76,8 @@ function Main:OnAttack(keys)
         end
     end
     
+
+
     -- 记录本次攻击的攻击者和目标
     local attackerKey = attackerName .. "_" .. attacker:GetEntityIndex()
     local targetKey = targetName .. "_" .. target:GetEntityIndex()
@@ -85,7 +91,7 @@ function Main:OnAttack(keys)
         name = targetName,
         entityId = target:GetEntityIndex()
     }
-    
+
     -- 原规则的键：攻击者类型 + 技能
     local attackerAbilityKey = attackerName .. "_" .. abilityName
     
@@ -129,6 +135,7 @@ function Main:OnAttack(keys)
             targetCurrentHealth = target:GetHealth()
         }
     end
+
     
     -- 更新攻击者和伤害信息
     if not Main.abilityTargetQueue[abilityTargetKey].attackers[attackerName] then
@@ -141,19 +148,26 @@ function Main:OnAttack(keys)
         Main.abilityTargetQueue[abilityTargetKey].attackers[attackerName].count = Main.abilityTargetQueue[abilityTargetKey].attackers[attackerName].count + 1
         Main.abilityTargetQueue[abilityTargetKey].attackers[attackerName].damage = Main.abilityTargetQueue[abilityTargetKey].attackers[attackerName].damage + damage
     end
-    
+
     -- 更新总伤害和目标当前血量
     Main.abilityTargetQueue[abilityTargetKey].totalDamage = Main.abilityTargetQueue[abilityTargetKey].totalDamage + damage
     Main.abilityTargetQueue[abilityTargetKey].targetCurrentHealth = target:GetHealth()
     
     -- 检查是否需要广播伤害消息（每秒一次）
+
+
+
     local currentTime = GameRules:GetGameTime()
     if currentTime - Main.lastDamageBroadcastTime >= 1.0 then
+
         self:BroadcastDamageMessages()
         Main.lastDamageBroadcastTime = currentTime
     end
 
     -- 追踪技能伤害
+
+
+
     if hero_duel.damagePanelEnabled and inflictor then
         -- 获取技能名称
         local abilityName = inflictor:GetName()
@@ -216,6 +230,7 @@ function Main:OnAttack(keys)
             self:CheckAndUpdateDamagePanel()
         end
     end
+
 
     -- 处理特定英雄之间的交互
     if self.leftTeamHero1 and self.rightTeamHero1 then
@@ -283,6 +298,8 @@ function Main:OnAttack(keys)
         local challengeFunctionName = "OnAttack_" .. challengeName
         if self[challengeFunctionName] then
             -- 调用对应的处理函数
+
+            print("准备调用对应的伤害处理keys.entindex_inflictor为")
             self[challengeFunctionName](self, keys)
         end
     end
@@ -462,6 +479,8 @@ function Main:BroadcastDamageMessages()
     end
     
     -- 3. 发送所有合并后的消息
+
+
     for _, messageData in pairs(combinedMessages) do
         local damageRounded = string.format("%.2f", messageData.damage or 0)
         
@@ -508,12 +527,12 @@ function Main:BroadcastDamageMessages()
             table.insert(messageElements, "（" .. startHealth .. "->" .. endHealth .. "）")
         end
         
-        -- 发送本次消息
+
         if Main.createLocalizedMessage then
             Main:createLocalizedMessage(unpack(messageElements))
         end
     end
-    
+
     -- 每次广播后清空计数表
     Main.entityCounters[timestampKey] = nil
 end

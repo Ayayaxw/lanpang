@@ -1,4 +1,3 @@
-
 function CommonAI:Ini_SkillAoeRadius()
     self.specificRadius = {
 
@@ -74,6 +73,8 @@ function CommonAI:Ini_SkillAoeRadius()
         dazzle_nothl_projection = 9999,
         gyrocopter_call_down =1200,
         dark_seer_ion_shell = 2000,
+        alchemist_unstable_concoction = 2000,
+        muerta_the_calling = 460,
 
     }
     self.itemRadius = {
@@ -115,6 +116,20 @@ function CommonAI:GetSkillAoeRadius(ability)
         self.specificRadius.treant_leech_seed = 2000
         self.specificRadius.mars_arena_of_blood = 800
         self.specificRadius.lina_light_strike_array = 800
+    end
+    if self:containsStrategy(self.hero_strategy, "出门虚无") then
+        self.specificRadius.pugna_decrepify = 9999
+    end
+
+    if self:containsStrategy(self.hero_strategy, "出门放弹幕") then
+        self.specificRadius.rattletrap_junk_mail = 9999
+    end
+    if self:containsStrategy(self.hero_strategy, "出门放齿轮") then
+        self.specificRadius.rattletrap_power_cogs = 9999
+    end
+
+    if self:containsStrategy(self.hero_strategy, "出门过载") then
+        self.specificRadius.rattletrap_overclocking = 9999
     end
 
     if self:containsStrategy(self.hero_strategy, "省蓝") then
@@ -251,141 +266,7 @@ function CommonAI:GetSkillAoeRadius(ability)
     }
 
 
-    -- 特殊处理 templar_assassin_meld
-    if abilityName == "templar_assassin_meld" then
-        if caster then
-            local attackRange = caster:Script_GetAttackRange()
-            aoeRadius = attackRange
-        end
-    elseif abilityName == "sniper_take_aim" then
-        if caster then
-            local attackRange = caster:Script_GetAttackRange() + 255
-            aoeRadius = attackRange
-        end
-    elseif abilityName == "windrunner_windrun" then
-        if caster then
-            local attackRange = caster:Script_GetAttackRange()
-            aoeRadius = attackRange
-        end
-    elseif abilityName == "marci_unleash" and self:containsStrategy(self.hero_strategy, "出门开大") then
-        if caster then
-            local attackRange = caster:Script_GetAttackRange()
-            aoeRadius = attackRange
-        end
-    elseif abilityName == "nevermore_requiem" and self:containsStrategy(self.hero_strategy, "全图摇大") then
-        aoeRadius = 9999
-    elseif abilityName == "enchantress_bunny_hop" then
-        if caster then
-            local attackRange = caster:Script_GetAttackRange()
-            aoeRadius = attackRange
-        end
-    elseif abilityName == "muerta_pierce_the_veil" then
-        if self:containsStrategy(self.hero_strategy, "出门开大") then
-            aoeRadius = 0
-        else
-            if caster then
-                local attackRange = caster:Script_GetAttackRange() + 300
-                aoeRadius = attackRange
-            end
-        end
 
-    elseif abilityName == "slardar_slithereen_crush" then
-        if self:containsStrategy(self.hero_strategy, "踩水洼") then
-            if not caster:HasModifier("modifier_slardar_seaborn_sentinel_river") then
-                aoeRadius = 1000
-            end
-        end
-    elseif abilityName == "tidehunter_ravage" then
-
-        aoeRadius = aoeRadius - 100
-    elseif abilityName == "rattletrap_power_cogs" then
-        if self.entity:HasModifier("modifier_rattletrap_jetpack") then
-            self.specificRadius.rattletrap_power_cogs = 1500
-        else
-            self.specificRadius.rattletrap_power_cogs = nil
-        end
-        if self:containsStrategy(self.hero_strategy, "出门放齿轮") then
-            self.specificRadius.rattletrap_power_cogs = 3000
-        end
-        if self:containsStrategy(self.hero_strategy, "用框弹人") then
-            local facetID = self.entity:GetHeroFacetID()
-            if facetID == 1 then
-                self.specificRadius.rattletrap_power_cogs = 400
-            end
-        end
-
-    elseif abilityName == "ember_spirit_searing_chains" then
-        local remnants = FindUnitsInRadius(
-            caster:GetTeamNumber(),
-            self.target:GetAbsOrigin(),
-            nil,
-            400,
-            DOTA_UNIT_TARGET_TEAM_BOTH,
-            DOTA_UNIT_TARGET_ALL,
-            DOTA_UNIT_TARGET_FLAG_INVULNERABLE,
-            FIND_ANY_ORDER,
-            false
-        )
-
-        for _, remnant in pairs(remnants) do
-            if remnant:GetUnitName() == "npc_dota_ember_spirit_remnant" then
-                self:log("有残焰在附近，可以远程捆")
-                aoeRadius = 2000
-            end
-        end
-    elseif abilityName == "elder_titan_echo_stomp" then
-        local spirits = FindUnitsInRadius(
-            caster:GetTeamNumber(),
-            self.target:GetAbsOrigin(),
-            nil,
-            500,
-            DOTA_UNIT_TARGET_TEAM_BOTH,
-            DOTA_UNIT_TARGET_ALL,
-            DOTA_UNIT_TARGET_FLAG_MAGIC_IMMUNE_ENEMIES + 
-            DOTA_UNIT_TARGET_FLAG_INVULNERABLE + 
-            DOTA_UNIT_TARGET_FLAG_OUT_OF_WORLD +
-            DOTA_UNIT_TARGET_FLAG_NOT_ILLUSIONS,
-            FIND_ANY_ORDER,
-            false
-        )
-    
-        for _, unit in pairs(spirits) do
-            if unit:GetUnitName() == "npc_dota_elder_titan_ancestral_spirit" then
-                self:log("先祖之灵在敌人500范围内，可以远程踩")
-                aoeRadius = 2000
-            end
-        end
-
-    -- 特殊处理 magnataur_reverse_polarity
-    elseif abilityName == "magnataur_reverse_polarity" then
-        local caster = ability:GetCaster()
-        if caster and caster:HasAbility("special_bonus_facet_magnataur_reverse_reverse_polarity") then
-            local talent = caster:FindAbilityByName("special_bonus_facet_magnataur_reverse_reverse_polarity")
-            if talent and talent:GetLevel() > 0 then
-                aoeRadius =  700
-            end
-        end
-        aoeRadius = 430
-
-
-    elseif abilityName == "earthshaker_fissure" then
-        if self:containsStrategy(self.hero_strategy, "沟壑连招") then
-            return 0
-        end
-
-
-    elseif abilityName == "earthshaker_echo_slam" then
-        if not self:containsStrategy(self.hero_strategy, "远程余震") then
-
-            local totemAbility = self.entity:FindAbilityByName("earthshaker_enchant_totem")
-            if totemAbility then
-                print("用图腾的范围代替")
-                aoeRadius = self:GetSkillAoeRadius(totemAbility)
-            end
-        else
-            aoeRadius = 500
-        end
-    end
 
     if specialValueKeys[abilityName] then
         local kv = ability:GetAbilityKeyValues()
@@ -395,12 +276,12 @@ function CommonAI:GetSkillAoeRadius(ability)
                 -- 处理有两个半径值的情况
                 local value1 = tonumber(kv.AbilityValues[specialValueKey[1]] or 0)
                 local value2 = tonumber(kv.AbilityValues[specialValueKey[2]] or 0)
-                return math.max(value1 or 0, value2 or 0)
+                aoeRadius = math.max(value1 or 0, value2 or 0)
             else
                 -- 处理单个半径值的情况
                 local specialValue = kv.AbilityValues[specialValueKey]
                 if type(specialValue) == "table" and specialValue.value then
-                    return tonumber(specialValue.value) or 0
+                    aoeRadius = tonumber(specialValue.value) or 0
                 elseif type(specialValue) == "string" then
                     -- 处理多等级技能
                     local radii = {}
@@ -408,9 +289,9 @@ function CommonAI:GetSkillAoeRadius(ability)
                         table.insert(radii, tonumber(value))
                     end
                     local currentLevel = ability:GetLevel()
-                    return radii[currentLevel] or radii[#radii] or 0
+                    aoeRadius = radii[currentLevel] or radii[#radii] or 0
                 else
-                    return tonumber(specialValue) or 0
+                    aoeRadius = tonumber(specialValue) or 0
                 end
             end
         end
@@ -586,6 +467,184 @@ function CommonAI:GetSkillAoeRadius(ability)
         else
             print("[Debug] 未启用远程余震策略")
         end
+        -- 特殊处理 templar_assassin_meld
+    elseif abilityName == "templar_assassin_meld" then
+        if caster then
+            local attackRange = caster:Script_GetAttackRange()
+            aoeRadius = attackRange
+        end
+    elseif abilityName == "ember_spirit_searing_chains" and self.entity:GetHeroFacetID() == 2 then
+        -- 查找所有属于自己的残焰
+        local hasEnemyNearRemnant = false
+        local remnantFound = false
+        
+        self:log("开始查找灰烬残焰...")
+        
+        -- 使用FindAllByName直接获取所有残焰单位
+        local remnants = Entities:FindAllByClassname("npc_dota_base_additive")
+        self:log(string.format("找到 %d 个灰烬残焰", #remnants))
+        
+        for _, remnant in pairs(remnants) do
+            if remnant:GetRealOwner() == self.entity then
+                -- 检查残焰的modifier状态
+                local unitModifiers = remnant:FindModifierByName("modifier_ember_spirit_fire_remnant_thinker")
+                if unitModifiers then
+                    local skipRemnant = false
+                    local modifierName = unitModifiers:GetName()
+                    local remainingTime = unitModifiers:GetRemainingTime()
+                    local duration = unitModifiers:GetDuration()
+                    -- 检查是否为火焰残留的modifier且持续时间等于最大时间
+                    if modifierName == "modifier_ember_spirit_fire_remnant_thinker" and math.abs(remainingTime - duration) < 0.1 then
+                        skipRemnant = true
+                        goto continue_loop
+                    end
+                end
+                
+                remnantFound = true
+                self:log(string.format("找到属于自己的残焰，位置: %s", tostring(remnant:GetAbsOrigin())))
+                
+                -- 检查残焰周围400码内是否有敌方单位
+                local enemiesNearRemnant = FindUnitsInRadius(
+                    self.entity:GetTeamNumber(),
+                    remnant:GetAbsOrigin(),
+                    nil,
+                    400,
+                    DOTA_UNIT_TARGET_TEAM_ENEMY,
+                    DOTA_UNIT_TARGET_HERO + DOTA_UNIT_TARGET_BASIC,
+                    DOTA_UNIT_TARGET_FLAG_NO_INVIS,
+                    FIND_ANY_ORDER,
+                    false
+                )
+                
+                if #enemiesNearRemnant > 0 then
+                    self:log(string.format("残焰周围400码范围内有 %d 个敌方单位", #enemiesNearRemnant))
+                    hasEnemyNearRemnant = true
+                    break
+                else
+                    self:log("残焰周围400码范围内没有敌方单位")
+                end
+            end
+            ::continue_loop::
+        end
+        
+        if remnantFound then
+            if hasEnemyNearRemnant then
+                self:log("至少有一个残焰周围有敌人，设置灼热锁链AOE为9999")
+                aoeRadius = 9999
+            else
+                self:log("所有残焰周围都没有敌人，使用默认AOE值")
+            end
+        else
+            self:log("没有找到属于自己的残焰，使用默认AOE值")
+        end
+    elseif abilityName == "sniper_take_aim" then
+        if caster then
+            local attackRange = caster:Script_GetAttackRange() + 255
+            aoeRadius = attackRange
+        end
+    elseif abilityName == "windrunner_windrun" then
+        if caster then
+            local attackRange = caster:Script_GetAttackRange()
+            aoeRadius = attackRange
+        end
+    elseif abilityName == "marci_unleash" and self:containsStrategy(self.hero_strategy, "出门开大") then
+        if caster then
+            local attackRange = caster:Script_GetAttackRange()
+            aoeRadius = attackRange
+        end
+    elseif abilityName == "nevermore_requiem" and self:containsStrategy(self.hero_strategy, "全图摇大") then
+        aoeRadius = 9999
+    elseif abilityName == "enchantress_bunny_hop" then
+        if caster then
+            local attackRange = caster:Script_GetAttackRange()
+            aoeRadius = attackRange
+        end
+    elseif abilityName == "muerta_pierce_the_veil" then
+        if self:containsStrategy(self.hero_strategy, "出门开大") then
+            aoeRadius = 0
+        else
+            if caster then
+                local attackRange = caster:Script_GetAttackRange() + 300
+                aoeRadius = attackRange
+            end
+        end
+
+    elseif abilityName == "slardar_slithereen_crush" then
+        if self:containsStrategy(self.hero_strategy, "踩水洼") then
+            if not caster:HasModifier("modifier_slardar_seaborn_sentinel_river") then
+                aoeRadius = 1000
+            end
+        end
+    elseif abilityName == "tidehunter_ravage" then
+
+        aoeRadius = aoeRadius - 100
+    elseif abilityName == "rattletrap_power_cogs" then
+        if self.entity:HasModifier("modifier_rattletrap_jetpack") then
+            self.specificRadius.rattletrap_power_cogs = 1500
+        else
+            self.specificRadius.rattletrap_power_cogs = nil
+        end
+
+        if self:containsStrategy(self.hero_strategy, "用框弹人") then
+            local facetID = self.entity:GetHeroFacetID()
+            if facetID == 1 then
+                self.specificRadius.rattletrap_power_cogs = 400
+            end
+        end
+
+    elseif abilityName == "elder_titan_echo_stomp" then
+        local spirits = FindUnitsInRadius(
+            caster:GetTeamNumber(),
+            self.target:GetAbsOrigin(),
+            nil,
+            500,
+            DOTA_UNIT_TARGET_TEAM_BOTH,
+            DOTA_UNIT_TARGET_ALL,
+            DOTA_UNIT_TARGET_FLAG_MAGIC_IMMUNE_ENEMIES + 
+            DOTA_UNIT_TARGET_FLAG_INVULNERABLE + 
+            DOTA_UNIT_TARGET_FLAG_OUT_OF_WORLD +
+            DOTA_UNIT_TARGET_FLAG_NOT_ILLUSIONS,
+            FIND_ANY_ORDER,
+            false
+        )
+    
+        for _, unit in pairs(spirits) do
+            if unit:GetUnitName() == "npc_dota_elder_titan_ancestral_spirit" then
+                self:log("先祖之灵在敌人500范围内，可以远程踩")
+                aoeRadius = 2000
+            end
+        end
+
+    -- 特殊处理 magnataur_reverse_polarity
+    elseif abilityName == "magnataur_reverse_polarity" then
+        local caster = ability:GetCaster()
+        if caster and caster:HasAbility("special_bonus_facet_magnataur_reverse_reverse_polarity") then
+            local talent = caster:FindAbilityByName("special_bonus_facet_magnataur_reverse_reverse_polarity")
+            if talent and talent:GetLevel() > 0 then
+                aoeRadius =  700
+            end
+        end
+        aoeRadius = 430
+
+
+    elseif abilityName == "earthshaker_fissure" then
+        if self:containsStrategy(self.hero_strategy, "沟壑连招") then
+            return 0
+        end
+
+
+    elseif abilityName == "earthshaker_echo_slam" then
+        if not self:containsStrategy(self.hero_strategy, "远程余震") then
+
+            local totemAbility = self.entity:FindAbilityByName("earthshaker_enchant_totem")
+            if totemAbility then
+                print("用图腾的范围代替")
+                aoeRadius = self:GetSkillAoeRadius(totemAbility)
+            end
+        else
+            aoeRadius = 500
+        end
     end
+
     return aoeRadius
 end

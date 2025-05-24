@@ -1,4 +1,3 @@
-
 -- 在文件顶部或适当的位置定义这个变量
 local DEBUG_PRINT = true
 
@@ -82,6 +81,30 @@ function Main:OnNPCSpawned(event)
             "npc_dota_lone_druid_bear"
         }
         if self:isExcludedUnit(spawnedUnit) then
+            DebugPrint("单位坐标：" .. tostring(spawnedUnit:GetAbsOrigin()))
+            
+            -- 打印thinker的基本信息
+            DebugPrint("===== Thinker基本信息 =====")
+            
+            -- 尝试获取所有者
+            local owner = spawnedUnit:GetOwner()
+            if owner and not owner:IsNull() then
+                DebugPrint("所有者: " .. (owner:GetName() or "未知") .. " / " .. (owner:GetUnitName() or "未知"))
+            else
+                DebugPrint("所有者: 无")
+            end
+            
+            -- 尝试获取classname
+            local classname = spawnedUnit:GetClassname()
+            DebugPrint("实体类名: " .. (classname or "未知"))
+            
+            -- 尝试获取实体名称
+            DebugPrint("实体名称: " .. (spawnedUnit:GetName() or "未知"))
+            
+            -- 尝试获取实体索引
+            DebugPrint("实体索引: " .. spawnedUnit:GetEntityIndex())
+            
+            DebugPrint("============================")
             DebugPrint("函数结束：单位在排除列表中")
             return
         end

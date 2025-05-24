@@ -4,30 +4,11 @@ function Main:PrintEverythingAboutUnit(event)
     local unit = EntIndexToHScript(unitEntIndex)
     local PREFIX = "【打印单位信息】"
 
-    -- 创建完美幻象
+    -- 查找所有的npc_dota_thinker单位
+    local enemyVariant = Convars:GetInt("dota_hero_demo_default_enemy_variant")
+    print("敌对单位变体：" .. enemyVariant)
 
-
-    -- local prop = Entities:CreateByClassname("prop_dynamic")
-    -- prop:SetModel("maps/ti10_assets/column/column_ti10_01.vmdl")
-    -- prop:SetRenderMode(1) -- 启用透明度渲染
-    -- prop:SetRenderColor(255, 255, 255) -- Alpha=0（完全透明）
-
-
-    -- local nearbyUnits = Entities:FindAllInSphere(unit:GetAbsOrigin(), 1000)
-    -- print(PREFIX .. string.format("在半径1000范围内找到了%s个单位", #nearbyUnits))
-    -- for _, nearbyUnit in pairs(nearbyUnits) do
-    --     print(PREFIX .. string.format("找到单位: %s", nearbyUnit:GetUnitName()))
-    -- end
-    unit:AddNewModifier(unit, nil, "modifier_walrus_punch_stun", {duration = 2})
-
-    if unit:IsHero() then
-        
-        -- Main:CreateIllusionAndCast(unit, "crystal_maiden_freezing_field", "target", unit)
-    else
-        print(PREFIX .. string.format("【单位】%s 不是英雄", unit:GetUnitName()))
-    end
-
-    --打印该单位是不是守卫
+    
     if unit:IsBarracks() then
         print(PREFIX .. string.format("【单位】%s 是守卫", unit:GetUnitName()))
     else
@@ -241,11 +222,32 @@ function Main:PrintEverythingAboutUnit(event)
         local unitName = unit:GetUnitName()
         local modifiers = {}
         local unitModifiers = unit:FindAllModifiers()
+        
+        -- 在后端打印modifier详细信息
+        print(PREFIX .. string.format("【单位Modifier】%s 的所有modifier：", unitName))
         for _, modifier in pairs(unitModifiers) do
             local modifierName = modifier:GetName()
             local remainingTime = modifier:GetRemainingTime()
             local duration = modifier:GetDuration()
             local stackCount = modifier:GetStackCount()
+            
+            -- 获取modifier的创造者和所属技能
+            local caster = modifier:GetCaster()
+            local ability = modifier:GetAbility()
+            local casterInfo = caster and caster:GetUnitName() or "未知"
+            local abilityInfo = ability and ability:GetAbilityName() or "未知"
+            
+            -- 后端打印
+            print(PREFIX .. string.format("    - %s [持续时间: %.1f/%.1f] [层数: %d] [施法者: %s] [技能: %s]", 
+                modifierName, 
+                remainingTime, 
+                duration, 
+                stackCount,
+                casterInfo,
+                abilityInfo
+            ))
+            
+            -- 保持原来的逻辑，把modifier信息添加到数组中用于发送给前端
             table.insert(modifiers, {
                 name = modifierName,
                 remaining_time = remainingTime,
@@ -253,12 +255,14 @@ function Main:PrintEverythingAboutUnit(event)
                 stack_count = stackCount
             })
         end
+        
         local ownerPlayerID = unit:GetPlayerOwnerID()
         local teamNumber = unit:GetTeamNumber()
         
         local facetID = nil
         if unit.GetHeroFacetID then
             facetID = unit:GetHeroFacetID()
+            print(PREFIX .. string.format("【单位】%s 的facetID是 %d", unit:GetUnitName(), facetID))
         end
 
         -- Add new unit information

@@ -2,6 +2,7 @@
 	"Language" "SChinese"
 	"Tokens" {
 		"npc_dota_miniboss_custom" "自定义魔方"
+		"custom_roshan_nosound" "肉山"
 		"caipan" "裁判"
 		"luosi" "螺丝"
 		"sniper" "狙击手"
@@ -69,7 +70,8 @@
 		"DOTA_Tooltip_ability_item_bracer_custom_bonus_intellect"       "+$int"
 		"DOTA_Tooltip_ability_item_bracer_custom_bonus_health_regen"    "+$hp_regen"
 		"DOTA_Tooltip_ability_item_bracer_custom_bonus_health"          "+$health"
-
+		
+        "DOTA_Tooltip_Ability_special_bonus_cleave_100" "+100% 分裂"
 		
 
 		"DOTA_Tooltip_ability_item_giant_net"        "捕鱼网"

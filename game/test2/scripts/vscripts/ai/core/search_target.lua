@@ -68,7 +68,7 @@ function CommonAI:FindHeroTarget(entity)
             enemyCount = enemyCount + 1
         end
     end
-    
+
     return closestHero, enemyCount
 end
 
@@ -180,7 +180,47 @@ function CommonAI:FindPreferredTarget(entity, preferredUnitNames)
     return nil, enemyCount
 end
 
-
+function CommonAI:FindWeakAIUnitTarget(entity)
+    -- 首先寻找非幻象英雄单位
+    local units = FindUnitsInRadius(
+        entity:GetTeamNumber(),
+        entity:GetAbsOrigin(),
+        nil,
+        1500, -- 搜索范围
+        DOTA_UNIT_TARGET_TEAM_ENEMY,
+        DOTA_UNIT_TARGET_HERO,
+        DOTA_UNIT_TARGET_FLAG_NOT_ILLUSIONS,
+        FIND_CLOSEST,
+        false
+    )
+    
+    for _, unit in pairs(units) do
+        if self:CanAttackTarget(entity, unit) then
+            return unit
+        end
+    end
+    
+    -- 如果没找到非幻象英雄，则寻找其他可攻击单位
+    units = FindUnitsInRadius(
+        entity:GetTeamNumber(),
+        entity:GetAbsOrigin(),
+        nil,
+        1500,
+        DOTA_UNIT_TARGET_TEAM_ENEMY,
+        DOTA_UNIT_TARGET_ALL,
+        DOTA_UNIT_TARGET_FLAG_NONE,
+        FIND_CLOSEST,
+        false
+    )
+    
+    for _, unit in pairs(units) do
+        if self:CanAttackTarget(entity, unit) then
+            return unit
+        end
+    end
+    
+    return nil
+end
 
     
 function CommonAI:FindNearestVulnerableEnemy(entity)
@@ -223,11 +263,11 @@ end
 
 function CommonAI:FindNearestEnemyLastResort(entity)
     -- 记录函数调用
-    self:log("FindNearestEnemyLastResort被调用 - 最后的寻敌手段，实体: " .. (entity and entity:GetUnitName() or "nil"))
+    --self:log("FindNearestEnemyLastResort被调用 - 最后的寻敌手段，实体: " .. (entity and entity:GetUnitName() or "nil"))
     
     -- 检查实体是否有效
     if not entity then
-        self:log("错误：FindNearestEnemyLastResort中的实体为nil")
+        --self:log("错误：FindNearestEnemyLastResort中的实体为nil")
         return nil
     end
     
@@ -272,7 +312,7 @@ function CommonAI:FindNearestEnemyLastResort(entity)
     end
     
     if nearestHero then
-        self:log("最后手段找到最近的敌方英雄: " .. nearestHero:GetUnitName())
+        --self:log("最后手段找到最近的敌方英雄: " .. nearestHero:GetUnitName())
         return nearestHero
     end
     
@@ -304,10 +344,10 @@ function CommonAI:FindNearestEnemyLastResort(entity)
     end
     
     if nearestUnit then
-        self:log("最后手段找到最近的非英雄敌人: " .. nearestUnit:GetUnitName())
+        --self:log("最后手段找到最近的非英雄敌人: " .. nearestUnit:GetUnitName())
         return nearestUnit
     else
-        self:log("最后手段未找到任何敌人")
+        --self:log("最后手段未找到任何敌人")
         return nil
     end
 end
@@ -511,6 +551,13 @@ function CommonAI:FindBestAllyHeroTarget(entity, ability, requiredModifiers, min
     local validNonHeroes = {}
     local selfValid = false
     
+    -- 检查避免重复施法策略
+    local checkDuplicateCast = self:containsStrategy(self.global_strategy, "避免重复施法") and entity:GetHealthPercent() > 10
+    local abilityName = ability and ability:GetAbilityName() or ""
+    
+    -- 检查是否是电弧/磁场技能
+    local isArcMagneticField = (abilityName == "arc_warden_magnetic_field")
+    
     for _, ally in pairs(allies) do
         -- 检查是否为自身且不允许选择自身
         if ally:IsUnselectable() then
@@ -519,6 +566,44 @@ function CommonAI:FindBestAllyHeroTarget(entity, ability, requiredModifiers, min
         if not canBeSelf and ally == entity then
             goto continue
         end
+        
+        -- 检查该目标是否在短时间内已被相同技能选为目标
+        if checkDuplicateCast and Main.targetLockInfo then
+            local currentTime = GameRules:GetGameTime()
+            if Main.targetLockInfo.target == ally and 
+                Main.targetLockInfo.caster ~= entity and
+                Main.targetLockInfo.abilityName == abilityName and
+                currentTime - Main.targetLockInfo.timestamp < 3 then
+                self:log(string.format("单位 %s 在2秒内已被技能 %s 选为目标，跳过", ally:GetUnitName(), abilityName))
+                goto continue
+            end
+        end
+        
+        -- 电弧/磁场技能的特殊处理：检查友军攻击范围内是否有敌人
+        if isArcMagneticField and sortBy == "nearest_to_enemy" then
+            local attackRange = ally:Script_GetAttackRange()
+            if attackRange then
+                local enemiesInRange = FindUnitsInRadius(
+                    ally:GetTeamNumber(),
+                    ally:GetOrigin(),
+                    nil,
+                    attackRange,
+                    DOTA_UNIT_TARGET_TEAM_ENEMY,
+                    DOTA_UNIT_TARGET_HERO + DOTA_UNIT_TARGET_BASIC,
+                    DOTA_UNIT_TARGET_FLAG_NO_INVIS,
+                    FIND_ANY_ORDER,
+                    false
+                )
+                
+                if #enemiesInRange == 0 then
+                    self:log(string.format("单位 %s 攻击范围内没有敌人，不适合电弧/磁场技能", ally:GetUnitName()))
+                    goto continue
+                else
+                    self:log(string.format("单位 %s 攻击范围内有 %d 个敌人，适合电弧/磁场技能", ally:GetUnitName(), #enemiesInRange))
+                end
+            end
+        end
+        
         if #requiredModifiers > 0 then
             local needRefresh = false
             for _, modifier in ipairs(requiredModifiers) do
@@ -643,6 +728,19 @@ function CommonAI:FindBestAllyHeroTarget(entity, ability, requiredModifiers, min
     -- 如果有符合条件的英雄，优先返回英雄
     if #validHeroes > 0 then
         local target = validHeroes[1]
+        
+        -- 记录目标选择信息以避免重复施法
+        if checkDuplicateCast then
+            if not Main.targetLockInfo then Main.targetLockInfo = {} end
+            Main.targetLockInfo = {
+                target = target,
+                caster = entity,
+                abilityName = abilityName,
+                timestamp = GameRules:GetGameTime()
+            }
+            self:log(string.format("记录友军施法目标: %s，施法者: %s，技能: %s", target:GetUnitName(), entity:GetUnitName(), abilityName))
+        end
+        
         self:log(string.format("选择英雄目标: %s", target:GetUnitName()))
         return target
     end
@@ -650,6 +748,19 @@ function CommonAI:FindBestAllyHeroTarget(entity, ability, requiredModifiers, min
     -- 如果没有英雄且允许非英雄单位，返回非英雄单位
     if not forceHero and #validNonHeroes > 0 then
         local target = validNonHeroes[1]
+        
+        -- 记录非英雄单位目标选择信息以避免重复施法
+        if checkDuplicateCast then
+            if not Main.targetLockInfo then Main.targetLockInfo = {} end
+            Main.targetLockInfo = {
+                target = target,
+                caster = entity,
+                abilityName = abilityName,
+                timestamp = GameRules:GetGameTime()
+            }
+            self:log(string.format("记录友军施法目标(非英雄): %s，施法者: %s，技能: %s", target:GetUnitName(), entity:GetUnitName(), abilityName))
+        end
+        
         self:log(string.format("选择非英雄目标: %s", target:GetUnitName()))
         return target
     end
@@ -974,6 +1085,7 @@ function CommonAI:FindBestEnemyHeroTarget(entity, ability, requiredModifiers, mi
         end
         
         self:log(string.format("选择敌方英雄目标: %s", target:GetUnitName()))
+
         return target
     end
 

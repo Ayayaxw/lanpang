@@ -29,6 +29,7 @@ require("ai/skill/SkillHandlers/EnemyPoint_OutOfRange")
 
 require("ai/skill/SkillHandlers/AllyTarget_InRange")
 require("ai/skill/SkillHandlers/AllyTarget_OutOfRange")
+require("ai/skill/SkillHandlers/HandleAbility_function")
 
 require("ai/skill/SkillInfo/GetSkill_CastPoint")
 require("ai/skill/SkillInfo/GetSkill_CastRange")
@@ -106,23 +107,30 @@ function CommonAI:Think(entity)
     self.entity = entity  -- 设置当前实体
 
 
-    -- 检查实体是否存在
-    if not entity or entity:IsNull() then
+    if hero_duel.EndDuel then
+        self:log("[AI] 决斗结束，终止AI - 英雄: " .. entity:GetName())
+        return nil
+    elseif not entity:IsAlive() then
+        self:log("[AI] 英雄已死亡，等待复活 - 英雄: " .. entity:GetName())
+        return 0.5  -- 1秒后继续检查
+    elseif self:containsStrategy(self.global_strategy, "仅仅控制召唤物") and not self.entity:IsRealHero() then
+        self:log("仅仅控制召唤物")
+        return nil
+    elseif not entity or entity:IsNull() then
         self:log("[AI] 实体不存在，终止AI - Entity: " .. (entity and entity:GetName() or "nil"))
-        return nil  -- 彻底停止AI循环
+        return nil  -- 彻底停止AI循环        
+    elseif self:containsStrategy(self.global_strategy, "辅助模式") and entity:IsMoving() then
+        return self.nextThinkTime
+    end
+
+
+    if entity:IsMoving() then
+        self:log("英雄正在移动")
     end
 
     if entity:IsRealHero() then
         if entity:GetAbilityPoints() > 0 then
             Main:AutoUpgradeHeroAbilities(entity)
-        end
-    end
-
-
-    if self:containsStrategy(self.global_strategy, "仅仅控制召唤物") then
-        self:log("仅仅控制召唤物")
-        if self.entity:IsRealHero() then
-            return nil
         end
     end
 
@@ -142,31 +150,20 @@ function CommonAI:Think(entity)
         end
     end
 
-    if hero_duel.EndDuel then
-        self:log("[AI] 决斗结束，终止AI - 英雄: " .. entity:GetName())
-        return nil
-    end
 
-    -- 英雄死亡继续循环，但不执行后续AI逻辑
-    if not entity:IsAlive() then
-        self:log("[AI] 英雄已死亡，等待复活 - 英雄: " .. entity:GetName())
-        return 0.5  -- 1秒后继续检查
-    end
-
-    self.shouldturn = nil
     self:ProcessPendingSpellCast()
     self.target = nil
     self.attackTarget = nil
+    self.isSpecialChannelingHero = self:IsSpecialChannelingHero(entity)
 
     if self.currentState == AIStates.Channeling and 
-    self:IsSpecialChannelingHero(entity) then
+    self.isSpecialChannelingHero then
      if not entity:IsChanneling() then
          self:log("特殊英雄持续施法结束，设置为空闲状态")
          self:SetState(AIStates.Idle)
      end
     elseif self.currentState == AIStates.CastSpell or 
-            (self.currentState == AIStates.Channeling and 
-            not self:IsSpecialChannelingHero(entity)) then
+            (self.currentState == AIStates.Channeling and not self.isSpecialChannelingHero) then
         self:log("正在施法中，跳过本次 AI 思考过程")
         return self.nextThinkTime
     end
@@ -174,56 +171,57 @@ function CommonAI:Think(entity)
     self:log("开始寻找目标...")
     
     -- 初始化变量
-    local target, enemyHeroCount = self:FindHeroTarget(entity)
-    self.enemyHeroCount = enemyHeroCount
-    
-    -- 1. 获取最后手段目标(无敌单位)
-    self.lastResortTarget = self:FindNearestEnemyLastResort(entity)
-    if self.lastResortTarget then
-        self:log("找到无敌目标:", self.lastResortTarget:GetUnitName())
+    local target = nil
+
+    if self:containsStrategy(self.global_strategy, "谁近打谁") then
+        target = self:FindTarget(entity)
+    else
+        target = self:FindHeroTarget(entity)
     end
 
-    -- 2. 获取优先攻击目标
+
     local preferredTargets = {
         "npc_dota_unit_tombstone",
         "npc_dota_phoenix_sun", 
         "npc_dota_pugna_nether_ward",
         "npc_dota_juggernaut_healing_ward",
+        "npc_dota_unit_tidehunter_anchor",
     }
+    
+    -- 3. 检查是否优先打小僵尸
+    if self:containsStrategy(self.global_strategy, "优先打小僵尸") then
+        table.insert(preferredTargets, "npc_dota_unit_undying_zombie_torso")
+        table.insert(preferredTargets, "npc_dota_unit_undying_zombie")
+        table.insert(preferredTargets, "npc_dota_weaver_swarm")
+    end
+    
     self.attackTarget = self:FindPreferredTarget(entity, preferredTargets)
     if self.attackTarget then
         self:log("找到优先攻击目标:", self.attackTarget:GetUnitName())
     end
+  
 
-    -- 3. 检查是否优先打小僵尸
-    if self:containsStrategy(self.global_strategy, "优先打小僵尸") then
-        self.attackTarget = self:FindPreferredTarget(entity, {
-            "npc_dota_unit_undying_zombie_torso",
-            "npc_dota_unit_undying_zombie",
-            "npc_dota_weaver_swarm"
-        })
-    end
+
 
     -- 4. 主要目标查找逻辑
-    if not target or self:containsStrategy(self.global_strategy, "谁近打谁") then
+    if not target then 
+        self.lastResortTarget = self:FindNearestEnemyLastResort(entity)
 
         self:log("未找到英雄目标，寻找普通单位")
         target = self:FindTarget(entity)
-        
         if target then
             self:log("找到普通目标")
-        elseif self:containsStrategy(self.global_strategy, "攻击无敌单位") then
+        elseif self:containsStrategy(self.global_strategy, "攻击无敌单位") and self.lastResortTarget then
             self:log("转为攻击无敌单位")
             target = self.lastResortTarget
         end
-    end
 
-    -- 5. 特殊情况处理：卡尔和SD
-    if not target and (entity:GetUnitName() == "npc_dota_hero_invoker" or 
-                      entity:GetUnitName() == "npc_dota_hero_shadow_demon") then
-        if self.lastResortTarget and
-           (self.lastResortTarget:HasModifier("modifier_invoker_tornado") or 
-            self.lastResortTarget:HasModifier("modifier_shadow_demon_disruption")) then
+
+        -- 5. 特殊情况处理：卡尔和SD
+        if self.lastResortTarget 
+            and (entity:GetUnitName() == "npc_dota_hero_invoker" and self.lastResortTarget:HasModifier("modifier_invoker_tornado"))
+            or (entity:GetUnitName() == "npc_dota_hero_shadow_demon" and self.lastResortTarget:HasModifier("modifier_shadow_demon_disruption")) 
+        then
             target = self.lastResortTarget
             self:log("卡尔/SD特殊模式")
         end
@@ -234,68 +232,32 @@ function CommonAI:Think(entity)
         self.target = target
 
     elseif not self.attackTarget then
+        if entity:IsAttacking() then
+            entity:Stop()
+        end
+        if not entity:IsChanneling() then
+            entity:Stop()
+        end
         return self.nextThinkTime
     end
 
-    
     self.Ally = self:FindNearestNoSelfAlly(entity)
 
-    -- -- 处理特定英雄的特殊逻辑 这里是火猫有魂的情况下
-    -- self:AdjustAbilityCastRangeForSpecialHeroes(entity, target)
-
-    if self:IsWeakIllusion(entity) then
-        if self:containsStrategy(self.global_strategy, "不要优先拆墓碑、棒子") then
-        
-        elseif self:containsStrategy(self.global_strategy, "优先打小僵尸") then
+    if self:IsWeakAIUnit(entity) then
+        -- 根据策略决定使用哪个目标
+        if self:containsStrategy(self.global_strategy, "优先打小僵尸") and self.attackTarget then
             target = self.attackTarget
-        else 
-            -- Find nearest attackable target
-            local units = FindUnitsInRadius(
-                entity:GetTeamNumber(),
-                entity:GetAbsOrigin(),
-                nil,
-                1500, -- Search radius
-                DOTA_UNIT_TARGET_TEAM_ENEMY,
-                DOTA_UNIT_TARGET_HERO,
-                DOTA_UNIT_TARGET_FLAG_NOT_ILLUSIONS,
-                FIND_CLOSEST,
-                false
-            )
-            
-            -- 如果找到非幻象英雄单位
-            for _, unit in pairs(units) do
-                if self:CanAttackTarget(entity, unit) then
-                    target = unit
-                    break
-                end
-            end
-
-            -- 如果没找到非幻象英雄单位，寻找其他单位
-            if not target then
-                units = FindUnitsInRadius(
-                    entity:GetTeamNumber(),
-                    entity:GetAbsOrigin(),
-                    nil,
-                    1500, -- Search radius
-                    DOTA_UNIT_TARGET_TEAM_ENEMY,
-                    DOTA_UNIT_TARGET_ALL,
-                    DOTA_UNIT_TARGET_FLAG_NONE,
-                    FIND_CLOSEST,
-                    false
-                )
-                
-                for _, unit in pairs(units) do
-                    if self:CanAttackTarget(entity, unit) then
-                        target = unit
-                        break
-                    end
-                end
-            end
         end
-    
-        if target then 
+        
+        -- 如果没有合适的目标，再进行更具体的搜索
+        if not target then
+            target = self:FindWeakAIUnitTarget(entity)
+        end
+        
+        -- 处理目标动作
+        if target then
             if target:IsInvulnerable() then
-                -- 如果目标无敌,移动到目标位置
+                -- 目标无敌，移动到目标位置
                 local order = {
                     UnitIndex = self.entity:entindex(),
                     OrderType = DOTA_UNIT_ORDER_MOVE_TO_POSITION,
@@ -305,7 +267,7 @@ function CommonAI:Think(entity)
                 ExecuteOrderFromTable(order)
                 self:log("目标无敌,移动到目标位置")
             elseif not self:IsUnableToAttack(entity, target) then
-                -- 目标不是无敌且可以攻击,执行攻击命令
+                -- 可以攻击，执行攻击命令
                 local order = {
                     UnitIndex = self.entity:entindex(),
                     OrderType = DOTA_UNIT_ORDER_ATTACK_TARGET,
@@ -320,16 +282,11 @@ function CommonAI:Think(entity)
         end
         return 1
     end
+    
 
-
-    if self:containsStrategy(self.global_strategy, "辅助模式") then
-        if entity and entity:IsMoving() then
-            return self.nextThinkTime
-        end
-    end
 
     local skill, castRange, aoeRadius
-    if target then
+    if target and not self:containsStrategy(self.global_strategy, "禁用所有技能") then
         skill, castRange, aoeRadius = self:FindBestAbilityToUse(entity,target)
     end
 
@@ -339,7 +296,7 @@ function CommonAI:Think(entity)
         local abilityInfo = self:GetAbilityInfo(skill, castRange, aoeRadius)
 
         -- 处理施法后移动的逻辑
-        if target and self.currentState == AIStates.PostCast then
+        if target and self.currentState == AIStates.PostCast and not self:containsStrategy(self.global_strategy, "原地不动") then
             local returnValue = self:HandlePostCastMovement(entity, target, abilityInfo)
             if returnValue ~= nil then
                 return returnValue
@@ -355,10 +312,8 @@ function CommonAI:Think(entity)
                 target = result
             end
 
-            
-
             local targetInfo = self:GetTargetInfo(target, entity)
-            
+                       
             self:log("敌人信息获取完毕")
 
             -- 检查是否能施放技能
@@ -572,6 +527,7 @@ end
 
 
 function CommonAI:HandlePostCastMovement(entity, target, abilityInfo)
+    self:log("施法后移动")
     if not entity:IsFeared() and not entity:IsTaunted() then
         if entity:GetUnitName() == "npc_dota_hero_templar_assassin" or entity:GetUnitName() == "npc_dota_hero_life_stealer" or entity:GetUnitName() == "npc_dota_hero_riki" then
 
@@ -914,384 +870,13 @@ function CommonAI:HandleMuertaDeadShot(entity, ability)
     return self.target
 end
 
-
-function CommonAI:ClampPositionToRect(position, left, right, top, bottom)
-    if position.x < left then
-        position.x = left
-    elseif position.x > right then
-        position.x = right
-    end
-    if position.y > top then
-        position.y = top
-    elseif position.y < bottom then
-        position.y = bottom
-    end
-    return position
-end
-
-function CommonAI:HandleUnitTargetAbility(entity, abilityInfo, target, targetInfo)
-
-    if self:isSelfCastAbility(abilityInfo.abilityName) then --只对自己释放的技能
-        if self:isSelfCastAbilityWithRange(abilityInfo.abilityName) then
-            -- 对自己释放但需要考虑范围的技能
-            if abilityInfo.aoeRadius > 0 then
-                local totalRange = self:GetSkillRangeThreshold(abilityInfo.skill, entity, abilityInfo.aoeRadius)
-
-
-                if self:IsInRange(target, totalRange) then
-                    entity:CastAbilityOnTarget(entity, abilityInfo.skill, 0)
-                    self:OnSpellCast(entity, abilityInfo.skill, abilityInfo.castPoint, abilityInfo.channelTime, entity)
-                else
-                    -- 敌人不在施法范围内
-                    if self.currentState ~= AIStates.Channeling then
-                        -- 移动到施法距离内
-                        self:MoveToRange(targetInfo.targetPos, totalRange)
-                        self:SetState(AIStates.Seek)
-                        self:log(string.format("不在施法范围内，移动到施法范围，进入Seek状态，目标距离: %.2f，施法距离: %.2f", targetInfo.distance, abilityInfo.castRange))
-                    end
-                end
-            end
-        else
-            self:log("对自己施放的技能，无需考虑范围")
-            if abilityInfo.abilityName == "lich_frost_shield" then
-                local targetToCast = FindSuitableTarget(entity, abilityInfo, "modifier_lich_frost_shield", true, "friendly")
-                if targetToCast then
-                    if log then
-                        log(string.format("巫妖技能检查: 选择目标 %s", targetToCast:GetUnitName()))
-                    end
-                    entity:CastAbilityOnTarget(targetToCast, abilityInfo.skill, 0)
-                    self:OnSpellCast(entity, abilityInfo.skill, abilityInfo.castPoint, abilityInfo.channelTime, entity)
-                else
-                    if log then
-                        log("巫妖技能检查: 未找到合适的目标")
-                    end
-                end
-            else
-                local totalRange = self:GetSkillRangeThreshold(abilityInfo.skill, entity, 0)
-                if totalRange == 0 then
-                    entity:CastAbilityOnTarget(entity, abilityInfo.skill, 0)
-                    self:OnSpellCast(entity, abilityInfo.skill, abilityInfo.castPoint, abilityInfo.channelTime, entity)
-                else
-                    if self:IsInRange(self.target, totalRange) then
-                        entity:CastAbilityOnTarget(entity, abilityInfo.skill, 0)
-                        self:OnSpellCast(entity, abilityInfo.skill, abilityInfo.castPoint, abilityInfo.channelTime, entity)
-                    else
-                        self:MoveToRange(targetInfo.targetPos, totalRange)
-                        self:SetState(AIStates.Seek)
-                        self:log(string.format("不在施法范围内，移动到施法范围，进入Seek状态，目标距离: %.2f，施法距离: %.2f", targetInfo.distance, abilityInfo.castRange))
-                    end
-                end
-            end
-        end
-
-    elseif abilityInfo.targetTeam ~= DOTA_UNIT_TARGET_TEAM_FRIENDLY then
-        if abilityInfo.castRange > 0 then
-            local currentTarget = self.treetarget or target
-            local totalRange = self:GetSkillRangeThreshold(abilityInfo.skill, entity, abilityInfo.castRange)
-
-            if self:IsInRange(currentTarget, totalRange) then
-                -- 敌人在施法范围内
-                self:HandleEnemyTargetAction(entity, currentTarget, abilityInfo, targetInfo)
-                self:OnSpellCast(entity, abilityInfo.skill, abilityInfo.castPoint, abilityInfo.channelTime, currentTarget)
-            else
-                -- 敌人不在施法范围内
-                if self:HandleEnemyTargetOutofRangeAction(entity, currentTarget, abilityInfo, targetInfo) then
-                    self:OnSpellCast(entity, abilityInfo.skill, abilityInfo.castPoint, abilityInfo.channelTime, currentTarget)
-                elseif self.currentState ~= AIStates.Channeling then
-                    -- 移动到施法距离内
-                    local targetPosition = self.treetarget and self.treetarget:GetAbsOrigin() or targetInfo.targetPos
-                    self:MoveToRange(targetPosition, totalRange)
-                    self:SetState(AIStates.Seek)
-                    self:log(string.format("不在施法范围内，移动到施法范围，进入Seek状态，目标距离: %.2f，施法距离: %.2f", targetInfo.distance, abilityInfo.castRange))
-                end
-            end
-        end
-    else
-        self:log("对队友释放的技能")
-        if abilityInfo.abilityName == "clinkz_death_pact" then
-            -- 使用FindNearestNoSelfAllyLastResort搜索ally
-            local lastResortAlly = self:FindNearestNoSelfAllyLastResort(entity)
-            if lastResortAlly then
-                self:log("找到目标了")
-                entity:CastAbilityOnTarget(lastResortAlly, abilityInfo.skill, 0)
-            else
-                -- 如果没有找到ally，可以在这里添加日志或其他处理
-                self:log("没有找到可用的目标来使用死亡契约")
-            end
-        end
-        self:HandleAllyTargetAbility(entity, abilityInfo,targetInfo)
-    end
-end
-
-function CommonAI:HandlePointTargetAbility(entity, abilityInfo, target, targetInfo)
-    if abilityInfo.targetTeam ~= DOTA_UNIT_TARGET_TEAM_FRIENDLY then
-        local totalRange = self:GetSkillRangeThreshold(abilityInfo.skill, entity, abilityInfo.castRange)
-        if self:IsInRange(target, totalRange) then
-            -- 敌人在施法范围内
-            self:HandleEnemyPoint_InCastRange(entity, target, abilityInfo, targetInfo)
-            self:OnSpellCast(entity, abilityInfo.skill, abilityInfo.castPoint, abilityInfo.channelTime, target)
-        elseif self:IsInRange(target, self:GetSkillRangeThreshold(abilityInfo.skill, entity, abilityInfo.castRange + abilityInfo.aoeRadius)) then
-            -- 敌人在作用范围内
-            self:HandleEnemyPoint_InAoeRange(entity, target, abilityInfo, targetInfo)
-            self:OnSpellCast(entity, abilityInfo.skill, abilityInfo.castPoint, abilityInfo.channelTime, target)
-        else
-            -- 敌人不在范围内
-            if self:HandleEnemyPoint_OutofRangeAction(entity, target, abilityInfo, targetInfo) then
-                self:OnSpellCast(entity, abilityInfo.skill, abilityInfo.castPoint, abilityInfo.channelTime, target)
-            else
-                -- 移动到施法距离内
-                local totalRange = self:GetSkillRangeThreshold(abilityInfo.skill, entity, abilityInfo.castRange + abilityInfo.aoeRadius)
-                self:MoveToRange(targetInfo.targetPos, totalRange)
-                self:SetState(AIStates.Seek)
-                self:log(string.format("不在施法范围内，移动到施法范围，进入Seek状态，目标距离: %.2f，施法距离+作用范围: %.2f", targetInfo.distance, totalRange))
-            end
-        end
-    elseif self:isSelfCastAbility(abilityInfo.abilityName) then
-        -- 对自己释放技能
-
-        self:log("对自己施放技能")
-        entity:CastAbilityOnPosition(entity:GetAbsOrigin(), abilityInfo.skill, 0)
-
-        self:OnSpellCast(entity, abilityInfo.skill, abilityInfo.castPoint, abilityInfo.channelTime, target)
-    else
-        self:HandleAllyPointAbility(entity, abilityInfo, targetInfo)
-    end
-end
-
-function CommonAI:HandleNoTargetAbility(entity, abilityInfo, target, targetInfo)
-    self:log("无目标技能")
-    -- 修改：如果radius不等于零，并且小于150，就令它等于150
-    if abilityInfo.aoeRadius ~= 0 and abilityInfo.aoeRadius < 150 then
-        abilityInfo.aoeRadius = 150
-    end
-    local totalRange = self:GetSkillRangeThreshold(abilityInfo.skill, entity, abilityInfo.castRange + abilityInfo.aoeRadius)
-    if  totalRange == 0 then
-        self:log(string.format("技能: %s 没有作用范围，直接释放", abilityInfo.abilityName))
-        entity:CastAbilityNoTarget(abilityInfo.skill, 0)
-        self:OnSpellCast(entity, abilityInfo.skill, abilityInfo.castPoint, abilityInfo.channelTime, target)
-    else
-
-        if self:IsInRange(target, totalRange) then
-
-            if abilityInfo.abilityName == "zuus_heavenly_jump" and self.needToDodge == true then
-                local heroPosition = self.entity:GetAbsOrigin()
-                local dirToEnemy = (target:GetAbsOrigin() - heroPosition):Normalized()
-                local heroForward = self.entity:GetForwardVector()
-                local angle = math.deg(math.acos(heroForward:Dot(dirToEnemy)))
-            
-                if angle < 30 then
-                    -- 如果角度小于30度，从英雄和敌人的连线往北偏转30度移动200码
-                    local radians = math.rad(30)
-                    local cos = math.cos(radians)
-                    local sin = math.sin(radians)
-                    
-                    -- 计算旋转后的向量（逆时针旋转，所以用负的sin）
-                    local rotatedX = dirToEnemy.x * cos + dirToEnemy.y * sin
-                    local rotatedY = -dirToEnemy.x * sin + dirToEnemy.y * cos
-                    local moveDirection = Vector(rotatedX, rotatedY, dirToEnemy.z):Normalized()
-                    
-                    local movePosition = heroPosition + moveDirection * 200
-                    self.entity:MoveToPosition(movePosition)
-                    self:log("Zeus正在从敌人方向往北偏转30°移动200码")
-                else
-                    -- 如果角度大于等于30度，直接释放技能
-                    self:log("Zeus直接释放Heavenly Jump")
-                    entity:CastAbilityNoTarget(abilityInfo.skill, 0)
-                    self:OnSpellCast(entity, abilityInfo.skill, abilityInfo.castPoint, abilityInfo.channelTime, target)
-                end
-            elseif abilityInfo.abilityName == "invoker_ice_wall" and not self:containsStrategy(self.hero_strategy, "正面冰墙") then
-                local heroPosition = self.entity:GetAbsOrigin()
-                local targetPosition = target:GetAbsOrigin()
-                local distanceToTarget = (targetPosition - heroPosition):Length2D()
-                local heroForward = self.entity:GetForwardVector()
-                
-                -- 圆的半径
-                local circleRadius = 300
-                
-                -- 计算切点
-                -- cos(theta) = r/d，其中theta是圆心角的一半
-                local cosTheta = circleRadius / distanceToTarget
-                local theta = math.acos(cosTheta)
-                
-                -- 计算从圆心到敌人的基准角度
-                local baseAngle = math.atan2(targetPosition.y - heroPosition.y, targetPosition.x - heroPosition.x)
-                
-                -- 计算右侧切点的角度（基准角度减去theta）
-                local tangentAngle = baseAngle - theta
-                
-                -- 计算切点位置
-                local tangentPoint = Vector(
-                    heroPosition.x + circleRadius * math.cos(tangentAngle),
-                    heroPosition.y + circleRadius * math.sin(tangentAngle),
-                    heroPosition.z
-                )
-                
-                -- 计算应该面向的方向（从英雄到切点的方向）
-                local dirToTangent = (tangentPoint - heroPosition):Normalized()
-                local currentAngle = math.deg(math.acos(heroForward:Dot(dirToTangent)))
-                
-                if currentAngle > 5 then
-                    -- 需要调整方向，向切点方向移动
-                    local movePosition = heroPosition + dirToTangent * 50
-                    self:log("Invoker正在调整到切点方向")
-                    self.entity:MoveToPosition(movePosition)
-                    return
-                end
-                
-                -- 角度合适，直接释放技能
-                self:log("Invoker释放Ice Wall")
-                entity:CastAbilityNoTarget(abilityInfo.skill, 0)
-                self:OnSpellCast(entity, abilityInfo.skill, abilityInfo.castPoint, abilityInfo.channelTime, target)
-
-            elseif abilityInfo.abilityName == "rattletrap_power_cogs" then
-                local heroPosition = self.entity:GetAbsOrigin()
-                local dirToEnemy = (target:GetAbsOrigin() - heroPosition):Normalized()
-                local heroForward = self.entity:GetForwardVector()
-                local angle = math.deg(math.acos(heroForward:Dot(dirToEnemy)))
-                local distanceToEnemy = (target:GetAbsOrigin() - heroPosition):Length2D()
-                local hasCogImmune = self.entity:HasModifier("modifier_rattletrap_cog_immune")
-                
-                if angle < 45 then
-                    -- 如果角度小于45度，说明基本面对着敌人，直接放技能
-                    self:log("发条面对敌人，直接释放齿轮")
-                    entity:CastAbilityNoTarget(abilityInfo.skill, 0)
-                    self:OnSpellCast(entity, abilityInfo.skill, abilityInfo.castPoint, abilityInfo.channelTime, target)
-                else
-                    -- 如果没有齿轮免疫，直接放技能
-                    if not hasCogImmune then
-                        self:log("发条没有齿轮免疫，直接释放齿轮")
-                        entity:CastAbilityNoTarget(abilityInfo.skill, 0)
-                        self:OnSpellCast(entity, abilityInfo.skill, abilityInfo.castPoint, abilityInfo.channelTime, target)
-                    -- 如果有齿轮免疫且距离大于400，需要转身面对敌人
-                    elseif distanceToEnemy > 500 then
-                        self:log("发条需要转身面对敌人")
-                        local movePosition = target:GetAbsOrigin()
-                        local order = {
-                            UnitIndex = self.entity:entindex(),
-                            OrderType = DOTA_UNIT_ORDER_MOVE_TO_POSITION,
-                            TargetIndex = self.target and self.target:entindex(),
-                            Position = movePosition
-                        }
-                        ExecuteOrderFromTable(order)
-                    else
-                        -- 距离小于400且有齿轮免疫，直接放技能
-                        self:log("发条直接释放齿轮")
-                        entity:CastAbilityNoTarget(abilityInfo.skill, 0)
-                        self:OnSpellCast(entity, abilityInfo.skill, abilityInfo.castPoint, abilityInfo.channelTime, target)
-                    end
-                end
-            elseif abilityInfo.abilityName == "slark_pounce" then
-                local heroPosition = self.entity:GetAbsOrigin()
-                local dirToEnemy = (target:GetAbsOrigin() - heroPosition):Normalized()
-                local heroForward = self.entity:GetForwardVector()
-                local angle = math.deg(math.acos(heroForward:Dot(dirToEnemy)))
-                local distanceToEnemy = (target:GetAbsOrigin() - heroPosition):Length2D()
-                
-                if angle < 20 or distanceToEnemy < 100 then
-                    -- 如果角度小于45度或距离小于100，直接释放技能
-                    self:log("小鱼人面对敌人或距离足够近，直接跳跃")
-                    entity:CastAbilityNoTarget(abilityInfo.skill, 0)
-                    self:OnSpellCast(entity, abilityInfo.skill, abilityInfo.castPoint, abilityInfo.channelTime, target)
-                else
-                    -- 需要转身面对敌人
-                    self:log("小鱼人需要转身面对敌人")
-                    local movePosition = target:GetAbsOrigin()
-                    local order = {
-                        UnitIndex = self.entity:entindex(),
-                        OrderType = DOTA_UNIT_ORDER_MOVE_TO_POSITION,
-                        TargetIndex = self.target and self.target:entindex(),
-                        Position = movePosition
-                    }
-                    ExecuteOrderFromTable(order)
-                end
-            else
-                self:log(string.format("技能: %s 敌人在作用范围内，直接释放", abilityInfo.abilityName))
-                entity:CastAbilityNoTarget(abilityInfo.skill, 0)
-                self:OnSpellCast(entity, abilityInfo.skill, abilityInfo.castPoint, abilityInfo.channelTime, target)
-            end
-        else
-            self:MoveToRange(targetInfo.targetPos, totalRange)
-            self:SetState(AIStates.Seek)
-            self:log(string.format("技能: %s 敌人不在作用范围内，移动到作用范围，目标距离: %.2f，作用范围: %.2f", abilityInfo.abilityName, targetInfo.distance, abilityInfo.aoeRadius + abilityInfo.castRange))
-        end
-    end
-end
-
-function CommonAI:HandleAllyTargetAbility(entity, abilityInfo, targetInfo)
-    if not self.Ally then
-        return false
-    end
-    self:log("对队友放的")
-    self:log(string.format("找到友军目标 %s 准备施放技能 %s", self.Ally:GetUnitName(), abilityInfo.abilityName))
-    if abilityInfo.castRange > 0 then
-        if self:IsInRange(self.Ally, abilityInfo.castRange) then
-            -- 友军在范围内
-            if abilityInfo.abilityName == "brewmaster_void_astral_pull" then
-                self:log(string.format("友军在施法范围内，准备施放技能: %s", abilityInfo.abilityName))
-                CommonAI:CastVectorSkillToUnitAndPoint(entity, abilityInfo.skill, self.Ally, targetInfo.targetPos)
-                abilityInfo.castPoint = CommonAI:calculateAdjustedCastPoint(entity, self.Ally:GetOrigin(), abilityInfo.castPoint)
-                self:OnSpellCast(entity, abilityInfo.skill, abilityInfo.castPoint, abilityInfo.channelTime, abilityInfo.target)
-            elseif abilityInfo.abilityName == "dawnbreaker_solar_guardian" then
-                print("")
-                local order = {
-                    UnitIndex = entity:entindex(),
-                    OrderType = DOTA_UNIT_ORDER_CAST_POSITION,
-                    Position = self.Ally:GetOrigin(),
-                    AbilityIndex = abilityInfo.skill:entindex(),
-                    Queue = false
-                }
-                ExecuteOrderFromTable(order)
-                self:log("使用 ExecuteOrderFromTable 释放破晓辰星终极技能")
-            elseif abilityInfo.abilityName == "marci_companion_run" then 
-
-                CommonAI:CastVectorSkillToUnitAndPoint(entity, abilityInfo.skill, self.Ally, targetInfo.targetPos)
-        
-                abilityInfo.castPoint = CommonAI:calculateAdjustedCastPoint(entity, targetInfo.targetPos, abilityInfo.castPoint)
-            else
-                self:log(string.format("友军在施法范围内，准备施放技能: %s", abilityInfo.abilityName))
-                entity:CastAbilityOnTarget(self.Ally, abilityInfo.skill, 0)
-                abilityInfo.castPoint = CommonAI:calculateAdjustedCastPoint(entity, self.Ally:GetOrigin(), abilityInfo.castPoint)
-                self:OnSpellCast(entity, abilityInfo.skill, abilityInfo.castPoint, abilityInfo.channelTime, abilityInfo.target)
-            end
-        else
-            -- 友军不在范围内
-            self:MoveToRange(self.Ally:GetOrigin(), abilityInfo.castRange)
-            self:SetState(AIStates.Seek)
-            self:log(string.format("友军不在施法范围内，移动到施法范围，目标距离: %.2f，施法距离: %.2f", targetInfo.distance, abilityInfo.castRange))
-        end
-    end
-end
-
-function CommonAI:HandleAllyPointAbility(entity, abilityInfo, targetInfo)
-    if not self.Ally then
-        return false
-    end
-    
-    self:log("对队友放的")
-    self:log(string.format("找到友军目标 %s 准备施放技能 %s", self.Ally:GetUnitName(), abilityInfo.abilityName))
-    if abilityInfo.castRange > 0 then
-        if self:IsInRange(self.Ally, abilityInfo.castRange) then
-            -- 友军在范围内
-            self:log(string.format("友军在施法范围内，准备施放技能: %s", abilityInfo.abilityName))
-            entity:CastAbilityOnPosition(self.Ally:GetOrigin(), abilityInfo.skill, 0)
-            abilityInfo.castPoint = CommonAI:calculateAdjustedCastPoint(entity, self.Ally:GetOrigin(), abilityInfo.castPoint)
-            self:OnSpellCast(entity, abilityInfo.skill, abilityInfo.castPoint, abilityInfo.channelTime, abilityInfo.target)
-        else
-            -- 友军不在范围内
-            self:MoveToRange(self.Ally:GetOrigin(), abilityInfo.castRange)
-            self:SetState(AIStates.Seek)
-            self:log(string.format("友军不在施法范围内，移动到施法范围，目标距离: %.2f，施法距离: %.2f", targetInfo.distance, abilityInfo.castRange))
-        end
-    end
-end
-
 function CommonAI:HandleUnableToCast(entity, target, abilityInfo, targetInfo)
     -- 检查是否有特殊无敌状态
     if entity:HasModifier("modifier_void_spirit_dissimilate_phase") or 
        entity:HasModifier("modifier_dawnbreaker_solar_guardian_air_time") or 
        entity:HasModifier("modifier_snapfire_mortimer_kisses") then
         self:log("正在执行特殊无敌技能")
-        if self.currentState ~= AIStates.CastSpell and self.currentState ~= AIStates.Channeling then
+        if self.currentState ~= AIStates.CastSpell and self.currentState ~= AIStates.Channeling and not self:containsStrategy(self.global_strategy, "原地不动") then
             local order = {
                 UnitIndex = entity:entindex(),
                 OrderType = DOTA_UNIT_ORDER_MOVE_TO_POSITION,
@@ -1318,33 +903,6 @@ function CommonAI:HandleNoTargetFound(entity)
     return self.nextThinkTime
 end
 
-function CommonAI:AdjustAbilityCastRangeForSpecialHeroes(entity, target)
-    -- 特定英雄的特殊逻辑处理，例如 npc_dota_hero_ember_spirit
-
-    if entity:GetUnitName() == "npc_dota_hero_ember_spirit" and target then
-        local remnants = FindUnitsInRadius(
-            entity:GetTeamNumber(),
-            target:GetAbsOrigin(),
-            nil,
-            400,
-            DOTA_UNIT_TARGET_TEAM_BOTH,
-            DOTA_UNIT_TARGET_ALL,
-            DOTA_UNIT_TARGET_FLAG_INVULNERABLE,
-            FIND_ANY_ORDER,
-            false
-        )
-
-        for _, remnant in pairs(remnants) do
-            if remnant:GetUnitName() == "npc_dota_ember_spirit_remnant" then
-                self:log("有残焰在附近，可以远程捆")
-                self.specificRadius.ember_spirit_searing_chains = 2000
-                break
-            else
-                self.specificRadius.ember_spirit_searing_chains = nil
-            end
-        end
-    end
-end
 
 function CommonAI:HandleAttack(target, abilityInfo, targetInfo)
     -- 首先判断单位是否可以攻击
@@ -1490,51 +1048,57 @@ function CommonAI:HandleAttack(target, abilityInfo, targetInfo)
     end
 
     if not IsInAttackRange(self, target) then
-        local myPos = self.entity:GetAbsOrigin()
-        local targetPos = target:GetAbsOrigin()
-        local direction = (targetPos - myPos):Normalized()
-        local attackRange = self.entity:Script_GetAttackRange()
-        local flags = DOTA_UNIT_TARGET_FLAG_MAGIC_IMMUNE_ENEMIES + 
-        DOTA_UNIT_TARGET_FLAG_INVULNERABLE + 
-        DOTA_UNIT_TARGET_FLAG_OUT_OF_WORLD +
-        DOTA_UNIT_TARGET_FLAG_NOT_ILLUSIONS
-        
-        -- 获取范围内所有单位
-        local units = FindUnitsInRadius(
-            self.entity:GetTeamNumber(),
-            myPos,
-            nil,
-            attackRange,
-            DOTA_UNIT_TARGET_TEAM_BOTH,
-            DOTA_UNIT_TARGET_ALL,
-            flags,
-            FIND_ANY_ORDER,
-            false
-        )
-        
-        local nearestCog = nil
-        local nearestDistance = attackRange
-        
-        for _, unit in pairs(units) do
-            if unit:GetUnitName() == "npc_dota_rattletrap_cog" then
-                local cogPos = unit:GetAbsOrigin()
-                local cogToSelf = (cogPos - myPos):Normalized()  -- 归一化向量
-                
-                -- 严格检查是否在正前方60度范围内（cos30≈0.866）
-                local dotProduct = direction:Dot(cogToSelf)
-                if dotProduct >= 0.7 then  -- 对应30度夹角
-                    local distance = (cogPos - myPos):Length2D()
-                    if distance < nearestDistance then
-                        nearestCog = unit
-                        nearestDistance = distance
+        if not self:containsStrategy(self.global_strategy, "不要优先拆墓碑、棒子") then
+            local myPos = self.entity:GetAbsOrigin()
+            local targetPos = target:GetAbsOrigin()
+            local direction = (targetPos - myPos):Normalized()
+            local attackRange = self.entity:Script_GetAttackRange()
+            local flags = DOTA_UNIT_TARGET_FLAG_MAGIC_IMMUNE_ENEMIES + 
+            DOTA_UNIT_TARGET_FLAG_INVULNERABLE + 
+            DOTA_UNIT_TARGET_FLAG_OUT_OF_WORLD +
+            DOTA_UNIT_TARGET_FLAG_NOT_ILLUSIONS
+            
+            -- 获取范围内所有单位
+            local units = FindUnitsInRadius(
+                self.entity:GetTeamNumber(),
+                myPos,
+                nil,
+                attackRange,
+                DOTA_UNIT_TARGET_TEAM_BOTH,
+                DOTA_UNIT_TARGET_ALL,
+                flags,
+                FIND_ANY_ORDER,
+                false
+            )
+            
+            local nearestCog = nil
+            local nearestDistance = attackRange
+            
+            for _, unit in pairs(units) do
+                if unit:GetUnitName() == "npc_dota_rattletrap_cog" then
+                    local cogPos = unit:GetAbsOrigin()
+                    local cogToSelf = (cogPos - myPos):Normalized()  -- 归一化向量
+                    
+                    -- 严格检查是否在正前方60度范围内（cos30≈0.866）
+                    local dotProduct = direction:Dot(cogToSelf)
+                    if dotProduct >= 0.7 then  -- 对应30度夹角
+                        local distance = (cogPos - myPos):Length2D()
+                        if distance < nearestDistance then
+                            nearestCog = unit
+                            nearestDistance = distance
+                        end
                     end
                 end
             end
+            
+            if nearestCog then
+                target = nearestCog
+                self:log("找到正前方齿轮，优先攻击")
+            end
         end
-        
-        if nearestCog then
-            target = nearestCog
-            self:log("找到正前方齿轮，优先攻击")
+
+        if self:containsStrategy(self.global_strategy, "原地不动") then
+            return self.nextThinkTime
         end
     end
 
@@ -1565,6 +1129,22 @@ function CommonAI:HandleAttack(target, abilityInfo, targetInfo)
             }
             ExecuteOrderFromTable(order)
         end
+    elseif self:IsTargetInMagneticField(self.entity, target) then
+        self:log("目标处于磁场效果中，移动到目标身后100码位置")
+        -- 计算目标的朝向向量
+        local targetForward = target:GetForwardVector():Normalized()
+        -- 计算目标身后100码的位置
+        local movePosition = target:GetAbsOrigin() - targetForward * 100
+        
+        local order = {
+            UnitIndex = self.entity:entindex(),
+            OrderType = DOTA_UNIT_ORDER_MOVE_TO_POSITION,
+            TargetIndex = target:entindex(),
+            Position = movePosition,
+            Queue = false
+        }
+        ExecuteOrderFromTable(order)
+        return self.nextThinkTime
     else
         -- 已在攻击状态
         if self.entity:IsAttacking() then
@@ -1692,10 +1272,16 @@ function CommonAI:CanAttackTarget(entity, target)
     end
 
 
+
+    return true
+end
+
+
+function CommonAI:IsTargetInMagneticField(entity, target)
     local distance = (entity:GetAbsOrigin() - target:GetAbsOrigin()):Length2D()
     if target and type(target.FindModifierByName) == "function" then
         local magneticFieldModifier = target:FindModifierByName("modifier_arc_warden_magnetic_field_evasion")
-        if magneticFieldModifier and distance > 300 then
+        if magneticFieldModifier and not magneticFieldModifier:IsDebuff() and not entity:FindModifierByName("modifier_arc_warden_magnetic_field_evasion")then
             -- 检查是否有金箍棒
             local hasMonkeyKingBar = false
             for i = 0, 8 do
@@ -1708,12 +1294,19 @@ function CommonAI:CanAttackTarget(entity, target)
             
             if not hasMonkeyKingBar then
                 self:log("目标处于磁场效果中且距离过远,且没有金箍棒")
-                return false
+                return true
             end
         end
     end
-    return true
+
+    return false
 end
+
+
+
+
+
+
 
 
 function CommonAI:HandleFamiliarGuard()

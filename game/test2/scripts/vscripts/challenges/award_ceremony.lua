@@ -11,16 +11,16 @@ function SpawnFourHeroes()
 
 
     local rank1Heroes = { 
-        "npc_dota_hero_sand_king"
+        "npc_dota_hero_abyssal_underlord"
     }
     local rank2Heroes = { 
-        "npc_dota_hero_furion"
+        "npc_dota_hero_night_stalker"
     }
     local rank3Heroes = { 
-        "npc_dota_hero_void_spirit"
+        "npc_dota_hero_sven"
     }
     local rank4Heroes = { 
-        "npc_dota_hero_crystal_maiden"
+        "npc_dota_hero_pudge"
     }
 
     local positions = {

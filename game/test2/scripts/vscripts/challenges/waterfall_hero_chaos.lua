@@ -150,9 +150,9 @@ function Main:SetupWaterFallCombatBuffs(hero)
     hero:AddNewModifier(hero, nil, "modifier_item_aghanims_shard", {})
     hero:AddNewModifier(hero, nil, "modifier_item_ultimate_scepter_consumed", {})
     hero:AddNewModifier(hero, nil, "modifier_auto_elevation_waterfall", {})
-    if hero:GetUnitName() ~= "npc_dota_hero_dawnbreaker" then
-        hero:AddNewModifier(hero, nil, "modifier_attack_cast_ability_Ult", {})
-    end
+
+    hero:AddNewModifier(hero, nil, "modifier_auto_walrus_punch_custom", {})
+
     -- 查找英雄type
     local heroName = hero:GetUnitName()
     local heroType = nil
@@ -914,7 +914,7 @@ function Main:DeployWaterFallHero(heroType, isInitialSpawn)
             ParticleManager:ReleaseParticleIndex(particle)
             
             -- 创建AI并设置战斗状态
-            CreateAIForHero(hero,{"攻击无敌单位"},nil,nil,1)
+            CreateAIForHero(hero,{"攻击无敌单位"},nil,nil,0.1)
             self:SetupWaterFallCombatBuffs(hero)
             
             -- 执行英雄特殊效果

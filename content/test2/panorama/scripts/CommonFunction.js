@@ -208,7 +208,6 @@ var heroData = {
     150: { name: "unknown",       englishName: "unknown",           codeName: "unknown",           facingRight: false, heightAdjust: 5,  heroAttribute: 4, avatarAdjust: 30, avatarFacingRight: true  }
 }
 
-
 var heroesFacets = {
     "npc_dota_hero_antimage": {
         "Facets": {
@@ -271,7 +270,14 @@ var heroesFacets = {
                 "Icon": "speed",
                 "Color": "Gray",
                 "GradientID": "1",
+                "Deprecated": "true",
                 "name": "bloodseeker_bloodrush"
+            },
+            "3": {
+                "Icon": "debuff",
+                "Color": "Gray",
+                "GradientID": "1",
+                "name": "bloodseeker_old_blood"
             }
         }
     },
@@ -334,8 +340,15 @@ var heroesFacets = {
                 "Icon": "movement",
                 "Color": "Yellow",
                 "GradientID": "1",
+                "Deprecated": "true",
                 "name": "earthshaker_slugger",
                 "AbilityName": "earthshaker_slugger"
+            },
+            "3": {
+                "Icon": "ricochet",
+                "Color": "Gray",
+                "GradientID": "2",
+                "name": "earthshaker_reverberating_ridge"
             }
         }
     },
@@ -507,13 +520,27 @@ var heroesFacets = {
                 "Icon": "vision",
                 "Color": "Gray",
                 "GradientID": "3",
+                "Deprecated": "true",
                 "name": "sand_king_sandshroud"
             },
             "2": {
                 "Icon": "speed",
                 "Color": "Yellow",
                 "GradientID": "1",
+                "Deprecated": "true",
                 "name": "sand_king_dust_devil"
+            },
+            "3": {
+                "Icon": "no_vision",
+                "Color": "Yellow",
+                "GradientID": "3",
+                "name": "sand_king_obscurity"
+            },
+            "4": {
+                "Icon": "area_of_effect",
+                "Color": "Red",
+                "GradientID": "1",
+                "name": "sand_king_pinpoint"
             }
         }
     },
@@ -683,6 +710,7 @@ var heroesFacets = {
                 "Icon": "snowflake",
                 "Color": "Blue",
                 "GradientID": "0",
+                "Deprecated": "1",
                 "name": "lich_frostbound"
             },
             "2": {
@@ -690,6 +718,12 @@ var heroesFacets = {
                 "Color": "Gray",
                 "GradientID": "0",
                 "name": "lich_growing_cold"
+            },
+            "3": {
+                "Icon": "vision",
+                "Color": "Red",
+                "GradientID": "0",
+                "name": "lich_cryophobia"
             }
         }
     },
@@ -775,6 +809,7 @@ var heroesFacets = {
                 "Icon": "ricochet",
                 "Color": "Gray",
                 "GradientID": "3",
+                "Deprecated": "1",
                 "name": "witch_doctor_headhunter"
             },
             "2": {
@@ -789,6 +824,12 @@ var heroesFacets = {
                 "Color": "Purple",
                 "GradientID": "0",
                 "name": "witch_doctor_cleft_death"
+            },
+            "4": {
+                "Icon": "nuke",
+                "Color": "Red",
+                "GradientID": "2",
+                "name": "witch_doctor_malpractice"
             }
         }
     },
@@ -1169,6 +1210,12 @@ var heroesFacets = {
                 "Color": "Red",
                 "GradientID": "2",
                 "name": "rattletrap_expanded_armature"
+            },
+            "3": {
+                "Icon": "armor",
+                "Color": "Yellow",
+                "GradientID": "1",
+                "name": "rattletrap_junk_mail"
             }
         }
     },
@@ -1201,7 +1248,15 @@ var heroesFacets = {
                 "Icon": "siege",
                 "Color": "Blue",
                 "GradientID": "2",
+                "Deprecated": "true",
                 "name": "furion_ironwood_treant"
+            },
+            "3": {
+                "Icon": "gold",
+                "Color": "Yellow",
+                "GradientID": "2",
+                "name": "furion_natures_profit",
+                "AbilityName": "furion_natures_profit"
             }
         }
     },
@@ -1455,16 +1510,16 @@ var heroesFacets = {
     "npc_dota_hero_batrider": {
         "Facets": {
             "1": {
-                "Icon": "speed",
-                "Color": "Yellow",
-                "GradientID": "1",
-                "name": "batrider_buff_on_displacement",
-                "AbilityName": "batrider_stoked"
-            },
-            "2": {
-                "Icon": "siege",
+                "Icon": "nuke",
                 "Color": "Red",
                 "GradientID": "0",
+                "name": "batrider_buff_on_displacement"
+            },
+            "2": {
+                "Icon": "damage",
+                "Color": "Yellow",
+                "GradientID": "1",
+                "MaxHeroAttributeLevel": "6",
                 "name": "batrider_arsonist"
             }
         }
@@ -1664,32 +1719,18 @@ var heroesFacets = {
     "npc_dota_hero_invoker": {
         "Facets": {
             "1": {
-                "Icon": "invoker_passive",
-                "Color": "Purple",
-                "GradientID": "0",
-                "Deprecated": "true",
-                "name": "invoker_agnostic"
-            },
-            "2": {
-                "Icon": "invoker_active",
-                "Color": "Gray",
-                "GradientID": "0",
-                "Deprecated": "true",
-                "name": "invoker_elitist"
-            },
-            "3": {
                 "Icon": "invoker_quas",
                 "Color": "Blue",
                 "GradientID": "0",
                 "name": "invoker_quas_focus"
             },
-            "4": {
+            "2": {
                 "Icon": "invoker_wex",
                 "Color": "Purple",
                 "GradientID": "0",
                 "name": "invoker_wex_focus"
             },
-            "5": {
+            "3": {
                 "Icon": "invoker_exort",
                 "Color": "Yellow",
                 "GradientID": "0",
@@ -1703,6 +1744,7 @@ var heroesFacets = {
                 "Icon": "silencer",
                 "Color": "Purple",
                 "GradientID": "1",
+                "Deprecated": "1",
                 "name": "silencer_irrepressible",
                 "AbilityName": "silencer_irrepressible"
             },
@@ -1710,7 +1752,22 @@ var heroesFacets = {
                 "Icon": "debuff",
                 "Color": "Gray",
                 "GradientID": "3",
+                "Deprecated": "1",
                 "name": "silencer_reverberating_silence"
+            },
+            "3": {
+                "Icon": "ricochet",
+                "Color": "Purple",
+                "GradientID": "1",
+                "MaxHeroAttributeLevel": "6",
+                "name": "silencer_spread_the_knowledge"
+            },
+            "4": {
+                "Icon": "debuff",
+                "Color": "Gray",
+                "GradientID": "3",
+                "name": "silencer_oppressive_silence",
+                "AbilityName": "silencer_oppressive_silence"
             }
         }
     },
@@ -1874,7 +1931,8 @@ var heroesFacets = {
                 "Icon": "damage",
                 "Color": "Yellow",
                 "GradientID": "2",
-                "name": "treant_primeval_power"
+                "name": "treant_primeval_power",
+                "AbilityName": "treant_innate_attack_damage"
             },
             "2": {
                 "Icon": "tree",
@@ -1946,6 +2004,12 @@ var heroesFacets = {
                 "GradientID": "1",
                 "name": "disruptor_line_walls",
                 "AbilityName": "disruptor_kinetic_fence"
+            },
+            "3": {
+                "Icon": "vortex_out",
+                "Color": "Gray",
+                "GradientID": "0",
+                "name": "disruptor_conduit"
             }
         }
     },
@@ -2249,7 +2313,14 @@ var heroesFacets = {
                 "Icon": "barrier",
                 "Color": "Blue",
                 "GradientID": "1",
+                "Deprecated": "true",
                 "name": "abaddon_mephitic_shroud"
+            },
+            "3": {
+                "Icon": "phantom_ass_dagger",
+                "Color": "Blue",
+                "GradientID": "1",
+                "name": "abaddon_mists_of_fate"
             }
         }
     },
@@ -2484,6 +2555,7 @@ var heroesFacets = {
                 "Icon": "summons",
                 "Color": "Red",
                 "GradientID": "2",
+                "Deprecated": "true",
                 "name": "monkey_king_wukongs_faithful"
             },
             "2": {
@@ -2492,6 +2564,13 @@ var heroesFacets = {
                 "GradientID": "4",
                 "MaxHeroAttributeLevel": "6",
                 "name": "monkey_king_simian_stride"
+            },
+            "3": {
+                "Icon": "summons",
+                "Color": "Red",
+                "GradientID": "2",
+                "name": "monkey_king_transfiguration",
+                "AbilityName": "monkey_king_transfiguration"
             }
         }
     },
@@ -2731,8 +2810,15 @@ var heroesFacets = {
                 "Icon": "teleport",
                 "Color": "Yellow",
                 "GradientID": "0",
+                "Deprecated": "true",
                 "name": "muerta_ofrenda",
                 "AbilityName": "muerta_ofrenda"
+            },
+            "3": {
+                "Icon": "ricochet",
+                "Color": "Red",
+                "GradientID": "1",
+                "name": "muerta_slingshot"
             }
         }
     },
@@ -2750,14 +2836,14 @@ var heroesFacets = {
                 "Color": "Yellow",
                 "GradientID": "1",
                 "name": "ringmaster_carny_classics",
-
+                "AbilityName": "ringmaster_funhouse_mirror"
             },
             "3": {
                 "Icon": "pie",
                 "Color": "Red",
                 "GradientID": "0",
                 "name": "ringmaster_sideshow_secrets",
-
+                "AbilityName": "ringmaster_crystal_ball"
             }
         }
     },
@@ -2773,13 +2859,12 @@ var heroesFacets = {
                 "Icon": "kez_shadowhawk",
                 "Color": "Blue",
                 "GradientID": "3",
-                "name": "kez_shadowhawk_passive",
+                "name": "kez_shadowhawk",
                 "AbilityName": "kez_shadowhawk_passive"
             }
         }
     }
 };
-
 
 
 

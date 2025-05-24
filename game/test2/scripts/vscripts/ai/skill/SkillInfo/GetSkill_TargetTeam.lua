@@ -21,6 +21,7 @@ function CommonAI:Ini_SkillTargetTeam()
 
         weaver_time_lapse = DOTA_UNIT_TARGET_TEAM.FRIENDLY,
         item_disperser = DOTA_UNIT_TARGET_TEAM.FRIENDLY,
+        arc_warden_magnetic_field = DOTA_UNIT_TARGET_TEAM.FRIENDLY,
         
     }
 end

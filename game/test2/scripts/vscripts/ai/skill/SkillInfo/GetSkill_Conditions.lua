@@ -391,19 +391,31 @@ HeroSkillConditions = {
         },
     },
 
-    ["npc_dota_hero_arc_warden"] = {
-        ["arc_warden_magnetic_field"] = {
-            function(self, caster, log)
-                if caster:GetHeroFacetID() == 1 then
-                    local forbiddenModifiers = {
-                        "modifier_arc_warden_magnetic_field_evasion",
-                    }
-                    return self:IsNotUnderModifiers(caster, forbiddenModifiers, log) or GetRealEnemyHeroesWithinDistance(caster, 350, log) > 0
+        ["npc_dota_hero_arc_warden"] = {
+            ["arc_warden_magnetic_field"] = {
+                function(self, caster, log)
+
+
+                    local ability = caster:FindAbilityByName("arc_warden_magnetic_field")
+                    if not ability then return false end
+            
+                    self.Ally = self:FindBestAllyHeroTarget(
+                        caster, 
+                        ability,
+                        {"modifier_arc_warden_magnetic_field_evasion"},
+                        0,
+                        "nearest_to_enemy",
+                        true,
+                        true,
+                        false
+                    )
+            
+                    -- 检查是否找到了盟友
+                    return self.Ally ~= nil
+
                 end
-                return true
-            end
+            },
         },
-    },
 
     ["npc_dota_hero_axe"] = {
         ["axe_culling_blade"] = {
@@ -420,15 +432,19 @@ HeroSkillConditions = {
                     true      -- 只允许英雄单位
                 )
                 
-                if potentialTarget then
-                    self.target = potentialTarget
-                end
+                -- 更新目标
+                if potentialTarget then self.target = potentialTarget end
+                if not self.target then return false end
                 
-                if caster:GetHealthPercent() >= 20 and (not self.target or self.target:GetHealth() >= 575) then
-                    return false
-                else
+                -- 目标生命值低于斩杀线
+                if self.target:GetHealth() <= 575 then return true end
+                
+                -- 自身生命值过低且未限制使用策略时使用
+                if caster:GetHealthPercent() <= 20 and not self:containsStrategy(self.hero_strategy, "必须留斩杀") then
                     return true
                 end
+                
+                return false
             end
         },
         ["axe_berserkers_call"] = {
@@ -1991,7 +2007,33 @@ HeroSkillConditions = {
         },
         ["tidehunter_dead_in_the_water"] = {
             function(self, caster, log)
-                return false
+                local challengeId = Main.currentChallenge
+                print("当前挑战模式ID: " .. challengeId)
+                local challengeName = Main:GetChallengeNameById(challengeId)
+                if challengeName == "waterfall_hero_chaos" then
+                    return false
+                end
+
+
+
+
+                local ability = caster:FindAbilityByName("tidehunter_dead_in_the_water")
+                if not ability then return false end
+                
+                local potentialTarget = self:FindBestEnemyHeroTarget(
+                    caster,
+                    ability,
+                    nil,
+                    nil,
+                    "control" 
+                )
+                
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+
+                return potentialTarget ~= nil
+
             end
         },
     },
@@ -3164,12 +3206,76 @@ HeroSkillConditions = {
         },
 
 
+        
+        ["invoker_tornado"] = {
+            function(self, caster, log)
+                -- 检查是否在过去2秒内释放过以下技能
+                local checkTime = 2.0  -- 检查的时间范围(秒)
+                local forbiddenAbilities = {
+                    "invoker_chaos_meteor",
+                    "invoker_sun_strike",
+                    "invoker_deafening_blast"
+                }
+                
+                -- 获取英雄的EntityIndex
+                local heroIndex = caster:GetEntityIndex()
+                
+                -- 检查全局变量是否存在
+                if Main and Main.heroLastCastAbility and Main.heroLastCastAbility[heroIndex] then
+                    local currentTime = GameRules:GetGameTime()
+                    
+                    -- 检查是否在过去指定时间内释放过禁止的技能
+                    for _, abilityName in pairs(forbiddenAbilities) do
+                        local abilityData = Main.heroLastCastAbility[heroIndex][abilityName]
+                        if abilityData and (currentTime - abilityData.time) <= checkTime then
+                            if log then
+                                log(string.format("2秒内释放过技能 %s，禁止释放龙卷风", abilityName))
+                            end
+                            return false
+                        end
+                    end
+                end
+                
+                return true
+            end
+        },
+
         ["invoker_chaos_meteor"] = {
             function(self, caster, log)
+                -- 检查是否在过去1秒内释放过龙卷风
+                local heroIndex = caster:GetEntityIndex()
+                if Main and Main.heroLastCastAbility and Main.heroLastCastAbility[heroIndex] then
+                    local currentTime = GameRules:GetGameTime()
+                    local tornadoData = Main.heroLastCastAbility[heroIndex]["invoker_tornado"]
+                    if tornadoData and (currentTime - tornadoData.time) <= 1.0 then
+                        if log then
+                            log("1秒内释放过龙卷风，禁止释放")
+                        end
+                        return false
+                    end
+                end
+                
                 return self:NeedsModifierRefresh(self.target, {"modifier_invoker_tornado"}, 0.5)
             end
         },
-        
+        ["invoker_deafening_blast"] = {
+            function(self, caster, log)
+                -- 检查是否在过去1秒内释放过龙卷风
+                local heroIndex = caster:GetEntityIndex()
+                if Main and Main.heroLastCastAbility and Main.heroLastCastAbility[heroIndex] then
+                    local currentTime = GameRules:GetGameTime()
+                    local tornadoData = Main.heroLastCastAbility[heroIndex]["invoker_tornado"]
+                    if tornadoData and (currentTime - tornadoData.time) <= 1.0 then
+                        if log then
+                            log("1秒内释放过龙卷风，禁止释放")
+                        end
+                        return false
+                    end
+                end
+                
+                return self:NeedsModifierRefresh(self.target, {"modifier_invoker_tornado"}, 0)
+            end
+        },
     },
     ["npc_dota_hero_slardar"] = {
         ["slardar_amplify_damage"] = {
@@ -3923,7 +4029,7 @@ HeroSkillConditions = {
             end
         },
     },
-    
+
     ["npc_dota_hero_morphling"] = {
         ["morphling_adaptive_strike_str"] = {
             function(self, caster, log)
@@ -4570,49 +4676,162 @@ HeroSkillConditions = {
                     self:log("[STORM_TEST] 未匹配任何条件，默认禁止使用技能")
                     return false
                 else
+                    local attackRange = caster:Script_GetAttackRange()
+                    print("[风暴判断] 攻击范围:", attackRange)
+
                     local forbiddenModifiers = {
                         "modifier_storm_spirit_electric_rave",
                         "modifier_storm_spirit_overload",
                     }
                     
-                    -- 首先检查是否有 modifier_storm_spirit_ball_lightning
-                    if caster:HasModifier("modifier_storm_spirit_ball_lightning") then
-                        self:log("风暴之灵有 modifier_storm_spirit_ball_lightning，禁止使用技能")
-                        return false
-                    end
+                    -- 获取当前蓝量
+                    local currentMana = caster:GetMana()
+                    print("[风暴判断] 当前蓝量:", currentMana)
                     
-                    -- 检查其他两个修饰器
-                    local isNotUnderOtherModifiers = self:IsNotUnderModifiers(caster, forbiddenModifiers, log)
-                    self:log("isNotUnderOtherModifiers", isNotUnderOtherModifiers)
-                    
-                    -- 检查前三个技能是否都在冷却中
-                    local function areAllFirstThreeAbilitiesOnCooldown()
+                    -- 检查前三个技能中是否有可用技能
+                    local function isAnyFirstThreeAbilityReady()
                         for i = 0, 2 do  -- 检查前三个技能槽位
                             local ability = caster:GetAbilityByIndex(i)
                             if ability and ability:IsCooldownReady() then
-                                return false
+                                print("[风暴判断] 技能", i, "冷却完毕，可用")
+                                return true
                             end
                         end
-                        return true
+                        print("[风暴判断] 前三个技能都在冷却中")
+                        return false
                     end
                 
-                    -- 获取当前蓝量
-                    local currentMana = caster:GetMana()
-                
-                    -- 检查条件：没有禁止的修饰器或最近300范围内没有敌人，且蓝量低于300，且至少有一个技能不在冷却
-                    if (isNotUnderOtherModifiers or GetEnemiesWithinDistance(caster, 400, log) == 0) and
-                       currentMana < 500 and
-                       not areAllFirstThreeAbilitiesOnCooldown() then
-                        self:log("满足特殊条件：没有禁止的修饰器或附近没有敌人，且蓝量低于300，且至少有一个技能不在冷却，禁止使用技能")
+                    -- 蓝量低于500且有技能可用时不使用闪电
+                    if currentMana < 500 and isAnyFirstThreeAbilityReady() then
+                        print("[风暴判断] 满足特殊条件：蓝量低于500且有技能可用，禁止使用闪电")
+                        self:log("满足特殊条件：蓝量低于500，且至少有一个技能可用，禁止使用技能")
                         return false
                     end
                     
-                    -- 只有当没有其他两个禁止的修饰器或最近的敌人距离不超过300时，才返回true
-                    if isNotUnderOtherModifiers or GetEnemiesWithinDistance(caster, 400, log) == 0 then
+                    -- 检查风暴特有buff状态
+                    local hasOverload = caster:HasModifier("modifier_storm_spirit_overload")
+                    local hasElectricRave = caster:HasModifier("modifier_storm_spirit_electric_rave")
+                    local hasBallLightning = caster:HasModifier("modifier_storm_spirit_ball_lightning")
+                    print("[风暴判断] 是否有过载:", hasOverload)
+                    print("[风暴判断] 是否有电子兵:", hasElectricRave)
+                    print("[风暴判断] 是否有球状闪电:", hasBallLightning)
+                    
+                    -- 检查上次攻击和上次技能释放
+                    local heroIndex = caster:GetEntityIndex()
+                    local lastAttackTime = 0
+                    local lastAbilityTime = 0
+                    
+                    -- 获取上次攻击时间
+                    if Main and Main.heroLastAttack and Main.heroLastAttack[heroIndex] then
+                        lastAttackTime = Main.heroLastAttack[heroIndex].time
+                        print("[风暴判断] 上次攻击时间:", lastAttackTime)
+                    else
+                        print("[风暴判断] 未找到攻击记录")
+                    end
+                    
+                    -- 获取上次技能释放时间
+                    if Main and Main.heroLastCastAbility and Main.heroLastCastAbility[heroIndex] then
+                        for abilityName, abilityData in pairs(Main.heroLastCastAbility[heroIndex]) do
+                            if abilityData.time > lastAbilityTime then
+                                lastAbilityTime = abilityData.time
+                            end
+                        end
+                        print("[风暴判断] 上次技能释放时间:", lastAbilityTime)
+                    else
+                        print("[风暴判断] 未找到技能释放记录")
+                    end
+                    
+                    -- 如果有球状闪电且上次技能释放后还没有攻击过，不返回true
+                    if hasBallLightning and (lastAbilityTime > lastAttackTime) then
+                        print("[风暴判断] 有球状闪电且上次技能释放后还没有攻击过，禁止使用技能")
+                        self:log("有球状闪电且上次技能释放后还没有攻击过，禁止使用技能")
+                        return false
+                    end
+                    
+                    -- 新增条件1：英雄没有以下两个modifier中的任意一个
+                    if not hasOverload and not hasElectricRave then
+                        print("[风暴判断] 没有风暴特有buff，无条件允许使用技能")
+                        self:log("没有风暴特有buff，无条件允许使用技能")
                         return true
                     end
                     
-                    self:log("风暴之灵有禁止的修饰器且最近的敌人距离超过300，禁止使用技能")
+                    -- 新增条件2：检查英雄是否刚刚A出去且A出去后没有释放技能
+                    print("[风暴判断] 继续检查是否刚刚A出去且A出去后没有释放技能")
+                    
+                    -- 详细检查electric_rave的层数
+                    local electricRaveStacks = 0
+                    if hasElectricRave then
+                        electricRaveStacks = caster:GetModifierStackCount("modifier_storm_spirit_electric_rave", caster)
+                        print("[风暴判断] 电子兵层数:", electricRaveStacks)
+                    end
+                    
+                    -- 排除electric_rave层数大于1的情况
+                    if hasElectricRave and electricRaveStacks > 1 then
+                        print("[风暴判断] 电子兵层数>1，禁止使用技能")
+                        self:log("电子兵层数大于1，禁止使用技能")
+                        return false
+                    end
+                    
+                    -- 如果有overload或者electric_rave层数正好为1(预计会被平A消耗掉)
+                    if hasOverload or (hasElectricRave and electricRaveStacks == 1) then
+                        print("[风暴判断] 有overload或electric_rave层数为1，检查是否刚A出去")
+                        
+                        -- 检查是否刚刚A出去
+                        if Main and Main.heroLastAttack and Main.heroLastAttack[heroIndex] then
+                            local lastAttackTime = Main.heroLastAttack[heroIndex].time
+                            local currentTime = GameRules:GetGameTime()
+                            local timeSinceLastAttack = currentTime - lastAttackTime
+                            
+                            print("[风暴判断] 上次攻击时间:", lastAttackTime)
+                            print("[风暴判断] 当前时间:", currentTime)
+                            print("[风暴判断] 距离上次攻击经过:", timeSinceLastAttack, "秒")
+                            
+                            -- 检查最近一次攻击是否是在近期(5秒内)
+                            if timeSinceLastAttack <= 5.0 then
+                                print("[风暴判断] 攻击在5秒内，检查攻击后是否释放过技能")
+                                
+                                -- 检查攻击后是否没有释放技能
+                                local hasUsedAbilityAfterAttack = false
+                                
+                                if Main.heroLastCastAbility and Main.heroLastCastAbility[heroIndex] then
+                                    for abilityName, abilityData in pairs(Main.heroLastCastAbility[heroIndex]) do
+                                        if abilityData.time > lastAttackTime then
+                                            hasUsedAbilityAfterAttack = true
+                                            print("[风暴判断] 攻击后释放了技能:", abilityName, "在时间:", abilityData.time)
+                                            break
+                                        end
+                                    end
+                                end
+                                
+                                if not hasUsedAbilityAfterAttack then
+                                    print("[风暴判断] 满足特殊条件：有overload或一层electric_rave，且刚刚A出去后未释放技能，允许使用技能")
+                                    self:log("满足特殊条件：有overload或一层electric_rave，且刚刚A出去后未释放技能，允许使用技能")
+                                    return true
+                                else
+                                    print("[风暴判断] 攻击后已经释放过技能，不满足条件")
+                                    self:log("攻击后已经释放过技能，不满足条件")
+                                end
+                            else
+                                print("[风暴判断] 上次攻击时间超过5秒，不满足条件")
+                                self:log("上次攻击时间超过5秒，不满足条件")
+                            end
+                        else
+                            print("[风暴判断] 没有攻击记录或Main.heroLastAttack未初始化")
+                            self:log("没有攻击记录或Main.heroLastAttack未初始化")
+                        end
+                    else
+                        print("[风暴判断] 没有overload且electric_rave层数不为1")
+                        self:log("没有overload且electric_rave层数不为1")
+                    end
+                    
+                    if GetEnemiesWithinDistance(caster, attackRange, log) == 0 then
+                        print("[风暴判断] 攻击范围内没有敌人，允许使用技能")
+                        self:log("攻击范围内没有敌人，允许使用技能")
+                        return true
+                    end
+                    
+                    print("[风暴判断] 不满足任何条件，禁止使用技能")
+                    self:log("不满足任何条件，禁止使用技能")
                     return false
                 end
             end
@@ -5193,10 +5412,8 @@ HeroSkillConditions = {
         ["pugna_decrepify"] = {
             function(self, caster, log)
 
-                if self:containsStrategy(self.hero_strategy, "虚无自己") then
-                    
+                if self:containsStrategy(self.hero_strategy, "只虚无自己") then
                     if self:NeedsModifierRefresh(caster, {"modifier_pugna_decrepify"}, 0.5) then
-                        self:log("是时候虚无自己")
                         self.target = caster
                         return true
                     else
@@ -5205,6 +5422,7 @@ HeroSkillConditions = {
                 end
                 local ability = caster:FindAbilityByName("pugna_decrepify")
                 if not ability then return false end
+
                 local potentialTarget = self:FindBestEnemyHeroTarget(
                     caster,
                     ability,
@@ -5302,6 +5520,12 @@ HeroSkillConditions = {
         },
         ["alchemist_unstable_concoction_throw"] = {
             function(self, caster, log)
+                if self:containsStrategy(self.hero_strategy, "见面扔炸弹") then
+                    return true
+                end
+
+
+
                 if caster:GetHealthPercent()<20 then
                     return true
                 end
@@ -5420,6 +5644,15 @@ HeroSkillConditions = {
     ["npc_dota_hero_life_stealer"] = {
         ["life_stealer_infest"] = {
             function(self, caster, log)
+
+                if self:containsStrategy(self.hero_strategy, "满血开大") then
+                    return true
+                end
+
+
+
+
+
                 local ability = caster:FindAbilityByName("life_stealer_infest")
                 if not ability then return false end
                 
@@ -5944,6 +6177,36 @@ HeroSkillConditions = {
     ["npc_dota_hero_muerta"] = {
         ["muerta_dead_shot"] = {
             function(self, caster, log)
+
+                if self:containsStrategy(self.hero_strategy, "断技能") then
+
+                
+                    -- 检查敌人是否是屠夫，且没有释放过钩子
+                    if self.target and self.target:GetUnitName() == "npc_dota_hero_pudge" then
+                        local targetIndex = self.target:GetEntityIndex()
+                        -- 检查目标是否使用过钩子技能
+                        if Main.heroLastCastAbility and 
+                        Main.heroLastCastAbility[targetIndex] and 
+                        Main.heroLastCastAbility[targetIndex]["pudge_meat_hook"] then
+                            -- 目标屠夫已经使用过钩子，正常判断
+                        else
+                            -- 目标屠夫没有使用过钩子，不使用我们的技能
+                            if self.target
+                            and ((self:NeedsModifierRefresh(self.target, {"modifier_muerta_the_calling_silence"}, 0.5) and self.target:HasModifier("modifier_muerta_the_calling_silence") )
+                            or (self:NeedsModifierRefresh(self.target, {"modifier_muerta_dead_shot_fear"}, 0.5) and self.target:HasModifier("modifier_muerta_dead_shot_fear")) )
+                            then
+                                return true
+                            else
+                                return false
+                            end
+                        end
+                    end
+                end
+
+
+
+
+
                 print("正在检测技能: muerta_dead_shot")
                 self:log("正在检测技能: muerta_dead_shot")
                 local ability = caster:FindAbilityByName("muerta_dead_shot")
@@ -5963,7 +6226,7 @@ HeroSkillConditions = {
 
                 local current_time = GameRules:GetGameTime()
                 local heroIndex = caster:GetEntityIndex()
-                
+                    
                 -- 获取上次释放时间
                 local last_cast_info = Main.heroLastCastAbility 
                     and Main.heroLastCastAbility[heroIndex] 
@@ -5972,8 +6235,12 @@ HeroSkillConditions = {
                 self:log("当前时间: " .. current_time)
                 self:log("上次释放时间: " .. last_time)
                 -- 如果是首次释放或者距离上次释放超过0.5秒
-                if (current_time - last_time) > 1 then
-                    return potentialTarget ~= nil
+                if (current_time - last_time) > 2 then
+                    if self.target then
+                        return true
+                    else
+                        return false
+                    end
                 end
 
                 return false
@@ -6233,7 +6500,7 @@ HeroSkillConditions = {
                 local shortCooldownTime = 0.1 -- 0.2秒短冷却时间
                 local longCooldownTime = 1 -- 1秒长冷却时间
         
-                local currentTime = GameRules:GetGameTime()
+                            local currentTime = GameRules:GetGameTime()
                 
                 -- 检查是否在短冷却时间内（0.2秒）
                 if currentTime - self.firstTrueReturnTime <= shortCooldownTime then
@@ -6290,11 +6557,11 @@ HeroSkillConditions = {
                         if not unit:HasModifier("modifier_earth_spirit_boulder_smash") then
                             invalidStoneFound = true
                             log("发现一个没有 boulder_smash modifier 的石头")
-                            break
-                        end
-                    end
-                end
-        
+                                            break
+                                        end
+                                    end
+                                end
+                                
                 -- 判断结果
                 local shouldReturnTrue = false
                 if stoneCount > 0 and not invalidStoneFound then
@@ -6315,8 +6582,8 @@ HeroSkillConditions = {
                         self.firstTrueReturnTime = currentTime
                     end
                     self.lastTrueReturnTime = currentTime
-                    return true
-                end
+                                    return true
+                                end
         
                 return false
             end
@@ -6352,7 +6619,7 @@ HeroSkillConditions = {
                     local realHeroStr = potentialTarget:IsTempestDouble() and "(假)" or "(真)"
                     print("【阻挡检测】找到目标: " .. potentialTarget:GetUnitName() .. realHeroStr .. "，返回true")
                     self.target = potentialTarget
-                    return true
+                        return true
                 else
                     print("【阻挡检测】没有找到合适目标，返回false")
                     return false
@@ -6702,30 +6969,23 @@ HeroSkillConditions = {
         },
         ["ember_spirit_searing_chains"] = {
             function(self, caster, log)
-                -- 首先检查英雄是否处于 fire remnant 状态
-                if caster:HasModifier("modifier_ember_spirit_fire_remnant") then
-                    return true
-                end
-        
-                local radius = 400
-                local enemies = FindUnitsInRadius(caster:GetTeamNumber(),
-                                                  caster:GetAbsOrigin(),
-                                                  nil,
-                                                  radius,
-                                                  DOTA_UNIT_TARGET_TEAM_ENEMY,
-                                                  DOTA_UNIT_TARGET_HERO + DOTA_UNIT_TARGET_BASIC,
-                                                  DOTA_UNIT_TARGET_FLAG_NONE,
-                                                  FIND_ANY_ORDER,
-                                                  false)
+
+                local ability = caster:FindAbilityByName("ember_spirit_searing_chains")
+                if not ability then return false end
                 
-                for _, enemy in pairs(enemies) do
-                    local modifier = enemy:FindModifierByName("modifier_ember_spirit_searing_chains")
-                    if not modifier or modifier:GetRemainingTime() <= 0.5 then
-                        return true
-                    end
-                end
+                local potentialTarget = self:FindBestEnemyHeroTarget(
+                    caster,
+                    ability,
+                    {"modifier_ember_spirit_searing_chains"},
+                    0.5,
+                    "control" 
+                )
                 
-                return false
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+
+                return potentialTarget ~= nil
             end
         },
     },

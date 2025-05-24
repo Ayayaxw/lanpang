@@ -304,6 +304,12 @@ end
 function modifier_kv_editor:OnCreated(kv)
     -- 延迟一帧执行，确保所有数据都已加载
     Timers:CreateTimer(0.5, function()
+        -- 检查修饰器对象是否仍然有效
+        if not self or self:IsNull() then 
+            print("【KV编辑器】修饰器对象已失效")
+            return 
+        end
+
         local parent = self:GetParent()
         if not parent or parent:IsNull() then return end
         

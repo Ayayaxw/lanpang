@@ -8,6 +8,11 @@
 {
 	"Version"		"1"
 
+
+
+
+
+
 	//=================================================================================================================
 	// Templar Assassin: Refraction Holdout
 	//=================================================================================================================
@@ -362,6 +367,9 @@
     "IsHidden"              "1"
 }
 
+
+
+
 	// "phantom_assassin_blur"
 	// 	{
 
@@ -442,6 +450,21 @@
             "Function"              "CustomInnerFire"
         }
     }
+}
+
+
+"doom_bringer_doom"
+{
+
+	"AbilityValues"
+	{
+		"duration"				
+		{
+			"value"												"666"
+			"special_bonus_facet_doom_bringer_impending_doom"	"0"		// this is needed for facet tooltip to recognize that it's modifying this value
+			"dynamic_value"										"false"
+		}
+	}
 }
 // "centaur_khan_war_stomp"
 // {

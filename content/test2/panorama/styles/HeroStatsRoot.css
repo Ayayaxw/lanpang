@@ -114,6 +114,7 @@
     width: 24px;
     height: 24px;
     vertical-align: center;
+    
 }
 
 /* 左侧属性图标 */
@@ -124,6 +125,7 @@
 /* 右侧属性图标 */
 #RightHeroStatsContainer .HeroStatIcon {
     margin-left: 5px;
+    
 }
 
 /* 属性值样式 */
@@ -131,6 +133,7 @@
     color: white;
     font-size: 16px;
     vertical-align: center;
+    text-shadow: 0px 0px 0px 3.0 #000000;
 }
 
 /* 左侧属性值 */

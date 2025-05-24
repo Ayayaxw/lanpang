@@ -44,7 +44,7 @@ function CommonAI:Ini_SkillCastRange()
         treant_living_armor = 9999,
         rattletrap_rocket_flare = 9999,
         ogre_bruiser_ogre_smash = 100,
-
+        frogmen_congregation_of_the_deep = 0,
     }
 end
 
@@ -74,6 +74,7 @@ function CommonAI:GetSkillCastRange(entity, ability)
             mars_spear = "spear_range",
             primal_beast_onslaught = "max_distance",
             muerta_dead_shot = "AbilityCastRange",
+
         }
         
         local specialValueKey = specialValueKeys[abilityName]
@@ -297,6 +298,13 @@ function CommonAI:GetSkillCastRange(entity, ability)
         if self:containsStrategy(self.hero_strategy, "先开大") then
             castRange = 675
         end
+
+    elseif abilityName == "storm_spirit_static_remnant" and entity:GetHeroFacetID() == 2 then
+
+        castRange = 800
+
+
+
     elseif abilityName == "luna_eclipse" then
         
         if self:containsStrategy(self.hero_strategy, "大招确保罩到自己") then

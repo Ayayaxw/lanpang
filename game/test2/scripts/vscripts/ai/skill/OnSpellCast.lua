@@ -91,6 +91,7 @@ function CommonAI:ProcessPendingSpellCast()
 
             local function checkAbilityPhase()
                 if self.spellCastCounter ~= currentSpellCastId then return end
+                if not skill then self:SetState(AIStates.Idle) return end
 
                 if skillName ~= "storm_spirit_ball_lightning" and self.shouldStop then
                     self:log(string.format("检测到 shouldStop 为 true，中断施法并设置为空闲状态: %s", skillName))
@@ -103,16 +104,12 @@ function CommonAI:ProcessPendingSpellCast()
                     self.needToDodge = false
                 end
 
-                if not skill then
-                    self:log("技能对象为 nil，无法继续")
-                    self:SetState(AIStates.Idle)
-                    return
-                end
+
 
                 if skill:IsInAbilityPhase() then
                     -- 还在前摇，继续检查
                     self:log(string.format("还在前摇中: %s", skillName))
-                    Timers:CreateTimer(0.01, checkAbilityPhase)
+                    Timers:CreateTimer(self.nextThinkTime, checkAbilityPhase)
                     return
                 end
 

@@ -77,6 +77,11 @@ function Precache(context)
     PrecacheResource("particle", "particles/neutral_fx/miniboss_radiant_damage_impact.vpcf", context)
     PrecacheResource("particle", "particles/neutral_fx/miniboss_death_radiant.vpcf", context)
 
+    -- 预加载海象神拳相关资源
+    PrecacheResource("particle", "particles/units/heroes/hero_tusk/tusk_walruspunch_start.vpcf", context)
+    PrecacheResource("particle", "particles/units/heroes/hero_tusk/tusk_walruspunch_impact.vpcf", context)
+    PrecacheResource("soundfile", "soundevents/game_sounds_heroes/game_sounds_tusk.vsndevts", context)
+
     PrecacheResource("model", "models/props_gameplay/divine_sentinel/divine_sentinel_cube.vmdl", context)
 
 

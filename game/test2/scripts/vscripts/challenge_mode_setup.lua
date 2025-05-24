@@ -53,6 +53,9 @@ require("challenges/Attack_Trigger_2skill")
 require("challenges/Attack_Trigger_3skill")
 require("challenges/Attack_Trigger_Ulti")
 require("challenges/Intelligence_Cloak_Battle")
+require("challenges/Damage_Trigger_Punch")
+require("challenges/Attack_Trigger_Any")
+require("challenges/Skill_Stack_1000")
 
 Main.Challenges = {}
 Main.ModeConfig = {}
@@ -158,13 +161,7 @@ Main.GameModes = {
         menuConfig = {"SelfHeroRow", "OpponentHeroRow"},
         category = "test"
     },
-    {
-        id = "Intelligence_Cloak_Battle",
-        code = 0015,
-        name = "智力斗篷大战",
-        menuConfig = {"SelfHeroRow"},
-        category = "test"
-    },
+
 
 
 
@@ -204,7 +201,7 @@ Main.GameModes = {
     {
         id = "Attack_Trigger_3skill",
         code = 1005,
-        name = "攻击触发三技能",
+        name = "攻击触发三/魔晶/神杖技能",
         menuConfig = {"SelfHeroRow"},
         category = "creep"
     },
@@ -215,6 +212,28 @@ Main.GameModes = {
         menuConfig = {"SelfHeroRow"},
         category = "creep"
     },
+    {
+        id = "Attack_Trigger_Any",
+        code = 1007,
+        name = "攻击触发任意技能",
+        menuConfig = {"SelfHeroRow"},
+        category = "creep"
+    },
+    {
+        id = "Damage_Trigger_Punch",
+        code = 1008,
+        name = "攻击触发海象神拳",
+        menuConfig = {"SelfHeroRow"},
+        category = "creep"
+    },
+
+
+
+
+
+
+
+
 
     -- Multiplayer modes (2000-2999)
     {
@@ -311,6 +330,16 @@ Main.GameModes = {
         menuConfig = {"SelfHeroRow", "OpponentHeroRow"},
         category = "multiplayer"
     },
+
+    {
+        id = "Skill_Stack_1000",
+        code = 2016,
+        name = "被动层数1000",
+        menuConfig = {"SelfHeroRow", "OpponentHeroRow"},
+        category = "multiplayer"
+    },
+
+
     -- {
     --     id = "Skill_Value_100",
     --     code = 2016,
@@ -469,6 +498,13 @@ Main.GameModes = {
         menuConfig = {"SelfHeroRow"},
         category = "single"
     },
+    {
+        id = "Intelligence_Cloak_Battle",
+        code = 3023,
+        name = "智力斗篷大战",
+        menuConfig = {"SelfHeroRow"},
+        category = "single"
+    },
 
 
 }
@@ -523,6 +559,10 @@ function Main:RequestStrategyData()
         {
             name = "原地不动",
             id = "stay_position"
+        },
+        {
+            name = "非沉默不动",
+            id = "non_silence_stay_position"
         },
         {
             name = "攻击无敌单位",
@@ -624,6 +664,10 @@ function Main:RequestStrategyData()
             name = "禁用物品",
             id = "disable_item"
         },
+        {
+            name = "禁用所有技能",
+            id = "disable_all_ability"
+        },
     }
 
     --if self:containsStrategy(self.hero_strategy, "躲避模式") then
@@ -645,6 +689,10 @@ function Main:RequestStrategyData()
             {
                 name = "远程吼",
                 id = "remote_roar"
+            },
+            {
+                name = "必须留斩杀",
+                id = "must_kill"
             },
         },
 
@@ -906,6 +954,16 @@ function Main:RequestStrategyData()
                 name = "出门放齿轮",
                 id = "start_with_battery"
             },
+            {
+                name = "出门放弹幕",
+                id = "start_with_junk_mail"
+            },
+            {
+                name = "出门过载",
+                id = "start_with_overclocking"
+            },
+            
+
         },
         npc_dota_hero_windrunner = {  -- 风行者
             {
@@ -1295,12 +1353,16 @@ function Main:RequestStrategyData()
         },
         npc_dota_hero_pugna = {  
             {
-                name = "虚无自己",
+                name = "只虚无自己",
                 id = "1"
             },
             {
                 name = "不虚无自己",
                 id = "2"
+            },
+            {
+                name = "出门虚无",
+                id = "3"
             },
         },
         npc_dota_hero_meepo = {  
@@ -1502,10 +1564,21 @@ function Main:RequestStrategyData()
                 name = "出门开大",
                 id = "ult_on_spawn"
             },
+
+            {
+                name = "直线封锁",
+                id = "straight_line_block"
+            },
             {
                 name = "往前弹射",
-                id = "1"
+                id = "forward_bounce"
+            },  
+
+            {
+                name = "断技能",
+                id = "disable_skill"
             },
+
         },
         npc_dota_hero_legion_commander = {  -- 军团指挥官
             {
@@ -1518,6 +1591,16 @@ function Main:RequestStrategyData()
             },
         },
         npc_dota_hero_invoker = {  -- 祈求者
+
+            {
+                name = "辅助切球",
+                id = "assist_cut_ball"
+            },
+
+
+
+
+
             {
                 name = "神罗天征",
                 id = "deafening_blast"
@@ -1664,6 +1747,10 @@ function Main:RequestStrategyData()
                 name = "分身放身边",
                 id = "1"
             },
+            {
+                name = "后置领域",
+                id = "magnetic_field"
+            },
         },
         npc_dota_hero_bloodseeker = {  -- 血魔
             {
@@ -1750,6 +1837,10 @@ function Main:RequestStrategyData()
                 name = "秒解控",
                 id = "instant_rage"
             },
+            {
+                name = "满血开大",
+                id = "1"
+            },
         },
         npc_dota_hero_mars = {  -- 玛尔斯
             {
@@ -1771,6 +1862,10 @@ function Main:RequestStrategyData()
             {
                 name = "残血开大",
                 id = "rage_at_low_hp"
+            },
+            {
+                name = "见面扔炸弹",
+                id = "throw_bomb_at_spawn"
             },
         },
         npc_dota_hero_troll_warlord = {  -- 巨魔战将

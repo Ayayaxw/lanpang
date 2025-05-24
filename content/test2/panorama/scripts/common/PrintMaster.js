@@ -10,6 +10,10 @@ function OnLocalizedMessage(data) {
     $.Msg(finalMessage);
 }
 
+
+
+
+
 function renderMessage(messageParts) {
     let parts = [];
     
@@ -71,3 +75,4 @@ GameEvents.Subscribe("localized_message", OnLocalizedMessage);
 
 // 添加初始化消息
 $.Msg("Localized message script initialized");
+

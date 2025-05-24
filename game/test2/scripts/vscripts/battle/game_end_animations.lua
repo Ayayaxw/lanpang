@@ -17,7 +17,7 @@ function Main:PlayDefeatAnimation(unit)
         self:DisableHeroWithModifiers(unit, 10)
         unit:AddNewModifier(unit, nil, "modifier_disable_healing", { duration = 10 })
         -- 播放失败动作
-        unit:StartGesture(ACT_DOTA_DEFEAT)
+        -- unit:StartGesture(ACT_DOTA_DEFEAT)
     end
 end
 
@@ -46,7 +46,7 @@ function Main:PlayVictoryEffects(unit)
         self:DisableHeroWithModifiers(unit, 10)
         unit:AddNewModifier(unit, nil, "modifier_disable_healing", { duration = 10 })
         -- 播放胜利动作
-        unit:StartGesture(ACT_DOTA_VICTORY)
+        -- unit:StartGesture(ACT_DOTA_VICTORY)
     end
 end
 
@@ -124,7 +124,7 @@ function Main:gradual_slow_down(loserPos, winnerPos)--游戏结束时的慢动�
     SendToServerConsole("dota_hud_healthbars 0")
     SendToServerConsole("host_timescale 0.1")
     Main:ClearAbilitiesPanel()
-    CustomGameEventManager:Send_ServerToAllClients("FlashWhite",{winnerPos})
+    -- CustomGameEventManager:Send_ServerToAllClients("FlashWhite",{winnerPos})
     CustomGameEventManager:Send_ServerToAllClients("stop_timer", {winnerPos})
     local adjustedWinnerPos = Vector(winnerPos.x, winnerPos.y - 200 , winnerPos.z)
     CustomGameEventManager:Send_ServerToAllClients("cinematic_camera_move", {
@@ -181,7 +181,7 @@ function Main:gradual_slow_down(loserPos, winnerPos)--游戏结束时的慢动�
     Timers:CreateTimer(0.3,function()
 
 
-        local adjustedWinnerPos2 = Vector(winnerPos.x, winnerPos.y, winnerPos.z)
+        local adjustedWinnerPos2 = Vector(winnerPos.x - 100, winnerPos.y, winnerPos.z)
         CustomGameEventManager:Send_ServerToAllClients("cinematic_camera_move", {
             heroPosition = adjustedWinnerPos2,
             cameraData = {

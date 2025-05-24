@@ -1072,6 +1072,84 @@
 		}
 	}	
 
+		"custom_roshan_nosound" //肉山
+	{
+		// Armor
+		//----------------------------------------------------------------
+		"ArmorPhysical"				"30"			// 护甲
+		"MagicalResistance"				"55"			// 魔抗
+		"StatusHealth"				"1000"		// 生命值
+		"StatusHealthRegen"			"20"		// 生命恢复速度
+		"StatusMana"				"0"		// 魔法值
+		"StatusManaRegen"			"0"		// 魔法恢复速度
+
+		// Attack
+		//----------------------------------------------------------------
+		"AttackCapabilities"		"DOTA_UNIT_CAP_MELEE_ATTACK"		// 攻击能力
+		"AttackDamageMin"			"75"		// 最小攻击力
+		"AttackDamageMax"			"75"		// 最大攻击力
+		"AttackDamageType"			"DAMAGE_TYPE_ArmorPhysical"		// 攻击伤害类型
+		"AttackRate"				"2"			// 攻击速度
+		"AttackAnimationPoint"		"0.6"		// 攻击动画点
+		"AttackAcquisitionRange"	"150"		// 获取目标范围
+		"AttackRange"				"150"		// 攻击范围
+		"ProjectileModel"			"particles/base_attacks/ranged_goodguy.vpcf" // 投射物模型
+		"ProjectileSpeed"			"1000"		// 投射物速度
+
+		// General
+		//
+		"BaseClass"					"npc_dota_creature"	// Class of entity of link to.
+		"Model"						"models/creeps/roshan/roshan.vmdl"	// Model.
+		"SoundSet"					""					// Name of sound set.
+		"ModelScale"				"1"
+		"Level"						"30"
+		"IsAncient"					"1"
+				
+		// Abilities
+		//----------------------------------------------------------------
+		"Ability1"					"roshan_revengeroar"	// Ability 1.
+		"Ability2"					"roshan_slam"			// Ability 2.
+		"Ability3"					""			// Ability 3.
+		"Ability4"					""	// Ability 4.
+		"Ability5"					"roshan_bash"		// Ability 5.
+		"Ability6"					"roshan_spell_block"		// Ability 6 - Extra.
+		"Ability7"					"roshan_grab_and_throw"						// Ability 7 - Extra.
+		"Ability8"					""						// Ability 8 - Extra.
+
+		// Bounty
+		//----------------------------------------------------------------
+		"BountyXP"					"400"		// Experience earn.
+		"BountyGoldMin"				"200"		// Gold earned min.
+		"BountyGoldMax"				"290"		// Gold earned max.
+
+		// Bounds
+		//----------------------------------------------------------------
+		"BoundsHullName"			"DOTA_HULL_SIZE_HERO"			// Hull type used for navigation/locomotion.
+		"RingRadius"				"110"
+		"HealthBarOffset"			"400"
+
+		// Movement
+		//----------------------------------------------------------------
+		"MovementCapabilities"		"DOTA_UNIT_CAP_MOVE_GROUND"			// Type of locomotion - ground, air
+		"MovementSpeed"				"270"		// Speed
+		"MovementTurnRate"			"1.0"		// Turning rate.
+
+		// Team
+		//----------------------------------------------------------------
+		"TeamName"					"DOTA_TEAM_BADGUYS"			// Team name.
+		"UnitRelationshipClass"		"DOTA_NPC_UNIT_RELATIONSHIP_TYPE_DEFAULT"
+		
+		// Vision
+		//----------------------------------------------------------------
+		"VisionDaytimeRange"		"1400"		// Range of vision during day light.
+		"VisionNighttimeRange"		"1400"		// Range of vision at night time.
+
+		// Inventory
+		//----------------------------------------------------------------
+		"HasInventory"				"1"
+
+	}	
+
 
 	"double_on_death_mega"
 	{

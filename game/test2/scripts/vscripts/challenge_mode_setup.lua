@@ -569,6 +569,10 @@ function Main:RequestStrategyData()
             id = "attack_invulnerable"
         },
         {
+            name = "朝无敌单位移动",
+            id = "move_to_invulnerable"
+        },
+        {
             name = "不允许对非英雄释放控制",
             id = "no_control_non_hero"
         },
@@ -668,6 +672,15 @@ function Main:RequestStrategyData()
             name = "禁用所有技能",
             id = "disable_all_ability"
         },
+        {
+            name = "躲技能模式",
+            id = "hide_skill"
+        },
+        {
+            name = "禁用施法后移动行为",
+            id = "disable_cast_move"
+        },
+        
     }
 
     --if self:containsStrategy(self.hero_strategy, "躲避模式") then
@@ -1089,6 +1102,26 @@ function Main:RequestStrategyData()
                 name = "飞脸前",
                 id = "storm_initiate"
             },
+            {
+                name = "球状闪电保持距离",
+                id = "storm_move"
+            },
+            {
+                name = "仅电子涡流就绪时出击",
+                id = "storm_only_when_ready"
+            },
+            {
+                name = "没蓝才放拉",
+                id = "storm_no_mana"
+            },
+            {
+                name = "没蓝不滚",
+                id = "storm_no_mana_no_move"
+            },
+
+
+
+
         },
         npc_dota_hero_phantom_assassin = {  -- 幻影刺客
             {
@@ -1579,6 +1612,15 @@ function Main:RequestStrategyData()
                 id = "disable_skill"
             },
 
+            {
+                name = "射最近的树",
+                id = "prioritize_tree"
+            },
+            {
+                name = "射直线上的树",
+                id = "prioritize_tree_in_line"
+            },
+
         },
         npc_dota_hero_legion_commander = {  -- 军团指挥官
             {
@@ -1745,11 +1787,15 @@ function Main:RequestStrategyData()
             },
             {
                 name = "分身放身边",
-                id = "1"
+                id = "clone_at_feet"
             },
             {
                 name = "后置领域",
                 id = "magnetic_field"
+            },
+            {
+                name = "最大距离分身",
+                id = "max_distance_clone"
             },
         },
         npc_dota_hero_bloodseeker = {  -- 血魔

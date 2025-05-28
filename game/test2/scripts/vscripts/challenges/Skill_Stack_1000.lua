@@ -91,6 +91,7 @@ function Main:Init_Skill_Stack_1000(event, playerID)
     PlayerResource:SetGold(playerID, 0, false)
 
     -- 定义时间参数
+    self.start_time = GameRules:GetGameTime()
     self.duration = 10         -- 赛前准备时间
     self.endduration = 10      -- 赛后庆祝时间
     self.limitTime = 100        -- 限定时间为准备时间结束后的一分钟
@@ -141,7 +142,7 @@ function Main:Init_Skill_Stack_1000(event, playerID)
         self.currentArenaHeroes[1] = playerHero
         -- 如果启用了AI，为玩家英雄创建AI
         if selfAIEnabled then
-            Timers:CreateTimer(self.duration - 0.7, function()
+            Timers:CreateTimer(self.duration - 0.1, function()
                 if self.currentTimer ~= timerId or hero_duel.EndDuel then return end
                 local otherSettings = {skillThresholds = selfSkillThresholds}
                 CreateAIForHero(self.leftTeamHero1, selfOverallStrategy, selfHeroStrategy,"leftTeamHero1",0.01, otherSettings)
@@ -159,7 +160,7 @@ function Main:Init_Skill_Stack_1000(event, playerID)
         self.currentArenaHeroes[2] = self.rightTeamHero1
         -- 如果启用了AI，为对手英雄创建AI
         if opponentAIEnabled then
-            Timers:CreateTimer(self.duration - 0.7, function()
+            Timers:CreateTimer(self.duration - 0.1, function()
                 if self.currentTimer ~= timerId or hero_duel.EndDuel then return end
                 local otherSettings = {skillThresholds = opponentSkillThresholds}
                 CreateAIForHero(self.rightTeamHero1, opponentOverallStrategy, opponentHeroStrategy,"rightTeamHero1",0.01, otherSettings)

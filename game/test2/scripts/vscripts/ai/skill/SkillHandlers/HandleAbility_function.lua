@@ -281,7 +281,7 @@ function CommonAI:HandleNoTargetAbility(entity, abilityInfo, target, targetInfo)
         else
             self:MoveToRange(targetInfo.targetPos, totalRange)
             self:SetState(AIStates.Seek)
-            self:log(string.format("技能: %s 敌人不在作用范围内，移动到作用范围，目标距离: %.2f，作用范围: %.2f", abilityInfo.abilityName, targetInfo.distance, abilityInfo.aoeRadius + abilityInfo.castRange))
+
         end
     end
 end

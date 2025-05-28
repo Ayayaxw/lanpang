@@ -72,26 +72,313 @@ function Main:Init_movie_mode(heroName, heroFacet,playerID, heroChineseName)
 
 
 
-    local hPlayer = PlayerResource:GetPlayer(0)
-    DebugCreateHeroWithVariant(hPlayer, "npc_dota_hero_axe", 2, DOTA_TEAM_GOODGUYS, false,
-        function(hero)
+    -- 测试风暴之灵转身时间
+    --TestStormSpiritTurnTime()
+    
+    -- 测试风暴之灵对照组（球状闪电后转身 vs 直接转身）
+    TestStormSpiritControlGroup()
+    
 
-            local spawnPosition = Vector(43, -300, 256)
-            hero:SetRespawnPosition(spawnPosition)
-            FindClearSpaceForUnit(hero, spawnPosition, true)
-            hero:SetIdleAcquire(true)
-            hero:SetAcquisitionRange(0)
+
+    -- local hPlayer = PlayerResource:GetPlayer(0)
+    -- DebugCreateHeroWithVariant(hPlayer, "npc_dota_hero_axe", 2, DOTA_TEAM_GOODGUYS, false,
+    --     function(hero)
+
+    --         local spawnPosition = Vector(43, -300, 256)
+    --         hero:SetRespawnPosition(spawnPosition)
+    --         FindClearSpaceForUnit(hero, spawnPosition, true)
+    --         hero:SetIdleAcquire(true)
+    --         hero:SetAcquisitionRange(0)
             
 
-            if callback then
-                callback(hero)  -- 使用回调函数处理英雄对象
-            end
-        end)
+    --         if callback then
+    --             callback(hero)  -- 使用回调函数处理英雄对象
+    --         end
+    --     end)
 
 
 
 
     -- CreateHeroesSquareFormation1()
+end
+
+
+
+
+
+
+function TestStormSpiritTurnTime()
+    print("[TURN_TIME_TEST] 开始测试风暴之灵转身时间...")
+    
+    -- 创建风暴之灵
+    local spawnPosition = Vector(0, 0, 256)
+    local stormSpirit = CreateUnitByName("npc_dota_hero_storm_spirit", spawnPosition, true, nil, nil, DOTA_TEAM_GOODGUYS)
+    
+    if not stormSpirit then
+        print("[TURN_TIME_TEST] 错误：无法创建风暴之灵")
+        return
+    end
+    
+    -- 给予满级
+    HeroMaxLevel(stormSpirit)
+    
+    -- 设置初始朝向（朝北）
+    stormSpirit:SetForwardVector(Vector(0, 1, 0))
+    
+    -- 等待一帧确保朝向设置完成
+    Timers:CreateTimer(0.1, function()
+        -- 记录当前朝向
+        local currentForward = stormSpirit:GetForwardVector()
+        print(string.format("[TURN_TIME_TEST] 风暴之灵当前朝向: (%.3f, %.3f, %.3f)", currentForward.x, currentForward.y, currentForward.z))
+        
+        -- 计算身后200码的位置
+        local currentPosition = stormSpirit:GetOrigin()
+        local backwardDirection = -currentForward  -- 相反方向
+        local targetPosition = currentPosition + backwardDirection * 500
+        
+        print(string.format("[TURN_TIME_TEST] 当前位置: (%.1f, %.1f, %.1f)", currentPosition.x, currentPosition.y, currentPosition.z))
+        print(string.format("[TURN_TIME_TEST] 目标位置: (%.1f, %.1f, %.1f)", targetPosition.x, targetPosition.y, targetPosition.z))
+        
+        -- 创建CommonAI实例来使用calculateTurnTime函数
+        local commonAI = CommonAI.new(stormSpirit, {"默认策略"}, {"默认策略"}, 0.1, {})
+        
+        -- 预测转身时间
+        local predictedTurnTime = commonAI:calculateTurnTime(stormSpirit, targetPosition, currentPosition)
+        print(string.format("[TURN_TIME_TEST] 预测转身时间: %.3f 秒", predictedTurnTime))
+        
+        -- 获取球状闪电技能
+        local ballLightning = stormSpirit:FindAbilityByName("storm_spirit_ball_lightning")
+        if not ballLightning then
+            print("[TURN_TIME_TEST] 错误：找不到球状闪电技能")
+            return
+        end
+        
+        -- 确保技能满级
+        ballLightning:SetLevel(4)
+        
+        -- 记录开始时间
+        local startTime = GameRules:GetGameTime()
+        local castStartTime = nil
+        local phaseStartTime = nil
+        local actualTurnTime = nil
+        
+        print("[TURN_TIME_TEST] 开始发出球状闪电指令...")
+        
+        -- 发出球状闪电指令
+        stormSpirit:CastAbilityOnPosition(targetPosition, ballLightning, -1)
+        
+        -- 创建监听器，持续监听技能状态
+        local checkTimer = Timers:CreateTimer(0, function()
+            if not stormSpirit:IsAlive() then
+                return nil  -- 停止计时器
+            end
+            
+            local currentTime = GameRules:GetGameTime()
+            
+            -- 检查技能是否处于前摇阶段
+            if ballLightning:IsInAbilityPhase() and not phaseStartTime then
+                phaseStartTime = currentTime
+                actualTurnTime = phaseStartTime - startTime
+                
+                print("[TURN_TIME_TEST] === 技能进入前摇阶段分析 ===")
+                print(string.format("[TURN_TIME_TEST] 转身完成时间: %.3f 秒", actualTurnTime))
+                print(string.format("[TURN_TIME_TEST] 预测时间: %.3f 秒", predictedTurnTime))
+                print(string.format("[TURN_TIME_TEST] 时间差异: %.3f 秒 (%.1f%%)", 
+                    actualTurnTime - predictedTurnTime,
+                    math.abs(actualTurnTime - predictedTurnTime) / predictedTurnTime * 100))
+                
+                -- 详细分析结果
+                if math.abs(actualTurnTime - predictedTurnTime) < 0.05 then
+                    print("[TURN_TIME_TEST] ✓ 预测非常准确！误差小于50毫秒")
+                elseif math.abs(actualTurnTime - predictedTurnTime) < 0.1 then
+                    print("[TURN_TIME_TEST] ✓ 预测较为准确，误差小于100毫秒")
+                elseif math.abs(actualTurnTime - predictedTurnTime) < 0.2 then
+                    print("[TURN_TIME_TEST] △ 预测基本准确，误差小于200毫秒")
+                else
+                    print("[TURN_TIME_TEST] ✗ 预测误差较大，需要调整算法")
+                end
+                
+                -- 输出前摇开始时的朝向信息
+                local phaseStartForward = stormSpirit:GetForwardVector()
+                print(string.format("[TURN_TIME_TEST] 前摇开始时朝向: (%.3f, %.3f, %.3f)", phaseStartForward.x, phaseStartForward.y, phaseStartForward.z))
+                
+                local expectedDirection = (targetPosition - currentPosition):Normalized()
+                print(string.format("[TURN_TIME_TEST] 期望朝向: (%.3f, %.3f, %.3f)", expectedDirection.x, expectedDirection.y, expectedDirection.z))
+                
+                local phaseStartDotProduct = phaseStartForward:Dot(expectedDirection)
+                local phaseStartAngleDiff = math.deg(math.acos(math.min(1, math.max(-1, phaseStartDotProduct))))
+                print(string.format("[TURN_TIME_TEST] 前摇开始时角度差: %.2f 度", phaseStartAngleDiff))
+                print(string.format("[TURN_TIME_TEST] 说明：英雄在角度差%.2f度时就开始施法前摇", phaseStartAngleDiff))
+            end
+            
+            -- 检查是否开始施法（channeling）
+            if stormSpirit:IsChanneling() and not castStartTime then
+                castStartTime = currentTime
+                print("[TURN_TIME_TEST] === 技能开始施法分析 ===")
+                print(string.format("[TURN_TIME_TEST] 施法开始时间: %.3f 秒", castStartTime - startTime))
+                
+                local castStartForward = stormSpirit:GetForwardVector()
+                print(string.format("[TURN_TIME_TEST] 施法开始时朝向: (%.3f, %.3f, %.3f)", castStartForward.x, castStartForward.y, castStartForward.z))
+                
+                local expectedDirection = (targetPosition - currentPosition):Normalized()
+                local castStartDotProduct = castStartForward:Dot(expectedDirection)
+                local castStartAngleDiff = math.deg(math.acos(math.min(1, math.max(-1, castStartDotProduct))))
+                print(string.format("[TURN_TIME_TEST] 施法开始时角度差: %.2f 度", castStartAngleDiff))
+            end
+            
+            -- 检查技能是否施法完毕
+            if castStartTime and not ballLightning:IsChanneling() and not ballLightning:IsInAbilityPhase() then
+                print("[TURN_TIME_TEST] === 技能施法完毕分析 ===")
+                local finalTime = currentTime
+                print(string.format("[TURN_TIME_TEST] 施法完毕时间: %.3f 秒", finalTime - startTime))
+                
+                local finalForward = stormSpirit:GetForwardVector()
+                print(string.format("[TURN_TIME_TEST] 施法完毕时朝向: (%.3f, %.3f, %.3f)", finalForward.x, finalForward.y, finalForward.z))
+                
+                local expectedDirection = (targetPosition - currentPosition):Normalized()
+                local finalDotProduct = finalForward:Dot(expectedDirection)
+                local finalAngleDiff = math.deg(math.acos(math.min(1, math.max(-1, finalDotProduct))))
+                print(string.format("[TURN_TIME_TEST] 施法完毕时角度差: %.2f 度", finalAngleDiff))
+                
+                print("[TURN_TIME_TEST] === 总结 ===")
+                print("[TURN_TIME_TEST] 1. 英雄不需要完全转向目标方向才能开始施法")
+                print("[TURN_TIME_TEST] 2. 只要在一定角度范围内（约11.5度）就可以开始前摇")
+                print("[TURN_TIME_TEST] 3. 预测算法应该计算到达这个角度范围所需的时间，而不是完全转向")
+                
+                return nil  -- 停止计时器
+            end
+            
+            -- 超时保护（10秒后停止监听）
+            if currentTime - startTime > 10 then
+                print("[TURN_TIME_TEST] 监听超时，停止测试")
+                return nil
+            end
+            
+            return 0.03  -- 继续每30毫秒检查一次
+        end)
+        
+        -- 5秒后清理
+        Timers:CreateTimer(6, function()
+            if stormSpirit and stormSpirit:IsAlive() then
+                stormSpirit:RemoveSelf()
+            end
+            print("[TURN_TIME_TEST] 测试完成，清理单位")
+        end)
+    end)
+end
+
+function TestStormSpiritAngleTolerance()
+    print("[ANGLE_TEST] 开始测试风暴之灵不同角度的施法容忍度...")
+    
+    local testAngles = {30, 45, 60, 90, 120, 150, 180}  -- 测试不同的角度
+    local testIndex = 1
+    
+    local function runSingleTest()
+        if testIndex > #testAngles then
+            print("[ANGLE_TEST] === 所有角度测试完成 ===")
+            return
+        end
+        
+        local targetAngle = testAngles[testIndex]
+        print(string.format("[ANGLE_TEST] \n=== 测试角度: %d度 ===", targetAngle))
+        
+        -- 创建风暴之灵
+        local spawnPosition = Vector(0, 0, 256)
+        local stormSpirit = CreateUnitByName("npc_dota_hero_storm_spirit", spawnPosition, true, nil, nil, DOTA_TEAM_GOODGUYS)
+        
+        if not stormSpirit then
+            print("[ANGLE_TEST] 错误：无法创建风暴之灵")
+            return
+        end
+        
+        -- 给予满级
+        HeroMaxLevel(stormSpirit)
+        
+        -- 设置初始朝向（朝北）
+        stormSpirit:SetForwardVector(Vector(0, 1, 0))
+        
+        -- 等待一帧确保朝向设置完成
+        Timers:CreateTimer(0.1, function()
+            -- 计算目标位置（根据指定角度）
+            local currentPosition = stormSpirit:GetOrigin()
+            local angleRad = math.rad(targetAngle)
+            local targetDirection = Vector(math.sin(angleRad), math.cos(angleRad), 0)
+            local targetPosition = currentPosition + targetDirection * 200
+            
+            print(string.format("[ANGLE_TEST] 目标角度: %d度", targetAngle))
+            print(string.format("[ANGLE_TEST] 目标位置: (%.1f, %.1f, %.1f)", targetPosition.x, targetPosition.y, targetPosition.z))
+            
+            -- 获取球状闪电技能
+            local ballLightning = stormSpirit:FindAbilityByName("storm_spirit_ball_lightning")
+            if not ballLightning then
+                print("[ANGLE_TEST] 错误：找不到球状闪电技能")
+                return
+            end
+            
+            ballLightning:SetLevel(4)
+            
+            -- 记录开始时间
+            local startTime = GameRules:GetGameTime()
+            local phaseStartTime = nil
+            local canCast = false
+            
+            -- 发出球状闪电指令
+            stormSpirit:CastAbilityOnPosition(targetPosition, ballLightning, -1)
+            
+            -- 监听器
+            local checkTimer = Timers:CreateTimer(0.03, function()
+                if not stormSpirit:IsAlive() then
+                    return nil
+                end
+                
+                local currentTime = GameRules:GetGameTime()
+                
+                -- 检查技能是否处于前摇阶段
+                if ballLightning:IsInAbilityPhase() and not phaseStartTime then
+                    phaseStartTime = currentTime
+                    canCast = true
+                    
+                    local currentForward = stormSpirit:GetForwardVector()
+                    local expectedDirection = (targetPosition - currentPosition):Normalized()
+                    local dotProduct = currentForward:Dot(expectedDirection)
+                    local actualAngleDiff = math.deg(math.acos(math.min(1, math.max(-1, dotProduct))))
+                    
+                    print(string.format("[ANGLE_TEST] ✓ 角度%d度可以施法！实际角度差: %.1f度", targetAngle, actualAngleDiff))
+                    print(string.format("[ANGLE_TEST] 转身时间: %.3f秒", phaseStartTime - startTime))
+                    
+                    -- 清理并进行下一个测试
+                    Timers:CreateTimer(1, function()
+                        if stormSpirit and stormSpirit:IsAlive() then
+                            stormSpirit:RemoveSelf()
+                        end
+                        testIndex = testIndex + 1
+                        Timers:CreateTimer(0.5, runSingleTest)
+                    end)
+                    
+                    return nil
+                end
+                
+                -- 超时检查（2秒后认为无法施法）
+                if currentTime - startTime > 2 then
+                    print(string.format("[ANGLE_TEST] ✗ 角度%d度无法施法（超时）", targetAngle))
+                    
+                    -- 清理并进行下一个测试
+                    if stormSpirit and stormSpirit:IsAlive() then
+                        stormSpirit:RemoveSelf()
+                    end
+                    testIndex = testIndex + 1
+                    Timers:CreateTimer(0.5, runSingleTest)
+                    
+                    return nil
+                end
+                
+                return 0.03
+            end)
+        end)
+    end
+    
+    -- 开始第一个测试
+    runSingleTest()
 end
 
 
@@ -1381,17 +1668,17 @@ end
 
 
 function Main:OnNPCSpawned_movie_mode(spawnedUnit, event)
-    -- 如果不是被排除的单位，则应用战场效果
-    if not self:isExcludedUnit(spawnedUnit) then
-        -- 检查单位是否有指定的modifier
-        Timers:CreateTimer(1, function()
-        local modifier = spawnedUnit:FindModifierByName("modifier_dazzle_nothl_projection_soul_debuff")
-        if modifier then
-            -- 设置modifier持续时间为无限(-1表示永久持续)
-            modifier:SetDuration(-1, true)
-        end
-    end)
-    end
+    -- -- 如果不是被排除的单位，则应用战场效果
+    -- if not self:isExcludedUnit(spawnedUnit) then
+    --     -- 检查单位是否有指定的modifier
+    --     Timers:CreateTimer(1, function()
+    --         local modifier = spawnedUnit:FindModifierByName("modifier_dazzle_nothl_projection_soul_debuff")
+    --         if modifier then
+    --             -- 设置modifier持续时间为无限(-1表示永久持续)
+    --             modifier:SetDuration(-1, true)
+    --         end
+    --     end)
+    -- end
 end
 
 
@@ -4920,3 +5207,188 @@ function SetupStrengthHeroesScene()
     end)
 end
 
+function TestStormSpiritControlGroup()
+    print("[CONTROL_GROUP_TEST] 开始对照组测试：球状闪电后转身 vs 直接转身...")
+    
+    -- 创建两只风暴之灵
+    local spawnPosition1 = Vector(-200, -200, 256)  -- 左侧风暴之灵（释放技能组）
+    local spawnPosition2 = Vector(200, 200, 256)   -- 右侧风暴之灵（对照组）
+    
+    local stormSpirit1 = CreateUnitByName("npc_dota_hero_storm_spirit", spawnPosition1, true, nil, nil, DOTA_TEAM_GOODGUYS)
+    local stormSpirit2 = CreateUnitByName("npc_dota_hero_storm_spirit", spawnPosition2, true, nil, nil, DOTA_TEAM_GOODGUYS)
+    
+    if not stormSpirit1 or not stormSpirit2 then
+        print("[CONTROL_GROUP_TEST] 错误：无法创建风暴之灵")
+        return
+    end
+    
+    -- 给予满级
+    HeroMaxLevel(stormSpirit1)
+    HeroMaxLevel(stormSpirit2)
+    
+    -- 设置初始朝向（都朝北）
+    stormSpirit1:SetForwardVector(Vector(0, 1, 0))
+    stormSpirit2:SetForwardVector(Vector(0, 1, 0))
+
+
+    -- 等待一帧确保朝向设置完成
+    Timers:CreateTimer(1, function()
+        -- 计算身后的目标位置（相对于当前朝向的反方向）
+        local currentForward1 = stormSpirit1:GetForwardVector()
+        local currentForward2 = stormSpirit2:GetForwardVector()
+        
+        local currentPosition1 = stormSpirit1:GetOrigin()
+        local currentPosition2 = stormSpirit2:GetOrigin()
+        
+        local backwardDirection1 = -currentForward1
+        local backwardDirection2 = -currentForward2
+        
+        local targetPosition1 = currentPosition1 + backwardDirection1 * 500
+        local targetPosition2 = currentPosition2 + backwardDirection2 * 500
+        
+        print("[CONTROL_GROUP_TEST] === 初始状态 ===")
+        print(string.format("[CONTROL_GROUP_TEST] 风暴之灵1（技能组）位置: (%.1f, %.1f, %.1f)", currentPosition1.x, currentPosition1.y, currentPosition1.z))
+        print(string.format("[CONTROL_GROUP_TEST] 风暴之灵2（对照组）位置: (%.1f, %.1f, %.1f)", currentPosition2.x, currentPosition2.y, currentPosition2.z))
+        print(string.format("[CONTROL_GROUP_TEST] 目标位置1: (%.1f, %.1f, %.1f)", targetPosition1.x, targetPosition1.y, targetPosition1.z))
+        print(string.format("[CONTROL_GROUP_TEST] 目标位置2: (%.1f, %.1f, %.1f)", targetPosition2.x, targetPosition2.y, targetPosition2.z))
+        
+        -- 获取球状闪电技能
+        local ballLightning = stormSpirit1:FindAbilityByName("storm_spirit_ball_lightning")
+        if not ballLightning then
+            print("[CONTROL_GROUP_TEST] 错误：找不到球状闪电技能")
+            return
+        end
+        
+        ballLightning:SetLevel(4)
+        
+        -- 记录开始时间
+        local startTime = GameRules:GetGameTime()
+        local castStartTime = GameRules:GetGameTime()
+        local moveCommandExecuted1 = false
+        local moveCommandExecuted2 = false
+        
+        print("[CONTROL_GROUP_TEST] === 开始测试 ===")
+        print("[CONTROL_GROUP_TEST] 风暴之灵1开始释放球状闪电...")
+        
+        -- 风暴之灵1释放球状闪电
+        stormSpirit1:CastAbilityOnPosition(targetPosition1, ballLightning, -1)
+        
+        -- 创建监听器
+        local checkTimer = Timers:CreateTimer(0, function()
+
+            
+            local currentTime = GameRules:GetGameTime()
+            
+            -- 检查风暴之灵1是否开始施法（channeling）
+            if stormSpirit1:IsChanneling() and not castStartTime then
+                castStartTime = currentTime
+                print(string.format("[CONTROL_GROUP_TEST] 风暴之灵1开始施法，耗时: %.3f秒", castStartTime - startTime))
+            end
+            
+            -- 检查风暴之灵1技能是否结束（0.3秒后执行转身指令）
+            if currentTime - castStartTime >= 0.3 then
+                moveCommandExecuted1 = true
+                
+                print("[CONTROL_GROUP_TEST] === 0.3秒后执行转身指令 ===")
+                print(string.format("[CONTROL_GROUP_TEST] 当前时间: %.3f秒", currentTime - startTime))
+                
+                -- 风暴之灵1执行MOVE_TO_DIRECTION指令（朝反方向）
+                local order1 = {
+                    UnitIndex = stormSpirit1:entindex(),
+                    OrderType = DOTA_UNIT_ORDER_MOVE_TO_DIRECTION,
+                    Position = Vector(backwardDirection1.x, backwardDirection1.y, 0),
+                    TargetIndex = stormSpirit1:entindex(),
+                    AbilityIndex = ballLightning:entindex()
+                }
+                ExecuteOrderFromTable(order1)
+                print("[CONTROL_GROUP_TEST] 风暴之灵1执行MOVE_TO_DIRECTION指令")
+                
+                -- 同时让风暴之灵2也执行相同的转身指令
+                local order2 = {
+                    UnitIndex = stormSpirit2:entindex(),
+                    OrderType = DOTA_UNIT_ORDER_MOVE_TO_DIRECTION,
+                    Position = Vector(backwardDirection2.x, backwardDirection2.y, 0),
+                    TargetIndex = stormSpirit2:entindex(),
+                    AbilityIndex = ballLightning:entindex()
+                }
+                ExecuteOrderFromTable(order2)
+                moveCommandExecuted2 = true
+                print("[CONTROL_GROUP_TEST] 风暴之灵2同时执行MOVE_TO_DIRECTION指令")
+                
+                -- 开始监控转身过程
+                local turnStartTime = currentTime
+                local initialForward1 = stormSpirit1:GetForwardVector()
+                local initialForward2 = stormSpirit2:GetForwardVector()
+                
+                print(string.format("[CONTROL_GROUP_TEST] 转身开始时朝向1: (%.3f, %.3f, %.3f)", initialForward1.x, initialForward1.y, initialForward1.z))
+                print(string.format("[CONTROL_GROUP_TEST] 转身开始时朝向2: (%.3f, %.3f, %.3f)", initialForward2.x, initialForward2.y, initialForward2.z))
+                
+                -- 创建转身监控计时器
+                local turnMonitorTimer = Timers:CreateTimer(0.03, function()
+                    if not stormSpirit1:IsAlive() or not stormSpirit2:IsAlive() then
+                        return nil
+                    end
+                    
+                    local monitorTime = GameRules:GetGameTime()
+                    local currentForward1 = stormSpirit1:GetForwardVector()
+                    local currentForward2 = stormSpirit2:GetForwardVector()
+                    
+                    -- 计算与目标方向的角度差
+                    local targetDirection1 = backwardDirection1:Normalized()
+                    local targetDirection2 = backwardDirection2:Normalized()
+                    
+                    local dotProduct1 = currentForward1:Dot(targetDirection1)
+                    local dotProduct2 = currentForward2:Dot(targetDirection2)
+                    
+                    local angleDiff1 = math.deg(math.acos(math.min(1, math.max(-1, dotProduct1))))
+                    local angleDiff2 = math.deg(math.acos(math.min(1, math.max(-1, dotProduct2))))
+                    
+                    -- 每0.1秒输出一次状态
+                    if math.fmod(monitorTime - turnStartTime, 0.1) < 0.03 then
+                        print(string.format("[CONTROL_GROUP_TEST] 转身进度 %.1f秒 - 角度差1: %.1f度, 角度差2: %.1f度", 
+                            monitorTime - turnStartTime, angleDiff1, angleDiff2))
+                    end
+                    
+                    -- 检查是否都完成转身（角度差小于5度）
+                    if angleDiff1 < 5 and angleDiff2 < 5 then
+                        local turnCompleteTime = monitorTime
+                        print("[CONTROL_GROUP_TEST] === 转身完成分析 ===")
+                        print(string.format("[CONTROL_GROUP_TEST] 风暴之灵1转身完成时间: %.3f秒", turnCompleteTime - turnStartTime))
+                        print(string.format("[CONTROL_GROUP_TEST] 风暴之灵2转身完成时间: %.3f秒", turnCompleteTime - turnStartTime))
+                        print(string.format("[CONTROL_GROUP_TEST] 最终角度差1: %.2f度", angleDiff1))
+                        print(string.format("[CONTROL_GROUP_TEST] 最终角度差2: %.2f度", angleDiff2))
+                        
+                        -- 分析结果
+                        print("[CONTROL_GROUP_TEST] === 对照组分析结果 ===")
+                        print("[CONTROL_GROUP_TEST] 1. 技能组（红色）：先释放球状闪电，0.3秒后转身")
+                        print("[CONTROL_GROUP_TEST] 2. 对照组（绿色）：直接转身，无技能影响")
+                        print("[CONTROL_GROUP_TEST] 3. 两者转身速度应该相同，验证技能不影响转身速率")
+                        
+                        return nil
+                    end
+                    
+                    -- 转身监控超时（5秒）
+                    if monitorTime - turnStartTime > 5 then
+                        print("[CONTROL_GROUP_TEST] 转身监控超时")
+                        return nil
+                    end
+                    
+                    return 0.03
+                end)
+                
+                -- 主监听器在执行完转身指令后停止
+                return nil
+            end
+            
+            -- 总体超时保护（15秒）
+            if currentTime - startTime > 15 then
+                print("[CONTROL_GROUP_TEST] 总体测试超时，停止监控")
+                return nil
+            end
+            
+            return 0.03
+        end)
+        
+
+    end)
+end

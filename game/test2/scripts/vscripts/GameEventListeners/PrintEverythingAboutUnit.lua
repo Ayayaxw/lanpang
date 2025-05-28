@@ -5,10 +5,34 @@ function Main:PrintEverythingAboutUnit(event)
     local PREFIX = "【打印单位信息】"
 
     -- 查找所有的npc_dota_thinker单位
-    local enemyVariant = Convars:GetInt("dota_hero_demo_default_enemy_variant")
-    print("敌对单位变体：" .. enemyVariant)
 
+
+    -- 获取单位当前位置和朝向
+    local currentPos = unit:GetAbsOrigin()
+    local forwardVector = unit:GetForwardVector()
     
+    -- 计算反方向前进1个单位的目标位置
+    local targetPos = currentPos - forwardVector * 100
+    unit:CastAbilityOnPosition(targetPos,unit:FindAbilityByName("storm_spirit_ball_lightning"),-1)
+    Timers:CreateTimer(0.03,function()
+        unit:Stop()
+    end)
+    
+    -- local order = {
+    --     UnitIndex = unit:entindex(),
+    --     OrderType = DOTA_UNIT_ORDER_MOVE_TO_DIRECTION ,
+    --     TargetIndex = unit:entindex(),
+    --     Position = targetPos,
+    --     AbilityIndex = 0,
+    -- }
+    -- ExecuteOrderFromTable(order)
+
+
+
+
+
+
+
     if unit:IsBarracks() then
         print(PREFIX .. string.format("【单位】%s 是守卫", unit:GetUnitName()))
     else

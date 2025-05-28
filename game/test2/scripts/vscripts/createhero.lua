@@ -21,8 +21,8 @@ function CreateHero(playerId, heroName, FacetID, spawnPosition, team, isControll
             
             hero:SetRespawnPosition(spawnPosition)
             FindClearSpaceForUnit(hero, spawnPosition, true)
-            hero:SetIdleAcquire(true)
-            hero:SetAcquisitionRange(0)
+            hero:SetIdleAcquire(false)
+
             
             
             print(heroName .. " 已创建，带有命石 " .. FacetID)
@@ -64,7 +64,7 @@ function CreateHeroHeroChaos(playerId, heroName, FacetID, spawnPosition, team, i
     FindClearSpaceForUnit(hero, spawnPosition, true)
 
     -- 设置AI行为参数
-    hero:SetIdleAcquire(true)
+    hero:SetIdleAcquire(false)
     hero:SetAcquisitionRange(0)
 
     print(heroName .. " 已创建，命石ID: " .. FacetID)

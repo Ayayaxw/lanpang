@@ -303,6 +303,14 @@ function CommonAI:GetSkillCastRange(entity, ability)
 
         castRange = 800
 
+    elseif abilityName == "storm_spirit_ball_lightning" and self:containsStrategy(self.hero_strategy, "仅电子涡流就绪时出击")  then
+        local vortexAbility = entity:FindAbilityByName("storm_spirit_electric_vortex")
+        if vortexAbility and vortexAbility:IsFullyCastable() then
+            castRange = 9999
+        else
+            castRange = 1100
+        end
+
 
 
     elseif abilityName == "luna_eclipse" then

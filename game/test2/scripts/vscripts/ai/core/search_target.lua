@@ -1,3 +1,123 @@
+function CommonAI:FindAiBestTargets(entity)
+    -- 初始化变量
+    local target = nil
+    local attackTarget = nil
+    local lastResortTarget = nil
+
+    -- 1. 主要目标查找
+    if self:containsStrategy(self.global_strategy, "谁近打谁") then
+        target = self:FindTarget(entity)
+    else
+        target = self:FindHeroTarget(entity)
+    end
+
+    -- 2. 优先攻击目标设置
+    local preferredTargets = {
+        "npc_dota_unit_tombstone",
+        "npc_dota_phoenix_sun", 
+        "npc_dota_pugna_nether_ward",
+        "npc_dota_juggernaut_healing_ward",
+        "npc_dota_unit_tidehunter_anchor",
+    }
+    
+    -- 3. 检查是否优先打小僵尸
+    if self:containsStrategy(self.global_strategy, "优先打小僵尸") then
+        table.insert(preferredTargets, "npc_dota_unit_undying_zombie_torso")
+        table.insert(preferredTargets, "npc_dota_unit_undying_zombie")
+        table.insert(preferredTargets, "npc_dota_weaver_swarm")
+    end
+    
+    attackTarget = self:FindPreferredTarget(entity, preferredTargets)
+    if attackTarget then
+        self:log("找到优先攻击目标:", attackTarget:GetUnitName())
+    end
+
+    -- 4. 主要目标查找逻辑
+    if not target then 
+        lastResortTarget = self:FindNearestEnemyLastResort(entity)
+
+        self:log("未找到英雄目标，寻找普通单位")
+        target = self:FindTarget(entity)
+        if target then
+            self:log("找到普通目标")
+        elseif (self:containsStrategy(self.global_strategy, "攻击无敌单位") or self:containsStrategy(self.global_strategy, "朝无敌单位移动")) and lastResortTarget then
+            self:log("转为攻击无敌单位")
+            target = lastResortTarget
+        end
+
+        -- 5. 特殊情况处理：卡尔和SD
+        if lastResortTarget 
+            and (entity:GetUnitName() == "npc_dota_hero_invoker" and lastResortTarget:HasModifier("modifier_invoker_tornado"))
+            or (entity:GetUnitName() == "npc_dota_hero_shadow_demon" and lastResortTarget:HasModifier("modifier_shadow_demon_disruption")) 
+        then
+            target = lastResortTarget
+            self:log("卡尔/SD特殊模式")
+        end
+    end
+
+    -- 6. 弱AI单位特殊处理
+    if self:IsWeakAIUnit(entity) then
+        -- 根据策略决定使用哪个目标
+        if self:containsStrategy(self.global_strategy, "优先打小僵尸") and attackTarget then
+            target = attackTarget
+        end
+        
+        -- 如果没有合适的目标，再进行更具体的搜索
+        if not target then
+            target = self:FindWeakAIUnitTarget(entity)
+        end
+        
+        -- 处理目标动作
+        if target then
+            if target:IsInvulnerable() then
+                -- 目标无敌，移动到目标位置
+                local order = {
+                    UnitIndex = self.entity:entindex(),
+                    OrderType = DOTA_UNIT_ORDER_MOVE_TO_POSITION,
+                    TargetIndex = target:entindex(),
+                    Position = target:GetAbsOrigin()
+                }
+                ExecuteOrderFromTable(order)
+                self:log("目标无敌,移动到目标位置")
+            elseif not self:IsUnableToAttack(entity, target) then
+                -- 可以攻击，执行攻击命令
+                local order = {
+                    UnitIndex = self.entity:entindex(),
+                    OrderType = DOTA_UNIT_ORDER_ATTACK_TARGET,
+                    TargetIndex = target:entindex(),
+                    Position = target:GetAbsOrigin()
+                }
+                ExecuteOrderFromTable(order)
+                self:log("弱幻象单位开始移动并攻击目标")
+            else
+                self:log("弱幻象单位当前无法攻击目标")
+            end
+        end
+        
+        -- 返回特殊标记表示弱AI单位已处理完毕
+        return {
+            isWeakAIHandled = true,
+            target = target,
+            attackTarget = attackTarget,
+            lastResortTarget = lastResortTarget
+        }
+    end
+
+    -- 返回所有找到的目标
+    return {
+        isWeakAIHandled = false,
+        target = target,
+        attackTarget = attackTarget,
+        lastResortTarget = lastResortTarget
+    }
+end
+
+
+
+
+
+
+
 function CommonAI:FindHeroTarget(entity)
     self:log("FindHeroTarget called for entity: " .. (entity and entity:GetUnitName() or "nil"))
     if not entity then
@@ -832,12 +952,14 @@ function CommonAI:FindBestEnemyHeroTarget(entity, ability, requiredModifiers, mi
         local aoeRadius = self:GetSkillAoeRadius(ability)
         searchRadius = castRange + aoeRadius + 200
     end
-    
+    local finalSearchRadius = nil
     -- 确保搜索范围不小于目标距离
     if self.target then
         local distanceToTarget = (self.target:GetAbsOrigin() - self.entity:GetAbsOrigin()):Length2D()
         if searchRadius < distanceToTarget then
-            searchRadius = distanceToTarget
+            finalSearchRadius = distanceToTarget
+        else
+            finalSearchRadius = searchRadius
         end
     end
 
@@ -847,7 +969,7 @@ function CommonAI:FindBestEnemyHeroTarget(entity, ability, requiredModifiers, mi
         entity:GetTeamNumber(),
         entity:GetOrigin(), 
         nil,
-        searchRadius,
+        finalSearchRadius,
         DOTA_UNIT_TARGET_TEAM_ENEMY,
         targetType,
         DOTA_UNIT_TARGET_FLAG_NOT_ILLUSIONS + DOTA_UNIT_TARGET_FLAG_NO_INVIS,
@@ -1073,15 +1195,20 @@ function CommonAI:FindBestEnemyHeroTarget(entity, ability, requiredModifiers, mi
             return nil
         end
         
-        -- 记录目标选择信息以避免重复施法
+        -- 记录目标选择信息以避免重复施法 - 只有在searchRadius范围内才记录
         if checkDuplicateCast then
-            if not Main.targetLockInfo then Main.targetLockInfo = {} end
-            Main.targetLockInfo = {
-                target = target,
-                caster = entity,
-                timestamp = GameRules:GetGameTime()
-            }
-            self:log(string.format("记录施法目标: %s，施法者: %s", target:GetUnitName(), entity:GetUnitName()))
+            local distanceToTarget = (target:GetAbsOrigin() - entity:GetAbsOrigin()):Length2D()
+            if distanceToTarget <= searchRadius then
+                if not Main.targetLockInfo then Main.targetLockInfo = {} end
+                Main.targetLockInfo = {
+                    target = target,
+                    caster = entity,
+                    timestamp = GameRules:GetGameTime()
+                }
+                self:log(string.format("记录施法目标: %s，施法者: %s，距离: %.0f", target:GetUnitName(), entity:GetUnitName(), distanceToTarget))
+            else
+                self:log(string.format("目标距离(%.0f)超出searchRadius(%.0f)，不记录重复施法信息", distanceToTarget, searchRadius))
+            end
         end
         
         self:log(string.format("选择敌方英雄目标: %s", target:GetUnitName()))
@@ -1099,15 +1226,20 @@ function CommonAI:FindBestEnemyHeroTarget(entity, ability, requiredModifiers, mi
             return nil
         end
         
-        -- 记录非英雄单位目标选择信息以避免重复施法
+        -- 记录非英雄单位目标选择信息以避免重复施法 - 只有在searchRadius范围内才记录
         if checkDuplicateCast then
-            if not Main.targetLockInfo then Main.targetLockInfo = {} end
-            Main.targetLockInfo = {
-                target = target,
-                caster = entity,
-                timestamp = GameRules:GetGameTime()
-            }
-            self:log(string.format("记录施法目标(非英雄): %s，施法者: %s", target:GetUnitName(), entity:GetUnitName()))
+            local distanceToTarget = (target:GetAbsOrigin() - entity:GetAbsOrigin()):Length2D()
+            if distanceToTarget <= searchRadius then
+                if not Main.targetLockInfo then Main.targetLockInfo = {} end
+                Main.targetLockInfo = {
+                    target = target,
+                    caster = entity,
+                    timestamp = GameRules:GetGameTime()
+                }
+                self:log(string.format("记录施法目标(非英雄): %s，施法者: %s，距离: %.0f", target:GetUnitName(), entity:GetUnitName(), distanceToTarget))
+            else
+                self:log(string.format("目标距离(%.0f)超出searchRadius(%.0f)，不记录重复施法信息", distanceToTarget, searchRadius))
+            end
         end
         
         self:log(string.format("选择敌方非英雄目标: %s", target:GetUnitName()))

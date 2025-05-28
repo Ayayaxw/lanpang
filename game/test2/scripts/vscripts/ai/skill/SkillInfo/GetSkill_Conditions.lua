@@ -28,36 +28,24 @@ HeroSkillConditions = {
         },
         ["bloodseeker_rupture"] = {
             function(self, caster, log)
+
+
                 local ability = caster:FindAbilityByName("bloodseeker_rupture")
-                local castRange = self:GetSkillCastRange(caster, ability)
-        
-                local enemies = FindUnitsInRadius(
-                    caster:GetTeamNumber(),
-                    caster:GetOrigin(),
-                    nil,
-                    castRange,
-                    DOTA_UNIT_TARGET_TEAM_ENEMY,
-                    DOTA_UNIT_TARGET_HERO,  -- 只对英雄使用破裂
-                    0,
-                    FIND_ANY_ORDER,
-                    false
+                if not ability then return false end
+                
+                local potentialTarget = self:FindBestEnemyHeroTarget(
+                    caster,
+                    ability,
+                    {"modifier_bloodseeker_rupture"},
+                    0.5,
+                    "distance" 
                 )
-        
-                for _, enemy in pairs(enemies) do
-                    if not enemy:HasModifier("modifier_bloodseeker_rupture") then
-                        if enemy:IsHero() then
-                            if log then
-                                log("找到合适的目标: " .. enemy:GetUnitName())
-                            end
-                            return true
-                        end
-                    end
+                
+                if potentialTarget then
+                    self.target = potentialTarget
                 end
-        
-                if log then
-                    log("没有找到合适的目标")
-                end
-                return false
+                
+                return self.target ~= nil
             end
         },
     },
@@ -391,31 +379,54 @@ HeroSkillConditions = {
         },
     },
 
-        ["npc_dota_hero_arc_warden"] = {
-            ["arc_warden_magnetic_field"] = {
-                function(self, caster, log)
+    ["npc_dota_hero_arc_warden"] = {
+        ["arc_warden_magnetic_field"] = {
+            function(self, caster, log)
 
 
-                    local ability = caster:FindAbilityByName("arc_warden_magnetic_field")
-                    if not ability then return false end
-            
-                    self.Ally = self:FindBestAllyHeroTarget(
-                        caster, 
-                        ability,
-                        {"modifier_arc_warden_magnetic_field_evasion"},
-                        0,
-                        "nearest_to_enemy",
-                        true,
-                        true,
-                        false
-                    )
-            
-                    -- 检查是否找到了盟友
-                    return self.Ally ~= nil
-
-                end
-            },
+                local ability = caster:FindAbilityByName("arc_warden_magnetic_field")
+                if not ability then return false end
+        
+                self.Ally = self:FindBestAllyHeroTarget(
+                    caster, 
+                    ability,
+                    {"modifier_arc_warden_magnetic_field_evasion"},
+                    0,
+                    "nearest_to_enemy",
+                    true,
+                    true,
+                    false
+                )
+        
+                -- 检查是否找到了盟友
+                return self.Ally ~= nil
+            end
         },
+
+
+        ["arc_warden_flux"] = {
+            function(self, caster, log)
+                local ability = caster:FindAbilityByName("arc_warden_flux")
+                if not ability then return false end
+                
+                local potentialTarget = self:FindBestEnemyHeroTarget(
+                    caster,
+                    ability,
+                    {"modifier_arc_warden_flux"},
+                    0.5,
+                    "control" 
+                )
+                
+                if potentialTarget then
+                    self.target = potentialTarget
+                end
+                
+                return potentialTarget ~= nil
+            end
+        },
+
+        
+    },
 
     ["npc_dota_hero_axe"] = {
         ["axe_culling_blade"] = {
@@ -4613,43 +4624,22 @@ HeroSkillConditions = {
         ["ancient_apparition_cold_feet"] = {
             function(self, caster, log)
                 local ability = caster:FindAbilityByName("ancient_apparition_cold_feet")
-                if not ability then
-                    log("无法找到 Cold Feet 技能")
-                    return false
-                end
+                if not ability then return false end
             
-                local castRange =  self:GetSkillCastRange(caster, ability)
-                local aoeRadius =  self:GetSkillAoeRadius(ability)
-                local searchRange = castRange
-            
-                if bit.band(ability:GetBehavior(), DOTA_ABILITY_BEHAVIOR_POINT) ~= 0 then
-                    searchRange = castRange + aoeRadius
-                    log("技能为点目标类型，搜索范围: " .. searchRange)
-                else
-                    log("技能非点目标类型，搜索范围: " .. searchRange)
-                end
-            
-                local enemies = FindUnitsInRadius(
-                    caster:GetTeamNumber(),
-                    caster:GetOrigin(),
-                    nil,
-                    searchRange,
-                    DOTA_UNIT_TARGET_TEAM_ENEMY,
-                    DOTA_UNIT_TARGET_HERO,
-                    0,
-                    FIND_ANY_ORDER,
-                    false
+                local potentialTarget = self:FindBestEnemyHeroTarget(
+                    caster,
+                    ability,
+                    {"modifier_cold_feet"},
+                    0.5,
+                    "control" 
                 )
-            
-                for _, enemy in pairs(enemies) do
-                    if enemy:IsHero() and not enemy:IsSummoned() and not enemy:HasModifier("modifier_cold_feet") then
-                        log("找到合适的英雄目标: " .. enemy:GetUnitName())
-                        return true
-                    end
+                
+                if potentialTarget then
+                    self.target = potentialTarget
                 end
-            
-                log("没有找到合适的英雄目标")
-                return false
+
+                return potentialTarget ~= nil
+
             end
         }
     },
@@ -4657,23 +4647,122 @@ HeroSkillConditions = {
     ["npc_dota_hero_storm_spirit"] = {
         ["storm_spirit_ball_lightning"] = {
             function(self, caster, log)
-                if self:containsStrategy(self.hero_strategy, "折叠飞") then
-                    self:log("[STORM_TEST] 进入折叠飞策略判断")
-                    
-                    if not caster:HasModifier("modifier_storm_spirit_ball_lightning") then
-                        self:log("[STORM_TEST] 风暴之灵没有 modifier_storm_spirit_ball_lightning，允许使用技能")
-                        return true
-                    elseif caster:HasModifier("modifier_storm_spirit_ball_lightning") and self.nextBallLightningCastReady == true then
-                        self:log("[STORM_TEST] 风暴之灵有 modifier_storm_spirit_ball_lightning，且 nextBallLightningCastReady 为 true，允许使用技能")
-                        return true
-                    elseif caster:HasModifier("modifier_storm_spirit_ball_lightning") and self.nextBallLightningCastReady ~= true then
-                        self:log("[STORM_TEST] 风暴之灵有 modifier_storm_spirit_ball_lightning，但 nextBallLightningCastReady 不为 true，禁止使用技能")
-                        self:log(string.format("[STORM_TEST] nextBallLightningCastReady 的当前值: %s", tostring(self.nextBallLightningCastReady)))
-                        self:log(string.format("[STORM_TEST] 当前游戏时间: %.3f", GameRules:GetGameTime()))
+                if self:containsStrategy(self.hero_strategy, "没蓝不滚") then
+                    if caster:GetMana() <= 500 then
                         return false
                     end
-                
-                    self:log("[STORM_TEST] 未匹配任何条件，默认禁止使用技能")
+                end
+
+
+
+
+                if self:containsStrategy(self.hero_strategy, "折叠飞") then
+                    self:log("[FOLDING_FLY] 进入折叠飞策略判断")
+                    
+                    -- 初始化折叠飞相关变量
+                    if not self.foldingFlyCount then
+                        self.foldingFlyCount = 0
+                    end
+                    if not self.foldingFlyRecords then
+                        self.foldingFlyRecords = {}
+                    end
+                    if not self.lastBallLightningCastTime then
+                        self.lastBallLightningCastTime = 0
+                    end
+                    
+                    local currentTime = GameRules:GetGameTime()
+                    local isFlying = caster:HasModifier("modifier_storm_spirit_ball_lightning")
+                    
+                    -- 如果没有在飞行，允许施法
+                    if not isFlying then
+                        self:log("[FOLDING_FLY] 风暴之灵没有 modifier_storm_spirit_ball_lightning，允许使用技能")
+                        self.lastBallLightningCastTime = currentTime
+                        return true
+                    end
+                    
+                    -- 如果正在飞行，需要计算是否到了下一次施法的时机
+                    if isFlying then
+                        -- 获取上次施法位置和当前位置
+                        local lastCastPos = self:GetLastCastPositionFromGlobal(caster, "storm_spirit_ball_lightning")
+                        if not lastCastPos then
+                            self:log("[FOLDING_FLY] 无法获取上次施法位置，允许施法（错过最佳时机也要施法）")
+                            return true
+                        end
+                        
+                        local currentPos = caster:GetOrigin()
+                        local nextTargetPos = self.target and self.target:GetOrigin() or currentPos
+                        
+                        -- 获取球状闪电技能和速度
+                        local ability = caster:FindAbilityByName("storm_spirit_ball_lightning")
+                        local ballLightningSpeed = 1400  -- 默认速度
+                        if ability then
+                            local kv = ability:GetAbilityKeyValues()
+                            local currentLevel = ability:GetLevel()
+                            if kv and kv.AbilityValues and kv.AbilityValues.ball_lightning_move_speed then
+                                local speedValue = kv.AbilityValues.ball_lightning_move_speed
+                                if type(speedValue) == "string" then
+                                    local speeds = {}
+                                    for s in speedValue:gmatch("%S+") do
+                                        table.insert(speeds, tonumber(s))
+                                    end
+                                    ballLightningSpeed = speeds[currentLevel] or speeds[#speeds] or 1400
+                                elseif type(speedValue) == "table" then
+                                    ballLightningSpeed = tonumber(speedValue[currentLevel] or speedValue[#speedValue]) or 1400
+                                else
+                                    ballLightningSpeed = tonumber(speedValue) or 1400
+                                end
+                            end
+                        end
+                        
+                        -- 实时计算：基于当前位置计算剩余飞行距离和时间
+                        local remainingDistance = (lastCastPos - currentPos):Length2D()
+                        local remainingFlightTime = remainingDistance / ballLightningSpeed
+                        
+                        -- 记录用于日志的总距离（用于调试）
+                        local totalDistance = remainingDistance  -- 当前就是剩余距离
+                        
+                        -- 获取真实的施法前摇时间
+                        local expectedCastPoint = ability and ability:GetCastPoint() or 0.3
+                        
+                        -- 计算下一次施法的最佳时机：剩余飞行时间 - 准备时间
+                        local totalPreparationTime = expectedCastPoint + 0.03   -- 加上一帧的网络延迟
+                        
+                        -- 边界处理：确保最小施法间隔
+                        local minPreparationTime = 0.1  -- 最小准备时间
+                        totalPreparationTime = math.max(totalPreparationTime, minPreparationTime)
+                        
+                        self:log(string.format("[FOLDING_FLY] 时间计算详情:"))
+                        self:log(string.format("[FOLDING_FLY]  - 当前位置到目标位置剩余距离: %.2f", remainingDistance))
+                        self:log(string.format("[FOLDING_FLY]  - 球状闪电速度: %.2f", ballLightningSpeed))
+                        self:log(string.format("[FOLDING_FLY]  - 剩余飞行时间: %.3f", remainingFlightTime))
+                        self:log(string.format("[FOLDING_FLY]  - 施法前摇: %.3f", expectedCastPoint))
+                        self:log(string.format("[FOLDING_FLY]  - 总准备时间: %.3f", totalPreparationTime))
+                        
+                        -- 判断是否到了施法时机：剩余飞行时间 <= 总准备时间
+                        if remainingFlightTime <= totalPreparationTime then
+                            self:log(string.format("[FOLDING_FLY] 到达施法时机，允许施法 (剩余飞行: %.3f, 准备时间: %.3f)", remainingFlightTime, totalPreparationTime))
+                            self.lastBallLightningCastTime = currentTime
+                            self.foldingFlyCount = self.foldingFlyCount + 1
+                            
+                            -- 记录这次施法的详细信息
+                            table.insert(self.foldingFlyRecords, {
+                                castTime = currentTime,
+                                lastCastPos = lastCastPos,
+                                currentPos = currentPos,
+                                remainingDistance = remainingDistance,
+                                remainingFlightTime = remainingFlightTime,
+                                totalPreparationTime = totalPreparationTime
+                            })
+                            
+                            return true
+                        else
+                            local timeUntilOptimal = remainingFlightTime - totalPreparationTime
+                            self:log(string.format("[FOLDING_FLY] 尚未到达施法时机 (还需等待: %.3f秒)", timeUntilOptimal))
+                            return false
+                        end
+                    end
+                    
+                    self:log("[FOLDING_FLY] 未匹配任何条件，默认禁止使用技能")
                     return false
                 else
                     local attackRange = caster:Script_GetAttackRange()
@@ -4732,7 +4821,7 @@ HeroSkillConditions = {
                     -- 获取上次技能释放时间
                     if Main and Main.heroLastCastAbility and Main.heroLastCastAbility[heroIndex] then
                         for abilityName, abilityData in pairs(Main.heroLastCastAbility[heroIndex]) do
-                            if abilityData.time > lastAbilityTime then
+                            if abilityData.time and abilityData.time > lastAbilityTime then
                                 lastAbilityTime = abilityData.time
                             end
                         end
@@ -4742,6 +4831,11 @@ HeroSkillConditions = {
                     end
                     
                     -- 如果有球状闪电且上次技能释放后还没有攻击过，不返回true
+
+                    if self:containsStrategy(self.hero_strategy, "球状闪电保持距离") and hasBallLightning then
+                        return false
+                    end
+
                     if hasBallLightning and (lastAbilityTime > lastAttackTime) then
                         print("[风暴判断] 有球状闪电且上次技能释放后还没有攻击过，禁止使用技能")
                         self:log("有球状闪电且上次技能释放后还没有攻击过，禁止使用技能")
@@ -4766,7 +4860,7 @@ HeroSkillConditions = {
                     end
                     
                     -- 排除electric_rave层数大于1的情况
-                    if hasElectricRave and electricRaveStacks > 1 then
+                    if hasElectricRave and electricRaveStacks > 1 and currentMana < 500 then
                         print("[风暴判断] 电子兵层数>1，禁止使用技能")
                         self:log("电子兵层数大于1，禁止使用技能")
                         return false
@@ -4839,6 +4933,16 @@ HeroSkillConditions = {
         ["storm_spirit_electric_vortex"] = {
             function(self, caster, log)
                 -- 检查自身是否有禁止的 modifier
+                if self:containsStrategy(self.hero_strategy, "没蓝才放拉") then
+                    if caster:GetMana() <= 500 then
+                        return true
+                    else
+                        return false
+                    end
+                end
+
+
+
                 local forbiddenModifiers = {
                     "modifier_storm_spirit_overload",
                     "modifier_storm_spirit_electric_rave",
@@ -5041,50 +5145,28 @@ HeroSkillConditions = {
         ["viper_nethertoxin"] = {
             function(self, caster, log)
                 local ability = caster:FindAbilityByName("viper_nethertoxin")
-                if not ability then
-                    return false
-                end
+                if not ability then return false end
             
-                local castRange =  self:GetSkillCastRange(caster, ability)
-                local aoeRadius =  self:GetSkillAoeRadius(ability)
-                local searchRange = castRange
-            
-                if bit.band(ability:GetBehavior(), DOTA_ABILITY_BEHAVIOR_POINT) ~= 0 then
-                    searchRange = castRange + aoeRadius
-                    log("技能为点目标类型，搜索范围: " .. searchRange)
-                else
-                    log("技能非点目标类型，搜索范围: " .. searchRange)
-                end
-            
-
-                if self:containsStrategy(self.global_strategy, "防守策略") then
-                    searchRange = 3000
-                end
-
-
-                local enemies = FindUnitsInRadius(
-                    caster:GetTeamNumber(),
-                    caster:GetOrigin(),
-                    nil,
-                    searchRange,
-                    DOTA_UNIT_TARGET_TEAM_ENEMY,
-                    DOTA_UNIT_TARGET_HERO,
+                local potentialTarget = self:FindBestEnemyHeroTarget(
+                    caster,
+                    ability,
+                    {"modifier_viper_nethertoxin"},
                     0,
-                    FIND_ANY_ORDER,
-                    false
+                    "distance" 
                 )
                 
-                for _, enemy in pairs(enemies) do
-                    if enemy:IsHero() and not enemy:IsSummoned() and self:NeedsModifierRefresh(enemy,{"modifier_viper_nethertoxin"}, 0) then
-                        log("找到合适的英雄目标: " .. enemy:GetUnitName())
-                        return true
-                    end
+                if potentialTarget then
+                    self.target = potentialTarget
                 end
-            
-                log("没有找到合适的英雄目标")
-                return false
+
+                return potentialTarget ~= nil
+
+
             end
         },
+
+
+
     },
 
     ["npc_dota_hero_death_prophet"] = {
@@ -5125,42 +5207,22 @@ HeroSkillConditions = {
         ["death_prophet_silence"] = {
             function(self, caster, log)
                 local ability = caster:FindAbilityByName("death_prophet_silence")
-                if not ability then
-                    return false
-                end
+                if not ability then return false end
             
-                local castRange =  self:GetSkillCastRange(caster, ability)
-                local aoeRadius =  self:GetSkillAoeRadius(ability)
-                local searchRange = castRange
-            
-                if bit.band(ability:GetBehavior(), DOTA_ABILITY_BEHAVIOR_POINT) ~= 0 then
-                    searchRange = castRange + aoeRadius
-                    log("技能为点目标类型，搜索范围: " .. searchRange)
-                else
-                    log("技能非点目标类型，搜索范围: " .. searchRange)
-                end
-            
-                local enemies = FindUnitsInRadius(
-                    caster:GetTeamNumber(),
-                    caster:GetOrigin(),
-                    nil,
-                    searchRange,
-                    DOTA_UNIT_TARGET_TEAM_ENEMY,
-                    DOTA_UNIT_TARGET_HERO,
-                    0,
-                    FIND_ANY_ORDER,
-                    false
+                local potentialTarget = self:FindBestEnemyHeroTarget(
+                    caster,
+                    ability,
+                    {"modifier_death_prophet_silence"},
+                    0.5,
+                    "control" 
                 )
                 
-                for _, enemy in pairs(enemies) do
-                    if enemy:IsHero() and not enemy:IsSummoned() and self:NeedsModifierRefresh(enemy,{"modifier_death_prophet_silence"}, 0.5) then
-                        log("找到合适的英雄目标: " .. enemy:GetUnitName())
-                        return true
-                    end
+                if potentialTarget then
+                    self.target = potentialTarget
                 end
-            
-                log("没有找到合适的英雄目标")
-                return false
+
+                return potentialTarget ~= nil
+
             end
         }
     },
@@ -6202,11 +6264,6 @@ HeroSkillConditions = {
                         end
                     end
                 end
-
-
-
-
-
                 print("正在检测技能: muerta_dead_shot")
                 self:log("正在检测技能: muerta_dead_shot")
                 local ability = caster:FindAbilityByName("muerta_dead_shot")
@@ -7612,7 +7669,7 @@ function CommonAI:checkAbilities(caster, excludeAbilities)
         local ability = caster:GetAbilityByIndex(i)
         if ability then
             local abilityName = ability:GetAbilityName()
-            local heroName = caster:GetUnitName()
+                        local heroName = caster:GetUnitName()
 
             if not self:shouldSkipAbility(ability, abilityName, heroName, excludeAbilities, i) then
                 self:log("找到可用技能:", abilityName)
@@ -8087,12 +8144,31 @@ end
 
 function CommonAI:IsHPBelowSkillThreshold(ability, entity)
     local abilityName = ability:GetAbilityName()
+    
+    -- 定义特殊技能表，这些技能在"卡时间"策略下不受阈值限制
+    local timeConstraintSkills = {
+        ["storm_spirit_ball_lightning"] = true,
+        ["storm_spirit_static_remnant"] = true,
+
+        -- 可以在这里添加更多需要此逻辑的技能
+    }
+
+    -- 检查是否是特殊技能且满足"卡时间"策略条件
+    if timeConstraintSkills[abilityName] then
+        if self:containsStrategy(self.global_strategy, "卡时间") then
+            if (Main.start_time + Main.limitTime + Main.duration) - GameRules:GetGameTime() <= 0.89 then
+                self:log("[STORM_TEST] 卡时间策略生效，技能 " .. abilityName .. " 血量阈值不再生效")
+                --打印差值
+                self:log("[STORM_TEST] 差值: " .. (Main.start_time + Main.limitTime + Main.duration) - GameRules:GetGameTime())
+                return true -- 血量阈值不再生效，直接返回true
+            else
+                self:log("[STORM_TEST] 卡时间策略失效，技能 " .. abilityName .. " 受血量阈值限制")
+            end
+        end
+    end
+
     local skillKey = nil
     
-
-    --打印ability的技能名
-    --print("技能名："..abilityName)
-
 
     -- 判断是否是大招
     if ability:GetAbilityType() == ABILITY_TYPE_ULTIMATE then
@@ -8143,6 +8219,36 @@ end
 function CommonAI:GetSkillRangeThreshold(ability, entity, range)
     local abilityName = ability:GetAbilityName()
 
+    -- 检查是否是躲避技能，如果是则不做阈值限制
+    if self.shouldUseDodgeSkills and self.currentAvailableDodgeSkills then
+        for _, dodgeSkillName in ipairs(self.currentAvailableDodgeSkills) do
+            if abilityName == dodgeSkillName then
+                return range -- 躲避技能不受阈值限制
+            end
+        end
+    end
+
+    -- 定义特殊技能表，这些技能在"卡时间"策略下不受阈值限制
+    local timeConstraintSkills = {
+        ["storm_spirit_ball_lightning"] = true,
+
+        -- 可以在这里添加更多需要此逻辑的技能
+    }
+
+    -- 检查是否是特殊技能且满足"卡时间"策略条件
+    if timeConstraintSkills[abilityName] then
+        if self:containsStrategy(self.global_strategy, "卡时间") then
+            if (Main.start_time + Main.limitTime + Main.duration) - GameRules:GetGameTime() <= 0.89 then
+                self:log("[STORM_TEST] 卡时间策略生效，技能 " .. abilityName .. " 不受阈值限制")
+                return range -- 不受阈值限制，直接返回原始range
+            else
+                self:log("[STORM_TEST] 卡时间策略失效，技能 " .. abilityName .. " 受阈值限制")
+                --打印差值
+                self:log("[STORM_TEST] 差值: " .. (Main.start_time + Main.limitTime + Main.duration) - GameRules:GetGameTime())
+            end
+        end
+    end
+
     local skillKey = nil
     
     -- 判断是否是大招
@@ -8179,21 +8285,20 @@ function CommonAI:GetSkillRangeThreshold(ability, entity, range)
     -- 处理range为0的情况
     if range == 0 then
         if distThreshold == 0 then
-
             return 0
-        else
-
-            return distThreshold
         end
     end
     if distThreshold == 0 then
         return range  -- 阈值为0时不限制，直接使用传入的range
     end
+
+    return distThreshold
+
     -- 比较阈值和range，返回较小的值
-    local result = math.min(distThreshold, range)
+    -- local result = math.min(distThreshold, range)
 
     
-    return result
+    -- return result
 end
 
 

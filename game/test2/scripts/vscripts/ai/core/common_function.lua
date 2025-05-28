@@ -246,8 +246,16 @@ function CommonAI:MoveToRange(targetPosition, range)
 
     if self:containsStrategy(self.global_strategy, "原地不动") then
         self:log("原地不动")
+            --打印self.eneity当前朝向
+        local forwardVector = self.entity:GetForwardVector()
+        self:log(string.format("当前朝向: (%.2f, %.2f, %.2f)", forwardVector.x, forwardVector.y, forwardVector.z))
         return
     end
+    self:log("移动到范围")
+
+
+
+
 
     local target = self.target
     local myPos = self.entity:GetAbsOrigin()
@@ -625,7 +633,7 @@ end
 
 --     -- 确保 targetPosition 是一个 Vector 对象
 --     if not isVector(targetPosition) then
---         -- self:log(string.format("[STORM_TEST] 错误：targetPosition 不是有效的 Vector 对象。类型: %s, 值: %s", type(targetPosition), tostring(targetPosition)))
+--         -- self:log(string.format("[TURN_TIME_TEST] 错误：targetPosition 不是有效的 Vector 对象。类型: %s, 值: %s", type(targetPosition), tostring(targetPosition)))
 --         return originalCastPoint, 0
 --     end
 
@@ -645,18 +653,21 @@ end
     
 --     local adjustedCastPoint = math.max(originalCastPoint, turnTime)
     
---     self:log(string.format("[STORM_TEST] 英雄朝向: (%.2f, %.2f, %.2f)", forwardVector.x, forwardVector.y, forwardVector.z))
---     self:log(string.format("[STORM_TEST] 目标方向: (%.2f, %.2f, %.2f)", newDirection.x, newDirection.y, newDirection.z))
---     self:log(string.format("[STORM_TEST] 点积: %.4f", dotProduct))
---     self:log(string.format("[STORM_TEST] 角度差: %.2f 度", angleDifference))
---     self:log(string.format("[STORM_TEST] 预计转身时间: %.3f 秒", turnTime))
---     self:log(string.format("[STORM_TEST] 预计总施法前摇时间: %.3f 秒", adjustedCastPoint))
+--     self:log(string.format("[TURN_TIME_TEST] 英雄朝向: (%.2f, %.2f, %.2f)", forwardVector.x, forwardVector.y, forwardVector.z))
+--     self:log(string.format("[TURN_TIME_TEST] 目标方向: (%.2f, %.2f, %.2f)", newDirection.x, newDirection.y, newDirection.z))
+--     self:log(string.format("[TURN_TIME_TEST] 点积: %.4f", dotProduct))
+--     self:log(string.format("[TURN_TIME_TEST] 角度差: %.2f 度", angleDifference))
+--     self:log(string.format("[TURN_TIME_TEST] 预计转身时间: %.3f 秒", turnTime))
+--     self:log(string.format("[TURN_TIME_TEST] 预计总施法前摇时间: %.3f 秒", adjustedCastPoint))
     
 --     return adjustedCastPoint, turnTime
 -- end
 
 function CommonAI:calculateTurnTime(caster, targetPosition, castPosition)
+    self:log("[TURN_TIME_CALC] ========== 开始转身时间计算 ==========")
+    
     local forwardVector = caster:GetForwardVector()
+    self:log(string.format("[TURN_TIME_CALC] 步骤1 - 获取英雄朝向: (%.4f, %.4f, %.4f)", forwardVector.x, forwardVector.y, forwardVector.z))
     
     -- 确保 targetPosition 和 castPosition 是 Vector 对象
     local function ensureVector(v)
@@ -665,39 +676,80 @@ function CommonAI:calculateTurnTime(caster, targetPosition, castPosition)
         elseif type(v) == "table" and type(v.x) == "number" and type(v.y) == "number" and type(v.z) == "number" then
             return Vector(v.x, v.y, v.z)
         else
-            self:log(string.format("[STORM_TEST] 错误：无法转换为 Vector 对象。类型: %s, 值: %s", type(v), tostring(v)))
+            self:log(string.format("[TURN_TIME_CALC] 错误：无法转换为 Vector 对象。类型: %s, 值: %s", type(v), tostring(v)))
             return nil
         end
     end
 
     local vectorTarget = ensureVector(targetPosition)
     local vectorCast = ensureVector(castPosition)
+    self:log(string.format("[TURN_TIME_CALC] 步骤2 - 目标位置: (%.4f, %.4f, %.4f)", vectorTarget.x, vectorTarget.y, vectorTarget.z))
+    self:log(string.format("[TURN_TIME_CALC] 步骤2 - 施法位置: (%.4f, %.4f, %.4f)", vectorCast.x, vectorCast.y, vectorCast.z))
+    
     if not vectorTarget or not vectorCast then
+        self:log("[TURN_TIME_CALC] 错误：向量转换失败，返回转身时间 0")
         return 0
     end
 
-    local newDirection = (vectorTarget - vectorCast):Normalized()
+    -- 计算方向向量
+    local directionVector = vectorTarget - vectorCast
+    self:log(string.format("[TURN_TIME_CALC] 步骤3 - 方向向量(未归一化): (%.4f, %.4f, %.4f)", directionVector.x, directionVector.y, directionVector.z))
+    
+    local directionLength = directionVector:Length()
+    self:log(string.format("[TURN_TIME_CALC] 步骤3 - 方向向量长度: %.4f", directionLength))
+    
+    local newDirection = directionVector:Normalized()
+    self:log(string.format("[TURN_TIME_CALC] 步骤3 - 目标方向(归一化): (%.4f, %.4f, %.4f)", newDirection.x, newDirection.y, newDirection.z))
+    
+    -- 计算点积
     local dotProduct = forwardVector:Dot(newDirection)
-    local angleDifference = math.deg(math.acos(math.min(1, math.max(-1, dotProduct))))
-    local requiredAngle = 11.5  -- Dota 2 中英雄开始施法所需的最小角度
+    self:log(string.format("[TURN_TIME_CALC] 步骤4 - 点积计算: %.6f", dotProduct))
+    
+    -- 限制点积范围以避免数值误差
+    local clampedDotProduct = math.min(1, math.max(-1, dotProduct))
+    self:log(string.format("[TURN_TIME_CALC] 步骤4 - 限制后点积: %.6f", clampedDotProduct))
+    
+    -- 计算角度
+    local angleRadians = math.acos(clampedDotProduct)
+    self:log(string.format("[TURN_TIME_CALC] 步骤5 - 角度(弧度): %.6f", angleRadians))
+    
+    local angleDifference = math.deg(angleRadians)
+    self:log(string.format("[TURN_TIME_CALC] 步骤5 - 角度差(度): %.4f", angleDifference))
+    
+    local requiredAngle = 11.5  -- Dota 2 中英雄开始施法所需的最小角度（基于实际测试调整）
+    self:log(string.format("[TURN_TIME_CALC] 步骤6 - 所需最小角度: %.2f 度", requiredAngle))
+    
     local turnRate = self:getTurnRate(caster)
+    self:log(string.format("[TURN_TIME_CALC] 步骤7 - 转身速率: %.6f", turnRate))
     
     local turnTime = 0
     if angleDifference > requiredAngle then
-        -- 使用新的公式计算转身时间
-        turnTime = (math.rad(angleDifference - requiredAngle) * 0.03) / turnRate
+        self:log(string.format("[TURN_TIME_CALC] 步骤8 - 需要转身：角度差(%.4f) > 所需角度(%.2f)", angleDifference, requiredAngle))
+        
+        -- 计算需要转身的角度（从当前角度差转到requiredAngle）
+        local actualTurnAngle = angleDifference - requiredAngle
+        self:log(string.format("[TURN_TIME_CALC] 步骤8 - 实际需要转身角度: %.4f 度", actualTurnAngle))
+        
+        local actualTurnAngleRadians = math.rad(actualTurnAngle)
+        self:log(string.format("[TURN_TIME_CALC] 步骤8 - 实际需要转身角度(弧度): %.6f", actualTurnAngleRadians))
+        
+        -- 使用Dota 2的正确转身时间公式：t = (0.03 * π) / T
+        -- 其中 T 是转身速率，π 是180度对应的弧度
+        -- 对于任意角度：t = (0.03 * 角度弧度) / T
+        turnTime = (0.03 * actualTurnAngleRadians) / turnRate
+        self:log(string.format("[TURN_TIME_CALC] 步骤8 - 计算转身时间: (0.03 * %.6f) / %.6f = %.6f", actualTurnAngleRadians, turnRate, turnTime))
+    else
+        self:log(string.format("[TURN_TIME_CALC] 步骤8 - 无需转身：角度差(%.4f) <= 所需角度(%.2f)", angleDifference, requiredAngle))
     end
     
     -- 添加一个小的延迟来模拟服务器延迟和游戏引擎处理时间
     local serverDelay = 0.033
-    turnTime = turnTime + serverDelay
+    self:log(string.format("[TURN_TIME_CALC] 步骤9 - 添加服务器延迟: %.3f 秒", serverDelay))
     
-    self:log(string.format("[STORM_TEST] 英雄朝向: (%.2f, %.2f, %.2f)", forwardVector.x, forwardVector.y, forwardVector.z))
-    self:log(string.format("[STORM_TEST] 目标方向: (%.2f, %.2f, %.2f)", newDirection.x, newDirection.y, newDirection.z))
-    self:log(string.format("[STORM_TEST] 点积: %.4f", dotProduct))
-    self:log(string.format("[STORM_TEST] 角度差: %.2f 度", angleDifference))
-    self:log(string.format("[STORM_TEST] 转身速率: %.4f", turnRate))
-    self:log(string.format("[STORM_TEST] 预计转身时间: %.3f 秒", turnTime))
+    turnTime = turnTime + serverDelay
+    self:log(string.format("[TURN_TIME_CALC] 步骤9 - 最终转身时间: %.6f 秒", turnTime))
+    
+    self:log("[TURN_TIME_CALC] ========== 转身时间计算完成 ==========")
     
     return turnTime
 end

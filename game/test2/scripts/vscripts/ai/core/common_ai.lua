@@ -19,6 +19,8 @@ require("ai/skill/ConditionFunctions")
 require("ai/hero_ai/visage")
 require("ai/skill/AutoUpgradeHeroAbilities")
 require("ai/skill/OnSpellCast")
+require("ai/skill/ShouldDodgeSkill")
+
 
 require("ai/skill/SkillHandlers/EnemyTarget_InRange")
 require("ai/skill/SkillHandlers/EnemyTarget_OutOfRange")
@@ -45,8 +47,8 @@ require("ai/skill/SkillInfo/GetSkill_SelfCastSkill")
 require("ai/skill/SkillInfo/GetSkill_Behavior")
 require("ai/skill/SkillInfo/GetSkill_TargetType")
 
-require("ai/skill/SkillInfo/Get_DodgableSkills")
-require("ai/skill/SkillInfo/Get_DodgeSkills")
+require("ai/skill/SkillInfo/GetSkill_AvoidableSkills")
+require("ai/skill/SkillInfo/GetSkill_EvasionSkills")
 require("ai/skill/SkillInfo/GetSkill_NumberMapping")
 
 
@@ -75,8 +77,8 @@ function CommonAI:constructor(entity, overallStrategy, heroStrategy, thinkInterv
     self:Ini_SkillAoeRadius()
     self:Ini_SkillCastRange()
     self:Ini_SkillTargetTeam()
-    self:Init_DodgableSkills()
-    self:Init_DodgeSkills()
+    self:Init_AvoidableSkills()
+    self:Init_EvasionSkills()
     self:Ini_SkillBehavior()
     self:Ini_SkillTargetType()
     self.toggleItems = {}
@@ -94,7 +96,15 @@ function CommonAI:constructor(entity, overallStrategy, heroStrategy, thinkInterv
     self.hasWaited = false  -- 添加一个标志来跟踪是否已经等待过
     self.nextThinkTime = thinkInterval or 0.1  -- 使用传入的间隔时间或默认值
     self.enemyUsedAbility = false  -- 对手是否放过技能
+    
+    -- 躲避技能相关变量
     self.needToDodge = false
+    self.dodgeableAbilities = nil
+    self.lastDodgeTime = 0  -- 上次躲避的时间，防止频繁躲避
+    
+    -- 新增：躲避技能队列和模式标志
+    self.dodgeSkillQueue = {}  -- 需要释放的躲避技能队列
+    self.isDodgeMode = false   -- 是否处于躲避模式
 end
 
 function CommonAI.new(entity, overallStrategy, heroStrategy, thinkInterval,otherSettings)
@@ -103,9 +113,10 @@ function CommonAI.new(entity, overallStrategy, heroStrategy, thinkInterval,other
     return instance
 end
 
+
+
 function CommonAI:Think(entity)
     self.entity = entity  -- 设置当前实体
-
 
     if hero_duel.EndDuel then
         self:log("[AI] 决斗结束，终止AI - 英雄: " .. entity:GetName())
@@ -123,9 +134,20 @@ function CommonAI:Think(entity)
         return self.nextThinkTime
     end
 
+    -- 躲避技能判断 - 在所有其他逻辑之前进行
+    if self:containsStrategy(self.global_strategy, "躲技能模式") and self:ShouldDodgeSkill(entity) then
+        -- 躲避逻辑已在ShouldDodgeSkill中设置标志位
+        self:log("[AI] 需要躲避，已设置躲避标志位")
+    else
+        -- 重置躲避标志位
+        self:log("躲避检测未通过")
+        self.shouldUseDodgeSkills = false
+        self.currentAvailableDodgeSkills = nil
+    end
 
-    if entity:IsMoving() then
+    if entity:IsMoving() and self:containsStrategy(self.global_strategy, "原地不动") then
         self:log("英雄正在移动")
+        entity:Stop()
     end
 
     if entity:IsRealHero() then
@@ -150,8 +172,12 @@ function CommonAI:Think(entity)
         end
     end
 
+    local temptime  = self:ProcessPendingSpellCast() 
+    if temptime then
+        self:log("有移动后施法指令，直接返回")
+        return temptime
+    end
 
-    self:ProcessPendingSpellCast()
     self.target = nil
     self.attackTarget = nil
     self.isSpecialChannelingHero = self:IsSpecialChannelingHero(entity)
@@ -167,70 +193,31 @@ function CommonAI:Think(entity)
         self:log("正在施法中，跳过本次 AI 思考过程")
         return self.nextThinkTime
     end
-
-    self:log("开始寻找目标...")
     
-    -- 初始化变量
-    local target = nil
-
-    if self:containsStrategy(self.global_strategy, "谁近打谁") then
-        target = self:FindTarget(entity)
-    else
-        target = self:FindHeroTarget(entity)
+    -- 使用新的目标查找函数
+    local targetResults = self:FindAiBestTargets(entity)
+    
+    if self:containsStrategy(self.global_strategy, "朝无敌单位移动") and targetResults.target:IsInvulnerable() then
+        self.entity:MoveToPosition(targetResults.lastResortTarget:GetOrigin())
+        return self.nextThinkTime
     end
 
 
-    local preferredTargets = {
-        "npc_dota_unit_tombstone",
-        "npc_dota_phoenix_sun", 
-        "npc_dota_pugna_nether_ward",
-        "npc_dota_juggernaut_healing_ward",
-        "npc_dota_unit_tidehunter_anchor",
-    }
+
     
-    -- 3. 检查是否优先打小僵尸
-    if self:containsStrategy(self.global_strategy, "优先打小僵尸") then
-        table.insert(preferredTargets, "npc_dota_unit_undying_zombie_torso")
-        table.insert(preferredTargets, "npc_dota_unit_undying_zombie")
-        table.insert(preferredTargets, "npc_dota_weaver_swarm")
+    -- 如果是弱AI单位且已处理完毕，直接返回
+    if targetResults.isWeakAIHandled then
+        return 1
     end
     
-    self.attackTarget = self:FindPreferredTarget(entity, preferredTargets)
-    if self.attackTarget then
-        self:log("找到优先攻击目标:", self.attackTarget:GetUnitName())
-    end
-  
+    -- 设置找到的目标
+    local target = targetResults.target
+    self.attackTarget = targetResults.attackTarget
+    self.lastResortTarget = targetResults.lastResortTarget
 
-
-
-    -- 4. 主要目标查找逻辑
-    if not target then 
-        self.lastResortTarget = self:FindNearestEnemyLastResort(entity)
-
-        self:log("未找到英雄目标，寻找普通单位")
-        target = self:FindTarget(entity)
-        if target then
-            self:log("找到普通目标")
-        elseif self:containsStrategy(self.global_strategy, "攻击无敌单位") and self.lastResortTarget then
-            self:log("转为攻击无敌单位")
-            target = self.lastResortTarget
-        end
-
-
-        -- 5. 特殊情况处理：卡尔和SD
-        if self.lastResortTarget 
-            and (entity:GetUnitName() == "npc_dota_hero_invoker" and self.lastResortTarget:HasModifier("modifier_invoker_tornado"))
-            or (entity:GetUnitName() == "npc_dota_hero_shadow_demon" and self.lastResortTarget:HasModifier("modifier_shadow_demon_disruption")) 
-        then
-            target = self.lastResortTarget
-            self:log("卡尔/SD特殊模式")
-        end
-    end
-
-    -- 6. 最终目标确定
+    -- 7. 最终目标确定
     if target then
         self.target = target
-
     elseif not self.attackTarget then
         if entity:IsAttacking() then
             entity:Stop()
@@ -241,49 +228,11 @@ function CommonAI:Think(entity)
         return self.nextThinkTime
     end
 
+
+
+
+
     self.Ally = self:FindNearestNoSelfAlly(entity)
-
-    if self:IsWeakAIUnit(entity) then
-        -- 根据策略决定使用哪个目标
-        if self:containsStrategy(self.global_strategy, "优先打小僵尸") and self.attackTarget then
-            target = self.attackTarget
-        end
-        
-        -- 如果没有合适的目标，再进行更具体的搜索
-        if not target then
-            target = self:FindWeakAIUnitTarget(entity)
-        end
-        
-        -- 处理目标动作
-        if target then
-            if target:IsInvulnerable() then
-                -- 目标无敌，移动到目标位置
-                local order = {
-                    UnitIndex = self.entity:entindex(),
-                    OrderType = DOTA_UNIT_ORDER_MOVE_TO_POSITION,
-                    TargetIndex = target:entindex(),
-                    Position = target:GetAbsOrigin()
-                }
-                ExecuteOrderFromTable(order)
-                self:log("目标无敌,移动到目标位置")
-            elseif not self:IsUnableToAttack(entity, target) then
-                -- 可以攻击，执行攻击命令
-                local order = {
-                    UnitIndex = self.entity:entindex(),
-                    OrderType = DOTA_UNIT_ORDER_ATTACK_TARGET,
-                    TargetIndex = target:entindex(),
-                    Position = target:GetAbsOrigin()
-                }
-                ExecuteOrderFromTable(order)
-                self:log("弱幻象单位开始移动并攻击目标")
-            else
-                self:log("弱幻象单位当前无法攻击目标")
-            end
-        end
-        return 1
-    end
-    
-
 
     local skill, castRange, aoeRadius
     if target and not self:containsStrategy(self.global_strategy, "禁用所有技能") then
@@ -295,13 +244,7 @@ function CommonAI:Think(entity)
         
         local abilityInfo = self:GetAbilityInfo(skill, castRange, aoeRadius)
 
-        -- 处理施法后移动的逻辑
-        if target and self.currentState == AIStates.PostCast and not self:containsStrategy(self.global_strategy, "原地不动") then
-            local returnValue = self:HandlePostCastMovement(entity, target, abilityInfo)
-            if returnValue ~= nil then
-                return returnValue
-            end
-        end
+
 
         self:log(string.format("准备施放技能 %s", abilityInfo.abilityName))
         target = self.target
@@ -344,7 +287,6 @@ function CommonAI:Think(entity)
     else
 
         if target then 
-            self:log("攻击target")
             return self:HandleAttack(target)
         elseif self.attackTarget then
             self:log("有攻击目标2")
@@ -526,47 +468,7 @@ end
 
 
 
-function CommonAI:HandlePostCastMovement(entity, target, abilityInfo)
-    self:log("施法后移动")
-    if not entity:IsFeared() and not entity:IsTaunted() then
-        if entity:GetUnitName() == "npc_dota_hero_templar_assassin" or entity:GetUnitName() == "npc_dota_hero_life_stealer" or entity:GetUnitName() == "npc_dota_hero_riki" then
 
-            local order = {
-                UnitIndex = self.entity:entindex(),
-                OrderType = DOTA_UNIT_ORDER_ATTACK_TARGET,
-                TargetIndex = target:entindex(),
-                Position = target:GetAbsOrigin()
-            }
-            ExecuteOrderFromTable(order)
-
-            self:SetState(AIStates.Attack)
-            self:log("近战英雄施法后继续追击")
-        elseif entity:GetUnitName() == "npc_dota_hero_leshrac" then
-            entity:MoveToPosition(target:GetOrigin())
-            self:SetState(AIStates.Idle)
-            self:log("拉席克，没事走走")
-            
-            -- 计算拉席克和目标之间的距离
-            local distance = (entity:GetOrigin() - target:GetOrigin()):Length2D()
-            
-            -- 如果距离大于300，才返回0.1
-            if distance > 300 then
-                return 0.1
-            end
-        else
-            --entity:MoveToPosition(target:GetOrigin())
-            self:SetState(AIStates.Idle)
-            self:log("其他英雄移动到目标位置")
-        end
-
-        if abilityInfo.abilityName == "leshrac_split_earth" or abilityInfo.abilityName == "oracle_fortunes_end" or abilityInfo.abilityName == "void_spirit_aether_remnant" or (abilityInfo.abilityName == "slark_pounce" and self:containsStrategy(self.hero_strategy, "跳慢点") )then
-            self:log("朝向敌人移动")
-            entity:MoveToPosition(target:GetOrigin())
-            self:SetState(AIStates.Idle)
-            return 0.01
-        end
-    end
-end
 
 function CommonAI:FindClosestTreeForAbility(entity, abilityName)
     -- 获取对应技能的施法范围
@@ -748,15 +650,42 @@ end
 
 function CommonAI:HandleMuertaDeadShot(entity, ability)
     local searchCenter = self.target:GetAbsOrigin()
-    local searchRadius = self:GetSkillCastRange(entity, ability)
+    local searchRadius = self:GetSkillCastRange(entity, ability)*2
     local trees = GridNav:GetAllTreesAroundPoint(searchCenter, searchRadius, true)
     local validTrees = {}
     
     self:log("搜索到树木总数: " .. #trees)
     
     -- 计算从自己到敌人的方向向量
-    local entityPos = entity:GetOrigin()
+    local entityPos = entity:GetAbsOrigin()
     local targetPos = self.target:GetAbsOrigin()
+    
+    -- 打印玩家和敌人的坐标
+    self:log("玩家位置: (" .. string.format("%.2f", entityPos.x) .. 
+            "," .. string.format("%.2f", entityPos.y) .. 
+            "," .. string.format("%.2f", entityPos.z) .. ")")
+    self:log("敌人位置: (" .. string.format("%.2f", targetPos.x) .. 
+            "," .. string.format("%.2f", targetPos.y) .. 
+            "," .. string.format("%.2f", targetPos.z) .. ")")
+    self:log("搜索中心(敌人位置): (" .. string.format("%.2f", searchCenter.x) .. 
+            "," .. string.format("%.2f", searchCenter.y) .. 
+            "," .. string.format("%.2f", searchCenter.z) .. ")")
+    self:log("搜索半径: " .. string.format("%.2f", searchRadius))
+    
+    -- 打印所有搜索到的树木信息（不管是否在施法范围内）
+    self:log("=== 所有搜索到的树木原始信息 ===")
+    for i, tree in pairs(trees) do
+        local treePos = tree:GetAbsOrigin()
+        local treeDistanceToPlayer = (treePos - entityPos):Length2D()
+        local treeDistanceToEnemy = (treePos - targetPos):Length2D()
+        self:log("树木" .. i .. " 位置:(" .. string.format("%.2f", treePos.x) .. 
+                "," .. string.format("%.2f", treePos.y) .. 
+                "," .. string.format("%.2f", treePos.z) .. ")" ..
+                " 到玩家距离:" .. string.format("%.2f", treeDistanceToPlayer) ..
+                " 到敌人距离:" .. string.format("%.2f", treeDistanceToEnemy) ..
+                " 施法范围:" .. string.format("%.2f", searchRadius))
+    end
+    self:log("=== 原始树木信息打印完毕 ===")
     local dirToEnemy = (targetPos - entityPos):Normalized()
     local entityForward = entity:GetForwardVector()
     
@@ -769,6 +698,7 @@ function CommonAI:HandleMuertaDeadShot(entity, ability)
     local frontalTrees = {}  -- 前方的树
     local otherTrees = {}    -- 其他方向的树
     local behindEnemyTrees = {}  -- 敌人身后的树
+    local lineTrees = {}     -- 直线上的树
     
     for _, tree in pairs(trees) do
         local treePos = tree:GetAbsOrigin()
@@ -790,17 +720,37 @@ function CommonAI:HandleMuertaDeadShot(entity, ability)
             -- 判断树是否在敌人身后 (夹角小于90度表示在敌人身后形成钝角)
             local isBehindEnemy = math.deg(angleEnemyToTree) < 90
             
+            -- 计算树到玩家-敌人连线的垂直距离
+            local lineVector = dirToEnemy  -- 连线方向向量
+            local treeVector = treePos - entityPos  -- 从玩家到树的向量
+            -- 计算树在连线上的投影长度
+            local projectionLength = treeVector:Dot(lineVector)
+            -- 计算投影点
+            local projectionPoint = entityPos + lineVector * projectionLength
+            -- 计算垂直距离
+            local perpendicularDistance = (treePos - projectionPoint):Length2D()
+            
             local treeInfo = {
                 tree = tree, 
                 distance = treeDistanceToPlayer,
                 position = treePos,
                 id = treeCount,
                 angle = angleToTree,    -- 保存夹角
-                behindEnemy = isBehindEnemy  -- 是否在敌人身后
+                behindEnemy = isBehindEnemy,  -- 是否在敌人身后
+                perpendicularDistance = perpendicularDistance  -- 到连线的垂直距离
             }
             
+            -- 如果策略是"射直线上的树"
+            if self:containsStrategy(self.hero_strategy, "射直线上的树") then
+                table.insert(lineTrees, treeInfo)
+                self:log("找到直线上的树 ID:" .. treeCount .. 
+                        " 位置:(" .. string.format("%.2f", treePos.x) .. 
+                        "," .. string.format("%.2f", treePos.y) .. 
+                        "," .. string.format("%.2f", treePos.z) .. ")" ..
+                        " 垂直距离:" .. string.format("%.2f", perpendicularDistance) ..
+                        " 到玩家距离:" .. string.format("%.2f", treeDistanceToPlayer))
             -- 如果策略是"往前弹射"且树在敌人身后
-            if self:containsStrategy(self.hero_strategy, "往前弹射") and isBehindEnemy then
+            elseif self:containsStrategy(self.hero_strategy, "往前弹射") and isBehindEnemy then
                 table.insert(behindEnemyTrees, treeInfo)
                 self:log("找到敌人背后的树 ID:" .. treeCount)
             -- 其他情况按原来的逻辑处理
@@ -812,11 +762,43 @@ function CommonAI:HandleMuertaDeadShot(entity, ability)
         end
     end
     
-    self:log("前方树木数量: " .. #frontalTrees .. ", 其他方向树木数量: " .. #otherTrees .. ", 敌人身后树木数量: " .. #behindEnemyTrees)
+    self:log("前方树木数量: " .. #frontalTrees .. ", 其他方向树木数量: " .. #otherTrees .. ", 敌人身后树木数量: " .. #behindEnemyTrees .. ", 直线上树木数量: " .. #lineTrees)
     
     -- 确定使用哪组树
     local treesToUse = nil
-    if self:containsStrategy(self.hero_strategy, "往前弹射") then
+    if self:containsStrategy(self.hero_strategy, "射直线上的树") then
+        -- 打印所有搜索到的树的详细信息
+        self:log("=== 所有搜索到的树木信息 ===")
+        for _, tree in pairs(trees) do
+            local treePos = tree:GetAbsOrigin()
+            local treeDistanceToPlayer = (treePos - entityPos):Length2D()
+            
+            if treeDistanceToPlayer <= searchRadius then
+                -- 计算垂直距离
+                local lineVector = dirToEnemy
+                local treeVector = treePos - entityPos
+                local projectionLength = treeVector:Dot(lineVector)
+                local projectionPoint = entityPos + lineVector * projectionLength
+                local perpendicularDistance = (treePos - projectionPoint):Length2D()
+                
+                self:log("树木位置:(" .. string.format("%.2f", treePos.x) .. 
+                        "," .. string.format("%.2f", treePos.y) .. 
+                        "," .. string.format("%.2f", treePos.z) .. ")" ..
+                        " 垂直距离:" .. string.format("%.2f", perpendicularDistance) ..
+                        " 到玩家距离:" .. string.format("%.2f", treeDistanceToPlayer))
+            end
+        end
+        self:log("=== 树木信息打印完毕 ===")
+        
+        if #lineTrees > 0 then
+            treesToUse = lineTrees
+            self:log("使用直线上的树木")
+        else
+            self:log("未找到直线上的树木，不选择任何树木")
+            self.treetarget = nil
+            return self.target
+        end
+    elseif self:containsStrategy(self.hero_strategy, "往前弹射") then
         if #behindEnemyTrees > 0 then
             treesToUse = behindEnemyTrees
             self:log("使用敌人身后的树木")
@@ -830,32 +812,43 @@ function CommonAI:HandleMuertaDeadShot(entity, ability)
     end
     
     if treesToUse and #treesToUse > 0 then
-        -- 排序：优先按角度排序(角度小的优先)，然后按距离排序(距离远的优先)
-        table.sort(treesToUse, function(a, b)
-            -- 如果角度差异很小，按距离排序
-            if math.abs(a.angle - b.angle) < 0.2 then  -- 约10度差异
-                if math.abs(a.distance - b.distance) < 0.1 then
-                    -- 如果距离也很接近，使用ID排序保证稳定性
+        -- 根据策略选择不同的排序方式
+        if self:containsStrategy(self.hero_strategy, "射直线上的树") then
+            -- 射直线上的树：按垂直距离排序(垂直距离近的优先)
+            table.sort(treesToUse, function(a, b)
+                if math.abs(a.perpendicularDistance - b.perpendicularDistance) < 0.1 then
+                    -- 如果垂直距离很接近，使用ID排序保证稳定性
                     return a.id < b.id
                 else
-                    -- 距离远的优先
-                    return a.distance > b.distance
+                    -- 垂直距离近的优先
+                    return a.perpendicularDistance < b.perpendicularDistance
                 end
-            else
-                -- 角度小的优先
-                return a.angle < b.angle
-            end
-        end)
+            end)
+        else 
+            -- 射最近的树：按距离排序(距离近的优先)
+            table.sort(treesToUse, function(a, b)
+                if math.abs(a.distance - b.distance) < 0.1 then
+                    -- 如果距离很接近，使用ID排序保证稳定性
+                    return a.id < b.id
+                else
+                    -- 距离近的优先
+                    return a.distance < b.distance
+                end
+            end)
+
+        end
         
         local selectedTree = treesToUse[1]
         local treePos = selectedTree.position
         
         self:log("选中树木: " .. 
+                (treesToUse == lineTrees and "直线上" or
                 (treesToUse == behindEnemyTrees and "敌人身后" or 
-                (treesToUse == frontalTrees and "前方" or "其他方向")) ..
+                (treesToUse == frontalTrees and "前方" or "其他方向"))) ..
                 " ID:" .. selectedTree.id .. 
                 " 距离:" .. string.format("%.2f", selectedTree.distance) .. 
                 " 角度:" .. string.format("%.2f", math.deg(selectedTree.angle)) .. "度" ..
+                (treesToUse == lineTrees and (" 垂直距离:" .. string.format("%.2f", selectedTree.perpendicularDistance)) or "") ..
                 " 位置:(" .. string.format("%.2f", treePos.x) .. 
                 "," .. string.format("%.2f", treePos.y) .. 
                 "," .. string.format("%.2f", treePos.z) .. ")" ..
@@ -906,6 +899,20 @@ end
 
 function CommonAI:HandleAttack(target, abilityInfo, targetInfo)
     -- 首先判断单位是否可以攻击
+
+    if self:containsStrategy(self.global_strategy, "禁用普攻") then
+        self:log("禁用普攻")
+        --如果正在普攻，stop
+        self.entity:SetIdleAcquire(false)
+
+        if self.entity:IsAttacking() and not self.entity:IsTaunted() then
+            self:log("正在普攻，stop")
+            self.entity:Stop()
+        end
+        return self.nextThinkTime
+
+    end
+
     if self:IsUnableToAttack(self.entity, target) then
         self:log("目标无法攻击")
         return self.nextThinkTime
@@ -1035,6 +1042,10 @@ function CommonAI:HandleAttack(target, abilityInfo, targetInfo)
         target = self.attackTarget
     end
 
+
+
+
+
     if not target then
         self:log("没有target")
         return self.nextThinkTime
@@ -1130,20 +1141,6 @@ function CommonAI:HandleAttack(target, abilityInfo, targetInfo)
             ExecuteOrderFromTable(order)
         end
     elseif self:IsTargetInMagneticField(self.entity, target) then
-        self:log("目标处于磁场效果中，移动到目标身后100码位置")
-        -- 计算目标的朝向向量
-        local targetForward = target:GetForwardVector():Normalized()
-        -- 计算目标身后100码的位置
-        local movePosition = target:GetAbsOrigin() - targetForward * 100
-        
-        local order = {
-            UnitIndex = self.entity:entindex(),
-            OrderType = DOTA_UNIT_ORDER_MOVE_TO_POSITION,
-            TargetIndex = target:entindex(),
-            Position = movePosition,
-            Queue = false
-        }
-        ExecuteOrderFromTable(order)
         return self.nextThinkTime
     else
         -- 已在攻击状态
@@ -1281,7 +1278,7 @@ function CommonAI:IsTargetInMagneticField(entity, target)
     local distance = (entity:GetAbsOrigin() - target:GetAbsOrigin()):Length2D()
     if target and type(target.FindModifierByName) == "function" then
         local magneticFieldModifier = target:FindModifierByName("modifier_arc_warden_magnetic_field_evasion")
-        if magneticFieldModifier and not magneticFieldModifier:IsDebuff() and not entity:FindModifierByName("modifier_arc_warden_magnetic_field_evasion")then
+        if magneticFieldModifier and not magneticFieldModifier:IsDebuff() then
             -- 检查是否有金箍棒
             local hasMonkeyKingBar = false
             for i = 0, 8 do
@@ -1293,7 +1290,80 @@ function CommonAI:IsTargetInMagneticField(entity, target)
             end
             
             if not hasMonkeyKingBar then
-                self:log("目标处于磁场效果中且距离过远,且没有金箍棒")
+                self:log("目标处于磁场效果中，查找磁场thinker")
+                
+                -- 全局查找所有thinker（只查找一次）
+                local allThinkers = Entities:FindAllByClassname("npc_dota_thinker")
+                local magneticFieldThinker = nil
+                local entityHasMagneticField = entity:FindModifierByName("modifier_arc_warden_magnetic_field_evasion")
+                
+                -- 在同一个循环中处理距离检查和查找最近的thinker
+                for _, thinker in pairs(allThinkers) do
+                    if thinker and not thinker:IsNull() and thinker:HasModifier("modifier_arc_warden_magnetic_field_thinker_evasion") then
+                        local entityPos = entity:GetAbsOrigin()
+                        local thinkerPos = thinker:GetAbsOrigin()
+                        local thinkerDistance = (entityPos - thinkerPos):Length2D()
+                        
+                        -- 如果entity有磁场modifier且距离小于250码，则无需移动
+                        if entityHasMagneticField and thinkerDistance < 250 then
+                            self:log("entity有磁场modifier且距离磁场thinker小于250码，无需移动")
+                            return false
+                        end
+                        
+                        -- 记录第一个找到的磁场thinker用于后续移动
+                        if not magneticFieldThinker then
+                            magneticFieldThinker = thinker
+                        end
+                    end
+                end
+                
+                -- 如果entity有磁场modifier但距离所有thinker都大于等于250码
+                if entityHasMagneticField then
+                    self:log("entity有磁场modifier但距离所有thinker都大于等于250码，需要处理移动")
+                end
+                
+                -- 处理移动逻辑
+                if magneticFieldThinker then
+                    local entityPos = entity:GetAbsOrigin()
+                    local thinkerPos = magneticFieldThinker:GetAbsOrigin()
+                    local thinkerDistance = (entityPos - thinkerPos):Length2D()
+                    
+                    if thinkerDistance > 200 then
+                        self:log("距离磁场thinker超过100码，移动到100码范围内")
+                        -- 计算从thinker到entity的方向向量
+                        local direction = (entityPos - thinkerPos):Normalized()
+                        -- 计算距离thinker 100码的目标位置
+                        local movePosition = thinkerPos + direction * 200
+                        
+                        local order = {
+                            UnitIndex = entity:entindex(),
+                            OrderType = DOTA_UNIT_ORDER_MOVE_TO_POSITION,
+                            Position = movePosition,
+                            Queue = false
+                        }
+                        ExecuteOrderFromTable(order)
+                        return true
+                    else
+                        self:log("已在磁场thinker 100码范围内，无需移动")
+                    end
+                else
+                    self:log("未找到磁场thinker，使用原来的方法")
+                    -- 计算目标的朝向向量
+                    local targetForward = target:GetForwardVector():Normalized()
+                    -- 计算目标身后100码的位置
+                    local movePosition = target:GetAbsOrigin() - targetForward * 200
+                    
+                    local order = {
+                        UnitIndex = entity:entindex(),
+                        OrderType = DOTA_UNIT_ORDER_MOVE_TO_POSITION,
+                        TargetIndex = target:entindex(),
+                        Position = movePosition,
+                        Queue = false
+                    }
+                    ExecuteOrderFromTable(order)
+                    return true
+                end
+                
                 return true
             end
         end

@@ -98,6 +98,11 @@ function CommonAI:GetItemAoeRadius(ability)
 end
 
 function CommonAI:GetSkillAoeRadius(ability)
+    if not self.specificRadius then
+        self:Ini_SkillAoeRadius()
+    end
+
+
     local kv = ability:GetAbilityKeyValues()
     local caster = ability:GetCaster()
     local abilityName = ability:GetAbilityName()

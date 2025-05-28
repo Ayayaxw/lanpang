@@ -62,6 +62,7 @@ end
 
 -- 执行挑战模式的收尾函数
 function Main:ExecuteCleanupFunction(challengeId)
+    Main.heroLastCastAbility = {}
     hero_duel.EndDuel = true
     local challengeName = self:GetChallengeNameById(challengeId)
 
@@ -177,7 +178,7 @@ function Main:DeleteCurrentArenaHeroes()
                 hero:SetAbsOrigin(Vector(10000, 10000, 128))
             end
             Timers:CreateTimer(0.1, function()
-                if hero:IsHero() and not hero:IsClone() and hero:GetPlayerOwner() then
+                if hero:IsHero() and not hero:IsClone() and hero:GetPlayerOwner() and playerID ~= 0 then
                     
                     DisconnectClient(playerID, true)
                 else

@@ -206,7 +206,7 @@ function Main:ProcessHeroDeath(killedUnit)
         for _, modifier in ipairs(modifiers) do
             winningHero:AddNewModifier(winningHero, nil, modifier, {duration = self.endduration})
         end
-
+        
         winningHero:StartGesture(ACT_DOTA_VICTORY)
         self:MonitorUnitsStatus()
         self:gradual_slow_down(losingHero:GetOrigin(), winningHero:GetOrigin())

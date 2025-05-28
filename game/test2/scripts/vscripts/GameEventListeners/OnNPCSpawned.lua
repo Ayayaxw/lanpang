@@ -105,6 +105,31 @@ function Main:OnNPCSpawned(event)
             DebugPrint("实体索引: " .. spawnedUnit:GetEntityIndex())
             
             DebugPrint("============================")
+            
+            -- 一秒后打印modifier信息
+            Timers:CreateTimer(1.0, function()
+                if spawnedUnit and not spawnedUnit:IsNull() then
+                    DebugPrint("===== 一秒后的Modifier信息 =====")
+                    DebugPrint("实体索引: " .. spawnedUnit:GetEntityIndex())
+                    
+                    -- 获取modifier数量
+                    local modifierCount = spawnedUnit:GetModifierCount()
+                    DebugPrint("Modifier总数: " .. modifierCount)
+                    
+                    -- 遍历所有modifier
+                    for i = 0, modifierCount - 1 do
+                        local modifierName = spawnedUnit:GetModifierNameByIndex(i)
+                        if modifierName then
+                            DebugPrint("Modifier[" .. i .. "]: " .. modifierName)
+                        end
+                    end
+                    
+                    DebugPrint("================================")
+                else
+                    DebugPrint("单位已被销毁，无法获取modifier信息")
+                end
+            end)
+            
             DebugPrint("函数结束：单位在排除列表中")
             return
         end

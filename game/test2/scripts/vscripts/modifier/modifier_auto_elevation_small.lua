@@ -18,6 +18,8 @@ modifier_auto_elevation_small.excluded_modifiers = {
     ["modifier_dawnbreaker_solar_guardian_air_time"] = true,
     ["modifier_dawnbreaker_solar_guardian_disable"] = true,
     ["modifier_knockback"] = true,
+    ["modifier_storm_spirit_ball_lightning"] = true,
+
 }
 
 function modifier_auto_elevation_small:OnCreated()
@@ -123,6 +125,7 @@ function modifier_auto_elevation_small:OnIntervalThink()
         
         -- 检查是否有排除的modifier
         if self:HasExcludedModifier() then
+            print("有排除的modifier，不进行自动升高")
             return
         end
         

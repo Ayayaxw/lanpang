@@ -503,7 +503,21 @@ function CommonAI:FindBestAbilityToUse(entity, target)
         entityPosition = entity:GetAbsOrigin()
         targetPosition = target:GetAbsOrigin()
         
-        -- 使用原生API获取技能索引
+        -- 躲避技能处理 - 最高优先级
+        if self.shouldUseDodgeSkills and self.currentAvailableDodgeSkills then
+            for index, skillName in ipairs(self.currentAvailableDodgeSkills) do
+                local adjustedPriority = 0 + (index - 1) * 0.1
+                local ability = entity:FindAbilityByName(skillName)
+                if ability then
+                    table.insert(allSkills, {
+                        name = skillName, 
+                        priority = adjustedPriority, 
+                        index = ability:GetAbilityIndex()
+                    })
+                end
+            end
+        end
+
         if self.highPrioritySkills[heroName] then
             for index, skillName in ipairs(self.highPrioritySkills[heroName]) do
                 local adjustedPriority = 1 + (index - 1) * 0.1

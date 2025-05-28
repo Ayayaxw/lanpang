@@ -205,7 +205,19 @@ function CommonAI:HandleEnemyTargetAction(entity,target,abilityInfo,targetInfo)
                 self:log("技能索引: " .. abilityIndex)
             
                 -- 获取目标位置
-                local targetPosition = self.target:GetAbsOrigin()
+                local targetOrigin = self.target:GetAbsOrigin()
+                local targetPosition
+                
+                -- 检查目标是否有 modifier_muerta_dead_shot_fear 且持续时间小于0.5秒
+                local fearModifier = self.target:FindModifierByName("modifier_muerta_dead_shot_fear")
+                if fearModifier then
+                    -- 如果有恐惧修饰符且持续时间小于0.5秒，瞄准敌人当前位置
+                    targetPosition = targetOrigin
+                else
+                    -- 否则瞄准敌人朝向自己方向延伸200码位置
+                    local directionToSelf = (entity:GetOrigin() - targetOrigin):Normalized()
+                    targetPosition = targetOrigin + directionToSelf * 200
+                end
                 local startPosition = entity:GetOrigin()
                 local treeIndex = self.treetarget and self.treetarget:entindex() or nil
                 

@@ -56,7 +56,6 @@ function Main:DisableHeroWithModifiers(unit, duration)
         "modifier_disarmed",
         "modifier_silence", 
         "modifier_rooted",
-        "modifier_break",
         "modifier_muted",
         "modifier_damage_reduction_100",
     }
